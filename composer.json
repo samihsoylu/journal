@@ -1,0 +1,19 @@
+{
+    "name": "samihsoylu/notes",
+    "description": "An app that is accessible world wide, use this to keep notes .",
+    "type": "project",
+    "license": "GNU GENERAL PUBLIC LICENSE",
+    "authors": [
+        {
+            "name": "Samih Soylu",
+            "email": "mail@samihsoylu.nl"
+        }
+    ],
+    "autoload": {
+        "psr-4": {"App\\": "private/lib/"}
+    },
+    "require": {
+        "php": ">=7.3",
+        "ext-json": "*"
+    }
+}
