@@ -6,8 +6,6 @@ use Exception;
 
 /**
  * JSONFile class that deals with reading and writing json files.
- *
- * @author Samih Soylu <mail@samihsoylu.nl>
  */
 class JSONFile {
 
@@ -27,6 +25,10 @@ class JSONFile {
         $fileData  = fread($file, max(filesize($filePath), 1));
         $jsonData  = JSON_decode($fileData, true);
 
-        return $jsonData;
+        if ($jsonData === 1) {
+            throw new Exception("Failed to decode: '{$filePath}' json file.");
+        }
+
+        return $jsonData ;
     }
 }

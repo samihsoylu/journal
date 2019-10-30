@@ -7,8 +7,6 @@ use Exception;
 
 /**
  * Class Config is responsible for generating constants at the intitial stage of this project.
- *
- * @package App\Utilities
  */
 class Config
 {
