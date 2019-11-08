@@ -3,10 +3,12 @@
 
 namespace App\Utilities;
 
-use Exception;
+use App\Exceptions\FileNotFoundException;
+use App\Exceptions\InvalidConfigFileException;
 
 /**
- * Class Config is responsible for generating constants at the intitial stage of this project.
+ * This class is responsible for generating constants based on a json output from the configuration files in
+ * /private/conf/
  */
 class Config
 {
@@ -21,15 +23,14 @@ class Config
     private static $availableConstants = [];
 
     /**
-     * Initialises configuration file
-     *
-     * @param string $filePath
-     * @throws Exception
+     * @throws FileNotFoundException
+     * @throws InvalidConfigFileException
+     * @throws \App\Exceptions\InvalidJsonFileException
      */
     public static function initialise(string $filePath): void
     {
         if (in_array($filePath, self::$isInitialised, true)) {
-            throw new Exception("Configuration file '{$filePath}' was already initialised.");
+            throw new InvalidConfigFileException("Configuration file '{$filePath}' was already initialised.");
         }
 
         // Load json file and generate constant
@@ -41,11 +42,7 @@ class Config
     }
 
     /**
-     * This method generates constants dynamically for any given array.
-     *
-     * @param array $jsonData
-     * @param string $index
-     * @throws Exception
+     * @throws InvalidConfigFileException
      */
     private static function setConstants(array $jsonData, string $index = ''): void
     {
@@ -59,7 +56,7 @@ class Config
             }
 
             if (defined($constantName)) {
-                throw new Exception("The constant {$constantName} is already defined! You have more than one configuration file with the same settings.");
+                throw new InvalidConfigFileException("The constant {$constantName} is already defined! You have more than one configuration file with the same settings.");
             }
             define($constantName, $value);
 
@@ -87,5 +84,17 @@ class Config
     public static function getAllInitialisedConfigFiles(): array
     {
         return self::$isInitialised;
+    }
+
+    /**
+     * @throws InvalidConfigFileException
+     */
+    public static function ensureConstantsAreDefined(array $requiredConstants): void
+    {
+        foreach ($requiredConstants as $constant) {
+            if (!defined($constant)) {
+                throw new InvalidConfigFileException("The required constant '{$constant}' is undefined!");
+            }
+        }
     }
 }

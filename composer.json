@@ -1,6 +1,6 @@
 {
     "name": "samihsoylu/notes",
-    "description": "An app that is accessible world wide, use this to keep notes .",
+    "description": "An app that is accessible world wide, use this to keep notes.",
     "type": "project",
     "license": "GNU GENERAL PUBLIC LICENSE",
     "authors": [
@@ -10,7 +10,10 @@
         }
     ],
     "autoload": {
-        "psr-4": {"App\\": "private/lib/"}
+        "psr-4": {
+            "App\\": "private/lib/",
+            "Model\\": "private/models/"
+        }
     },
     "require": {
         "php": ">=7.3",

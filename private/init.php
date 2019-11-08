@@ -1,17 +1,18 @@
 <?php
 
+use App\Exceptions\InvalidConfigFileException;
 use App\Utilities\Config;
 
 require(__DIR__ . '/../vendor/autoload.php');
 
 /*
- * Scan for all config files
+ * Step 1: Scan for all config files
  */
 $configDirectory = __DIR__ . '/conf/';
 $configFiles = glob($configDirectory . '*.json');
 
 /*
- * Load all config files and generate constants
+ * Step 2: Load all config files and generate constants
  */
 foreach ($configFiles as $filePath) {
     if (strpos($filePath, 'example')) {
@@ -19,9 +20,31 @@ foreach ($configFiles as $filePath) {
         continue;
     }
 
-    // Load config file and create constants from json
-    Config::initialise($filePath);
-
-    // @todo: think about how to efficiently handle errors
+    try {
+        // Load config file and create constants from json
+        Config::initialise($filePath);
+    } catch(Exception $e) {
+        echo $e->getMessage();
+        exit();
+    }
 }
+
+/*
+ * Step 3: Check if all required constants are loaded
+ */
+try {
+    Config::ensureConstantsAreDefined([
+        'ENVIRONMENT',
+        'BASE_URL',
+        'DATABASE_HOST',
+        'DATABASE_USERNAME',
+        'DATABASE_PASSWORD',
+        'DATABASE_SCHEMA',
+        'DATABASE_CHARSET',
+    ]);
+} catch (InvalidConfigFileException $e) {
+    echo $e->getMessage();
+    exit();
+}
+
 

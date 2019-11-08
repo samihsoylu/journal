@@ -2,7 +2,8 @@
 
 namespace App\Utilities;
 
-use Exception;
+use App\Exceptions\FileNotFoundException;
+use App\Exceptions\InvalidJsonFileException;
 
 /**
  * JSONFile class that deals with reading and writing json files.
@@ -10,15 +11,13 @@ use Exception;
 class JSONFile {
 
     /**
-     * @param string $filePath
-     * @param string $openMode
-     * @return array
-     * @throws Exception
+     * @throws FileNotFoundException
+     * @throws InvalidJsonFileException
      */
-    public static function read(string $filePath, $openMode = 'r'): array
+    public static function read(string $filePath, string $openMode = 'r'): array
     {
         if(!file_exists($filePath)) {
-            throw new Exception("File '".$filePath."' in parameter does not exist, please make sure the file exists.");
+            throw new FileNotFoundException("File '".$filePath."' could not be found, please make sure the file exists.");
         }
 
         $file      = fopen($filePath, $openMode);
@@ -26,7 +25,9 @@ class JSONFile {
         $jsonData  = JSON_decode($fileData, true);
 
         if ($jsonData === 1) {
-            throw new Exception("Failed to decode: '{$filePath}' json file.");
+            $fileName = end(explode('/', $filePath));
+
+            throw new InvalidJsonFileException("Failed to decode: '{$fileName}' json file.");
         }
 
         return $jsonData ;
