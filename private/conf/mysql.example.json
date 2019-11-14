@@ -1,6 +1,4 @@
 {
-  "ENVIRONMENT": "production",
-  "BASE_URL": "/",
   "DATABASE": {
     "HOST": "localhost",
     "SCHEMA": "testdb",

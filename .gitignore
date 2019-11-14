@@ -1,4 +1,4 @@
 /vendor/
 /private/conf/*
-!private/conf/env.example.json
+!private/conf/*.example.json
 .idea/*
