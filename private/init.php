@@ -1,5 +1,8 @@
 <?php
 
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\EntityManager;
 use App\Exceptions\InvalidConfigFileException;
 use App\Utilities\Config;
 
@@ -23,7 +26,7 @@ foreach ($configFiles as $filePath) {
     try {
         // Load config file and create constants from json
         Config::initialise($filePath);
-    } catch(Exception $e) {
+    } catch (Exception $e) {
         echo $e->getMessage();
         exit();
     }
@@ -47,4 +50,23 @@ try {
     exit();
 }
 
+/*
+ * Step 4: Instantiate Doctrine
+ */
+$isDevMode = (ENVIRONMENT === 'staging') ? true : false;
+$pathToModels = [__DIR__ . '/models/'];
 
+$dbParams = array(
+    'driver'   => 'pdo_mysql',
+    'user'     => DATABASE_USERNAME,
+    'password' => DATABASE_PASSWORD,
+    'dbname'   => DATABASE_SCHEMA,
+);
+
+try {
+    $config = Setup::createAnnotationMetadataConfiguration($pathToModels, $isDevMode);
+    $entityManager = EntityManager::create($dbParams, $config);
+} catch (ORMException $e) {
+    echo $e->getMessage();
+    exit();
+}
