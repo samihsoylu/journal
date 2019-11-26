@@ -7,5 +7,4 @@ use Exception;
 
 class InvalidConfigFileException extends Exception
 {
-
 }

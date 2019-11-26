@@ -47,7 +47,6 @@ class Config
     private static function setConstants(array $jsonData, string $index = ''): void
     {
         foreach ($jsonData as $key => $value) {
-
             $constantName = ($index !== '') ? "{$index}_{$key}" : $key;
 
             if (is_array($value)) {
