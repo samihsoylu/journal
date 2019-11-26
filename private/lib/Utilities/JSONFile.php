@@ -8,28 +8,29 @@ use App\Exceptions\InvalidJsonFileException;
 /**
  * JSONFile class that deals with reading and writing json files.
  */
-class JSONFile {
+class JSONFile
+{
 
     /**
      * @throws FileNotFoundException
      * @throws InvalidJsonFileException
      */
-    public static function read(string $filePath, string $openMode = 'r'): array
+    public static function read(string $filePath): array
     {
-        if(!file_exists($filePath)) {
+        if (!file_exists($filePath)) {
             throw new FileNotFoundException("File '".$filePath."' could not be found, please make sure the file exists.");
         }
 
-        $file      = fopen($filePath, $openMode);
-        $fileData  = fread($file, max(filesize($filePath), 1));
+        $fileData = file_get_contents($filePath);
         $jsonData  = JSON_decode($fileData, true);
 
-        if ($jsonData === 1) {
-            $fileName = end(explode('/', $filePath));
+        if ($jsonData === null) {
+            $fileName = explode('/', $filePath);
+            $fileName = end($fileName);
 
             throw new InvalidJsonFileException("Failed to decode: '{$fileName}' json file.");
         }
 
-        return $jsonData ;
+        return $jsonData;
     }
 }
