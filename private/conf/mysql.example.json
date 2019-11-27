@@ -1,9 +1,0 @@
-{
-  "DATABASE": {
-    "HOST": "localhost",
-    "SCHEMA": "testdb",
-    "USERNAME": "testuser",
-    "PASSWORD": "testpswd",
-    "CHARSET": "utf8_unicode_ci"
-  }
-}

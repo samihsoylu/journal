@@ -18,11 +18,6 @@ $configFiles = glob($configDirectory . '*.json');
  * Step 2: Load all config files and generate constants
  */
 foreach ($configFiles as $filePath) {
-    if (strpos($filePath, 'example')) {
-        // Ignore default example files
-        continue;
-    }
-
     try {
         // Load config file and create constants from json
         Config::initialise($filePath);
