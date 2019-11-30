@@ -1,5 +1,5 @@
 /vendor/
-/private/conf/*
-!private/conf/*.example.json
-.idea/*
 /doctrine
+.idea/*
+.env
+.php_cs.cache
