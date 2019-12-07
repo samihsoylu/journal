@@ -11,15 +11,13 @@
     ],
     "autoload": {
         "psr-4": {
-            "App\\": "private/lib/",
-            "Model\\": "private/models/"
-        },
-        "psr-0": {"":  "private/models/"}
+            "App\\": "private/lib/"
+        }
     },
     "require": {
         "php": ">=7.3",
         "ext-json": "*",
-        "doctrine/orm": "^2.6",
+        "doctrine/orm": "^2.7",
         "vlucas/phpdotenv": "^3.6"
     }
 }
