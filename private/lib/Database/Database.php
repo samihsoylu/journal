@@ -29,7 +29,7 @@ final class Database
         ];
 
         $config = Setup::createAnnotationMetadataConfiguration(
-            [BASE_PATH . '/private/models/'],
+            [MODEL_PATH],
             $_ENV['DEV_MODE'],
             null,
             null,

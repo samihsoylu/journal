@@ -1,6 +1,8 @@
 <?php
 
+// Project constants
 define('BASE_PATH', realpath(__DIR__ . '/../'));
+define('MODEL_PATH', BASE_PATH . '/private/lib/Database/Model/');
 
 // Composer dependencies
 require(BASE_PATH . '/vendor/autoload.php');
