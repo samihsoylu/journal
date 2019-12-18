@@ -18,6 +18,6 @@
         "php": ">=7.3",
         "ext-json": "*",
         "doctrine/orm": "^2.7",
-        "vlucas/phpdotenv": "^3.6"
+        "vlucas/phpdotenv": "^4.1"
     }
 }
