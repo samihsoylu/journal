@@ -5,6 +5,8 @@ namespace App\Database\Model;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * This model class represents a single database record from the `categories` table.
+ *
  * @ORM\Entity
  * @ORM\Table(name="categories")
  */
@@ -18,7 +20,7 @@ class Category extends AbstractModel
     protected $id;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", unique=true)
      */
     protected $categoryName;
 
