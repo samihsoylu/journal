@@ -7,6 +7,8 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
+ * This model class represents a single database record from the `notes` table.
+ *
  * @ORM\Entity
  * @ORM\Table(name="notes")
  */
