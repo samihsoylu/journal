@@ -5,7 +5,7 @@ use App\Database\Model\Category;
 
 /**
  * Use this file to add a new category to the database from the command line. In the -c parameter you can provide more
- * than one category name separated by a comma.
+ * than one category name by separating, by using a comma.
  *
  * Usage: php SaveNewCategory.php -c 'diary,food,work'
  */
