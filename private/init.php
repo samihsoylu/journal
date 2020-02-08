@@ -1,8 +1,11 @@
 <?php
 
 // Project constants
+define('BASE_URL', '/');
 define('BASE_PATH', realpath(__DIR__ . '/../'));
 define('MODEL_PATH', BASE_PATH . '/private/lib/Database/Model/');
+define('TEMPLATE_PATH', BASE_PATH . '/private/templates/');
+define('ASSETS_URL', BASE_URL . '/assets/');
 
 // Composer dependencies
 require(BASE_PATH . '/vendor/autoload.php');

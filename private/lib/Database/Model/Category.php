@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="categories")
  */
-class Category extends AbstractModel
+final class Category extends AbstractModel
 {
     /**
      * @ORM\Id
@@ -34,14 +34,6 @@ class Category extends AbstractModel
      */
     protected $lastUpdatedTimestamp;
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getId(): int
-    {
-        return $this->id;
-    }
-
     public function getCategoryName(): string
     {
         return $this->categoryName;
@@ -50,28 +42,6 @@ class Category extends AbstractModel
     public function setCategoryName(string $categoryName): self
     {
         $this->categoryName = $categoryName;
-        return $this;
-    }
-
-    public function getCreatedTimestamp(): int
-    {
-        return $this->createdTimestamp;
-    }
-
-    public function setCreatedTimestamp(int $createdTimestamp): self
-    {
-        $this->createdTimestamp = $createdTimestamp;
-        return $this;
-    }
-
-    public function getLastUpdatedTimestamp(): int
-    {
-        return $this->lastUpdatedTimestamp;
-    }
-
-    public function setLastUpdatedTimestamp(int $lastUpdatedTimestamp): self
-    {
-        $this->lastUpdatedTimestamp = $lastUpdatedTimestamp;
         return $this;
     }
 }

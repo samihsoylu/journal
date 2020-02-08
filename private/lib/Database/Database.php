@@ -35,13 +35,12 @@ final class Database
             null,
             false
         );
+
         try {
             $this->entityManager = EntityManager::create($dbParams, $config);
         } catch (ORMException $e) {
             throw new \RuntimeException($e->getMessage());
         }
-
-        return $this;
     }
 
     public static function getInstance(): EntityManager
