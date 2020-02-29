@@ -3,7 +3,8 @@
 namespace App\Database\Model;
 
 /**
- * Class Model represents
+ * Class AbstractModel represents all tables in the database. The properties defined in this file are present in every
+ * table. Columns such as id, created & updated dates are enforced here on to all models.
  *
  * @package App\Database\Model
  */

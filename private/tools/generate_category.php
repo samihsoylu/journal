@@ -25,7 +25,7 @@ if (!isset($options['c'])) {
 # Separate multiple categories by a coma
 $categoryNames = explode(',', $options['c']);
 
-$categoryRepository = new CategoryRepository();
+$repository = new CategoryRepository();
 foreach ($categoryNames as $categoryName) {
 
     // Creates a new category model and assigns a name
@@ -33,12 +33,12 @@ foreach ($categoryNames as $categoryName) {
     $category->setCategoryName($categoryName);
 
     // Queue for saving in to the database
-    $categoryRepository->queue($category);
+    $repository->queue($category);
 
     echo "Queued: {$categoryName}\n";
 }
 
 // Save queued database categories
-$categoryRepository->save();
+$repository->save();
 
 echo "All categories saved!";
