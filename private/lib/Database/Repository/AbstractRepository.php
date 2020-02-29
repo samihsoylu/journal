@@ -3,6 +3,7 @@
 namespace App\Database\Repository;
 
 use App\Database\Database;
+use App\Database\Exception\NotFoundException;
 use App\Database\Model\ModelInterface;
 use \Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
@@ -11,10 +12,13 @@ use \Doctrine\ORM\OptimisticLockException;
 abstract class AbstractRepository
 {
     /**
-     * @var EntityManager $db - database instance
+     * @var EntityManager $db database instance
      */
     protected $db;
 
+    /**
+     * @var string RESOURCE_NAME name of the database model (name of table)
+     */
     protected const RESOURCE_NAME = '';
 
     public function __construct()
@@ -22,19 +26,34 @@ abstract class AbstractRepository
         $this->db = Database::getInstance();
     }
 
+    /**
+     * Retrieves all entries from the database table of RESOURCE_NAME
+     *
+     * @return array
+     */
     public function getAll(): array
     {
         $resource = $this->db->getRepository(static::RESOURCE_NAME);
         return $resource->findAll();
     }
 
+    /**
+     * Retrieves a single row from a table by the provided record id, and returns it as a Model object.
+     *
+     * @param int $id
+     *
+     * @return object
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws \Doctrine\ORM\TransactionRequiredException
+     */
     public function getById(int $id): object
     {
         $modelName = static::RESOURCE_NAME;
         $resource  = $this->db->find($modelName, $id);
 
-        if ($resource === null) {
-            throw new \RuntimeException("{$modelName} with id={$id} was not found");
+        if (!$resource) {
+            throw NotFoundException::entityIdNotFound(self::RESOURCE_NAME, $id);
         }
 
         return $resource;
