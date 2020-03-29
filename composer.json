@@ -19,6 +19,6 @@
         "ext-json": "*",
         "doctrine/orm": "^2.7",
         "vlucas/phpdotenv": "^4.1",
-        "twig/twig": "^3.0"
+        "jenssegers/blade": "^1.3"
     }
 }
