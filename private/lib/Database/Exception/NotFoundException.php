@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Database\Exception;
 
@@ -11,12 +11,12 @@ class NotFoundException extends RuntimeException
         parent::__construct($message, $code);
     }
 
-    public static function entityNameNotFound($entityTitle, $entityName, $code = 404)
+    public static function entityNameNotFound($entityTitle, $entityName, $code = 404): self
     {
         return new self("{$entityTitle} with name {$entityName} was not found", $code);
     }
 
-    public static function entityIdNotFound($entityTitle, $entityId, $code = 404)
+    public static function entityIdNotFound($entityTitle, $entityId, $code = 404): self
     {
         return new self("{$entityTitle} with id={$entityId} was not found", $code);
     }

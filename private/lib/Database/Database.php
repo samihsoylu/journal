@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Database;
 
@@ -43,12 +43,17 @@ final class Database
         }
     }
 
-    public static function getInstance(): EntityManager
+    public static function getInstance(): self
     {
         if (self::$instance === null) {
             self::$instance = new self();
         }
 
-        return (self::$instance)->entityManager;
+        return self::$instance;
+    }
+
+    public function getEntityManager(): EntityManager
+    {
+        return $this->entityManager;
     }
 }

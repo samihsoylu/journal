@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Database\Model;
 
@@ -42,6 +42,7 @@ final class Category extends AbstractModel
     public function setCategoryName(string $categoryName): self
     {
         $this->categoryName = $categoryName;
+
         return $this;
     }
 }

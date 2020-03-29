@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Database\Repository;
 
@@ -23,7 +23,8 @@ abstract class AbstractRepository
 
     public function __construct()
     {
-        $this->db = Database::getInstance();
+        $provider = Database::getInstance();
+        $this->db = $provider->getEntityManager();
     }
 
     /**

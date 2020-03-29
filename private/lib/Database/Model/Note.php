@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Database\Model;
 
@@ -28,9 +28,14 @@ final class Note extends AbstractModel
     protected $categoryId;
 
     /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected $title;
+
+    /**
      * @ORM\Column(type="text")
      */
-    protected $context;
+    protected $content;
 
     /**
      * @ORM\Column(type="integer")
@@ -50,17 +55,31 @@ final class Note extends AbstractModel
     public function setCategoryId(int $categoryId): self
     {
         $this->categoryId = $categoryId;
+
         return $this;
     }
 
-    public function getContext(): string
+    public function getTitle()
     {
-        return $this->context;
+        return $this->title;
     }
 
-    public function setContext(string $context): self
+    public function setTitle(string $title): self
     {
-        $this->context = $context;
+        $this->title = $title;
+
+        return $this;
+    }
+
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
+    public function setContent(string $content): self
+    {
+        $this->content = $content;
+
         return $this;
     }
 }
