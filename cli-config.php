@@ -5,4 +5,7 @@ use Doctrine\ORM\Tools\Console\ConsoleRunner;
 
 require_once __DIR__ . '/private/init.php';
 
-return ConsoleRunner::createHelperSet(Database::getInstance());
+$provider = Database::getInstance();
+$entityManager = $provider->getEntityManager();
+
+return ConsoleRunner::createHelperSet($entityManager);

@@ -1,5 +1,7 @@
 /vendor/
 /doctrine
 .idea/*
+/private/cache/*
+!/private/cache/.gitkeep
 .env
 .php_cs.cache
