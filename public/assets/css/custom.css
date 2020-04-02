@@ -1,0 +1,33 @@
+@charset "UTF-8";
+/* Table of Content
+==================================================
+    #General styles
+    #Authentication form
+
+/* #General styles
+  ================================================== */
+body {
+    background-color:#f6f8fa;
+}
+
+/* #Authentication form
+  ================================================== */
+.auth-form {
+    width:340px;
+    margin:0 auto;
+}
+.auth-form label {
+    display:block;
+    padding-bottom: 7px;
+}
+.auth-form h1 {
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: -.5px;
+    text-align:center;
+}
+.auth-form footer {
+    font-size:8pt;
+    margin-top: 16px;
+    text-align:center;
+}
