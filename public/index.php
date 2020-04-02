@@ -1,5 +1,17 @@
 <?php
 
-require_once(__DIR__ . '/../private/init.php');
+use Jenssegers\Blade\Blade;
 
-$twig = \App\Twig\TwigProvider::getInstance();
+require_once(dirname(__DIR__) . '/private/init.php');
+
+$blade = new Blade(BASE_PATH . '/private/templates/',BASE_PATH . '/private/cache/');
+
+$parameters = [
+    'assets_url' => ASSETS_URL,
+    'post_url' => BASE_URL . '/login/submit',
+];
+
+echo $blade->render('login', $parameters);
+
+// sources
+// https://primer.style/css/utilities/box-shadow#default
