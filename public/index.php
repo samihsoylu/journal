@@ -4,7 +4,7 @@ use Jenssegers\Blade\Blade;
 
 require_once(dirname(__DIR__) . '/private/init.php');
 
-$blade = new Blade(BASE_PATH . '/private/templates/',BASE_PATH . '/private/cache/');
+$blade = new Blade(BASE_PATH . '/private/templates/',BASE_PATH . '/private/cache/blade/');
 
 $parameters = [
     'assets_url' => ASSETS_URL,
