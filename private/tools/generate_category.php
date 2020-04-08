@@ -5,25 +5,21 @@ use App\Database\Model\Category;
 use App\Database\Repository\CategoryRepository;
 
 /**
- * Use this file to add a new category to the database from the command line. In the -c parameter you can provide more
- * than one category name by using a comma.
+ * Use this file to add a new category to the database from the command line.
  *
- * Usage: generate_category.php -c 'diary,food,work'
+ * Usage: generate_category.php diary,food,work
  */
 
-require(__DIR__ . '/../init.php');
-
-# Get argument
-$options = getopt('c:');
+require(dirname(__DIR__) . '/init.php');
 
 # Check if data is provided
-if (!isset($options['c'])) {
-    printf("Usage: %s -c 'diary,food,work'\n", basename($_SERVER['PHP_SELF']));
+if (!isset($argv[1])) {
+    printf("Usage: %s 'diary,food,work'\n", basename($argv[0]));
     exit();
 }
 
 # Separate multiple categories by a coma
-$categoryNames = explode(',', $options['c']);
+$categoryNames = explode(',', $argv[1]);
 
 $repository = new CategoryRepository();
 foreach ($categoryNames as $categoryName) {
@@ -41,4 +37,4 @@ foreach ($categoryNames as $categoryName) {
 // Save queued database categories
 $repository->save();
 
-echo "All categories saved!";
+echo "All categories saved!\n";
