@@ -10,9 +10,9 @@ use Doctrine\ORM\Mapping as ORM;
  * This model class represents a single database record from the `notes` table.
  *
  * @ORM\Entity
- * @ORM\Table(name="notes")
+ * @ORM\Table(name="entries")
  */
-final class Note extends AbstractModel
+final class Entry extends AbstractModel
 {
     /**
      * @ORM\Id
