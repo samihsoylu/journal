@@ -5,14 +5,17 @@
 @section('content')
     <div class="col-12">
         <div class="auth-form mt-6">
-            <h1>Notes</h1>
+            <h1>Sign in to Journal</h1>
             <div class="Box box-shadow mt-3">
                 <div class="Box-row">
-                    <form action="{{ $post_url }}">
+                    <form action="{{ $post_url }}" method="post">
+                        <label for="username">Username</label>
+                        <input class="form-control input-block" type="text" id="username" />
+
                         <label for="password">Password</label>
                         <input class="form-control input-block" type="password" id="password" />
 
-                        <button class="btn btn-primary btn-block mt-3" type="submit">Sign in</button>
+                        <button class="btn btn-primary btn-block" type="submit">Sign in</button>
                     </form>
                 </div>
             </div>

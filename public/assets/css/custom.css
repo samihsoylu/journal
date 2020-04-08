@@ -9,12 +9,16 @@
 body {
     background-color:#f6f8fa;
 }
+footer {
+    font-size:8pt;
+}
 
 /* #Authentication form
   ================================================== */
 .auth-form {
     width:340px;
     margin:0 auto;
+    padding:0 16px;
 }
 .auth-form label {
     display:block;
@@ -26,8 +30,10 @@ body {
     letter-spacing: -.5px;
     text-align:center;
 }
+.auth-form input {
+    margin-bottom:16px;
+}
 .auth-form footer {
-    font-size:8pt;
     margin-top: 16px;
     text-align:center;
 }
