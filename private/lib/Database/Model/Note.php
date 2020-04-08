@@ -19,33 +19,39 @@ final class Note extends AbstractModel
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue
      */
-    protected $id;
+    protected int $id;
 
     /**
      * @ManyToOne(targetEntity="Category")
      * @JoinColumn(name="categoryId", referencedColumnName="id")
      */
-    protected $categoryId;
+    protected int $categoryId;
+
+    /**
+     * @ManyToOne(targetEntity="User")
+     * @JoinColumn(name="userId", referencedColumnName="id")
+     */
+    protected int $userId;
 
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $title;
+    protected string $title;
 
     /**
      * @ORM\Column(type="text")
      */
-    protected $content;
+    protected string $content;
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected $createdTimestamp;
+    protected int $createdTimestamp;
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected $lastUpdatedTimestamp;
+    protected int $lastUpdatedTimestamp;
 
     public function getCategoryId(): int
     {
@@ -59,7 +65,19 @@ final class Note extends AbstractModel
         return $this;
     }
 
-    public function getTitle()
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(int $userId): self
+    {
+        $this->userId = $userId;
+
+        return $this;
+    }
+
+    public function getTitle(): string
     {
         return $this->title;
     }

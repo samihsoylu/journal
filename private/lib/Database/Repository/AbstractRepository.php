@@ -11,10 +11,8 @@ use \Doctrine\ORM\OptimisticLockException;
 
 abstract class AbstractRepository
 {
-    /**
-     * @var EntityManager $db database instance
-     */
-    protected $db;
+    /** @var EntityManager $db database instance */
+    protected EntityManager $db;
 
     /**
      * @var string RESOURCE_NAME name of the database model (name of table)
@@ -23,8 +21,8 @@ abstract class AbstractRepository
 
     public function __construct()
     {
-        $provider = Database::getInstance();
-        $this->db = $provider->getEntityManager();
+        $instance = Database::getInstance();
+        $this->db = $instance->getEntityManager();
     }
 
     /**

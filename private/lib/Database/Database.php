@@ -8,15 +8,8 @@ use Doctrine\ORM\Tools\Setup;
 
 final class Database
 {
-    /**
-     * @var self
-     */
-    private static $instance;
-
-    /**
-     * @var EntityManager
-     */
-    private $entityManager;
+    private static ?Database $instance = null;
+    private EntityManager $entityManager;
 
     private function __construct()
     {

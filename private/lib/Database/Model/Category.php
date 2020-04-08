@@ -17,22 +17,22 @@ final class Category extends AbstractModel
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue
      */
-    protected $id;
+    protected int $id;
 
     /**
      * @ORM\Column(type="string", unique=true)
      */
-    protected $categoryName;
+    protected string $categoryName;
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected $createdTimestamp;
+    protected int $createdTimestamp;
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected $lastUpdatedTimestamp;
+    protected int $lastUpdatedTimestamp;
 
     public function getCategoryName(): string
     {

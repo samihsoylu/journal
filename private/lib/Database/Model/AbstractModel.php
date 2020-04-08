@@ -10,20 +10,9 @@ namespace App\Database\Model;
  */
 abstract class AbstractModel implements ModelInterface
 {
-    /**
-     * @var int
-     */
-    protected $id;
-
-    /**
-     * @var int
-     */
-    protected $createdTimestamp;
-
-    /**
-     * @var int
-     */
-    protected $lastUpdatedTimestamp;
+    protected int $id;
+    protected int $createdTimestamp;
+    protected int $lastUpdatedTimestamp;
 
     /**
      * Gets the primary key, `id` column associated with the table.
