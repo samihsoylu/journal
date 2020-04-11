@@ -10,10 +10,10 @@
                 <div class="Box-row">
                     <form action="{{ $post_url }}" method="post">
                         <label for="username">Username</label>
-                        <input class="form-control input-block" type="text" id="username" />
+                        <input class="form-control input-block" type="text" id="username" name="username" />
 
                         <label for="password">Password</label>
-                        <input class="form-control input-block" type="password" id="password" />
+                        <input class="form-control input-block" type="password" id="password" name="password" />
 
                         <button class="btn btn-primary btn-block" type="submit">Sign in</button>
                     </form>
