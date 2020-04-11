@@ -2,9 +2,9 @@
 
 @section('pageTitle', 'Dashboard')
 
+@section('content')
 @include('components/header')
 
-@section('content')
     <div class="container-lg clearfix">
         <div class="col-4 float-left border p-4">
             My column
