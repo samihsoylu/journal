@@ -14,15 +14,14 @@ require(dirname(__DIR__) . '/init.php');
 
 # Check if data is provided
 if (!isset($argv[1])) {
-    printf("Usage: %s 'diary,food,work'\n", basename($argv[0]));
+    printf("Usage: %s diary\n", basename($argv[0]));
+    printf("Usage: %s diary work food exercise\n", basename($argv[0]));
     exit();
 }
-
-# Separate multiple categories by a coma
-$categoryNames = explode(',', $argv[1]);
+array_shift($argv);
 
 $repository = new CategoryRepository();
-foreach ($categoryNames as $categoryName) {
+foreach ($argv as $categoryName) {
 
     // Creates a new category model and assigns a name
     $category = new Category();

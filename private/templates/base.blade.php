@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>@yield('pageTitle') | Notes</title>
+        <title>@yield('pageTitle') | {{ $site_title }}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <link href="{{ $assets_url }}/css/primer.css" rel="stylesheet" />

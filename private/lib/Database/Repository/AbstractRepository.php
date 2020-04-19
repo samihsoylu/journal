@@ -5,6 +5,7 @@ namespace App\Database\Repository;
 use App\Database\Database;
 use App\Database\Exception\NotFoundException;
 use App\Database\Model\ModelInterface;
+use App\Database\Model\User;
 use \Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use \Doctrine\ORM\OptimisticLockException;

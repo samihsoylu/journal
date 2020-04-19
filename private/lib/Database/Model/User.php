@@ -30,6 +30,16 @@ final class User extends AbstractModel
     protected string $password;
 
     /**
+     * @ORM\Column(type="string", unique=true)
+     */
+    protected string $emailAddress;
+
+    /**
+     * @ORM\Column(type="integer", options={"unsigned":true, "default":0});
+     */
+    protected int $privilegeLevel;
+
+    /**
      * @ORM\Column(type="integer")
      */
     protected int $createdTimestamp;
@@ -61,5 +71,33 @@ final class User extends AbstractModel
         $this->password = $password;
 
         return $this;
+    }
+
+    public function getEmailAddress(): string
+    {
+        return $this->emailAddress;
+    }
+
+    public function setEmailAddress(string $emailAddress): self
+    {
+        $this->emailAddress = $emailAddress;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPrivilegeLevel(): int
+    {
+        return $this->privilegeLevel;
+    }
+
+    /**
+     * @param int $privilegeLevel
+     */
+    public function setPrivilegeLevel(int $privilegeLevel): void
+    {
+        $this->privilegeLevel = $privilegeLevel;
     }
 }

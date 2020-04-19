@@ -23,18 +23,18 @@ class Session
      */
     public static function put(string $name, $value): void
     {
-        return $_SESSION[$name] = $value;
+        $_SESSION[$name] = $value;
     }
 
     /**
      * Reads a Session
      *
      * @param $name
-     * @return mixed
+     * @return null|mixed
      */
     public static function get($name)
     {
-        return $_SESSION[$name];
+        return $_SESSION[$name] ?? null;
     }
 
     /**

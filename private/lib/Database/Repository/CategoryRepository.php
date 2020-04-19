@@ -15,11 +15,11 @@ class CategoryRepository extends AbstractRepository
     /**
      * Retrieves a category from the category table via the provided category name.
      *
-     * @param $categoryName
+     * @param string $categoryName
      *
      * @return Category
      */
-    public function getByName($categoryName): Category
+    public function getByName(string $categoryName): Category
     {
         $category = $this->db->getRepository(self::RESOURCE_NAME)
             ->findBy(['categoryName' => $categoryName]);
