@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Service\AuthenticationService;
+use App\Utilities\Redirect;
 use Jenssegers\Blade\Blade;
 
 abstract class AbstractController
@@ -20,6 +22,8 @@ abstract class AbstractController
      * @var array route specific parameters
      */
     private array $routeParameters;
+
+    protected const HOME_URL = BASE_URL . '/welcome';
 
     public function __construct(array $routeParameters)
     {
@@ -41,7 +45,7 @@ abstract class AbstractController
         return $this->bladeInstance;
     }
 
-    protected function addToTemplateParameters(string $key, string $value): void
+    protected function addToBladeParameters(string $key, string $value): void
     {
         $this->bladeParameters[$key] = $value;
     }
@@ -54,5 +58,25 @@ abstract class AbstractController
     protected function getRouteParameters(): array
     {
         return $this->routeParameters;
+    }
+
+    protected function ensureUserIsLoggedIn(): void
+    {
+        $userIsLoggedIn = (new AuthenticationService())->isUserLoggedIn();
+
+        // If the user is NOT logged in, then they must be redirected to the login page
+        if (!$userIsLoggedIn) {
+            Redirect::to(BASE_URL . '/');
+        }
+    }
+
+    protected function ensureUserIsNotLoggedIn(): void
+    {
+        $userIsLoggedIn = (new AuthenticationService())->isUserLoggedIn();
+
+        // If user IS logged in, then they likely must be redirected to the welcome page
+        if ($userIsLoggedIn) {
+            Redirect::to(self::HOME_URL);
+        }
     }
 }
