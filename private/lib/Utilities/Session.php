@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Utilities;
 
@@ -12,7 +12,7 @@ class Session
      */
     public static function exists(string $name): bool
     {
-        return (isset($_SESSION[$name])) ? true : false;
+        return isset($_SESSION[$name]);
     }
 
     /**
