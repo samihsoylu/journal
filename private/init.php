@@ -29,5 +29,6 @@ if (!DEBUG_MODE) {
 const MODEL_PATH          = BASE_PATH . '/private/lib/Database/Model/';
 const TEMPLATE_PATH       = BASE_PATH . '/private/templates/';
 const TEMPLATE_CACHE_PATH = BASE_PATH . '/private/cache/templates/';
+const SESSION_CACHE_PATH  = BASE_PATH . '/private/cache/sessions/';
 const ASSETS_URL          = BASE_URL . '/assets';
 
