@@ -12,6 +12,9 @@ use Doctrine\ORM\Mapping as ORM;
  */
 final class User extends AbstractModel
 {
+    public const PRIVILEGE_LEVEL_USER = 1;
+    public const PRIVILEGE_LEVEL_ADMIN = 2;
+
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
