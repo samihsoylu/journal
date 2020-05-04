@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Repository;
+namespace App\Database\Repositories;
 
 use App\Database\Exception\NotFoundException;
-use App\Database\Model\User;
+use App\Database\Models\User;
 
 class UserRepository extends AbstractRepository
 {
@@ -23,7 +23,7 @@ class UserRepository extends AbstractRepository
         $user = $this->db->getRepository(self::RESOURCE_NAME)
             ->findBy(['username' => $username]);
 
-        if (!$user[0]) {
+        if (!isset($user[0])) {
             throw NotFoundException::entityNameNotFound(self::RESOURCE_NAME, $username);
         }
 

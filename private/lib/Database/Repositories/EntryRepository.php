@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Repository;
+namespace App\Database\Repositories;
 
-use App\Database\Model\Entry;
+use App\Database\Models\Entry;
 
 class EntryRepository extends AbstractRepository
 {

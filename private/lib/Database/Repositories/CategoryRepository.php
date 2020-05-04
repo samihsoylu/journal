@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Repository;
+namespace App\Database\Repositories;
 
 use App\Database\Exception\NotFoundException;
-use App\Database\Model\Category;
+use App\Database\Models\Category;
 
 class CategoryRepository extends AbstractRepository
 {
@@ -24,7 +24,7 @@ class CategoryRepository extends AbstractRepository
         $category = $this->db->getRepository(self::RESOURCE_NAME)
             ->findBy(['categoryName' => $categoryName]);
 
-        if (!$category[0]) {
+        if (!isset($category[0])) {
             throw NotFoundException::entityNameNotFound(self::RESOURCE_NAME, $categoryName);
         }
 

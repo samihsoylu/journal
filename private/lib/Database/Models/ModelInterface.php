@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Model;
+namespace App\Database\Models;
 
 interface ModelInterface
 {
@@ -12,6 +12,13 @@ interface ModelInterface
     public function getId(): int;
 
     /**
+     * This method must set a new timestamp of 'now' to the `lastUpdatedTimestamp` column within a table
+     *
+     * @return void
+     */
+    public function setLastUpdatedTimestamp(): void;
+
+    /**
      * This method must return the `lastUpdatedTimestamp` column from a table row.
      *
      * @return int Unix timestamp
@@ -19,16 +26,9 @@ interface ModelInterface
     public function getLastUpdatedTimestamp(): int;
 
     /**
-     * This method must set a new timestamp of 'now' to the `createdTimestamp` column within a table
+     * This method must return the `createdTimestamp` column from a table row.
      *
      * @return void
      */
-    public function setCreatedTimestamp(): void;
-
-    /**
-     * This method must set a new timestamp of 'now' to the `lastUpdatedTimestamp` column within a table
-     *
-     * @return void
-     */
-    public function setLastUpdatedTimestamp(): void;
+    public function getCreatedTimestamp(): int;
 }

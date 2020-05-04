@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Model;
+namespace App\Database\Models;
 
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;

@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Model;
+namespace App\Database\Models;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -12,8 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 final class User extends AbstractModel
 {
-    public const PRIVILEGE_LEVEL_USER = 1;
-    public const PRIVILEGE_LEVEL_ADMIN = 2;
+    public const PRIVILEGE_LEVEL_ADMIN = 1;
+    public const PRIVILEGE_LEVEL_USER  = 2;
 
     /**
      * @ORM\Id
@@ -88,17 +88,11 @@ final class User extends AbstractModel
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getPrivilegeLevel(): int
     {
         return $this->privilegeLevel;
     }
 
-    /**
-     * @param int $privilegeLevel
-     */
     public function setPrivilegeLevel(int $privilegeLevel): void
     {
         $this->privilegeLevel = $privilegeLevel;

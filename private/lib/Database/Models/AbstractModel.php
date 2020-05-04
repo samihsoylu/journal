@@ -1,18 +1,23 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Model;
+namespace App\Database\Models;
 
 /**
  * Class AbstractModel represents all tables in the database. The properties defined in this file are present in every
  * table. Columns such as id, created & updated dates are enforced here on to all models.
  *
- * @package App\Database\Model
+ * @package App\Database\Models
  */
 abstract class AbstractModel implements ModelInterface
 {
     protected int $id;
     protected int $createdTimestamp;
     protected int $lastUpdatedTimestamp;
+
+    public function __construct()
+    {
+        $this->createdTimestamp = time();
+    }
 
     /**
      * Gets the primary key, `id` column associated with the table.
@@ -42,21 +47,6 @@ abstract class AbstractModel implements ModelInterface
     public function getLastUpdatedTimestamp(): int
     {
         return $this->lastUpdatedTimestamp;
-    }
-
-    /**
-     * Set the createdTimestamp of this model to now, and if already set, then do nothing.
-     *
-     * @return void
-     */
-    public function setCreatedTimestamp(): void
-    {
-        // Only set a timestamp for new models
-        if ($this->createdTimestamp > 0) {
-            return;
-        }
-
-        $this->createdTimestamp = time();
     }
 
     /**

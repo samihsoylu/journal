@@ -1,8 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Model;
+namespace App\Database\Models;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
  * This model class represents a single database record from the `categories` table.
@@ -20,6 +22,12 @@ final class Category extends AbstractModel
     protected int $id;
 
     /**
+     * @ManyToOne(targetEntity="User")
+     * @JoinColumn(name="userId", referencedColumnName="id")
+     */
+    protected int $userId;
+
+    /**
      * @ORM\Column(type="string", unique=true)
      */
     protected string $categoryName;
@@ -33,6 +41,16 @@ final class Category extends AbstractModel
      * @ORM\Column(type="integer")
      */
     protected int $lastUpdatedTimestamp;
+
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+
+    public function setUserId(int $userId): void
+    {
+        $this->userId = $userId;
+    }
 
     public function getCategoryName(): string
     {

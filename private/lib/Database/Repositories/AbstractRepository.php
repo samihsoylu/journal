@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Repository;
+namespace App\Database\Repositories;
 
 use App\Database\Database;
 use App\Database\Exception\NotFoundException;
-use App\Database\Model\ModelInterface;
-use App\Database\Model\User;
+use App\Database\Models\ModelInterface;
+use App\Database\Models\User;
 use \Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use \Doctrine\ORM\OptimisticLockException;
@@ -38,7 +38,7 @@ abstract class AbstractRepository
     }
 
     /**
-     * Retrieves a single row from a table by the provided record id, and returns it as a Model object.
+     * Retrieves a single row from a table by the provided record id, and returns it as a Models object.
      *
      * @param int $id
      *
@@ -70,8 +70,6 @@ abstract class AbstractRepository
      */
     public function queue(ModelInterface $model): void
     {
-        // Update model timestamps when ever queued to be saved
-        $model->setCreatedTimestamp();
         $model->setLastUpdatedTimestamp();
 
         // Queue this model to list of models that will be saved

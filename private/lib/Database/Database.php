@@ -2,8 +2,8 @@
 
 namespace App\Database;
 
+use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
 
 final class Database
@@ -23,17 +23,13 @@ final class Database
 
         $config = Setup::createAnnotationMetadataConfiguration(
             [MODEL_PATH],
-            $_ENV['DEV_MODE'],
+            $_ENV['DEBUG_MODE'],
             null,
             null,
             false
         );
 
-        try {
-            $this->entityManager = EntityManager::create($dbParams, $config);
-        } catch (ORMException $e) {
-            throw new \RuntimeException($e->getMessage());
-        }
+        $this->entityManager = EntityManager::create($dbParams, $config);
     }
 
     public static function getInstance(): self
