@@ -6,6 +6,7 @@ use App\Controller\Welcome;
 /**  @var FastRoute\RouteCollector $route */
 
 // Welcome
+$route->addRoute('GET', BASE_URL . '/', 'Welcome@index');
 $route->addRoute('GET', Welcome::HOME_URL, 'Welcome@index');
 
 // Authentication
