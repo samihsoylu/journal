@@ -1,5 +1,8 @@
 <?php
 
+ini_set('session.cookie_lifetime', 86400);
+ini_set('session.gc_maxlifetime', 200000);
+
 session_start();
 
 ini_set('display_errors', 1);
@@ -26,7 +29,7 @@ if (!DEBUG_MODE) {
 }
 
 // Project constants
-const MODEL_PATH          = BASE_PATH . '/private/lib/Database/Model/';
+const MODEL_PATH          = BASE_PATH . '/private/lib/Database/Models/';
 const TEMPLATE_PATH       = BASE_PATH . '/private/templates/';
 const TEMPLATE_CACHE_PATH = BASE_PATH . '/private/cache/templates/';
 const SESSION_CACHE_PATH  = BASE_PATH . '/private/cache/sessions/';
