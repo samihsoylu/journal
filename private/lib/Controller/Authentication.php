@@ -3,8 +3,8 @@
 namespace App\Controller;
 
 use App\Service\AuthenticationService;
-use App\Utilities\Redirect;
-use App\Utilities\Session;
+use App\Utility\Redirect;
+use LogicException;
 
 class Authentication extends AbstractController
 {
@@ -31,48 +31,62 @@ class Authentication extends AbstractController
 
     public function register(): void
     {
-        // this needs to be looked in to more in depth
-        // a few factors to consider
-        // we don't want to open registration to the world
-        // we want registration only be possible via the admin user
-        // and the password perhaps needs to be generated and emailed
+        // Registration is not open, administrators can only create user accounts
+        $this->ensureUserHasAdminRights();
 
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
-        $email    = $_POST['email'] ?? '';
+        // If not set, then set as empty string
+        $_POST['username'] ??= '';
+        $_POST['password'] ??= '';
+        $_POST['email']    ??= '';
 
-        try {
-            $this->service->register($username, $password, $email);
+        // 'if' Stops displaying 'username, password, email is wrong' error on initial visit
+        if ($this->isPostRequest()) {
+            try {
+                $this->service->registerNewUser($_POST['username'], $_POST['password'], $_POST['email']);
 
-            Session::put('info_message', 'Registration was successful');
-            Redirect::to(self::HOME_URL);
-        } catch (\Throwable $e) {
-            $this->addToBladeParameters('error_message', $e->getMessage());
-
-            echo $this->getBladeInstance()->render('auth/register', $this->getBladeParameters());
+                $this->getNotificationService()->setNotification('info', 'Registered successfully!');
+            } catch (LogicException $e) {
+                $this->addToBladeParameters('error', $e->getMessage());
+            }
         }
+
+        // Shows success message after page loads
+        $this->checkForNotificationMessages();
+
+        $this->addToBladeParameters('post_url', self::REGISTER_URL);
+        $this->render('authenticate/register');
     }
 
     public function login(): void
     {
-        $username = $_POST['username'] ?? '';
-        $password = $_POST['password'] ?? '';
+        $this->ensureUserIsNotLoggedIn();
 
-        try {
-            $this->service->login($username, $password);
+        $_POST['username'] ??= '';
+        $_POST['password'] ??= '';
 
-            Redirect::to(self::HOME_URL);
-        } catch (\Throwable $e) {
-            $this->addToBladeParameters('error_message', $e->getMessage());
+        // 'if' Stops displaying 'username, password is wrong' error on initial visit
+        if ($this->isPostRequest()) {
+            try {
+                $this->service->loginUser($_POST['username'], $_POST['password']);
 
-            echo $this->getBladeInstance()->render('auth/login', $this->getBladeParameters());
+                Redirect::to(Welcome::HOME_URL);
+            } catch (LogicException $e) {
+                $this->addToBladeParameters('error', $e->getMessage());
+            }
         }
+
+        // If previous action was a successful logout, this helps display that success message
+        $this->checkForNotificationMessages();
+
+        $this->addToBladeParameters('post_url', self::LOGIN_URL);
+         $this->render('authenticate/login');
     }
 
     public function logout(): void
     {
-        $this->service->logout();
+        $this->service->logoutUser();
 
-        Redirect::to(BASE_URL . '/');
+        $this->getNotificationService()->setNotification('success', 'Logout successful!');
+        Redirect::to(self::LOGIN_URL);
     }
 }

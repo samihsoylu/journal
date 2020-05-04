@@ -2,22 +2,16 @@
 
 namespace App\Controller;
 
-use App\Utilities\Session;
+use App\Utility\Session;
 
 class Welcome extends AbstractController
 {
+    public const HOME_URL = BASE_URL . '/welcome';
+
     public function index(): void
-    {
-        $this->ensureUserIsNotLoggedIn();
-
-        $this->addToBladeParameters('post_url', Authentication::LOGIN_URL);
-        echo $this->getBladeInstance()->render('authenticate/login', $this->getBladeParameters());
-    }
-
-    public function welcome(): void
     {
         $this->ensureUserIsLoggedIn();
 
-        echo $this->getBladeInstance()->render('home');
+        $this->render('dashboard');
     }
 }
