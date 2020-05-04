@@ -17,6 +17,7 @@
             <details class="dropdown details-reset details-overlay d-inline-block">
                 <summary class="text-gray p-2 d-inline" aria-haspopup="true">
                     <img class="avatar" height="20" alt="@octocat" src="https://github.com/octocat.png" width="20">
+
                     <div class="dropdown-caret"></div>
                 </summary>
 
@@ -24,7 +25,7 @@
                     <li><a class="dropdown-item" href="#url">Account</a></li>
                     <li><a class="dropdown-item" href="#url">Settings</a></li>
                     <li class="dropdown-divider" role="separator"></li>
-                    <li><a class="dropdown-item" href="#url">Logout</a></li>
+                    <li><a class="dropdown-item" href="{{ $logout_url }}">Logout</a></li>
                 </ul>
             </details>
         </div>

@@ -8,6 +8,7 @@
             <h1>Sign in to Journal</h1>
             <div class="Box box-shadow mt-3">
                 <div class="Box-row">
+                    @include('components/alerts')
                     <form action="{{ $post_url }}" method="post">
                         <label for="username">Username</label>
                         <input class="form-control input-block" type="text" id="username" name="username" />
