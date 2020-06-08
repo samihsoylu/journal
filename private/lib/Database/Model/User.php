@@ -1,14 +1,15 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Models;
+namespace App\Database\Model;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Index;
 
 /**
  * This model class represents a single database record from the `users` table.
  *
  * @ORM\Entity
- * @ORM\Table(name="users")
+ * @ORM\Table(name="users",indexes={@Index(name="search_username_emailaddress", columns={"username","emailAddress"})})
  */
 final class User extends AbstractModel
 {

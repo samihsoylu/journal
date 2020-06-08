@@ -1,9 +1,9 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Repositories;
+namespace App\Database\Repository;
 
 use App\Database\Exception\NotFoundException;
-use App\Database\Models\Category;
+use App\Database\Model\Category;
 
 class CategoryRepository extends AbstractRepository
 {

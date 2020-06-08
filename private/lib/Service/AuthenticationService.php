@@ -3,8 +3,8 @@
 namespace App\Service;
 
 use App\Database\Exception\NotFoundException;
-use App\Database\Models\User;
-use App\Database\Repositories\UserRepository;
+use App\Database\Model\User;
+use App\Database\Repository\UserRepository;
 use App\Utility\Session;
 use InvalidArgumentException;
 use LengthException;

@@ -1,7 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Models;
+namespace App\Database\Model;
 
+use Doctrine\ORM\Mapping\Index;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * This model class represents a single database record from the `notes` table.
  *
  * @ORM\Entity
- * @ORM\Table(name="entries")
+ * @ORM\Table(name="entries",indexes={@Index(name="search_by_userid_categoryid_createdtimestamp", columns={"userId", "categoryId", "createdTimestamp"})})
  */
 final class Entry extends AbstractModel
 {

@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Database\Models\User;
+use App\Database\Model\User;
 use App\Service\AuthenticationService;
 use App\Service\NotificationService;
 use App\Utility\Redirect;

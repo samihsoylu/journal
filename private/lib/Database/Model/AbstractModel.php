@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Models;
+namespace App\Database\Model;
 
 /**
  * Class AbstractModel represents all tables in the database. The properties defined in this file are present in every
