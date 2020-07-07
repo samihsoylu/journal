@@ -12,11 +12,16 @@ class NotificationService
     protected const NOTIFICATION_TYPE    = 'notify_type';
     protected const NOTIFICATION_MESSAGE = 'notify_message';
 
+    public const TYPE_INFO    = 'info';
+    public const TYPE_SUCCESS = 'success';
+    public const TYPE_WARNING = 'warning';
+    public const TYPE_ERROR   = 'error';
+
     protected array $allowedMessageTypes = [
-        'info',
-        'success',
-        'warning',
-        'error',
+        self::TYPE_INFO,
+        self::TYPE_SUCCESS,
+        self::TYPE_WARNING,
+        self::TYPE_ERROR,
     ];
 
     /**
@@ -57,7 +62,7 @@ class NotificationService
      *
      * @return bool true - notification exists, false - not found
      */
-    public function isHit(): bool
+    public function notificationExists(): bool
     {
         return Session::exists(self::NOTIFICATION_TYPE) &&
             Session::exists(self::NOTIFICATION_MESSAGE);

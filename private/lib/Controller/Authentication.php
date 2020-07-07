@@ -3,16 +3,13 @@
 namespace App\Controller;
 
 use App\Service\AuthenticationService;
+use App\Service\NotificationService;
 use App\Utility\Redirect;
 use LogicException;
 
 class Authentication extends AbstractController
 {
-    /**
-     * URL constants, for keeping consistent urls across multiple locations in this project. These constants are either
-     * used in the router, or they are passed on to the templating engine so that a button on the website may link to
-     * the defined url in the constants below.
-     */
+    // Route url constants, to keep paths consistent within multiple classes
     public const LOGIN_URL    = BASE_URL . '/auth/login';
     public const LOGOUT_URL   = BASE_URL . '/auth/logout';
     public const REGISTER_URL = BASE_URL . '/auth/register';
@@ -32,26 +29,26 @@ class Authentication extends AbstractController
     public function register(): void
     {
         // Registration is not open, administrators can only create user accounts
-        $this->ensureUserHasAdminRights();
-
-        // If not set, then set as empty string
-        $_POST['username'] ??= '';
-        $_POST['password'] ??= '';
-        $_POST['email']    ??= '';
+        //$this->ensureUserHasAdminRights();
 
         // 'if' Stops displaying 'username, password, email is wrong' error on initial visit
-        if ($this->isPostRequest()) {
+        if ($this->requestIsPost()) {
             try {
-                $this->service->registerNewUser($_POST['username'], $_POST['password'], $_POST['email']);
+                $this->service->register(
+                    $_POST['username'] ?? null,
+                    $_POST['password'] ?? null,
+                    $_POST['email'] ?? null
+                );
 
-                $this->getNotificationService()->setNotification('info', 'Registered successfully!');
+                $this->getNotificationService()->setNotification(
+                    NotificationService::TYPE_SUCCESS,
+                    'Registration successful');
             } catch (LogicException $e) {
-                $this->addToBladeParameters('error', $e->getMessage());
+                $this->getNotificationService()->setNotification(
+                    NotificationService::TYPE_ERROR,
+                    $e->getMessage());
             }
         }
-
-        // Shows success message after page loads
-        $this->checkForNotificationMessages();
 
         $this->addToBladeParameters('post_url', self::REGISTER_URL);
         $this->render('authenticate/register');
@@ -61,30 +58,24 @@ class Authentication extends AbstractController
     {
         $this->ensureUserIsNotLoggedIn();
 
-        $_POST['username'] ??= '';
-        $_POST['password'] ??= '';
-
         // 'if' Stops displaying 'username, password is wrong' error on initial visit
-        if ($this->isPostRequest()) {
+        if ($this->requestIsPost()) {
             try {
-                $this->service->loginUser($_POST['username'], $_POST['password']);
+                $this->service->login($_POST['username'] ?? null, $_POST['password'] ?? null);
 
                 Redirect::to(Welcome::HOME_URL);
             } catch (LogicException $e) {
-                $this->addToBladeParameters('error', $e->getMessage());
+                $this->getNotificationService()->setNotification(NotificationService::TYPE_ERROR, $e->getMessage());
             }
         }
 
-        // If previous action was a successful logout, this helps display that success message
-        $this->checkForNotificationMessages();
-
         $this->addToBladeParameters('post_url', self::LOGIN_URL);
-         $this->render('authenticate/login');
+        $this->render('authenticate/login');
     }
 
     public function logout(): void
     {
-        $this->service->logoutUser();
+        $this->service->logout();
 
         $this->getNotificationService()->setNotification('success', 'Logout successful!');
         Redirect::to(self::LOGIN_URL);

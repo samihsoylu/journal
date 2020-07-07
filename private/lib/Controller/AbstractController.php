@@ -78,7 +78,7 @@ abstract class AbstractController
 
     /**
      * Used for users who are not logged in, in most cases they should be redirected to the login page because they must
-     * be logged in to see the web page.
+     * be logged in to see every web page.
      *
      * @return void
      */
@@ -87,6 +87,7 @@ abstract class AbstractController
         $userIsLoggedIn = $this->authenticationService->isUserLoggedIn();
 
         if (!$userIsLoggedIn) {
+            $this->getNotificationService()->setNotification('error', 'You must login before you can access this page');
             Redirect::to(Authentication::LOGIN_URL);
         }
     }
@@ -124,32 +125,29 @@ abstract class AbstractController
     }
 
     /**
-     * Before rendering a template that includes the 'alerts' blade template, run a check with this method in your
-     * controller to ensure that you are providing notifications to the user
+     * Checks whether a post request was made when a page is loaded. Returns true if a form is submitted.
      *
-     * @return void
+     * @return bool
      */
-    protected function checkForNotificationMessages(): void
-    {
-        if ($this->getNotificationService()->isHit()) {
-            [$notifyType, $notifyMessage] = $this->getNotificationService()->getNotification();
-
-            $this->addToBladeParameters($notifyType, $notifyMessage);
-        }
-    }
-
-    protected function isPostRequest(): bool
+    protected function requestIsPost(): bool
     {
         return ($_SERVER['REQUEST_METHOD'] === 'POST');
     }
 
     /**
-     * Shortening the default render method, now you no longer need to provide blade parameters, this is automatic.
+     * Shortens the default render method by eliminating the variable parameter, and additionally checks for notifications.
      *
      * @param string $templatePath
      */
     protected function render(string $templatePath): void
     {
+        // Ensures that success/error/info/warning message shows after page loads
+        if ($this->getNotificationService()->notificationExists()) {
+            [$notifyType, $notifyMessage] = $this->getNotificationService()->getNotification();
+
+            $this->addToBladeParameters($notifyType, $notifyMessage);
+        }
+
         echo $this->getBladeInstance()->render($templatePath, $this->getBladeParameters());
     }
 }

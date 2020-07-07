@@ -26,16 +26,21 @@ class EntryRepository extends AbstractRepository
         int $categoryId,
         int $startTime,
         int $endTime,
-        int $page,
+        int $offset,
         int $limit
     ): array
     {
         $qb = $this->db->createQueryBuilder();
+
         $qb->add('select', 'e')
             ->add('from', 'Entries e')
             ->add('orderBy', 'e.createdTimestamp DESC')
-            ->setFirstResult($page)
+            ->setFirstResult($offset)
             ->setMaxResults($limit);
+
+        $qb->where('e.categoryId = :categoryId AND e.userId = :userId')
+            ->setParameter('categoryId', $categoryId)
+            ->setParameter('userId', $userId);
 
         $qb->where('e.createdTimestamp BETWEEN :startTime AND :endTime')
             ->setParameter('startTime', $startTime)

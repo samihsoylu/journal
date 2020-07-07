@@ -1,32 +1,46 @@
-    <div class="Header">
-        <div class="Header-item">
-            <a href="#" class="Header-link f4 d-flex flex-items-center">
-                <span>Journal</span>
-            </a>
-        </div>
-        <div class="Header-item">
-            <a href="#" class="Header-link">Dashboard</a>
-        </div>
-        <div class="Header-item">
-            <a href="#" class="Header-link">Create</a>
-        </div>
-        <div class="Header-item Header-item--full">
-            <a href="#" class="Header-link">Find</a>
-        </div>
-        <div class="Header-item mr-0">
-            <details class="dropdown details-reset details-overlay d-inline-block">
-                <summary class="text-gray p-2 d-inline" aria-haspopup="true">
-                    <img class="avatar" height="20" alt="@octocat" src="https://github.com/octocat.png" width="20">
+<header>
+    <!-- Account menu dropdown (desktop) -->
+    <ul id="account_menu" class="dropdown-content">
+        <li><a href="#!">Profile</a></li>
+        <li class="divider"></li>
+        <li><a href="#!">Logout</a></li>
 
-                    <div class="dropdown-caret"></div>
-                </summary>
+    </ul>
+    <!-- Create menu dropdown (desktop) -->
+    <ul id="create_menu" class="dropdown-content">
+        <li><a href="#!">Entry</a></li>
+        <li><a href="#!">Category</a></li>
+    </ul>
 
-                <ul class="dropdown-menu dropdown-menu-sw">
-                    <li><a class="dropdown-item" href="#url">Account</a></li>
-                    <li><a class="dropdown-item" href="#url">Settings</a></li>
-                    <li class="dropdown-divider" role="separator"></li>
-                    <li><a class="dropdown-item" href="{{ $logout_url }}">Logout</a></li>
+    <ul id="mobile_menu" class="sidenav">
+        <li><a href="#!">Dashboard</a></li>
+        <li><a href="#!">Entries</a></li>
+        <li><a href="#!">Categories</a></li>
+        <li><a href="#!">Users</a></li>
+        <li><a href="#!">Profile</a></li>
+        <li><a href="#!">Logout</a></li>
+    </ul>
+
+    <div class="navbar-fixed">
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#!" class="brand-logo">Journal</a>
+                <a href="#" data-target="mobile_menu" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+                <ul class="right hide-on-med-and-down">
+                    <li><a href="dashboard.html">Dashboard</a></li>
+                    <li class="active"><a href="#!">Entries</a></li>
+                    <li><a href="categories-view.html">Categories</a></li>
+                    <li><a href="#!">Users</a></li>
+                    <li><a class="dropdown-trigger" href="#!" data-target="account_menu"><i class="material-icons right">account_box arrow_drop_down</i></a></li>
                 </ul>
-            </details>
+            </div>
+        </nav>
+    </div>
+
+    <div class="parallax-container parallax-page-heading">
+        <div class="parallax"><img src="images/title-images/photo-of-island-during-golden-hour-1119973.jpg"></div>
+        <div class="container">
+            <h2 class="white-text text-shadow vertical-center">Entries</h2>
         </div>
     </div>
+</header>
