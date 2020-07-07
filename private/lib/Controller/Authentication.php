@@ -77,7 +77,7 @@ class Authentication extends AbstractController
     {
         $this->service->logout();
 
-        $this->getNotificationService()->setNotification('success', 'Logout successful!');
+        $this->getNotificationService()->setNotification('info', 'You have been logged out');
         Redirect::to(self::LOGIN_URL);
     }
 }
