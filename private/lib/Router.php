@@ -4,6 +4,7 @@ namespace App;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+use function FastRoute\simpleDispatcher;
 
 /**
  * Class Router loads all pre-defined routes, and instantiates a simple dispatcher
@@ -14,7 +15,7 @@ class Router
 
     public static function route(): void
     {
-        $dispatcher = \FastRoute\simpleDispatcher(static function(RouteCollector $route) {
+        $dispatcher = simpleDispatcher(static function(RouteCollector $route) {
             // Load all pre-defined routes
             $routeFiles = glob(self::PATH_TO_ROUTES . '/*.php');
             foreach ($routeFiles as $routeFile) {

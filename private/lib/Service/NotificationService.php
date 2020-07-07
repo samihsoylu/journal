@@ -4,6 +4,9 @@ namespace App\Service;
 
 use App\Utility\Session;
 
+/**
+ * Class NotificationService is used to transfer user notifications between redirects in the web app using Sessions
+ */
 class NotificationService
 {
     protected const NOTIFICATION_TYPE    = 'notify_type';
@@ -16,6 +19,12 @@ class NotificationService
         'error',
     ];
 
+    /**
+     * Sets two notification sessions, type and message.
+     *
+     * @param string $type info|success|warning|error
+     * @param string $message
+     */
     public function setNotification(string $type, string $message): void
     {
         if (!in_array($type, $this->allowedMessageTypes, true)) {
@@ -26,6 +35,11 @@ class NotificationService
         Session::put(self::NOTIFICATION_MESSAGE, $message);
     }
 
+    /**
+     * Gets the existing sessions returns [type, message]
+     *
+     * @return array
+     */
     public function getNotification(): array
     {
         $notificationData = [
@@ -37,12 +51,23 @@ class NotificationService
         return $notificationData;
     }
 
+    /**
+     * Checks to see if a notification session is set. Notifications are stored in sessions so that they are not lost
+     * in between redirects on the web application.
+     *
+     * @return bool true - notification exists, false - not found
+     */
     public function isHit(): bool
     {
         return Session::exists(self::NOTIFICATION_TYPE) &&
             Session::exists(self::NOTIFICATION_MESSAGE);
     }
 
+    /**
+     * Delete current existing notification sessions
+     *
+     * @return void
+     */
     public function flush(): void
     {
         Session::delete(self::NOTIFICATION_TYPE);
