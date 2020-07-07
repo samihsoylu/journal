@@ -1,5 +1,12 @@
+# Generic project files
 /vendor/
-/doctrine
 .idea/*
 .env
 .php_cs.cache
+
+# Cache Directory
+/private/cache/*
+!/private/cache/.gitkeep
+!/private/cache/templates/
+/private/cache/templates/*
+!/private/cache/templates/.gitkeep

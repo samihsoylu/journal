@@ -1,5 +1,5 @@
 {
-    "name": "samihsoylu/notes",
+    "name": "samihsoylu/journal",
     "description": "An app that is accessible world wide, use this to keep notes.",
     "type": "project",
     "license": "GNU GENERAL PUBLIC LICENSE",
@@ -15,9 +15,15 @@
         }
     },
     "require": {
-        "php": ">=7.3",
+        "php": ">=7.4",
         "ext-json": "*",
         "doctrine/orm": "^2.7",
-        "vlucas/phpdotenv": "^3.6"
+        "vlucas/phpdotenv": "^4.1",
+        "jenssegers/blade": "^1.3",
+        "nikic/fast-route": "^1.3",
+        "symfony/cache": "^5.0"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-master"
     }
 }

@@ -1,22 +1,15 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Database;
 
+use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Tools\Setup;
 
 final class Database
 {
-    /**
-     * @var self
-     */
-    private static $instance;
-
-    /**
-     * @var EntityManager
-     */
-    private $entityManager;
+    private static ?Database $instance = null;
+    private EntityManager $entityManager;
 
     private function __construct()
     {
@@ -29,27 +22,27 @@ final class Database
         ];
 
         $config = Setup::createAnnotationMetadataConfiguration(
-            [BASE_PATH . '/private/models/'],
-            $_ENV['DEV_MODE'],
+            [MODEL_PATH],
+            $_ENV['DEBUG_MODE'],
             null,
             null,
             false
         );
-        try {
-            $this->entityManager = EntityManager::create($dbParams, $config);
-        } catch (ORMException $e) {
-            throw new \RuntimeException($e->getMessage());
-        }
 
-        return $this;
+        $this->entityManager = EntityManager::create($dbParams, $config);
     }
 
-    public static function getInstance(): EntityManager
+    public static function getInstance(): self
     {
         if (self::$instance === null) {
             self::$instance = new self();
         }
 
-        return (self::$instance)->entityManager;
+        return self::$instance;
+    }
+
+    public function getEntityManager(): EntityManager
+    {
+        return $this->entityManager;
     }
 }

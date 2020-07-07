@@ -1,22 +1,22 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Database\Model;
 
-use App\Database\Database;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
-
-abstract class AbstractModel
+/**
+ * Class AbstractModel represents all tables in the database. The properties defined in this file are present in every
+ * table. Columns such as id, created & updated dates are enforced here on to all models.
+ *
+ * @package App\Database\Models
+ */
+abstract class AbstractModel implements ModelInterface
 {
-    public function save(): EntityManager
+    protected int $id;
+    protected int $createdTimestamp;
+    protected int $lastUpdatedTimestamp;
+
+    public function __construct()
     {
-        $db = Database::getInstance();
-        try {
-            $db->persist($this);
-        } catch (ORMException $e) {
-            throw new \RuntimeException($e->getMessage());
-        }
-        return $db;
+        $this->createdTimestamp = time();
     }
 
     /**
@@ -24,5 +24,38 @@ abstract class AbstractModel
      *
      * @return int
      */
-    abstract public function getId(): int;
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    /**
+     * Get the createdTimestamp column associated with this database table
+     *
+     * @return int
+     */
+    public function getCreatedTimestamp(): int
+    {
+        return $this->createdTimestamp;
+    }
+
+    /**
+     * Get the lastUpdatedTimestamp column associated with this database table
+     *
+     * @return int
+     */
+    public function getLastUpdatedTimestamp(): int
+    {
+        return $this->lastUpdatedTimestamp;
+    }
+
+    /**
+     * Set the last updated time stamp of this model to now.
+     *
+     * @return void
+     */
+    public function setLastUpdatedTimestamp(): void
+    {
+        $this->lastUpdatedTimestamp = time();
+    }
 }

@@ -1,43 +1,56 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Database\Model;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Index;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 
 /**
+ * This model class represents a single database record from the `categories` table.
+ *
  * @ORM\Entity
- * @ORM\Table(name="categories")
+ * @ORM\Table(name="categories",indexes={@Index(name="search_by_userid", columns={"userId"})})
  */
-class Category extends AbstractModel
+final class Category extends AbstractModel
 {
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue
      */
-    protected $id;
+    protected int $id;
 
     /**
-     * @ORM\Column(type="string")
+     * @ManyToOne(targetEntity="User")
+     * @JoinColumn(name="userId", referencedColumnName="id")
      */
-    protected $categoryName;
+    protected int $userId;
+
+    /**
+     * @ORM\Column(type="string", unique=true)
+     */
+    protected string $categoryName;
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected $createdTimestamp;
+    protected int $createdTimestamp;
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected $lastUpdatedTimestamp;
+    protected int $lastUpdatedTimestamp;
 
-    /**
-     * {@inheritDoc}
-     */
-    public function getId(): int
+    public function getUserId(): int
     {
-        return $this->id;
+        return $this->userId;
+    }
+
+    public function setUserId(int $userId): void
+    {
+        $this->userId = $userId;
     }
 
     public function getCategoryName(): string
@@ -48,28 +61,7 @@ class Category extends AbstractModel
     public function setCategoryName(string $categoryName): self
     {
         $this->categoryName = $categoryName;
-        return $this;
-    }
 
-    public function getCreatedTimestamp(): int
-    {
-        return $this->createdTimestamp;
-    }
-
-    public function setCreatedTimestamp(int $createdTimestamp): self
-    {
-        $this->createdTimestamp = $createdTimestamp;
-        return $this;
-    }
-
-    public function getLastUpdatedTimestamp(): int
-    {
-        return $this->lastUpdatedTimestamp;
-    }
-
-    public function setLastUpdatedTimestamp(int $lastUpdatedTimestamp): self
-    {
-        $this->lastUpdatedTimestamp = $lastUpdatedTimestamp;
         return $this;
     }
 }

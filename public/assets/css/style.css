@@ -1,0 +1,283 @@
+@charset "UTF-8";
+@import "fonts/material-icons.css";
+
+/* Table of Content
+==================================================
+    #General styles
+	#Firefox specific styles
+    #Helpers
+    #Header
+    #Button styles
+    #Authentication form
+    #Dashboard card content
+    #Nav bar
+    #Cards
+
+/* #General styles
+  ================================================== */
+body {
+	background-color:#f6f8fa;
+}
+footer {
+	font-size:8pt;
+}
+
+/* #Firefox specific styles
+================================================== */
+@-moz-document url-prefix() {
+	/** Firefox specific styles go here **/
+}
+
+/* #Helpers
+  ================================================== */
+.fullwidth {
+	width:100%;
+}
+.row-align {
+	/** Used in dashboard, aligns with title **/
+	margin-left: -.75rem;
+	margin-right: -.75rem;
+}
+.corner-position {
+	/** Corners element to bottom right corner **/
+	position:fixed;
+	right: 15px;
+	bottom:15px;
+}
+.vertical-center {
+	/** Centers element vertically **/
+	margin: 0;
+	position: absolute;
+	top: 50%;
+	-ms-transform: translateY(-50%);
+	transform: translateY(-50%);
+}
+.text-shadow {
+	/** Adds a little bit of shadow to text (used in page title) **/
+	text-shadow: 1px 0px 2px #000000;
+}
+.button-row {
+	/** In rows that only have buttons, adds necessary space below separating the content (used in category & entries page) **/
+	margin-bottom:10px;
+}
+.small-text {
+	font-size: 8pt;
+}
+@media only screen and (max-width: 400px) {
+	/** Screens smaller than 400px **/
+	.hide-on-tiny {
+		/** Hides element on very small screens **/
+		display:none !important;
+	}
+}
+@media only screen and (max-width: 768px) {
+	.mobile-fullwidth {
+		width:100%;
+	}
+}
+
+/* #Header
+================================================== */
+.parallax-page-heading {
+	/** Pages with parallax heading have a restricted height (default is too big)  **/
+	height:9em;
+	margin-bottom:20px;
+}
+
+
+/* #Button styles
+  ================================================== */
+.btn {
+	line-height:18px;
+	padding:6px 10px;
+	height:auto;
+	border-radius:3.5px;
+	text-transform: none;
+	letter-spacing:normal;
+	font-weight: 600;
+	box-shadow:none;
+}
+.btn.mobile-fullwidth {
+	margin-bottom:10px;
+}
+.btn .material-icons {
+	font-size:inherit;
+	vertical-align: text-top;
+}
+.btn-small {
+	height: 25px;
+	font-size: 10pt;
+	padding: 0px 10px;
+}
+.btn-primary {
+	background-color:#279f43;
+	background-image: linear-gradient(-180deg,#34d058,#28a745 95%);
+	border:1px solid rgba(37, 140, 62, 0.80);
+	color:#fff;
+}
+.btn-primary:hover {
+	background-color: #269f42;
+	background-image: linear-gradient(-180deg,#2fcb53,#269f42 90%);
+	background-position: -.5em;
+	border-color: rgba(27,31,35,.5);
+	box-shadow: none;
+}
+.btn-primary:focus-within, .btn-primary:focus, .btn-primary:active {
+	background-color:#279f43;
+	background-image:none;
+}
+.btn-default {
+	background-color:#eff3f6;
+	background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
+	border:1px solid rgba(27,31,35,.2);
+	color: #24292e;
+}
+.btn-default:hover {
+	background-color: #e6ebf1;
+	background-image: linear-gradient(-180deg,#f0f3f6,#e6ebf1 90%);
+	border-color: rgba(27,31,35,.35);
+
+	background-position: -.5em;
+	box-shadow: none;
+}
+.btn-default:focus-within, .btn-default:focus, .btn-default:active {
+	background-color: #e9ecef;
+	background-image: none;
+	border-color: rgba(27,31,35,.35);
+	box-shadow: inset 0 .15em .3em rgba(27,31,35,.15);
+}
+.btn-danger {
+	color: #cb2431;
+	background-color: #fafbfc;
+	background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
+	border:1px solid rgba(27,31,35,.2);
+}
+.btn-danger:hover {
+	color: #fff;
+	background-color: #cb2431;
+	background-image: linear-gradient(-180deg,#de4450,#cb2431 90%);
+	border-color: rgba(27,31,35,.5);
+}
+.btn-danger:focus-within, .btn-danger:focus, .btn-danger:active {
+	color: #fff;
+	background-color: #b5202c;
+	background-image: none;
+	border-color: rgba(27,31,35,.5);
+	box-shadow: inset 0 .15em .3em rgba(27,31,35,.15);
+}
+
+/* #Authentication form
+  ================================================== */
+.site-title {
+	font-size: 2.92rem;
+	margin: 1.52rem 0 0.912rem 0;
+}
+.alert-login-page {
+	width:100%;
+	max-width:517px;
+}
+.card.card-login {
+	display:flex;
+	max-width:517px;
+}
+.card.card-login .card-login-splash {
+	overflow:hidden;
+	position:relative;
+	z-index:1;
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	color:#fff;
+	flex:1;
+}
+.card.card-login .card-login-splash h1,
+.card.card-login .card-login-splash h2,
+.card.card-login .card-login-splash h3,
+.card.card-login .card-login-splash h4,
+.card.card-login .card-login-splash h5,
+.card.card-login .card-login-splash .settings-title {
+	margin-top:0;
+	text-shadow: 1px 0px 2px #000000;
+}
+.card.card-login .card-login-splash img {
+	position:absolute;
+	top:0;
+	left:0;
+	min-width:100%;
+	display:block;
+	z-index:-1;
+	max-height:287px;
+}
+.card.card-login .card-content {
+	flex:1;
+}
+
+/* #Dashboard card content
+  ================================================== */
+@media only screen and (min-width: 850px) {
+	/** Screens bigger that 850px **/
+
+	/**
+	 * To keep all cards aligned, we specify a height. Alignment fails without this because each card has a unique
+	 * sentence length.
+	 */
+	.dashboard.card-content {
+		height: 110px;
+	}
+}
+@media only screen and (min-width: 1400px) {
+	/** Screens bigger that 1400px **/
+	.dashboard.card-content {
+		height: 90px;
+	}
+}
+
+/* #Nav bar
+================================================== */
+@media only screen and (min-width: 993px) {
+	nav .brand-logo {
+		font-size: 1.8em;
+		left: 0.6em;
+	}
+}
+nav, nav .nav-wrapper i, nav a.sidenav-trigger, nav a.sidenav-trigger i, .navbar-fixed {
+	height:53px;
+	line-height:53px;
+}
+li a.side-menu-title {
+	color:#000;
+	font-size:16pt;
+	font-weight:bold;
+	margin-top:10px;
+	padding:0;
+}
+.sidenav.filters li {
+	padding:0px 25px;
+}
+.sidenav.filters li label {
+	left:25px;
+}
+.sidenav.filters li label.dropdown-label {
+	/* stops dropdown field labels from overflowing on top of the input on the sidenav */
+	top: -32px;
+}
+
+/* #Cards
+================================================== */
+a .card {
+	/* Ensures that text color stays normal */
+	color: rgba(0, 0, 0, 0.87);
+}
+a .card:hover {
+	/* Adds an emphasis to card box when hovering via mouse */
+	box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.24), 0 3px 1px -2px rgba(0, 0, 0, 0.212), 0 1px 5px 0 rgba(0, 0, 0, 0.4)
+}
+
+/* #Modals
+================================================== */
+.danger-modal {
+	max-width:460px;
+}
+.danger-modal .modal-footer {
+	padding:0px 24px;
+}
