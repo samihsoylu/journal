@@ -1,9 +1,7 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace App\Service\Authentication;
+namespace App\Utility;
 
-use App\Utility\Cache;
-use App\Utility\Session;
 use Symfony\Component\Cache\CacheItem;
 
 /**

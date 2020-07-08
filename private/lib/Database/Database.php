@@ -2,7 +2,6 @@
 
 namespace App\Database;
 
-use Doctrine\DBAL\Platforms\MySQL80Platform;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 

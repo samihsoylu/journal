@@ -4,10 +4,8 @@ namespace App\Controller;
 
 use App\Database\Model\User;
 use App\Service\AuthenticationService;
-use App\Service\NotificationService;
+use App\Utility\Notification;
 use App\Utility\Redirect;
-use App\Utility\Session;
-use Doctrine\Common\NotifyPropertyChanged;
 use Jenssegers\Blade\Blade;
 
 abstract class AbstractController
@@ -27,8 +25,9 @@ abstract class AbstractController
      */
     private array $routeParameters;
 
-    private AuthenticationService $authenticationService;
-    private NotificationService $notificationService;
+    private AuthenticationService $authService;
+
+    private Notification $notificationUtil;
 
     public function __construct(array $routeParameters)
     {
@@ -39,7 +38,7 @@ abstract class AbstractController
         $this->routeParameters = $routeParameters;
 
         // Instantiates auth service
-        $this->authenticationService = new AuthenticationService();
+        $this->authService = new AuthenticationService();
 
         // Set default variables for all blade templates
         $this->bladeParameters = [
@@ -48,12 +47,7 @@ abstract class AbstractController
             'logout_url' => Authentication::LOGOUT_URL,
         ];
 
-        $this->notificationService = new NotificationService();
-    }
-
-    protected function getBladeInstance(): Blade
-    {
-        return $this->bladeInstance;
+        $this->notificationUtil = new Notification();
     }
 
     protected function addToBladeParameters(string $key, string $value): void
@@ -61,19 +55,9 @@ abstract class AbstractController
         $this->bladeParameters[$key] = $value;
     }
 
-    protected function getBladeParameters(): array
-    {
-        return $this->bladeParameters;
-    }
-
     protected function getRouteParameters(): array
     {
         return $this->routeParameters;
-    }
-
-    protected function getNotificationService(): NotificationService
-    {
-        return $this->notificationService;
     }
 
     /**
@@ -84,10 +68,10 @@ abstract class AbstractController
      */
     protected function ensureUserIsLoggedIn(): void
     {
-        $userIsLoggedIn = $this->authenticationService->isUserLoggedIn();
+        $userIsLoggedIn = $this->authService->isUserLoggedIn();
 
         if (!$userIsLoggedIn) {
-            $this->getNotificationService()->setNotification('error', 'You must login before you can access this page');
+            $this->setNotification(Notification::TYPE_ERROR, 'You must login before you can access this page');
             Redirect::to(Authentication::LOGIN_URL);
         }
     }
@@ -100,7 +84,7 @@ abstract class AbstractController
      */
     protected function ensureUserIsNotLoggedIn(): void
     {
-        $userIsLoggedIn = $this->authenticationService->isUserLoggedIn();
+        $userIsLoggedIn = $this->authService->isUserLoggedIn();
 
         if ($userIsLoggedIn) {
             Redirect::to(Welcome::HOME_URL);
@@ -115,7 +99,7 @@ abstract class AbstractController
      */
     protected function ensureUserHasAdminRights(): void
     {
-        $userIsAdmin = $this->authenticationService->userHasPrivilege(User::PRIVILEGE_LEVEL_ADMIN);
+        $userIsAdmin = $this->authService->userHasPrivilege(User::PRIVILEGE_LEVEL_ADMIN);
 
         if (!$userIsAdmin) {
             http_response_code(403);
@@ -142,12 +126,17 @@ abstract class AbstractController
     protected function render(string $templatePath): void
     {
         // Ensures that success/error/info/warning message shows after page loads
-        if ($this->getNotificationService()->notificationExists()) {
-            [$notifyType, $notifyMessage] = $this->getNotificationService()->getNotification();
+        if ($this->notificationUtil->exists()) {
+            [$notifyType, $notifyMessage] = $this->notificationUtil->get();
 
             $this->addToBladeParameters($notifyType, $notifyMessage);
         }
 
-        echo $this->getBladeInstance()->render($templatePath, $this->getBladeParameters());
+        echo $this->bladeInstance->render($templatePath, $this->bladeParameters);
+    }
+
+    protected function setNotification(string $notificationType, string $notificationMessage): void
+    {
+        $this->notificationUtil->set($notificationType, $notificationMessage);
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Service\AuthenticationService;
-use App\Service\NotificationService;
+use App\Utility\Notification;
 use App\Utility\Redirect;
 use LogicException;
 
@@ -40,13 +40,15 @@ class Authentication extends AbstractController
                     $_POST['email'] ?? null
                 );
 
-                $this->getNotificationService()->setNotification(
-                    NotificationService::TYPE_SUCCESS,
-                    'Registration successful');
+                $this->setNotification(
+                    Notification::TYPE_SUCCESS,
+                    'Registration successful'
+                );
             } catch (LogicException $e) {
-                $this->getNotificationService()->setNotification(
-                    NotificationService::TYPE_ERROR,
-                    $e->getMessage());
+                $this->setNotification(
+                    Notification::TYPE_ERROR,
+                    $e->getMessage()
+                );
             }
         }
 
@@ -65,7 +67,10 @@ class Authentication extends AbstractController
 
                 Redirect::to(Welcome::HOME_URL);
             } catch (LogicException $e) {
-                $this->getNotificationService()->setNotification(NotificationService::TYPE_ERROR, $e->getMessage());
+                $this->setNotification(
+                    Notification::TYPE_ERROR,
+                    $e->getMessage()
+                );
             }
         }
 
@@ -77,7 +82,7 @@ class Authentication extends AbstractController
     {
         $this->service->logout();
 
-        $this->getNotificationService()->setNotification('info', 'You have been logged out');
+        $this->setNotification(Notification::TYPE_INFO, 'You have been logged out');
         Redirect::to(self::LOGIN_URL);
     }
 }

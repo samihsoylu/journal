@@ -7,7 +7,7 @@ use App\Controller\Welcome;
 
 // Welcome
 $route->addRoute('GET', BASE_URL . '/', 'Welcome@index');
-$route->addRoute('GET', Welcome::HOME_URL, 'Welcome@index');
+$route->addRoute('GET', Welcome::HOME_URL, 'Welcome@dashboard');
 
 // Authentication
 $route->addRoute(['GET', 'POST'], Authentication::LOGIN_URL, 'Authentication@login');

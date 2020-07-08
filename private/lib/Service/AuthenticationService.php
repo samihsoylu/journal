@@ -5,7 +5,7 @@ namespace App\Service;
 use App\Database\Exception\NotFoundException;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
-use App\Service\Authentication\UserSession;
+use App\Utility\UserSession;
 use InvalidArgumentException;
 use LengthException;
 

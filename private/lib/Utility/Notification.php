@@ -1,13 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace App\Service;
-
-use App\Utility\Session;
+namespace App\Utility;
 
 /**
- * Class NotificationService is used to transfer user notifications between redirects in the web app using Sessions
+ * Class Notification is used to transfer user notifications between redirects in the web app using Sessions
  */
-class NotificationService
+class Notification
 {
     protected const NOTIFICATION_TYPE    = 'notify_type';
     protected const NOTIFICATION_MESSAGE = 'notify_message';
@@ -30,7 +28,7 @@ class NotificationService
      * @param string $type info|success|warning|error
      * @param string $message
      */
-    public function setNotification(string $type, string $message): void
+    public function set(string $type, string $message): void
     {
         if (!in_array($type, $this->allowedMessageTypes, true)) {
             throw new \RuntimeException("Invalid type '{$type}' provided");
@@ -45,7 +43,7 @@ class NotificationService
      *
      * @return array
      */
-    public function getNotification(): array
+    public function get(): array
     {
         $notificationData = [
             Session::get(self::NOTIFICATION_TYPE),
@@ -62,7 +60,7 @@ class NotificationService
      *
      * @return bool true - notification exists, false - not found
      */
-    public function notificationExists(): bool
+    public function exists(): bool
     {
         return Session::exists(self::NOTIFICATION_TYPE) &&
             Session::exists(self::NOTIFICATION_MESSAGE);
@@ -73,7 +71,7 @@ class NotificationService
      *
      * @return void
      */
-    public function flush(): void
+    protected function flush(): void
     {
         Session::delete(self::NOTIFICATION_TYPE);
         Session::delete(self::NOTIFICATION_MESSAGE);
