@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service\Authentication\Model;
+namespace App\Service\Authentication;
 
 use App\Utility\Cache;
 use App\Utility\Session;
@@ -41,7 +41,7 @@ class UserSession
     protected const USER_NAME  = 'Username';
     protected const USER_PRIVILEGE_LEVEL = 'PrivlegeLevel';
 
-    public function __construct(string $id, int $userId, string $username, int $privilegeLevel)
+    protected function __construct(string $id, int $userId, string $username, int $privilegeLevel)
     {
         $this->sessionId      = $id;
         $this->userId         = $userId;
@@ -109,6 +109,35 @@ class UserSession
         ];
     }
 
+    /**
+     * Creates a new session instance
+     *
+     * @param int $userId
+     * @param string $username
+     * @param int $privilegeLevel
+     * @return self
+     */
+    public static function create(int $userId, string $username, int $privilegeLevel): self
+    {
+        // Generate a random prefix
+        $prefix = sha1(random_bytes(5));
+
+        // Generate a unique session id
+        $sessionId = uniqid($prefix, true);
+
+        return new self(
+            $sessionId,
+            $userId,
+            $username,
+            $privilegeLevel
+        );
+    }
+
+    /**
+     * Saves this session in to the users browser and local cache
+     *
+     * @return void
+     */
     public function save(): void
     {
         $cache = Cache::getInstance();
@@ -124,6 +153,12 @@ class UserSession
         Session::put(self::SESSION_ID, $this->sessionId);
     }
 
+    /**
+     * Reads the user $_SESSION and returns an UserSession instance if it exists in the cache. Returns null if user is
+     * not logged in.
+     *
+     * @return self|null
+     */
     public static function load(): ?self
     {
         $sessionId = Session::get(self::SESSION_ID);
@@ -143,6 +178,11 @@ class UserSession
         return self::fromStruct($item->get());
     }
 
+    /**
+     * Deletes an existing user session by clearing the cache and user $_SESSION
+     *
+     * @return void
+     */
     public static function destroy(): void
     {
         $sessionId = Session::get(self::SESSION_ID);

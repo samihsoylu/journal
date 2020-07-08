@@ -5,7 +5,7 @@ namespace App\Service;
 use App\Database\Exception\NotFoundException;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
-use App\Service\Authentication\Model\UserSession;
+use App\Service\Authentication\UserSession;
 use InvalidArgumentException;
 use LengthException;
 
@@ -53,19 +53,11 @@ class AuthenticationService
             throw new InvalidArgumentException('Password is incorrect');
         }
 
-        // Generate a random prefix
-        $prefix = sha1(random_bytes(5));
-
-        // Generate a unique session id
-        $sessionId = uniqid($prefix, true);
-
-        $session = new UserSession(
-            $sessionId,
+        $session = UserSession::create(
             $user->getId(),
             $user->getUsername(),
             $user->getPrivilegeLevel()
         );
-
         $session->save();
     }
 
