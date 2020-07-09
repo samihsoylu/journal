@@ -32,7 +32,7 @@ class Authentication extends AbstractController
         //$this->ensureUserHasAdminRights();
 
         // 'if' Stops displaying 'username, password, email is wrong' error on initial visit
-        if ($this->requestIsPost()) {
+        if ($this->isPostRequest()) {
             try {
                 $this->service->register(
                     $_POST['username'] ?? null,
@@ -52,8 +52,8 @@ class Authentication extends AbstractController
             }
         }
 
-        $this->addToBladeParameters('post_url', self::REGISTER_URL);
-        $this->render('authenticate/register');
+        $this->template->setVariable('post_url', self::REGISTER_URL);
+        $this->template->render('authenticate/register');
     }
 
     public function login(): void
@@ -61,11 +61,11 @@ class Authentication extends AbstractController
         $this->ensureUserIsNotLoggedIn();
 
         // 'if' Stops displaying 'username, password is wrong' error on initial visit
-        if ($this->requestIsPost()) {
+        if ($this->isPostRequest()) {
             try {
                 $this->service->login($_POST['username'] ?? null, $_POST['password'] ?? null);
 
-                Redirect::to(Welcome::HOME_URL);
+                Redirect::to(Welcome::DASHBOARD_URL);
             } catch (LogicException $e) {
                 $this->setNotification(
                     Notification::TYPE_ERROR,
@@ -74,8 +74,8 @@ class Authentication extends AbstractController
             }
         }
 
-        $this->addToBladeParameters('post_url', self::LOGIN_URL);
-        $this->render('authenticate/login');
+        $this->template->setVariable('post_url', self::LOGIN_URL);
+        $this->template->render('authenticate/login');
     }
 
     public function logout(): void

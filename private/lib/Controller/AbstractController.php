@@ -4,55 +4,50 @@ namespace App\Controller;
 
 use App\Database\Model\User;
 use App\Service\AuthenticationService;
+use App\Utility\Template;
 use App\Utility\Notification;
 use App\Utility\Redirect;
-use Jenssegers\Blade\Blade;
 
 abstract class AbstractController
 {
-    /**
-     * @var Blade template object
-     */
-    private Blade $bladeInstance;
-
-    /**
-     * @var array template specific parameters
-     */
-    private array $bladeParameters;
-
     /**
      * @var array route specific parameters (entryId, page, etc..)
      */
     private array $routeParameters;
 
+    /**
+     * @var AuthenticationService used to determine user is logged in or not in inheriting controller classes
+     */
     private AuthenticationService $authService;
 
-    private Notification $notificationUtil;
+    /**
+     * @var Notification gives the ability to set notifications for inheriting controller classes
+     */
+    private Notification $notification;
+
+    /**
+     * @var Template allows inheriting controller classes to render templates
+     */
+    protected Template $template;
 
     public function __construct(array $routeParameters)
     {
-        // Instantiate blade templating engine
-        $this->bladeInstance = new Blade([TEMPLATE_PATH],TEMPLATE_CACHE_PATH);
-
         // Router variables (/user/{userId}/entry/{entryId}/)
         $this->routeParameters = $routeParameters;
 
-        // Instantiates auth service
+        // Services relevant to all inheriting controllers
         $this->authService = new AuthenticationService();
+        $this->template    = Template::getInstance();
 
-        // Set default variables for all blade templates
-        $this->bladeParameters = [
-            'site_title' => $_ENV['SITE_TITLE'],
-            'assets_url' => ASSETS_URL,
-            'logout_url' => Authentication::LOGOUT_URL,
-        ];
+        // User later to create notifications for the user
+        $this->notification    = new Notification();
 
-        $this->notificationUtil = new Notification();
-    }
-
-    protected function addToBladeParameters(string $key, string $value): void
-    {
-        $this->bladeParameters[$key] = $value;
+        // Set default variables for all templates
+        $this->template->setVariables([
+            'site_title'  => $_ENV['SITE_TITLE'],
+            'assets_url'  => ASSETS_URL,
+            'active_page' => $this->getActivePage(),
+        ]);
     }
 
     protected function getRouteParameters(): array
@@ -87,7 +82,7 @@ abstract class AbstractController
         $userIsLoggedIn = $this->authService->isUserLoggedIn();
 
         if ($userIsLoggedIn) {
-            Redirect::to(Welcome::HOME_URL);
+            Redirect::to(Welcome::DASHBOARD_URL);
         }
     }
 
@@ -103,7 +98,7 @@ abstract class AbstractController
 
         if (!$userIsAdmin) {
             http_response_code(403);
-            $this->render('errors/403');
+            $this->template->render('errors/403');
             exit();
         }
     }
@@ -113,30 +108,38 @@ abstract class AbstractController
      *
      * @return bool
      */
-    protected function requestIsPost(): bool
+    protected function isPostRequest(): bool
     {
         return ($_SERVER['REQUEST_METHOD'] === 'POST');
     }
 
     /**
-     * Shortens the default render method by eliminating the variable parameter, and additionally checks for notifications.
+     * Finds current users active page
      *
-     * @param string $templatePath
+     * @return string
      */
-    protected function render(string $templatePath): void
+    protected function getActivePage(): string
     {
-        // Ensures that success/error/info/warning message shows after page loads
-        if ($this->notificationUtil->exists()) {
-            [$notifyType, $notifyMessage] = $this->notificationUtil->get();
+        // Remove base url
+        $activePage = str_replace(BASE_URL, '', $_SERVER['REQUEST_URI']);
 
-            $this->addToBladeParameters($notifyType, $notifyMessage);
-        }
+        // Remove sub pages
+        $activePage = explode('/', $activePage)[1];
 
-        echo $this->bladeInstance->render($templatePath, $this->bladeParameters);
+        // Remove get request
+        $activePage = explode('?', $activePage)[0];
+
+        return $activePage;
     }
 
+    /**
+     * Sets a notification session to prevent data loss in-between redirects.
+     *
+     * @param string $notificationType error|info|success|warning
+     * @param string $notificationMessage
+     */
     protected function setNotification(string $notificationType, string $notificationMessage): void
     {
-        $this->notificationUtil->set($notificationType, $notificationMessage);
+        $this->notification->set($notificationType, $notificationMessage);
     }
 }

@@ -5,10 +5,8 @@ namespace App\Utility;
 use Symfony\Component\Cache\CacheItem;
 
 /**
- * Class UserSession is a representation of a single user browsing the website. It stores session information of each
+ * Class UserSession is a utility and a representation of a single user browsing the website. It stores session information of each
  * individual visitor and it handles the information by reading/writing to the local cache.
- *
- * @package App\Service\Authentication\Model
  */
 class UserSession
 {

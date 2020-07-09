@@ -86,6 +86,11 @@ class Template
         echo $this->blade->render($templateName, $this->variables);
     }
 
+    /**
+     * Dynamically loads existing url constants in all controllers into the templating engine.
+     *
+     * @return void
+     */
     private function setDefaultVarList(): void
     {
         $controllers = array_diff(scandir(BASE_PATH . '/private/lib/Controller'), array('..', '.'));
@@ -93,12 +98,18 @@ class Template
         $variableList = [];
         foreach ($controllers as $controller) {
             if (strpos($controller,'Abstract') !== false) {
+                // ignore abstract class
                 continue;
             }
             $controllerName = str_replace('.php', '', $controller);
 
             $refl = new \ReflectionClass("\\App\\Controller\\{$controllerName}");
             foreach ($refl->getConstants() as $key => $value) {
+                if (strpos($key, '_URL') === false) {
+                    // if constant does not have url in its name, ignore it.
+                    continue;
+                }
+
                 $variableList[strtolower($key)] = $value;
             }
         }

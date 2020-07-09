@@ -38,7 +38,7 @@
                                 <div class="card-image">
                                     <img src="{{ $assets_url }}/images/book-case.jpg">
                                     <span class="card-title">View all entries</span>
-                                    <a href="entries-view.html" class="btn-floating halfway-fab waves-effect waves-light blue"><i class="material-icons">open_in_browser</i></a>
+                                    <a href="{{ $entries_url }}" class="btn-floating halfway-fab waves-effect waves-light blue"><i class="material-icons">open_in_browser</i></a>
                                 </div>
                                 <div class="dashboard card-content">
                                     <p>See an overview of your already written notes.</p>
@@ -78,7 +78,7 @@
                                 <div class="card-image">
                                     <img src="{{ $assets_url }}/images/exit.jpg">
                                     <span class="card-title">Logout</span>
-                                    <a href="login.html" class="btn-floating halfway-fab waves-effect waves-light red"><i class="material-icons">exit_to_app</i></a>
+                                    <a href="{{ $logout_url }}" class="btn-floating halfway-fab waves-effect waves-light red"><i class="material-icons">exit_to_app</i></a>
                                 </div>
                                 <div class="dashboard card-content">
                                     <p>Are you finished? Safely logout here.</p>

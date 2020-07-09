@@ -27,10 +27,10 @@
                 <a href="#!" class="brand-logo">Journal</a>
                 <a href="#" data-target="mobile_menu" class="sidenav-trigger"><i class="material-icons">menu</i></a>
                 <ul class="right hide-on-med-and-down">
-                    <li><a href="dashboard.html">Dashboard</a></li>
-                    <li><a href="#!">Entries</a></li>
-                    <li><a href="categories-view.html">Categories</a></li>
-                    <li><a href="#!">Users</a></li>
+                    <li @if ($active_page === 'dashboard') class="active" @endif><a href="{{ $dashboard_url }}">Dashboard</a></li>
+                    <li @if ($active_page === 'entries') class="active" @endif><a href="{{ $entries_url }}">Entries</a></li>
+                    <li @if ($active_page === 'categories') class="active" @endif><a href="categories-view.html">Categories</a></li>
+                    <li @if ($active_page === 'users') class="active" @endif><a href="#!">Users</a></li>
                     <li><a class="dropdown-trigger" href="#!" data-target="account_menu"><i class="material-icons right">account_box arrow_drop_down</i></a></li>
                 </ul>
             </div>
@@ -44,3 +44,4 @@
         </div>
     </div>
 </header>
+@include('components/alerts')

@@ -15,7 +15,7 @@ class Router
 
     public static function route(): void
     {
-        $dispatcher = simpleDispatcher(static function(RouteCollector $route) {
+        $dispatcher = simpleDispatcher(static function (RouteCollector $route) {
             // Load all pre-defined routes
             $routeFiles = glob(self::PATH_TO_ROUTES . '/*.php');
             foreach ($routeFiles as $routeFile) {
@@ -50,7 +50,7 @@ class Router
 
                 [$handler, $routeParameters] = $routeInfo;
 
-                if (strpos($handler,'@') === false) {
+                if (strpos($handler, '@') === false) {
                     throw new \RuntimeException('Controller and method name was not provided');
                 }
                 [$className, $method] = explode('@', $handler);

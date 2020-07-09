@@ -4,7 +4,7 @@ namespace App\Controller;
 
 class Welcome extends AbstractController
 {
-    public const HOME_URL = BASE_URL . '/dashboard';
+    public const DASHBOARD_URL = BASE_URL . '/dashboard';
 
     public function index(): void
     {
@@ -15,6 +15,6 @@ class Welcome extends AbstractController
     public function dashboard(): void
     {
         $this->ensureUserIsLoggedIn();
-        $this->render('dashboard');
+        $this->template->render('dashboard');
     }
 }

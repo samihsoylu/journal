@@ -8,6 +8,7 @@ use Doctrine\ORM\Tools\Setup;
 final class Database
 {
     private static ?Database $instance = null;
+
     private EntityManager $entityManager;
 
     private function __construct()
@@ -31,17 +32,12 @@ final class Database
         $this->entityManager = EntityManager::create($dbParams, $config);
     }
 
-    public static function getInstance(): self
+    public static function getInstance(): EntityManager
     {
         if (self::$instance === null) {
             self::$instance = new self();
         }
 
-        return self::$instance;
-    }
-
-    public function getEntityManager(): EntityManager
-    {
-        return $this->entityManager;
+        return (self::$instance)->entityManager;
     }
 }

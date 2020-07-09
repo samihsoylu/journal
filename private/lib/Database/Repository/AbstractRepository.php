@@ -22,8 +22,7 @@ abstract class AbstractRepository
 
     public function __construct()
     {
-        $instance = Database::getInstance();
-        $this->db = $instance->getEntityManager();
+        $this->db = Database::getInstance();
     }
 
     /**

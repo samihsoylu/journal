@@ -13,12 +13,10 @@ class EntryRepository extends AbstractRepository
 
     public function findByCategoryId(int $userId, int $categoryId)
     {
-
     }
 
     public function findByTimeframe(int $userId, int $startTime, int $endTime)
     {
-
     }
 
     public function findByCategoryAndTimeFrame(
@@ -28,8 +26,7 @@ class EntryRepository extends AbstractRepository
         int $endTime,
         int $offset,
         int $limit
-    ): array
-    {
+    ): array {
         $qb = $this->db->createQueryBuilder();
 
         $qb->add('select', 'e')
