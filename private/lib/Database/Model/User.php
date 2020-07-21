@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping\Index;
  * @ORM\Entity
  * @ORM\Table(name="users",indexes={@Index(name="search_username_emailaddress", columns={"username","emailAddress"})})
  */
-final class User extends AbstractModel
+class User extends AbstractModel
 {
     public const PRIVILEGE_LEVEL_ADMIN = 1;
     public const PRIVILEGE_LEVEL_USER  = 2;

@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity
  * @ORM\Table(name="entries",indexes={@Index(name="search_by_userid_categoryid_createdtimestamp", columns={"userId", "categoryId", "createdTimestamp"})})
  */
-final class Entry extends AbstractModel
+class Entry extends AbstractModel
 {
     /**
      * @ORM\Id

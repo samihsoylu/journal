@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * @ORM\Entity
  * @ORM\Table(name="categories",indexes={@Index(name="search_by_userid", columns={"userId"})})
  */
-final class Category extends AbstractModel
+class Category extends AbstractModel
 {
     /**
      * @ORM\Id
@@ -26,12 +26,17 @@ final class Category extends AbstractModel
      * @ManyToOne(targetEntity="User")
      * @JoinColumn(name="userId", referencedColumnName="id")
      */
-    protected int $userId;
+    protected User $referencedUser;
 
     /**
      * @ORM\Column(type="string", unique=true)
      */
-    protected string $categoryName;
+    protected string $name;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    protected string $description;
 
     /**
      * @ORM\Column(type="integer")
@@ -43,25 +48,35 @@ final class Category extends AbstractModel
      */
     protected int $lastUpdatedTimestamp;
 
-    public function getUserId(): int
+    public function getReferencedUser(): User
     {
-        return $this->userId;
+        return $this->referencedUser;
     }
 
-    public function setUserId(int $userId): void
+    public function setReferencedUser(User $user): void
     {
-        $this->userId = $userId;
+        $this->referencedUser = $user;
     }
 
-    public function getCategoryName(): string
+    public function getName(): string
     {
-        return $this->categoryName;
+        return $this->name;
     }
 
-    public function setCategoryName(string $categoryName): self
+    public function setName(string $name): self
     {
-        $this->categoryName = $categoryName;
+        $this->name = $name;
 
         return $this;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
     }
 }
