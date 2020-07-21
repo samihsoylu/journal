@@ -1,10 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace App\Database\Exception;
+namespace App\Exception\UserException;
 
-use RuntimeException;
+use App\Exception\UserException;
 
-class NotFoundException extends RuntimeException
+class NotFoundException extends UserException
 {
     public function __construct($message = "", $code = 0)
     {
