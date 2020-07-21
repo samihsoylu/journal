@@ -9,7 +9,7 @@
             <div class="Box box-shadow mt-3">
                 <div class="Box-row">
                     @include('components/alerts')
-                    <form action="{{ $post_url }}" method="post">
+                    <form action="{{ $register_post_url }}" method="post">
                         <label for="email">Email</label>
                         <input class="form-control input-block" type="text" id="email" name="email" />
 

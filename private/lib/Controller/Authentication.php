@@ -2,28 +2,31 @@
 
 namespace App\Controller;
 
+use App\Exception\UserException;
 use App\Service\AuthenticationService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
-use LogicException;
+use App\Validator\AuthenticationValidator;
 
 class Authentication extends AbstractController
 {
     // Route url constants, to keep paths consistent within multiple classes
-    public const LOGIN_URL    = BASE_URL . '/auth/login';
-    public const LOGOUT_URL   = BASE_URL . '/auth/logout';
-    public const REGISTER_URL = BASE_URL . '/auth/register';
+    public const LOGIN_URL         = BASE_URL . '/auth/login';
+    public const LOGIN_POST_URL    = BASE_URL . '/auth/login/post';
+    public const REGISTER_URL      = BASE_URL . '/auth/register';
+    public const REGISTER_POST_URL = BASE_URL . '/auth/register/post';
+    public const LOGOUT_URL        = BASE_URL . '/auth/logout';
 
-    /**
-     * @var AuthenticationService
-     */
     private AuthenticationService $service;
+
+    private AuthenticationValidator $validator;
 
     public function __construct(array $routeParameters)
     {
         parent::__construct($routeParameters);
 
-        $this->service = new AuthenticationService();
+        $this->service   = new AuthenticationService();
+        $this->validator = new AuthenticationValidator();
     }
 
     public function register(): void
@@ -31,28 +34,34 @@ class Authentication extends AbstractController
         // Registration is not open, administrators can only create user accounts
         //$this->ensureUserHasAdminRights();
 
-        // 'if' Stops displaying 'username, password, email is wrong' error on initial visit
-        if ($this->isPostRequest()) {
-            try {
-                $this->service->register(
-                    $_POST['username'] ?? null,
-                    $_POST['password'] ?? null,
-                    $_POST['email'] ?? null
-                );
+        try {
+            // Validate provided $_POST parameters
+            $this->validator->register();
 
-                $this->setNotification(
-                    Notification::TYPE_SUCCESS,
-                    'Registration successful'
-                );
-            } catch (LogicException $e) {
-                $this->setNotification(
-                    Notification::TYPE_ERROR,
-                    $e->getMessage()
-                );
-            }
+            // Register the user
+            $this->service->register(
+                $_POST['username'],
+                $_POST['password'],
+                $_POST['email']
+            );
+
+            // Present success message
+            $this->setNotification(
+                Notification::TYPE_SUCCESS,
+                'Registration successful'
+            );
+        } catch (UserException $e) {
+            $this->setNotification(
+                Notification::TYPE_ERROR,
+                $e->getMessage()
+            );
         }
 
-        $this->template->setVariable('post_url', self::REGISTER_URL);
+        $this->registerView();
+    }
+
+    public function registerView(): void
+    {
         $this->template->render('authenticate/register');
     }
 
@@ -60,21 +69,27 @@ class Authentication extends AbstractController
     {
         $this->ensureUserIsNotLoggedIn();
 
-        // 'if' Stops displaying 'username, password is wrong' error on initial visit
-        if ($this->isPostRequest()) {
-            try {
-                $this->service->login($_POST['username'] ?? null, $_POST['password'] ?? null);
+        try {
+            // Validate provided $_POST parameters
+            $this->validator->login();
 
-                Redirect::to(Welcome::DASHBOARD_URL);
-            } catch (LogicException $e) {
-                $this->setNotification(
-                    Notification::TYPE_ERROR,
-                    $e->getMessage()
-                );
-            }
+            // Log the user in
+            $this->service->login($_POST['username'], $_POST['password']);
+
+            Redirect::to(Welcome::DASHBOARD_URL);
+        } catch (UserException $e) {
+            $this->setNotification(
+                Notification::TYPE_ERROR,
+                $e->getMessage()
+            );
         }
 
-        $this->template->setVariable('post_url', self::LOGIN_URL);
+        $this->loginView();
+    }
+
+    public function loginView(): void
+    {
+        $this->ensureUserIsNotLoggedIn();
         $this->template->render('authenticate/login');
     }
 

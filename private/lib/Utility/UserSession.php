@@ -2,6 +2,8 @@
 
 namespace App\Utility;
 
+use App\Database\Model\User;
+use App\Database\Repository\UserRepository;
 use Symfony\Component\Cache\CacheItem;
 
 /**
@@ -121,12 +123,16 @@ class UserSession
         // Generate a unique session id
         $sessionId = uniqid($prefix, true);
 
-        return new self(
+        $self = new self(
             $sessionId,
             $userId,
             $username,
             $privilegeLevel
         );
+
+        $self->save();
+
+        return $self;
     }
 
     /**
@@ -194,5 +200,20 @@ class UserSession
         }
 
         Session::destroy();
+    }
+
+    public static function getUserObject(): User
+    {
+        $session = self::load();
+        if ($session === null) {
+            throw new \RuntimeException('User is not logged in');
+        }
+
+        $repository = new UserRepository();
+
+        /** @var User $user */
+        $user = $repository->getById($session->getUserId());
+
+        return $user;
     }
 }

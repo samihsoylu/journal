@@ -9,7 +9,7 @@ class Welcome extends AbstractController
     public function index(): void
     {
         // direct new visitors to login
-        (new Authentication([]))->login();
+        (new Authentication([]))->loginView();
     }
 
     public function dashboard(): void

@@ -29,7 +29,7 @@
                 <ul class="right hide-on-med-and-down">
                     <li @if ($active_page === 'dashboard') class="active" @endif><a href="{{ $dashboard_url }}">Dashboard</a></li>
                     <li @if ($active_page === 'entries') class="active" @endif><a href="{{ $entries_url }}">Entries</a></li>
-                    <li @if ($active_page === 'categories') class="active" @endif><a href="categories-view.html">Categories</a></li>
+                    <li @if ($active_page === 'categories') class="active" @endif><a href="{{ $categories_url }}">Categories</a></li>
                     <li @if ($active_page === 'users') class="active" @endif><a href="#!">Users</a></li>
                     <li><a class="dropdown-trigger" href="#!" data-target="account_menu"><i class="material-icons right">account_box arrow_drop_down</i></a></li>
                 </ul>
@@ -44,4 +44,6 @@
         </div>
     </div>
 </header>
+<div style="margin:0 auto; max-width:800px">
 @include('components/alerts')
+</div>

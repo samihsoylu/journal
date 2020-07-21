@@ -25,7 +25,7 @@
                                 <div class="card-image">
                                     <img src="{{ $assets_url }}/images/chapter-of-a-book.jpg">
                                     <span class="card-title">Create a category</span>
-                                    <a class="btn-floating halfway-fab waves-effect waves-light brown"><i class="material-icons">playlist_add</i></a>
+                                    <a href="{{ $create_category_url }}" class="btn-floating halfway-fab waves-effect waves-light brown"><i class="material-icons">playlist_add</i></a>
                                 </div>
                                 <div class="dashboard card-content">
                                     <p>Break up your entries into smaller pieces. Like chapters of a book.</p>

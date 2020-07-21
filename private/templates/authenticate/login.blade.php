@@ -20,7 +20,7 @@
                                 </div>
                                 <div class="card-content">
                                     <span class="card-title">Log In</span>
-                                    <form action="{{ $post_url }}" method="post">
+                                    <form action="{{ $login_post_url }}" method="post">
                                         <div class="input-field ">
                                             <input id="username" type="text" class="validate" name="username" required />
                                             <label for="username">Username</label>

@@ -8,8 +8,8 @@
     <div class="container">
         <div class="row row-align button-row">
             <div class="col s12">
-                <a href="create-entry.html" class="btn btn-primary fullwidth hide-on-med-and-up"><i class="material-icons">add_box</i> Create</a>
-                <a href="create-entry.html" class="btn btn-primary right hide-on-small-only"><i class="material-icons">add_box</i> Create</a>
+                <a href="{{ $create_entry_url }}" class="btn btn-primary fullwidth hide-on-med-and-up"><i class="material-icons">add_box</i> Create</a>
+                <a href="{{ $create_entry_url }}" class="btn btn-primary right hide-on-small-only"><i class="material-icons">add_box</i> Create</a>
             </div>
         </div>
         <div class="row row-align">
