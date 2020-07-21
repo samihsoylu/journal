@@ -3,9 +3,10 @@
 namespace App\Database\Repository;
 
 use App\Database\Database;
-use App\Database\Exception\NotFoundException;
+use App\Exception\UserException;
+use App\Exception\UserException\NotFoundException;
 use App\Database\Model\ModelInterface;
-use App\Database\Model\User;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use \Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use \Doctrine\ORM\OptimisticLockException;
@@ -52,7 +53,7 @@ abstract class AbstractRepository
         $resource  = $this->db->find($modelName, $id);
 
         if (!$resource) {
-            throw NotFoundException::entityIdNotFound(self::RESOURCE_NAME, $id);
+            throw NotFoundException::entityIdNotFound($modelName, $id);
         }
 
         return $resource;
