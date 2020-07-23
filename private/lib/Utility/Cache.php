@@ -5,6 +5,9 @@ namespace App\Utility;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 use Symfony\Contracts\Cache\CacheInterface;
 
+/**
+ * Cache utility that instantiates Symfony/Cache
+ */
 class Cache
 {
     protected static $instance = null;

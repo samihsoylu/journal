@@ -212,6 +212,12 @@ footer {
 	flex:1;
 }
 
+.corner-alert {
+	position:fixed;
+	right:20px;
+	bottom:20px;
+	z-index:1000;
+}
 /* #Dashboard card content
   ================================================== */
 @media only screen and (min-width: 850px) {

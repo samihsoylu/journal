@@ -9,7 +9,7 @@
             <div class="col s12 m10 l7 offset-m1 offset-l2">
                 <form method="post" action="{{ $create_category_post_url }}">
                     <div class="input-field">
-                        <input id="category_title" name="category_title" type="text" class="validate" required />
+                        <input id="category_title" name="category_name" type="text" class="validate" required />
                         <label for="category_title">Category title</label>
                     </div>
                     <div class="input-field">

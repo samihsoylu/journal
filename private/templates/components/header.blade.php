@@ -44,6 +44,4 @@
         </div>
     </div>
 </header>
-<div style="margin:0 auto; max-width:800px">
 @include('components/alerts')
-</div>

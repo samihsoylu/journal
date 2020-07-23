@@ -10,10 +10,9 @@
                 <form method="post" action="{{ $create_entry_url }}">
                     <div class="input-field">
                         <select id="category_id_d" name="category_id">
-                            <option value="1">Personal</option>
-                            <option value="2">Diet</option>
-                            <option value="3">Dreams</option>
-                            <option value="4">Work</option>
+                            @foreach ($categories as $category)
+                            <option value="{{ $category->getId() }}">{{ $category->getName() }}</option>
+                            @endforeach
                         </select>
                         <label for="category_id_d">Category</label>
                     </div>

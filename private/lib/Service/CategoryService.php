@@ -32,7 +32,7 @@ class CategoryService
      */
     public function getAllCategoriesForLoggedInUser(): array
     {
-        return $this->categoryRepository->getByUser(UserSession::getUserObject());
+        return $this->categoryRepository->getAllCategoriesForUser(UserSession::getUserObject());
     }
 
     public function createCategory(string $categoryTitle, string $categoryDescription): void

@@ -17,8 +17,8 @@
                 <a href="{{ $update_category_clean_url }}/{{ $category->getId() }}">
                     <div class="card">
                         <div class="card-content">
-                            <span class="card-title">{{ $category->getCategoryName() }}</span>
-                            <p>{{ $category->getCategoryDescription() }}</p>
+                            <span class="card-title">{{ $category->getName() }}</span>
+                            <p>{{ $category->getDescription() }}</p>
                         </div>
                     </div>
                 </a>

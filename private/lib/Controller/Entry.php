@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Service\CategoryService;
 use App\Service\EntryService;
+use App\Validator\CategoryValidator;
 
 class Entry extends AbstractController
 {
@@ -12,7 +14,15 @@ class Entry extends AbstractController
     public const UPDATE_ENTRY_URL = BASE_URL . '/entry/update';
     public const DELETE_ENTRY_URL = BASE_URL . '/entry/delete';
 
-    protected EntryService $service;
+    public const UPDATE_ENTRY_VIEW_URL = BASE_URL . '/entry/update/{id:\d+}';
+
+    public const CREATE_ENTRY_POST_URL = BASE_URL . '/entry/create/post';
+    public const UPDATE_ENTRY_POST_URL = BASE_URL . '/entry/update/{id:\d+}/post';
+    public const DELETE_ENTRY_POST_URL = BASE_URL . '/entry/delete/{id:\d+}';
+
+    protected EntryService $entryService;
+
+    protected CategoryService $categoryService;
 
     public function __construct(array $routeParameters)
     {
@@ -21,7 +31,8 @@ class Entry extends AbstractController
         // for every action in this controller, the user must be logged in
         $this->ensureUserIsLoggedIn();
 
-        $this->service = new EntryService();
+        $this->entryService = new EntryService();
+        $this->categoryService = new CategoryService();
     }
 
     /**
@@ -32,7 +43,7 @@ class Entry extends AbstractController
     public function index(): void
     {
         //[$filterOne, $filterTwo, $etc] = $this->getRouteParameters();
-        $entries = $this->service->getEntries();
+        $entries = $this->entryService->getEntries();
         if ($entries !== null) {
             $this->template->setVariable('entries', $entries);
         }
@@ -51,12 +62,20 @@ class Entry extends AbstractController
     }
 
     /**
-     * Action for page that creates an entry
+     * Action for page that makes a post request to create an Entry.
      *
-     * return @void
+     * @return void
      */
     public function create(): void
     {
+        $this->createView();
+    }
+
+    public function createView(): void
+    {
+        $categories = $this->categoryService->getAllCategoriesForLoggedInUser();
+        $this->template->setVariable('categories', $categories);
+
         $this->template->render('entry/create');
     }
 
