@@ -3,13 +3,16 @@
 namespace App\Database\Model;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\Index;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 
 /**
  * This model class represents a single database record from the `users` table.
  *
  * @ORM\Entity
- * @ORM\Table(name="users",indexes={@Index(name="search_username_emailaddress", columns={"username","emailAddress"})})
+ * @ORM\Table(name="users", uniqueConstraints={
+ *     @UniqueConstraint(name="unique_username",columns={"username"}),
+ *     @UniqueConstraint(name="unique_email",columns={"emailAddress"})
+ * })
  */
 class User extends AbstractModel
 {
@@ -34,7 +37,7 @@ class User extends AbstractModel
     protected string $password;
 
     /**
-     * @ORM\Column(type="string", unique=true)
+     * @ORM\Column(type="string")
      */
     protected string $emailAddress;
 

@@ -3,7 +3,7 @@
 namespace App\Database\Model;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\Index;
+use Doctrine\ORM\Mapping\UniqueConstraint;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 
@@ -11,7 +11,9 @@ use Doctrine\ORM\Mapping\ManyToOne;
  * This model class represents a single database record from the `categories` table.
  *
  * @ORM\Entity
- * @ORM\Table(name="categories",indexes={@Index(name="search_by_userid", columns={"userId"})})
+ * @ORM\Table(name="categories", uniqueConstraints={
+ *     @UniqueConstraint(name="unique_category_name",columns={"userId", "name"})
+ * })
  */
 class Category extends AbstractModel
 {
@@ -29,7 +31,7 @@ class Category extends AbstractModel
     protected User $referencedUser;
 
     /**
-     * @ORM\Column(type="string", unique=true)
+     * @ORM\Column(type="string")
      */
     protected string $name;
 
