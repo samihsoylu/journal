@@ -10,12 +10,14 @@ use App\Validator\CategoryValidator;
 
 class Category extends AbstractController
 {
+    // Route url constants, to keep paths consistent within multiple classes
     public const CATEGORIES_URL            = BASE_URL . '/categories';
     public const CREATE_CATEGORY_URL       = BASE_URL . '/category/create';
-    public const CREATE_CATEGORY_POST_URL  = BASE_URL . '/category/create/post';
 
-    public const UPDATE_CATEGORY_CLEAN_URL = BASE_URL . '/category/update';
-    public const UPDATE_CATEGORY_URL       = BASE_URL . '/category/update/{id:\d+}';
+    public const UPDATE_CATEGORY_URL       = BASE_URL . '/category/update';
+    public const UPDATE_CATEGORY_VIEW_URL  = BASE_URL . '/category/update/{id:\d+}';
+
+    public const CREATE_CATEGORY_POST_URL  = BASE_URL . '/category/create/post';
     public const UPDATE_CATEGORY_POST_URL  = BASE_URL . '/category/update/{id:\d+}/post';
 
     protected CategoryService $service;
@@ -30,7 +32,7 @@ class Category extends AbstractController
         $this->ensureUserIsLoggedIn();
 
         $this->service   = new CategoryService();
-        $this->validator = new CategoryValidator();
+        $this->validator = new CategoryValidator($_POST);
     }
 
     /**
@@ -67,15 +69,15 @@ class Category extends AbstractController
     }
 
     /**
-     * Action for page that creates a category
+     * Action for page that sends a post request to create a category
      *
      * @return void
      */
     public function create(): void
     {
         try {
-            // Validate provided $_POST parameters
-            $this->validator->create();
+            /** @see CategoryValidator::create() */
+            $this->validator->validate(__FUNCTION__);
 
             $title       = $_POST['category_name'];
             $description = $_POST['category_description'];
@@ -108,8 +110,8 @@ class Category extends AbstractController
     public function update(): void
     {
         try {
-            // Validate provided $_POST parameters
-            $this->validator->update();
+            /** @see CategoryValidator::update() */
+            $this->validator->validate(__FUNCTION__);
 
             $id          = $this->getRouteParameters()['id'];
             $title       = $_POST['category_name'];
@@ -121,8 +123,10 @@ class Category extends AbstractController
             // Present success message
             $this->setNotification(
                 Notification::TYPE_SUCCESS,
-                "Category '{$title}' updated"
+                "Category '{$title}' was updated"
             );
+
+            Redirect::to(self::CATEGORIES_URL);
         } catch (UserException $e) {
             $this->template->setVariable(Notification::TYPE_ERROR, $e->getMessage());
         }
