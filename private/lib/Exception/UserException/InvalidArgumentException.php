@@ -6,13 +6,18 @@ use App\Exception\UserException;
 
 class InvalidArgumentException extends UserException
 {
-    public function __construct($message = "", $code = 0)
+    public function __construct(string $message = "", int $code = 0)
     {
         parent::__construct($message, $code);
     }
 
-    public static function incorrectLogin($code = 406): self
+    public static function incorrectLogin(int $code = 406): self
     {
-        return new self("Username or password is incorrect", $code);
+        return new self("Username or Password is incorrect", $code);
+    }
+
+    public static function alreadyRegistered(string $fieldName, string $fieldValue, int $code = 406): self
+    {
+        return new self("User with {$fieldName} '{$fieldValue}' already exists");
     }
 }
