@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Exception\UserException\NotFoundException;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Utility\Sanitizer;
 use App\Utility\UserSession;
 use App\Exception\UserException\InvalidArgumentException;
 
@@ -19,6 +20,19 @@ class AuthenticationService
 
     public function register(string $username, string $password, string $email): void
     {
+        $username = Sanitizer::sanitizeString($username, 'trim|lowercase');
+        $email    = Sanitizer::sanitizeString($email, 'trim|lowercase');
+
+        $user = $this->repository->getByUsername($username);
+        if ($user !== null) {
+            throw InvalidArgumentException::alreadyRegistered('username', $username);
+        }
+
+        $user = $this->repository->getByEmailAddress($email);
+        if ($user !== null) {
+            throw InvalidArgumentException::alreadyRegistered('email', $email);
+        }
+
         $encryptedPassword = password_hash($password, PASSWORD_ARGON2ID);
 
         $user = new User();
@@ -33,9 +47,10 @@ class AuthenticationService
 
     public function login(string $username, string $password): void
     {
-        try {
-            $user = $this->repository->getByUsername($username);
-        } catch (NotFoundException $e) {
+        $username = Sanitizer::sanitizeString($username, 'trim|lowercase');
+
+        $user = $this->repository->getByUsername($username);
+        if ($user === null) {
             // Username was not found
             throw InvalidArgumentException::incorrectLogin();
         }
