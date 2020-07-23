@@ -9,10 +9,24 @@ abstract class AbstractValidator
 {
     protected array $post;
 
-    public function __construct()
+    public function __construct(array $postData)
     {
-        $this->post = $_POST;
+        $this->post = $postData;
     }
+
+    /**
+     * A fancy methods that runs the provided method name in this class.
+     *
+     * @param string $method
+     * @return void
+     */
+    public function validate(string $method): void
+    {
+        if (method_exists($this, $method)) {
+            $this->{$method}();
+        }
+    }
+
     /**
      * Ensure that all $requireFields exist as a key in $this->params.
      *
@@ -23,19 +37,24 @@ abstract class AbstractValidator
     {
         $fieldsFound = [];
         foreach ($this->post as $key => $value) {
+            // Map all existing fields in post to $fieldsFound based on $requiredFields
             if (in_array($key, $requiredFields, true)) {
                 $fieldsFound[] = $key;
             }
         }
 
+        // Find fields that are missing
         $missingFields = array_diff($requiredFields, $fieldsFound);
+
+        // Convert missing fields to a string
         $missingFieldsString = '';
         foreach ($missingFields as $missingField) {
             $missingFieldsString .= "{$missingField}, ";
         }
+        $missingFieldsString = rtrim($missingFieldsString, ', ');
 
         if (count($missingFields) !== 0) {
-            throw new UserException('You did not fill in all required fields: ' . rtrim($missingFieldsString, ','));
+            throw new UserException("You did not fill in all required fields: {$missingFieldsString}");
         }
     }
 
