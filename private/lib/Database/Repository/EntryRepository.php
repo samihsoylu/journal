@@ -3,6 +3,7 @@
 namespace App\Database\Repository;
 
 use App\Database\Model\Entry;
+use App\Database\Model\User;
 
 class EntryRepository extends AbstractRepository
 {
@@ -10,6 +11,15 @@ class EntryRepository extends AbstractRepository
      * @inheritdoc
      */
     protected const RESOURCE_NAME = Entry::class;
+
+    /**
+     * @return Entry[]
+     */
+    public function findByUser(User $user): array
+    {
+        return $this->db->getRepository(self::RESOURCE_NAME)
+            ->findBy(['referencedUser' => $user]);
+    }
 
     public function findByCategoryId(int $userId, int $categoryId)
     {

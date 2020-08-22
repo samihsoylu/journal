@@ -3,13 +3,12 @@
 namespace App\Database\Repository;
 
 use App\Database\Database;
-use App\Exception\UserException;
 use App\Exception\UserException\NotFoundException;
 use App\Database\Model\ModelInterface;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use \Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use \Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\TransactionRequiredException;
 
 abstract class AbstractRepository
 {
@@ -43,9 +42,7 @@ abstract class AbstractRepository
      * @param int $id
      *
      * @return object
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws \Doctrine\ORM\TransactionRequiredException
+     * @throws NotFoundException|TransactionRequiredException|OptimisticLockException|ORMException
      */
     public function getById(int $id): object
     {
@@ -95,8 +92,7 @@ abstract class AbstractRepository
      *
      * @return void
      *
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @throws ORMException|OptimisticLockException
      */
     public function save(): void
     {

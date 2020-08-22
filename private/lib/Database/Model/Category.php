@@ -26,27 +26,27 @@ class Category extends AbstractModel
 
     /**
      * @ManyToOne(targetEntity="User")
-     * @JoinColumn(name="userId", referencedColumnName="id")
+     * @JoinColumn(name="userId", referencedColumnName="id", nullable=false)
      */
     protected User $referencedUser;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable=false)
      */
     protected string $name;
 
     /**
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable=false)
      */
     protected string $description;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=false)
      */
     protected int $createdTimestamp;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=false)
      */
     protected int $lastUpdatedTimestamp;
 

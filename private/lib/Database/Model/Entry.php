@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * This model class represents a single database record from the `notes` table.
+ * This model class represents a single database record from the `entries` table.
  *
  * @ORM\Entity
  * @ORM\Table(name="entries",indexes={@Index(name="search_by_userid_categoryid_createdtimestamp", columns={"userId", "categoryId", "createdTimestamp"})})
@@ -24,56 +24,56 @@ class Entry extends AbstractModel
 
     /**
      * @ManyToOne(targetEntity="Category")
-     * @JoinColumn(name="categoryId", referencedColumnName="id")
+     * @JoinColumn(name="categoryId", referencedColumnName="id", nullable=false)
      */
-    protected int $categoryId;
+    protected Category $referencedCategory;
 
     /**
      * @ManyToOne(targetEntity="User")
-     * @JoinColumn(name="userId", referencedColumnName="id")
+     * @JoinColumn(name="userId", referencedColumnName="id", nullable=false)
      */
-    protected int $userId;
+    protected User $referencedUser;
 
     /**
-     * @ORM\Column(type="string", nullable=true)
+     * @ORM\Column(type="string", nullable=false)
      */
     protected string $title;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=false)
      */
     protected string $content;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=false)
      */
     protected int $createdTimestamp;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=false)
      */
     protected int $lastUpdatedTimestamp;
 
-    public function getCategoryId(): int
+    public function getReferencedCategory(): Category
     {
-        return $this->categoryId;
+        return $this->referencedCategory;
     }
 
-    public function setCategoryId(int $categoryId): self
+    public function setReferencedCategory(Category $referencedCategory): self
     {
-        $this->categoryId = $categoryId;
+        $this->referencedCategory = $referencedCategory;
 
         return $this;
     }
 
-    public function getUserId(): int
+    public function getReferencedUser(): User
     {
-        return $this->userId;
+        return $this->referencedUser;
     }
 
-    public function setUserId(int $userId): self
+    public function setReferencedUser(User $referencedUser): self
     {
-        $this->userId = $userId;
+        $this->referencedUser = $referencedUser;
 
         return $this;
     }
