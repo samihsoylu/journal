@@ -91,7 +91,7 @@ class Category extends AbstractController
                 "Category '{$title}' has been created"
             );
         } catch (UserException $e) {
-            $this->setNotification(Notification::TYPE_ERROR, $e->getMessage());
+            $this->userExceptionHandler($e->getMessage());
         }
 
         $this->createView();
@@ -128,7 +128,7 @@ class Category extends AbstractController
 
             Redirect::to(self::CATEGORIES_URL);
         } catch (UserException $e) {
-            $this->template->setVariable(Notification::TYPE_ERROR, $e->getMessage());
+            $this->userExceptionHandler($e->getMessage());
         }
 
         $this->updateView();

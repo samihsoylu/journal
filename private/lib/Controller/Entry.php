@@ -2,9 +2,12 @@
 
 namespace App\Controller;
 
+use App\Exception\UserException;
 use App\Service\CategoryService;
 use App\Service\EntryService;
-use App\Validator\CategoryValidator;
+use App\Utility\Notification;
+use App\Utility\Redirect;
+use App\Validator\EntryValidator;
 
 class Entry extends AbstractController
 {
@@ -24,6 +27,8 @@ class Entry extends AbstractController
 
     protected CategoryService $categoryService;
 
+    protected EntryValidator $validator;
+
     public function __construct(array $routeParameters)
     {
         parent::__construct($routeParameters);
@@ -33,6 +38,7 @@ class Entry extends AbstractController
 
         $this->entryService = new EntryService();
         $this->categoryService = new CategoryService();
+        $this->validator = new EntryValidator($_POST);
     }
 
     /**
@@ -43,8 +49,8 @@ class Entry extends AbstractController
     public function index(): void
     {
         //[$filterOne, $filterTwo, $etc] = $this->getRouteParameters();
-        $entries = $this->entryService->getEntries();
-        if ($entries !== null) {
+        $entries = $this->entryService->getAllEntriesForUser();
+        if (count($entries) > 0) {
             $this->template->setVariable('entries', $entries);
         }
 
@@ -68,6 +74,26 @@ class Entry extends AbstractController
      */
     public function create(): void
     {
+        try {
+            /** @see EntryValidator::create() */
+            $this->validator->validate(__FUNCTION__);
+
+            $categoryId = $_POST['category_id'];
+            $title      = $_POST['entry_title'];
+            $content    = $_POST['entry_content'];
+
+            // Create a new entry
+            $this->entryService->createEntry($categoryId, $title, $content);
+
+            // Present success message
+            $this->setNotification(Notification::TYPE_SUCCESS, "Entry {$title} has been created");
+
+            Redirect::to(self::ENTRIES_URL);
+        } catch (UserException $e) {
+            $this->template->setVariable('post', $_POST);
+            $this->userExceptionHandler($e->getMessage());
+        }
+
         $this->createView();
     }
 

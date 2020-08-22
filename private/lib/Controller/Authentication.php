@@ -55,10 +55,7 @@ class Authentication extends AbstractController
                 'Registration successful'
             );
         } catch (UserException $e) {
-            $this->setNotification(
-                Notification::TYPE_ERROR,
-                $e->getMessage()
-            );
+            $this->userExceptionHandler($e->getMessage());
         }
 
         $this->registerView();
@@ -87,10 +84,7 @@ class Authentication extends AbstractController
 
             Redirect::to(Welcome::DASHBOARD_URL);
         } catch (UserException $e) {
-            $this->setNotification(
-                Notification::TYPE_ERROR,
-                $e->getMessage()
-            );
+            $this->userExceptionHandler($e->getMessage());
         }
 
         $this->loginView();

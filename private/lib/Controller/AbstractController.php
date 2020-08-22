@@ -142,4 +142,12 @@ abstract class AbstractController
     {
         $this->notification->set($notificationType, $notificationMessage);
     }
+
+    protected function userExceptionHandler($exceptionMessage): void
+    {
+        $this->template->setVariable(
+            Notification::TYPE_ERROR,
+            $exceptionMessage
+        );
+    }
 }
