@@ -18,7 +18,8 @@
                         <label for="category_description">Category description</label>
                     </div>
                     <div>
-                        <button class="btn btn-primary fullwidth" type="submit"><i class="material-icons">save</i> Save</button>
+                        <button class="btn btn-default" type="button" onclick="window.location.href='{{ $categories_url }}';"><i class="material-icons">keyboard_arrow_left</i> Cancel</button>
+                        <button class="btn btn-primary" type="submit"><i class="material-icons">save</i> Save</button>
                     </div>
                 </form>
                 @endisset

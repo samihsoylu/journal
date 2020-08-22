@@ -9,6 +9,9 @@ use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException;
 use App\Utility\UserSession;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\TransactionRequiredException;
 
 class CategoryService
 {
@@ -63,7 +66,7 @@ class CategoryService
     {
         /** @var Category $category */
         $category = $this->categoryRepository->getById($id);
-        $this->ensureCategoryBelongsToUser($category);
+        $this->ensureUserOwnsCategory($category);
 
         $category->setName($categoryName);
         $category->setDescription($categoryDescription);
@@ -76,20 +79,18 @@ class CategoryService
      * Deletes an existing category
      *
      * @param int $id
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Doctrine\ORM\TransactionRequiredException
+     * @throws NotFoundException|TransactionRequiredException|OptimisticLockException|ORMException
      */
     public function deleteCategory(int $id): void
     {
         /** @var Category $category */
         $category = $this->categoryRepository->getById($id);
-        $this->ensureCategoryBelongsToUser($category);
+        $this->ensureUserOwnsCategory($category);
 
         $this->categoryRepository->remove($category);
     }
 
-    protected function ensureCategoryBelongsToUser(Category $category): void
+    public function ensureUserOwnsCategory(Category $category): void
     {
         $session = UserSession::load();
         if ($category->getReferencedUser()->getId() !== $session->getUserId()) {

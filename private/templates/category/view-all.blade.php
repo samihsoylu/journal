@@ -14,7 +14,7 @@
         <div class="row row-align">
             <div class="col s12">
             @foreach ($categories as $category)
-                <a href="{{ $update_category_clean_url }}/{{ $category->getId() }}">
+                <a href="{{ $update_category_url }}/{{ $category->getId() }}">
                     <div class="card">
                         <div class="card-content">
                             <span class="card-title">{{ $category->getName() }}</span>

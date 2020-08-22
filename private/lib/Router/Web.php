@@ -6,9 +6,8 @@ use App\Controller\Entry;
 use App\Controller\Welcome;
 
 /**  @var FastRoute\RouteCollector $route */
-
 // Welcome
-$route->addRoute('GET', BASE_URL . '/', 'Welcome@index');
+$route->addRoute('GET', BASE_URL, 'Welcome@index');
 $route->addRoute('GET', Welcome::DASHBOARD_URL, 'Welcome@dashboard');
 
 // Authentication
@@ -20,7 +19,8 @@ $route->addRoute('GET', Authentication::LOGOUT_URL, 'Authentication@logout');
 
 // Entries
 $route->addRoute('GET', Entry::ENTRIES_URL, 'Entry@index');
-$route->addRoute(['GET', 'POST'], Entry::CREATE_ENTRY_URL, 'Entry@create');
+$route->addRoute('GET', Entry::CREATE_ENTRY_URL, 'Entry@createView');
+$route->addRoute(['POST', 'GET'], Entry::CREATE_ENTRY_POST_URL, 'Entry@create');
 
 // Categories
 $route->addRoute('GET', Category::CREATE_CATEGORY_URL, 'Category@createView');

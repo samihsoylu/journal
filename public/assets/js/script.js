@@ -19,4 +19,8 @@ $( document ).ready(function() {
     $('.datepicker').datepicker();
 
     $('.modal').modal();
+
+    $(".corner-alert").click(function(){
+        $(".corner-alert").hide();
+    });
 });

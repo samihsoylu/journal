@@ -12,7 +12,7 @@ class Sanitizer
      * given options.
      *
      * @param string $value
-     * @param string $options sanitizing options separated by '|'
+     * @param string $options Sanitizing options separate with '|'. Options: trim, capitalize, lowercase
      * @return string
      */
     public static function sanitizeString(string $value, string $options): string

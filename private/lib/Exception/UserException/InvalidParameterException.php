@@ -26,8 +26,13 @@ class InvalidParameterException extends UserException
         return new self("The provided field '{$fieldName}' must be at least '{$minChars}' characters long", $code);
     }
 
-    public static function invalidEmail(string $fieldName, int $code = 406): self
+    public static function invalidFieldValue(string $fieldName, int $code = 406): self
     {
-        return new self ("The provided value in field {$fieldName} is invalid");
+        return new self("The provided value in field {$fieldName} is invalid");
+    }
+
+    public static function missingField(string $fieldName, int $code = 406): self
+    {
+        return new self("Field {$fieldName} is required");
     }
 }

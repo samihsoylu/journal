@@ -31,9 +31,9 @@ abstract class AbstractValidator
      * Ensure that all $requireFields exist as a key in $this->params.
      *
      * @param array $requiredFields
-     * @throws UserException
+     * @throws InvalidParameterException
      */
-    protected function ensureRequiredFieldsAreProvided(array $requiredFields): void
+    protected function ensureFieldsAreNotMissing(array $requiredFields): void
     {
         $fieldsFound = [];
         foreach ($this->post as $key => $value) {
@@ -54,7 +54,7 @@ abstract class AbstractValidator
         $missingFieldsString = rtrim($missingFieldsString, ', ');
 
         if (count($missingFields) !== 0) {
-            throw new UserException("You did not fill in all required fields: {$missingFieldsString}");
+            throw InvalidParameterException::missingField($missingFieldsString);
         }
     }
 
@@ -91,7 +91,7 @@ abstract class AbstractValidator
         $email = $this->post[$fieldName];
 
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw InvalidParameterException::invalidEmail($fieldName);
+            throw InvalidParameterException::invalidFieldValue($fieldName);
         }
     }
 }
