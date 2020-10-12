@@ -95,7 +95,7 @@ class Entry extends AbstractController
         $this->validator->validate(__FUNCTION__);
 
         $categoryId = $_POST['category_id'];
-        $title      = Sanitizer::sanitizeString($_POST['entry_title'], 'basics|capitalize');
+        $title      = Sanitizer::sanitizeString($_POST['entry_title'], 'strip|capitalize');
         $content    = Sanitizer::sanitizeString($_POST['entry_content'], 'htmlspecialchars');
 
         // Create a new entry
@@ -147,6 +147,7 @@ class Entry extends AbstractController
             $categories = $this->categoryService->getAllCategoriesForLoggedInUser();
             $entry = $this->entryService->findEntryById($entryId);
             //$entry->getTitle()
+            // @todo save to db
 
             $this->template->setVariables([
                 'entry' => $entry,

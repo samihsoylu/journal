@@ -36,7 +36,7 @@ class Sanitizer
                 case 'htmlspecialchars':
                     $value = htmlspecialchars($value);
                     break;
-                case 'basics':
+                case 'strip':
                     $value = strtolower($value);
                     $value = trim($value);
                     $value = htmlspecialchars($value);
