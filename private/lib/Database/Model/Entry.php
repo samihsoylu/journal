@@ -95,6 +95,14 @@ class Entry extends AbstractModel
         return $this->content;
     }
 
+    public function getContentAsMarkup(): string
+    {
+        $parser = new \Parsedown();
+        $parser->setSafeMode(true);
+
+        return $parser->text($this->getContent());
+    }
+
     public function setContent(string $content): self
     {
         $this->content = $content;

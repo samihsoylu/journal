@@ -37,7 +37,7 @@ abstract class AbstractRepository
     }
 
     /**
-     * Retrieves a single row from a table by the provided record id, and returns it as a Models object.
+     * Retrieves a single row from a table by the provided record id, and return found record as a Model.
      *
      * @param int $id
      *
@@ -50,7 +50,9 @@ abstract class AbstractRepository
         $resource  = $this->db->find($modelName, $id);
 
         if (!$resource) {
-            throw NotFoundException::entityIdNotFound($modelName, $id);
+            $className = last(explode('\\', static::RESOURCE_NAME));
+
+            throw NotFoundException::entityIdNotFound($className, $id);
         }
 
         return $resource;

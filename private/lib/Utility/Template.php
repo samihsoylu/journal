@@ -33,7 +33,9 @@ class Template
     {
         $this->blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH);
         $this->notification = new Notification();
-        $this->setDefaultVarList();
+
+        $this->setAllUrlConstantsToVariables();
+        $this->setDefaultVariables();
     }
 
     public static function getInstance(): self
@@ -91,7 +93,7 @@ class Template
      *
      * @return void
      */
-    private function setDefaultVarList(): void
+    private function setAllUrlConstantsToVariables(): void
     {
         $controllers = array_diff(scandir(BASE_PATH . '/private/lib/Controller'), array('..', '.'));
 
@@ -115,5 +117,40 @@ class Template
         }
 
         $this->setVariables($variableList);
+    }
+
+    /**
+     * Finds current user's active page. Used later to determine which navigation item should be set to active.
+     *
+     * @return string
+     */
+    private function getActivePage(): string
+    {
+        // Remove base url
+        $activePage = str_replace(BASE_URL, '', $_SERVER['REQUEST_URI']);
+
+        // Remove sub pages
+        $activePage = explode('/', $activePage)[1];
+
+        // Remove get request
+        $activePage = explode('?', $activePage)[0];
+
+        return $activePage;
+    }
+
+    /**
+     * Sets default variables required to render all templates
+     *
+     * @return void
+     */
+    private function setDefaultVariables(): void
+    {
+        $struct = [
+            'site_title'  => $_ENV['SITE_TITLE'],
+            'assets_url'  => ASSETS_URL,
+            'active_page' => $this->getActivePage(),
+        ];
+
+        $this->setVariables($struct);
     }
 }

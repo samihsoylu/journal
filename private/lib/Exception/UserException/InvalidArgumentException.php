@@ -20,4 +20,9 @@ class InvalidArgumentException extends UserException
     {
         return new self("User with {$fieldName} '{$fieldValue}' already exists");
     }
+
+    public static function categoryAlreadyExists(string $categoryName, int $code = 406): self
+    {
+        return new self("The category with name '{$categoryName}' already exists");
+    }
 }

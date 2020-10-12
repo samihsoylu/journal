@@ -4,12 +4,10 @@ $( document ).ready(function() {
     $(".dropdown-trigger").dropdown();
 
     // Forms: select field
-    $('select').formSelect();
+    $('form select').formSelect();
 
     // General site heading
     $('.parallax').parallax();
-
-    //M.toast({html: 'Password incorrect'});
 
     // ----- View all entries page -----
     /** $('form#filters select').on('change', function(){

@@ -12,7 +12,7 @@ class Sanitizer
      * given options.
      *
      * @param string $value
-     * @param string $options Sanitizing options separate with '|'. Options: trim, capitalize, lowercase
+     * @param string $options Sanitizing options separate with '|'. Options: trim, capitalize, lowercase, htmlspecialchars
      * @return string
      */
     public static function sanitizeString(string $value, string $options): string
@@ -32,6 +32,14 @@ class Sanitizer
                     break;
                 case 'trim':
                     $value = trim($value);
+                    break;
+                case 'htmlspecialchars':
+                    $value = htmlspecialchars($value);
+                    break;
+                case 'basics':
+                    $value = strtolower($value);
+                    $value = trim($value);
+                    $value = htmlspecialchars($value);
                     break;
             }
         }

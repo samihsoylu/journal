@@ -21,12 +21,25 @@ class EntryRepository extends AbstractRepository
             ->findBy(['referencedUser' => $user]);
     }
 
-    public function findByCategoryId(int $userId, int $categoryId)
+    /**
+     * @return Entry[]
+     */
+    public function findByUserIdAndCategoryId(int $userId, int $categoryId): array
     {
+        $queryBuilder = $this->db->createQueryBuilder();
+
+        $queryBuilder->select('e')
+            ->from(self::RESOURCE_NAME, 'e')
+            ->where('e.referencedCategory = :categoryId AND e.referencedUser = :userId')
+            ->setParameter('categoryId', $categoryId)
+            ->setParameter('userId', $userId);
+
+        return $queryBuilder->getQuery()->getResult();
     }
 
-    public function findByTimeframe(int $userId, int $startTime, int $endTime)
+    public function findByUserIdStartTimeAndEndTime(int $userId, int $startTime, int $endTime)
     {
+        throw new \RuntimeException('Method not implemented');
     }
 
     public function findByCategoryAndTimeFrame(

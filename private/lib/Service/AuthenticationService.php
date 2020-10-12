@@ -2,12 +2,11 @@
 
 namespace App\Service;
 
-use App\Exception\UserException\NotFoundException;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
-use App\Utility\Sanitizer;
 use App\Utility\UserSession;
 use App\Exception\UserException\InvalidArgumentException;
+use Doctrine\ORM\ORMException;
 
 class AuthenticationService
 {
@@ -20,9 +19,6 @@ class AuthenticationService
 
     public function register(string $username, string $password, string $email): void
     {
-        $username = Sanitizer::sanitizeString($username, 'trim|lowercase');
-        $email    = Sanitizer::sanitizeString($email, 'trim|lowercase');
-
         $user = $this->repository->getByUsername($username);
         if ($user !== null) {
             throw InvalidArgumentException::alreadyRegistered('username', $username);
@@ -47,16 +43,9 @@ class AuthenticationService
 
     public function login(string $username, string $password): void
     {
-        $username = Sanitizer::sanitizeString($username, 'trim|lowercase');
-
         $user = $this->repository->getByUsername($username);
-        if ($user === null) {
-            // Username was not found
-            throw InvalidArgumentException::incorrectLogin();
-        }
-
-        if (!password_verify($password, $user->getPassword())) {
-            // Password is incorrect
+        if ($user === null || !password_verify($password, $user->getPassword())) {
+            // Username or password is incorrect
             throw InvalidArgumentException::incorrectLogin();
         }
 
@@ -72,13 +61,7 @@ class AuthenticationService
         UserSession::destroy();
     }
 
-    /**
-     * Checks to see if the user sessionId is stored in the system cache. Gives a response `true` if the user session
-     * cache file exists, meaning the user is logged in. False otherwise.
-     *
-     * @return bool
-     */
-    public function isUserLoggedIn(): bool
+    public function userIsLoggedIn(): bool
     {
         $session = UserSession::load();
         return !($session === null);
@@ -88,7 +71,7 @@ class AuthenticationService
      * Check if the current logged in user has a specific privilege level. Responds with `true` if the required level
      * is a match.
      *
-     * @param int $requiredPrivilegeLevel
+     * @param int $requiredPrivilegeLevel User::PRIVILEGE_LEVEL_USER | User::PRIVILEGE_LEVEL_ADMIN
      * @return bool
      */
     public function userHasPrivilege(int $requiredPrivilegeLevel): bool

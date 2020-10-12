@@ -2,20 +2,20 @@
 
 namespace App\Controller;
 
-use App\Exception\UserException;
 use App\Service\AuthenticationService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
+use App\Utility\Sanitizer;
 use App\Validator\AuthenticationValidator;
 
 class Authentication extends AbstractController
 {
     // Route url constants, to keep paths consistent within multiple classes
-    public const LOGIN_URL         = BASE_URL . '/auth/login';
-    public const LOGIN_POST_URL    = BASE_URL . '/auth/login/post';
-    public const REGISTER_URL      = BASE_URL . '/auth/register';
-    public const REGISTER_POST_URL = BASE_URL . '/auth/register/post';
-    public const LOGOUT_URL        = BASE_URL . '/auth/logout';
+    public const LOGIN_URL         = BASE_URL . '/login';
+    public const LOGIN_POST_URL    = self::LOGIN_URL . '/action';
+    public const REGISTER_URL      = BASE_URL . '/register';
+    public const REGISTER_POST_URL = self::REGISTER_URL . '/action';
+    public const LOGOUT_URL        = BASE_URL . '/logout';
 
     private AuthenticationService $service;
     private AuthenticationValidator $validator;
@@ -30,6 +30,7 @@ class Authentication extends AbstractController
 
     /**
      * Action for post request when registration is submitted in /auth/register
+     * Url: /auth/register/action
      *
      * @return void
      */
@@ -38,25 +39,25 @@ class Authentication extends AbstractController
         // Registration is not open, administrators can only create user accounts
         //$this->ensureUserHasAdminRights();
 
-        try {
-            /** @see AuthenticationValidator::register() */
-            $this->validator->validate(__FUNCTION__);
+        /** @see AuthenticationValidator::register() */
+        $this->validator->validate(__FUNCTION__);
 
-            // Register the user
-            $this->service->register(
-                $_POST['username'],
-                $_POST['password'],
-                $_POST['email']
-            );
+        $username = Sanitizer::sanitizeString($_POST['username'], 'trim|lowercase');
+        $email    = Sanitizer::sanitizeString($_POST['email'], 'trim|lowercase');
+        $password = $_POST['password'];
 
-            // Present success message
-            $this->setNotification(
-                Notification::TYPE_SUCCESS,
-                'Registration successful'
-            );
-        } catch (UserException $e) {
-            $this->userExceptionHandler($e->getMessage());
-        }
+        // Register the user
+        $this->service->register(
+            $username,
+            $password,
+            $email
+        );
+
+        // Present success message
+        $this->setNotification(
+            Notification::TYPE_SUCCESS,
+            'Registration successful'
+        );
 
         $this->registerView();
     }
@@ -68,31 +69,29 @@ class Authentication extends AbstractController
 
     /**
      * Action for post request when login details are submitted on /auth/login
+     * Url: /auth/login/action
      *
      * @return void
      */
     public function login(): void
     {
-        $this->ensureUserIsNotLoggedIn();
+        $this->redirectLoggedInUsersToDashboard();
 
-        try {
-            /** @see AuthenticationValidator::login() */
-            $this->validator->validate(__FUNCTION__);
+        /** @see AuthenticationValidator::login() */
+        $this->validator->validate(__FUNCTION__);
 
-            // Log the user in
-            $this->service->login($_POST['username'], $_POST['password']);
+        $username = Sanitizer::sanitizeString($_POST['username'], 'trim|lowercase');
+        $password = $_POST['password'];
 
-            Redirect::to(Welcome::DASHBOARD_URL);
-        } catch (UserException $e) {
-            $this->userExceptionHandler($e->getMessage());
-        }
+        // Log the user in
+        $this->service->login($username, $password);
 
-        $this->loginView();
+        Redirect::to(Welcome::DASHBOARD_URL);
     }
 
     public function loginView(): void
     {
-        $this->ensureUserIsNotLoggedIn();
+        $this->redirectLoggedInUsersToDashboard();
 
         $this->template->render('authenticate/login');
     }
@@ -107,6 +106,7 @@ class Authentication extends AbstractController
         $this->service->logout();
 
         $this->setNotification(Notification::TYPE_INFO, 'You have been logged out');
+
         Redirect::to(self::LOGIN_URL);
     }
 }

@@ -2,6 +2,9 @@
 
 namespace App;
 
+use App\Controller\AbstractController;
+use App\Exception\UserException;
+use App\Utility\ExceptionHandler;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
@@ -55,23 +58,29 @@ class Router
                 if (strpos($handler, '@') === false) {
                     throw new \RuntimeException('Controller and method name was not provided');
                 }
-                [$className, $method] = explode('@', $handler);
+                [$className, $methodName] = explode('@', $handler);
 
                 // Path to all controllers, concatenates with class name
                 $fullClassPath = "\\App\\Controller\\{$className}";
                 if (!class_exists($fullClassPath)) {
-                    throw new \RuntimeException("Class ${fullClassPath} does not exist");
+                    throw new \RuntimeException("Controller class {$className} does not exist");
                 }
 
-                // Creates controller instance
+                // Creates controller instance, and ensures provided methodName exists
                 $controller = new $fullClassPath($routeParameters);
-                if (!method_exists($controller, $method)) {
-                    throw new \RuntimeException("Method {$method} was not found in class {$fullClassPath}");
+                if (!method_exists($controller, $methodName)) {
+                    throw new \RuntimeException("Method {$methodName} was not found in class {$className}");
                 }
 
-                // Executes the method
-                $controller->{$method}();
+                try {
+                    $controller->{$methodName}();
+                } catch (UserException $e) {
+                    ExceptionHandler::userException($e->getMessage(), $controller, $methodName);
+                } catch (\Exception $e) {
+                    ExceptionHandler::genericException($e);
+                }
+
                 break;
-        }
+        } // end of switch
     }
 }

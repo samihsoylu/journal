@@ -18,6 +18,6 @@ class NotFoundException extends UserException
 
     public static function entityIdNotFound(string $entityTitle, int $entityId, int $code = 404): self
     {
-        return new self("{$entityTitle} with id={$entityId} was not found", $code);
+        return new self("{$entityTitle} with id '{$entityId}' was not found", $code);
     }
 }

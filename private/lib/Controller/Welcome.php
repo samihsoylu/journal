@@ -14,7 +14,7 @@ class Welcome extends AbstractController
 
     public function dashboard(): void
     {
-        $this->ensureUserIsLoggedIn();
+        $this->redirectLoggedOutUsersToLoginPage();
         $this->template->render('dashboard');
     }
 }

@@ -4,6 +4,7 @@ namespace App\Utility;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Exception\UserException\NotFoundException;
 use Symfony\Component\Cache\CacheItem;
 
 /**
@@ -204,16 +205,13 @@ class UserSession
 
     public static function getUserObject(): User
     {
-        $session = self::load();
+        $session    = self::load();
         if ($session === null) {
-            throw new \RuntimeException('User is not logged in');
+            throw new \RuntimeException('Session does not exist');
         }
 
         $repository = new UserRepository();
 
-        /** @var User $user */
-        $user = $repository->getById($session->getUserId());
-
-        return $user;
+        return $repository->getById($session->getUserId());
     }
 }

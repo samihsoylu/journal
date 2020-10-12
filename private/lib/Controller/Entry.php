@@ -7,21 +7,22 @@ use App\Service\CategoryService;
 use App\Service\EntryService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
+use App\Utility\Sanitizer;
 use App\Validator\EntryValidator;
 
 class Entry extends AbstractController
 {
     public const ENTRIES_URL      = BASE_URL . '/entries';
     public const ENTRY_URL        = BASE_URL . '/entry';
-    public const CREATE_ENTRY_URL = BASE_URL . '/entry/create';
-    public const UPDATE_ENTRY_URL = BASE_URL . '/entry/update';
-    public const DELETE_ENTRY_URL = BASE_URL . '/entry/delete';
 
-    public const UPDATE_ENTRY_VIEW_URL = BASE_URL . '/entry/update/{id:\d+}';
+    public const CREATE_ENTRY_URL = self::ENTRY_URL . '/create';
 
-    public const CREATE_ENTRY_POST_URL = BASE_URL . '/entry/create/post';
-    public const UPDATE_ENTRY_POST_URL = BASE_URL . '/entry/update/{id:\d+}/post';
-    public const DELETE_ENTRY_POST_URL = BASE_URL . '/entry/delete/{id:\d+}';
+    public const READ_ENTRY_URL   = self::ENTRY_URL . '/{id:\d+}';
+    public const UPDATE_ENTRY_URL = self::READ_ENTRY_URL . '/update';
+    public const DELETE_ENTRY_URL = self::READ_ENTRY_URL . '/delete';
+
+    public const CREATE_ENTRY_POST_URL = self::CREATE_ENTRY_URL . '/action';
+    public const UPDATE_ENTRY_POST_URL = self::UPDATE_ENTRY_URL . '/action';
 
     protected EntryService $entryService;
 
@@ -34,7 +35,7 @@ class Entry extends AbstractController
         parent::__construct($routeParameters);
 
         // for every action in this controller, the user must be logged in
-        $this->ensureUserIsLoggedIn();
+        $this->redirectLoggedOutUsersToLoginPage();
 
         $this->entryService = new EntryService();
         $this->categoryService = new CategoryService();
@@ -42,7 +43,8 @@ class Entry extends AbstractController
     }
 
     /**
-     * Action for page that lists all entries
+     * View, displays all entries in the system associated with the logged in user
+     * Url: /entries/
      *
      * @return void
      */
@@ -58,45 +60,59 @@ class Entry extends AbstractController
     }
 
     /**
-     * Action for page that shows a selected entry
+     * View, displays a specific entry by the provided id in the url
+     * Url: /entry/{id}
      *
      * @return void
      */
     public function read(): void
     {
+        $entryId = $this->getRouteParameters()['id'];
+
+        try {
+            $entry = $this->entryService->findEntryById($entryId);
+
+            $this->template->setVariable('entry', $entry);
+        } catch (UserException $e) {
+            $this->template->setVariable(
+                Notification::TYPE_ERROR,
+                $e->getMessage()
+            );
+        }
+
         $this->template->render('entry/view');
     }
 
     /**
-     * Action for page that makes a post request to create an Entry.
+     * Post Action to create a new entry
+     * Url: /entry/create/post
      *
      * @return void
      */
     public function create(): void
     {
-        try {
-            /** @see EntryValidator::create() */
-            $this->validator->validate(__FUNCTION__);
+        /** @see EntryValidator::create() */
+        $this->validator->validate(__FUNCTION__);
 
-            $categoryId = $_POST['category_id'];
-            $title      = $_POST['entry_title'];
-            $content    = $_POST['entry_content'];
+        $categoryId = $_POST['category_id'];
+        $title      = Sanitizer::sanitizeString($_POST['entry_title'], 'basics|capitalize');
+        $content    = Sanitizer::sanitizeString($_POST['entry_content'], 'htmlspecialchars');
 
-            // Create a new entry
-            $this->entryService->createEntry($categoryId, $title, $content);
+        // Create a new entry
+        $this->entryService->createEntry($categoryId, $title, $content);
 
-            // Present success message
-            $this->setNotification(Notification::TYPE_SUCCESS, "Entry {$title} has been created");
+        // Present success message
+        $this->setNotification(Notification::TYPE_SUCCESS, "Entry {$title} has been created");
 
-            Redirect::to(self::ENTRIES_URL);
-        } catch (UserException $e) {
-            $this->template->setVariable('post', $_POST);
-            $this->userExceptionHandler($e->getMessage());
-        }
-
-        $this->createView();
+        Redirect::to(self::ENTRIES_URL);
     }
 
+    /**
+     * View, displays create an entry form
+     * Url: /entry/create
+     *
+     * @return void
+     */
     public function createView(): void
     {
         $categories = $this->categoryService->getAllCategoriesForLoggedInUser();
@@ -106,12 +122,43 @@ class Entry extends AbstractController
     }
 
     /**
-     * Action for updating an existing entry
-     *
-     * @return void
+     * Url: /entry/{id}/update/post
      */
     public function update(): void
     {
+        /** @see EntryValidator::update() */
+        $this->validator->validate(__FUNCTION__);
+
+        $this->template->setVariable('post', $_POST);
+        $this->updateView();
+    }
+
+    /**
+     * View for updating an existing entry
+     * Url: /entry/{id}/update
+     *
+     * @return void
+     */
+    public function updateView(): void
+    {
+        $entryId = $this->getRouteParameters()['id'];
+
+        try {
+            $categories = $this->categoryService->getAllCategoriesForLoggedInUser();
+            $entry = $this->entryService->findEntryById($entryId);
+            //$entry->getTitle()
+
+            $this->template->setVariables([
+                'entry' => $entry,
+                'categories' => $categories,
+            ]);
+        } catch (UserException $e) {
+            $this->template->setVariable(
+                Notification::TYPE_ERROR,
+                $e->getMessage()
+            );
+        }
+
         $this->template->render('entry/update');
     }
 
@@ -122,6 +169,22 @@ class Entry extends AbstractController
      */
     public function delete(): void
     {
-        // @todo remove an entry
+        $entryId = $this->getRouteParameters()['id'];
+
+        $this->entryService->deleteEntry($entryId);
+
+        $this->deleteView();
+    }
+
+    /**
+     * Redirects user to entries page, this is in its own method because when an error is triggered in the delete()
+     * method then the error handler will load this view method, which in turn will load the entries page and then
+     * display a nice error.
+     *
+     * @return void
+     */
+    public function deleteView(): void
+    {
+        Redirect::to(self::ENTRIES_URL);
     }
 }

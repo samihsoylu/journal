@@ -8,7 +8,7 @@
         <div class="row row-align button-row">
             <div class="col s12 m10 l7 offset-m1 offset-l2">
                 @isset($category)
-                <form method="post" action="{{ $update_category_url }}/{{ $category->getId() }}/post">
+                <form method="post" action="{{ $category_url }}/{{ $category->getId() }}/update/action">
                     <div class="input-field">
                         <input id="category_title" name="category_name" type="text" class="validate" value="{{ $category->getName() }}" required />
                         <label for="category_title">Category title</label>
@@ -18,7 +18,8 @@
                         <label for="category_description">Category description</label>
                     </div>
                     <div>
-                        <button class="btn btn-default" type="button" onclick="window.location.href='{{ $categories_url }}';"><i class="material-icons">keyboard_arrow_left</i> Cancel</button>
+                        <button class="btn btn-default" type="button" onclick="window.location.href='{{ $categories_url }}';"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
+                        <button class="btn btn-danger" type="button" onclick="if (!confirm('Warning: This action will also delete existing entries in the {{ $category->getName() }} category!')) { return false } else { window.location.href='{{ $category_url }}/{{ $category->getId() }}/delete'; }"><i class="material-icons">delete_forever</i> Delete</button>
                         <button class="btn btn-primary" type="submit"><i class="material-icons">save</i> Save</button>
                     </div>
                 </form>

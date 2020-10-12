@@ -6,19 +6,23 @@ use App\Exception\UserException;
 use App\Service\CategoryService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
+use App\Utility\Sanitizer;
 use App\Validator\CategoryValidator;
 
 class Category extends AbstractController
 {
     // Route url constants, to keep paths consistent within multiple classes
     public const CATEGORIES_URL            = BASE_URL . '/categories';
-    public const CREATE_CATEGORY_URL       = BASE_URL . '/category/create';
+    public const CATEGORY_URL              = BASE_URL . '/category';
 
-    public const UPDATE_CATEGORY_URL       = BASE_URL . '/category/update';
-    public const UPDATE_CATEGORY_VIEW_URL  = BASE_URL . '/category/update/{id:\d+}';
+    public const CREATE_CATEGORY_URL       = self::CATEGORY_URL . '/create';
+    public const CREATE_CATEGORY_POST_URL  = self::CREATE_CATEGORY_URL . '/action';
 
-    public const CREATE_CATEGORY_POST_URL  = BASE_URL . '/category/create/post';
-    public const UPDATE_CATEGORY_POST_URL  = BASE_URL . '/category/update/{id:\d+}/post';
+    public const READ_CATEGORY_URL         = self::CATEGORY_URL . '/{id:\d+}';
+    public const UPDATE_CATEGORY_URL       = self::READ_CATEGORY_URL . '/update';
+    public const UPDATE_CATEGORY_POST_URL  = self::UPDATE_CATEGORY_URL . '/action';
+
+    public const DELETE_CATEGORY_URL       = self::READ_CATEGORY_URL . '/delete';
 
     protected CategoryService $service;
 
@@ -29,72 +33,43 @@ class Category extends AbstractController
         parent::__construct($routeParameters);
 
         // for every action in this controller, the user must be logged in
-        $this->ensureUserIsLoggedIn();
+        $this->redirectLoggedOutUsersToLoginPage();
 
         $this->service   = new CategoryService();
         $this->validator = new CategoryValidator($_POST);
     }
 
     /**
-     * Action for page that lists all categories
-     *
-     * @todo implement
-     * @return void
-     */
-    public function index(): void
-    {
-//        //[$filterOne, $filterTwo, $etc] = $this->getRouteParameters();
-        $entries = $this->service->getEntries();
-
-        $this->template->setVariable('entries', $entries);
-
-        $this->template->render('category/all');
-    }
-
-    /**
-     * Action for page that shows a selected category
+     * View, displays categories related to the logged in user
+     * Url: /categories/
      *
      * @return void
      */
     public function read(): void
     {
-        // Retrieves all categories for user from the database
         $categories = $this->service->getAllCategoriesForLoggedInUser();
 
-        // Creates a variable in templating engine
         $this->template->setVariable('categories', $categories);
 
-        // Renders the template
         $this->template->render('category/view-all');
     }
 
-    /**
-     * Action for page that sends a post request to create a category
-     *
-     * @return void
-     */
     public function create(): void
     {
-        try {
-            /** @see CategoryValidator::create() */
-            $this->validator->validate(__FUNCTION__);
+        /** @see CategoryValidator::create() */
+        $this->validator->validate(__FUNCTION__);
 
-            $title       = $_POST['category_name'];
-            $description = $_POST['category_description'];
+        $title       = Sanitizer::sanitizeString($_POST['category_name'], 'general|capitalize');
+        $description = Sanitizer::sanitizeString($_POST['category_description'], 'htmlspecialchars');
 
-            // Create a new category
-            $this->service->createCategory($title, $description);
+        $this->service->createCategory($title, $description);
 
-            // Present success message
-            $this->setNotification(
-                Notification::TYPE_SUCCESS,
-                "Category '{$title}' has been created"
-            );
-        } catch (UserException $e) {
-            $this->userExceptionHandler($e->getMessage());
-        }
+        $this->setNotification(
+            Notification::TYPE_SUCCESS,
+            "Category '{$title}' has been created"
+        );
 
-        $this->createView();
+        Redirect::to(self::CATEGORIES_URL);
     }
 
     public function createView(): void
@@ -103,37 +78,36 @@ class Category extends AbstractController
     }
 
     /**
-     * Action for updating an existing category
+     * Post action for updating an existing category
+     * Url: /category/{id}/update/post
      *
      * @return void
      */
     public function update(): void
     {
-        try {
-            /** @see CategoryValidator::update() */
-            $this->validator->validate(__FUNCTION__);
+        /** @see CategoryValidator::update() */
+        $this->validator->validate(__FUNCTION__);
 
-            $id          = $this->getRouteParameters()['id'];
-            $title       = $_POST['category_name'];
-            $description = $_POST['category_description'];
+        $id          = $this->getRouteParameters()['id'];
+        $title       = Sanitizer::sanitizeString($_POST['category_name'], 'htmlspecialchars');
+        $description = Sanitizer::sanitizeString($_POST['category_description'], 'htmlspecialchars');
 
-            // Update category
-            $this->service->updateCategory($id, $title, $description);
+        $this->service->updateCategory($id, $title, $description);
 
-            // Present success message
-            $this->setNotification(
-                Notification::TYPE_SUCCESS,
-                "Category '{$title}' was updated"
-            );
+        $this->setNotification(
+            Notification::TYPE_SUCCESS,
+            "Category '{$title}' was updated"
+        );
 
-            Redirect::to(self::CATEGORIES_URL);
-        } catch (UserException $e) {
-            $this->userExceptionHandler($e->getMessage());
-        }
-
-        $this->updateView();
+        Redirect::to(self::CATEGORIES_URL);
     }
 
+    /**
+     * View, displays update
+     * Url: /category/{id}/update
+     *
+     * @return void
+     */
     public function updateView(): void
     {
         $parameters = $this->getRouteParameters();
@@ -153,12 +127,24 @@ class Category extends AbstractController
     }
 
     /**
-     * Action for deleting an existing category
+     * Post action for deleting an existing category
+     * Url: /category/{id}/delete
      *
      * @return void
      */
     public function delete(): void
     {
-        // @todo delete a category
+        $id = $this->getRouteParameters()['id'];
+
+        $this->service->deleteCategoryAndAssociatedEntries($id);
+
+        $this->setNotification(Notification::TYPE_SUCCESS, 'Category was removed');
+
+        $this->deleteView();
+    }
+
+    public function deleteView(): void
+    {
+        Redirect::to(self::CATEGORIES_URL);
     }
 }

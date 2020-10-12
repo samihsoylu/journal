@@ -2,16 +2,14 @@
 
 namespace App\Service;
 
-use App\Database\Repository\UserRepository;
-use App\Exception\UserException\NotFoundException;
 use App\Database\Model\Category;
+use App\Database\Repository\EntryRepository;
+use App\Database\Repository\UserRepository;
 use App\Database\Repository\CategoryRepository;
-use App\Exception\UserException;
+use App\Exception\UserException\NotFoundException;
+use App\Exception\UserException\InvalidArgumentException;
 use App\Utility\UserSession;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Doctrine\ORM\TransactionRequiredException;
 
 class CategoryService
 {
@@ -19,10 +17,13 @@ class CategoryService
 
     protected UserRepository $userRepository;
 
+    protected EntryRepository $entryRepository;
+
     public function __construct()
     {
         $this->categoryRepository = new CategoryRepository();
         $this->userRepository = new UserRepository();
+        $this->entryRepository = new EntryRepository();
     }
 
     public function getCategoryById(int $categoryId): Category
@@ -50,18 +51,10 @@ class CategoryService
         try {
             $this->categoryRepository->save();
         } catch (UniqueConstraintViolationException $e) {
-            throw new UserException("The category with title '{$categoryTitle}' already exists");
+            throw InvalidArgumentException::categoryAlreadyExists($categoryTitle);
         }
     }
 
-    /**
-     * Updates an existing category
-     *
-     * @param int $id
-     * @param string $categoryName
-     * @param string $categoryDescription
-     * @throws UserException
-     */
     public function updateCategory(int $id, string $categoryName, string $categoryDescription): void
     {
         /** @var Category $category */
@@ -75,19 +68,24 @@ class CategoryService
         $this->categoryRepository->save();
     }
 
-    /**
-     * Deletes an existing category
-     *
-     * @param int $id
-     * @throws NotFoundException|TransactionRequiredException|OptimisticLockException|ORMException
-     */
-    public function deleteCategory(int $id): void
+    public function deleteCategoryAndAssociatedEntries(int $categoryId): void
     {
         /** @var Category $category */
-        $category = $this->categoryRepository->getById($id);
+        $category = $this->categoryRepository->getById($categoryId);
+        $userId   = $category->getReferencedUser()->getId();
+
         $this->ensureUserOwnsCategory($category);
 
+        // delete associated entries
+        $entries = $this->entryRepository->findByUserIdAndCategoryId($userId, $categoryId);
+        foreach ($entries as $entry) {
+            $this->entryRepository->remove($entry);
+        }
+        $this->entryRepository->save();
+
+        // delete category
         $this->categoryRepository->remove($category);
+        $this->categoryRepository->save();
     }
 
     public function ensureUserOwnsCategory(Category $category): void

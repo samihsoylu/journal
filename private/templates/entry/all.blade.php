@@ -124,7 +124,7 @@
                             <div class="card">
                                 <div class="card-content">
                                     <span class="card-title">{{ $entry->getTitle() }}</span>
-                                    <p>{{ $entry->getCreatedTimestamp() }}</p>
+                                    <p>{{ $entry->getCreatedTimestampFormatted() }}</p>
                                 </div>
                             </div>
                         </a>

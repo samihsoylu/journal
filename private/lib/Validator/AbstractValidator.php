@@ -33,7 +33,7 @@ abstract class AbstractValidator
      * @param array $requiredFields
      * @throws InvalidParameterException
      */
-    protected function ensureFieldsAreNotMissing(array $requiredFields): void
+    protected function ensureRequiredFieldsAreProvided(array $requiredFields): void
     {
         $fieldsFound = [];
         foreach ($this->post as $key => $value) {
