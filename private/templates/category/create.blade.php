@@ -1,6 +1,6 @@
 @extends('base')
 
-@section('pageTitle', 'Create an entry')
+@section('pageTitle', 'Create category')
 
 @section('content')
     @include('components/header')

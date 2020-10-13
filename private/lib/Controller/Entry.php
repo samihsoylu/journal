@@ -94,17 +94,15 @@ class Entry extends AbstractController
         /** @see EntryValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $categoryId = $_POST['category_id'];
-        $title      = Sanitizer::sanitizeString($_POST['entry_title'], 'strip|capitalize');
-        $content    = Sanitizer::sanitizeString($_POST['entry_content'], 'htmlspecialchars');
+        $categoryId   = $_POST['category_id'];
+        $entryTitle   = Sanitizer::sanitizeString($_POST['entry_title'], 'strip|capitalize');
+        $entryContent = Sanitizer::sanitizeString($_POST['entry_content'], 'htmlspecialchars');
 
-        // Create a new entry
-        $this->entryService->createEntry($categoryId, $title, $content);
+        $entryId = $this->entryService->createEntry($categoryId, $entryTitle, $entryContent);
 
-        // Present success message
-        $this->setNotification(Notification::TYPE_SUCCESS, "Entry {$title} has been created");
+        $this->setNotification(Notification::TYPE_SUCCESS, "Entry {$entryTitle} has been created");
 
-        Redirect::to(self::ENTRIES_URL);
+        Redirect::to(self::ENTRY_URL . "/{$entryId}");
     }
 
     /**
@@ -123,14 +121,29 @@ class Entry extends AbstractController
 
     /**
      * Url: /entry/{id}/update/post
+     *
+     * @return void
      */
     public function update(): void
     {
+        $this->template->setVariable('post', $_POST);
+
         /** @see EntryValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
-        $this->template->setVariable('post', $_POST);
-        $this->updateView();
+        $entryId      = $this->getRouteParameters()['id'];
+        $categoryId   = $_POST['category_id'];
+        $entryTitle   = Sanitizer::sanitizeString($_POST['entry_title'], 'strip|capitalize');
+        $entryContent = Sanitizer::sanitizeString($_POST['entry_content'], 'htmlspecialchars');
+
+        $this->entryService->updateEntry($entryId, $categoryId, $entryTitle, $entryContent);
+
+        $this->setNotification(
+            Notification::TYPE_SUCCESS,
+            "Entry {$entryTitle} has been updated"
+        );
+
+        Redirect::to(self::ENTRY_URL . "/{$entryId}/");
     }
 
     /**
@@ -146,8 +159,6 @@ class Entry extends AbstractController
         try {
             $categories = $this->categoryService->getAllCategoriesForLoggedInUser();
             $entry = $this->entryService->findEntryById($entryId);
-            //$entry->getTitle()
-            // @todo save to db
 
             $this->template->setVariables([
                 'entry' => $entry,

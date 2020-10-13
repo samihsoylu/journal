@@ -29,21 +29,38 @@ class EntryService
         return $this->entryRepository->findByUser(UserSession::getUserObject());
     }
 
-    public function createEntry(int $categoryId, string $title, string $content): void
+    public function createEntry(int $categoryId, string $title, string $content): int
     {
         $category = $this->categoryRepository->getById($categoryId);
 
         /** @var Category $category */
         $this->categoryService->ensureUserOwnsCategory($category);
 
-        $title   = Sanitizer::sanitizeString($title, 'trim|capitalize');
-        $content = Sanitizer::sanitizeString($content, 'trim');
-
         $entry = new Entry();
         $entry->setReferencedCategory($category)
             ->setReferencedUser(UserSession::getUserObject())
             ->setTitle($title)
             ->setContent($content);
+
+        $this->entryRepository->queue($entry);
+        $this->entryRepository->save();
+
+        return $entry->getId();
+    }
+
+    public function updateEntry(int $entryId, int $categoryId, string $entryTitle, string $entryContent): void
+    {
+        /** @var Category $category */
+        $category = $this->categoryRepository->getById($categoryId);
+        $this->categoryService->ensureUserOwnsCategory($category);
+
+        /** @var Entry $entry */
+        $entry = $this->entryRepository->getById($entryId);
+        $this->ensureUserOwnsEntry($entry);
+
+        $entry->setReferencedCategory($category)
+              ->setTitle($entryTitle)
+              ->setContent($entryContent);
 
         $this->entryRepository->queue($entry);
         $this->entryRepository->save();

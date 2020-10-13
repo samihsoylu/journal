@@ -153,4 +153,17 @@ class Template
 
         $this->setVariables($struct);
     }
+
+    /**
+     * Clears template cache directory so that changes go in to effect immediately
+     *
+     * @return void
+     */
+    public function clearCache(): void
+    {
+        $staticTemplateFiles = glob(TEMPLATE_CACHE_PATH . '/*.php');
+        foreach ($staticTemplateFiles as $staticFile) {
+            unlink($staticFile);
+        }
+    }
 }
