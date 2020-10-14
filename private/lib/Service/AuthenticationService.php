@@ -63,7 +63,7 @@ class AuthenticationService
 
     public function userIsLoggedIn(): bool
     {
-        $session = UserSession::load();
+        $session = UserSession::load(false);
         return !($session === null);
     }
 
@@ -76,7 +76,7 @@ class AuthenticationService
      */
     public function userHasPrivilege(int $requiredPrivilegeLevel): bool
     {
-        $session = UserSession::load();
+        $session = UserSession::load(false);
         if ($session === null) {
             return false;
         }

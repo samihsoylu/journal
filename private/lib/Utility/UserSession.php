@@ -4,6 +4,7 @@ namespace App\Utility;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\NotFoundException;
 use Symfony\Component\Cache\CacheItem;
 
@@ -160,12 +161,17 @@ class UserSession
      * Reads the user $_SESSION and returns an UserSession instance if it exists in the cache. Returns null if user is
      * not logged in.
      *
+     * @param bool $sessionIsRequired (default: true) When specified true, exception is thrown when session is not found
      * @return self|null
+     * @throws InvalidOperationException
      */
-    public static function load(): ?self
+    public static function load($sessionIsRequired = true): ?self
     {
         $sessionId = Session::get(self::SESSION_ID);
         if ($sessionId === null) {
+            if ($sessionIsRequired) {
+                throw InvalidOperationException::userIsNotLoggedIn();
+            }
             return null;
         }
 
@@ -205,10 +211,7 @@ class UserSession
 
     public static function getUserObject(): User
     {
-        $session    = self::load();
-        if ($session === null) {
-            throw new \RuntimeException('Session does not exist');
-        }
+        $session = self::load();
 
         $repository = new UserRepository();
 

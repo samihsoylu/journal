@@ -41,6 +41,9 @@ class Sanitizer
                     $value = trim($value);
                     $value = htmlspecialchars($value);
                     break;
+                case 'int':
+                    $value = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+                    break;
             }
         }
 

@@ -6,6 +6,7 @@ use App\Database\Model\Category;
 use App\Database\Model\Entry;
 use App\Database\Repository\CategoryRepository;
 use App\Database\Repository\EntryRepository;
+use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\NotFoundException;
 use App\Utility\Sanitizer;
 use App\Utility\UserSession;
@@ -27,6 +28,21 @@ class EntryService
     public function getAllEntriesForUser(): ?array
     {
         return $this->entryRepository->findByUser(UserSession::getUserObject());
+    }
+
+    public function getAllEntriesForUserFromFilter(
+        ?string $search,
+        ?int $limit,
+        ?int $categoryId,
+        ?int $startCreatedDate,
+        ?int $endCreatedDate
+    ): ?array
+    {
+        throw new \RuntimeException('Method not implemented');
+        $session = UserSession::load();
+
+        $userId = $session->getUserId();
+        $entries = $this->entryRepository->findByUserIdStartTimeAndEndTime($userId, $startCreatedDate, $endCreatedDate);
     }
 
     public function createEntry(int $categoryId, string $title, string $content): int
@@ -102,7 +118,7 @@ class EntryService
     {
         $session = UserSession::load();
 
-        if ($session === null || $entry->getReferencedUser()->getId() !== $session->getUserId()) {
+        if ($entry->getReferencedUser()->getId() !== $session->getUserId()) {
             // Found entry does not belong to the logged in user
             throw NotFoundException::entityIdNotFound('Entry', $entry->getId());
         }

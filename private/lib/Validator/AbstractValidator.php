@@ -9,9 +9,12 @@ abstract class AbstractValidator
 {
     protected array $post;
 
-    public function __construct(array $postData)
+    protected array $get;
+
+    public function __construct(array $postData, array $getData = [])
     {
         $this->post = $postData;
+        $this->get  = $getData;
     }
 
     /**
@@ -28,69 +31,51 @@ abstract class AbstractValidator
     }
 
     /**
-     * Ensure that all $requireFields exist as a key in $this->params.
+     * Ensure that all $requireFields exist
      *
+     * @param array $array
      * @param array $requiredFields
      * @throws InvalidParameterException
      */
-    protected function ensureRequiredFieldsAreProvided(array $requiredFields): void
+    protected function ensureRequiredFieldsAreProvided(array $array, array $requiredFields): void
     {
-        $fieldsFound = [];
-        foreach ($this->post as $key => $value) {
-            // Map all existing fields in post to $fieldsFound based on $requiredFields
-            if (in_array($key, $requiredFields, true)) {
-                $fieldsFound[] = $key;
+        $missingFields = [];
+        foreach ($requiredFields as $fieldName) {
+            if (!array_key_exists($fieldName, $array)) {
+                $missingFields[] = $fieldName;
             }
         }
 
-        // Find fields that are missing
-        $missingFields = array_diff($requiredFields, $fieldsFound);
-
-        // Convert missing fields to a string
-        $missingFieldsString = '';
-        foreach ($missingFields as $missingField) {
-            $missingFieldsString .= "{$missingField}, ";
-        }
-        $missingFieldsString = rtrim($missingFieldsString, ', ');
-
-        if (count($missingFields) !== 0) {
-            throw InvalidParameterException::missingField($missingFieldsString);
+        if (count($missingFields) > 0) {
+            $missingFields = implode(', ', $missingFields);
+            throw InvalidParameterException::missingField($missingFields);
         }
     }
 
-    protected function ensureValueIsNumeric(string $fieldName): void
+    protected function ensureValueIsNumeric(array $values, string $fieldName): void
     {
-        if (!is_numeric($this->post[$fieldName])) {
-            throw InvalidParameterException::notANumber($fieldName);
+        if (!is_numeric($values[$fieldName])) {
+            throw InvalidParameterException::notNumeric($fieldName);
         }
     }
 
-    protected function ensureValueIsString(string $fieldName): void
+    protected function ensureValueIsNotTooShort(array $values, string $fieldName, int $minLength): void
     {
-        if (!is_string($this->post[$fieldName])) {
-            throw InvalidParameterException::notAString($fieldName);
-        }
-    }
-
-    protected function ensureValueIsNotTooShort(string $fieldName, int $minLength)
-    {
-        if (strlen($this->post[$fieldName]) < $minLength) {
+        if (strlen($values[$fieldName]) < $minLength) {
             throw InvalidParameterException::stringTooShort($fieldName, $minLength);
         }
     }
 
-    protected function ensureValueIsNotTooLong(string $fieldName, int $maxLength)
+    protected function ensureValueIsNotTooLong(array $values, string $fieldName, int $maxLength): void
     {
-        if(strlen($this->post[$fieldName]) > $maxLength) {
+        if(strlen($values[$fieldName]) > $maxLength) {
             throw InvalidParameterException::stringTooLong($fieldName, $maxLength);
         }
     }
 
-    protected function ensureEmailIsValid(string $fieldName)
+    protected function ensureEmailIsValid(array $values, string $fieldName): void
     {
-        $email = $this->post[$fieldName];
-
-        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if ($values[$fieldName] === '' || !filter_var($values[$fieldName], FILTER_VALIDATE_EMAIL)) {
             throw InvalidParameterException::invalidFieldValue($fieldName);
         }
     }

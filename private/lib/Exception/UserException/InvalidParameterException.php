@@ -11,7 +11,7 @@ class InvalidParameterException extends UserException
         parent::__construct($message, $code);
     }
 
-    public static function notANumber(string $fieldName, int $code = 406): self
+    public static function notNumeric(string $fieldName, int $code = 406): self
     {
         return new self("The provided field '{$fieldName}' is not a number", $code);
     }
@@ -28,11 +28,16 @@ class InvalidParameterException extends UserException
 
     public static function invalidFieldValue(string $fieldName, int $code = 406): self
     {
-        return new self("The provided value in field {$fieldName} is invalid");
+        return new self("The provided value in field {$fieldName} is invalid", $code);
     }
 
     public static function missingField(string $fieldName, int $code = 406): self
     {
-        return new self("Field {$fieldName} is required");
+        return new self("Field {$fieldName} is required", $code);
+    }
+
+    public static function invalidDateFormat(string $fieldName, int $code = 406): self
+    {
+        return new self("Field {$fieldName} provided an incorrect date format", $code);
     }
 }

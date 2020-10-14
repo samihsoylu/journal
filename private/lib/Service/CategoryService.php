@@ -6,6 +6,7 @@ use App\Database\Model\Category;
 use App\Database\Repository\EntryRepository;
 use App\Database\Repository\UserRepository;
 use App\Database\Repository\CategoryRepository;
+use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\NotFoundException;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Utility\UserSession;
@@ -91,6 +92,7 @@ class CategoryService
     public function ensureUserOwnsCategory(Category $category): void
     {
         $session = UserSession::load();
+
         if ($category->getReferencedUser()->getId() !== $session->getUserId()) {
             // found category does not belong to the logged in user
             throw NotFoundException::entityIdNotFound(Category::class, $category->getId());

@@ -39,7 +39,7 @@ class Entry extends AbstractController
 
         $this->entryService = new EntryService();
         $this->categoryService = new CategoryService();
-        $this->validator = new EntryValidator($_POST);
+        $this->validator = new EntryValidator($_POST, $_GET);
     }
 
     /**
@@ -50,8 +50,39 @@ class Entry extends AbstractController
      */
     public function index(): void
     {
-        //[$filterOne, $filterTwo, $etc] = $this->getRouteParameters();
-        $entries = $this->entryService->getAllEntriesForUser();
+        /** @see EntryValidator::index() */
+        $this->validator->validate(__FUNCTION__);
+
+        $searchQuery     = $_GET['search_by_title'] ?? null;
+        $limit           = $_GET['entries_limit'] ?? null;
+        $categoryId      = $_GET['category_id'] ?? null;
+        $createdDateFrom = $_GET['date_from'] ?? null;
+        $createdDateTo   = $_GET['date_to'] ?? null;
+
+        if ($searchQuery !== null) {
+            $searchQuery = Sanitizer::sanitizeString($searchQuery, 'strip');
+        }
+        if ($limit !== null) {
+            $limit = Sanitizer::sanitizeString($limit, 'int');
+        }
+        if ($categoryId !== null) {
+            $categoryId = Sanitizer::sanitizeString($categoryId, 'int');
+        }
+
+        if ($createdDateFrom !== null) {
+            $createdDateFrom = strtotime($createdDateFrom);
+        }
+        if ($createdDateTo !== null) {
+            $createdDateTo = strtotime($createdDateTo);
+        }
+
+        $entries = $this->entryService->getAllEntriesForUserFromFilter(
+            $searchQuery,
+            $limit,
+            $categoryId,
+            $createdDateFrom,
+            $createdDateTo
+        );
         if (count($entries) > 0) {
             $this->template->setVariable('entries', $entries);
         }

@@ -39,7 +39,16 @@ class EntryRepository extends AbstractRepository
 
     public function findByUserIdStartTimeAndEndTime(int $userId, int $startTime, int $endTime)
     {
-        throw new \RuntimeException('Method not implemented');
+        $queryBuilder = $this->db->createQueryBuilder();
+
+        $queryBuilder->select('e')
+            ->from(self::RESOURCE_NAME, 'e')
+            ->where('e.referencedUser = :userId AND e.createdTimestamp BETWEEN :startTime AND :endTime')
+            ->setParameter('userId', $userId)
+            ->setParameter('startTime', $startTime)
+            ->setParameter('endTime', $endTime);
+
+        return $queryBuilder->getQuery()->getResult();
     }
 
     public function findByCategoryAndTimeFrame(

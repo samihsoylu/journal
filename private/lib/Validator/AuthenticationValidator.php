@@ -12,11 +12,11 @@ class AuthenticationValidator extends AbstractValidator
     public function register(): void
     {
         $requiredFields = ['username', 'password', 'email'];
-        $this->ensureRequiredFieldsAreProvided($requiredFields);
+        $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
 
-        $this->ensureValueIsNotTooShort('username', 4);
-        $this->ensureValueIsNotTooLong('username', 64);
-        $this->ensureEmailIsValid('email');
+        $this->ensureValueIsNotTooShort($this->post, 'username', 4);
+        $this->ensureValueIsNotTooLong($this->post, 'username', 64);
+        $this->ensureEmailIsValid($this->post, 'email');
     }
 
     /**
@@ -25,9 +25,9 @@ class AuthenticationValidator extends AbstractValidator
     public function login(): void
     {
         $requiredFields = ['username', 'password'];
-        $this->ensureRequiredFieldsAreProvided($requiredFields);
+        $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
 
-        $this->ensureValueIsNotTooShort('username', 4);
-        $this->ensureValueIsNotTooLong('username', 64);
+        $this->ensureValueIsNotTooShort($this->post, 'username', 4);
+        $this->ensureValueIsNotTooLong($this->post, 'username', 64);
     }
 }

@@ -12,7 +12,7 @@ class CategoryValidator extends AbstractValidator
     public function create(): void
     {
         $requiredFields = ['category_name', 'category_description'];
-        $this->ensureRequiredFieldsAreProvided($requiredFields);
+        $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
     }
 
     /**
@@ -20,7 +20,6 @@ class CategoryValidator extends AbstractValidator
      */
     public function update(): void
     {
-        $requiredFields = ['category_name', 'category_description'];
-        $this->ensureRequiredFieldsAreProvided($requiredFields);
+        $this->create();
     }
 }
