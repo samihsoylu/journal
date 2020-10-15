@@ -63,16 +63,17 @@ class EntryRepository extends AbstractRepository
         }
 
         if ($startCreatedDate !== null && $endCreatedDate !== null) {
+            // adds 23h59m so that entires after 00:00 are also included.
+            $endCreatedDate += 86340;
+
             $qb->andWhere('e.createdTimestamp BETWEEN :startTime AND :endTime')
-                ->setParameters([
-                'startTime' => $startCreatedDate,
-                'endTime' => $endCreatedDate,
-            ]);
+                ->setParameter('startTime', $startCreatedDate)
+                ->setParameter('endTime', $endCreatedDate + 86340);
         }
 
         if ($search !== null) {
-            $qb->andWhere($qb->expr()->like('e.title', $qb->expr()->literal('%:search%')))
-                ->setParameter('search', $search);
+            $qb->andWhere($qb->expr()->like('e.title', ':search'))
+                ->setParameter('search', "%{$search}%");
         }
 
         if ($limit !== null) {
