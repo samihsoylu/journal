@@ -6,7 +6,7 @@ use App\Exception\UserException;
 use App\Service\CategoryService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
-use App\Utility\Sanitizer;
+use App\Utility\Sanitize;
 use App\Validator\CategoryValidator;
 
 class Category extends AbstractController
@@ -59,8 +59,8 @@ class Category extends AbstractController
         /** @see CategoryValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $title       = Sanitizer::sanitizeString($_POST['category_name'], 'strip|capitalize');
-        $description = Sanitizer::sanitizeString($_POST['category_description'], 'htmlspecialchars');
+        $title       = Sanitize::string($_POST['category_name'], 'strip|capitalize');
+        $description = Sanitize::string($_POST['category_description'], 'htmlspecialchars');
 
         $this->service->createCategory($title, $description);
 
@@ -89,8 +89,8 @@ class Category extends AbstractController
         $this->validator->validate(__FUNCTION__);
 
         $id          = $this->getRouteParameters()['id'];
-        $title       = Sanitizer::sanitizeString($_POST['category_name'], 'strip|capitalize');
-        $description = Sanitizer::sanitizeString($_POST['category_description'], 'htmlspecialchars');
+        $title       = Sanitize::string($_POST['category_name'], 'strip|capitalize');
+        $description = Sanitize::string($_POST['category_description'], 'htmlspecialchars');
 
         $this->service->updateCategory($id, $title, $description);
 

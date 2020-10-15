@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Service\AuthenticationService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
-use App\Utility\Sanitizer;
+use App\Utility\Sanitize;
 use App\Validator\AuthenticationValidator;
 
 class Authentication extends AbstractController
@@ -42,8 +42,8 @@ class Authentication extends AbstractController
         /** @see AuthenticationValidator::register() */
         $this->validator->validate(__FUNCTION__);
 
-        $username = Sanitizer::sanitizeString($_POST['username'], 'strip');
-        $email    = Sanitizer::sanitizeString($_POST['email'], 'strip');
+        $username = Sanitize::string($_POST['username'], 'strip');
+        $email    = Sanitize::string($_POST['email'], 'strip');
         $password = $_POST['password'];
 
         // Register the user
@@ -80,7 +80,7 @@ class Authentication extends AbstractController
         /** @see AuthenticationValidator::login() */
         $this->validator->validate(__FUNCTION__);
 
-        $username = Sanitizer::sanitizeString($_POST['username'], 'strip');
+        $username = Sanitize::string($_POST['username'], 'strip');
         $password = $_POST['password'];
 
         // Log the user in

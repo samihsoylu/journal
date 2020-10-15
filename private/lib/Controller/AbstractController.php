@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Database\Model\User;
 use App\Service\AuthenticationService;
-use App\Utility\Sanitizer;
+use App\Utility\Sanitize;
 use App\Utility\Template;
 use App\Utility\Notification;
 use App\Utility\Redirect;

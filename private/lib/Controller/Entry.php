@@ -7,7 +7,7 @@ use App\Service\CategoryService;
 use App\Service\EntryService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
-use App\Utility\Sanitizer;
+use App\Utility\Sanitize;
 use App\Validator\EntryValidator;
 
 class Entry extends AbstractController
@@ -53,21 +53,12 @@ class Entry extends AbstractController
         /** @see EntryValidator::index() */
         $this->validator->validate(__FUNCTION__);
 
-        $searchQuery     = $_GET['search_by_title'] ?? null;
-        $limit           = $_GET['entries_limit'] ?? null;
-        $categoryId      = $_GET['category_id'] ?? null;
-        $createdDateFrom = $_GET['date_from'] ?? null;
-        $createdDateTo   = $_GET['date_to'] ?? null;
-
-        if ($searchQuery !== null) {
-            $searchQuery = Sanitizer::sanitizeString($searchQuery, 'strip');
-        }
-        if ($limit !== null) {
-            $limit = Sanitizer::sanitizeString($limit, 'int');
-        }
-        if ($categoryId !== null) {
-            $categoryId = Sanitizer::sanitizeString($categoryId, 'int');
-        }
+        $searchQuery     = Sanitize::getVariable($_GET, 'search_by_title', 'string', 'trim|htmlspecialchars');
+        $categoryId      = Sanitize::getVariable($_GET, 'categoryId', 'int');
+        $createdDateFrom = Sanitize::getVariable($_GET, 'date_from', 'string', 'trim|htmlspecialchars');
+        $createdDateTo   = Sanitize::getVariable($_GET, 'date_to', 'string', 'trim|htmlspecialchars');
+        $limit           = Sanitize::getVariable($_GET, 'entries_limit', 'int');
+        $offset          = Sanitize::getVariable($_GET, 'page', 'int');
 
         if ($createdDateFrom !== null) {
             $createdDateFrom = strtotime($createdDateFrom);
@@ -81,12 +72,19 @@ class Entry extends AbstractController
             $limit,
             $categoryId,
             $createdDateFrom,
-            $createdDateTo
+            $createdDateTo,
+            $offset
         );
+
         if (count($entries) > 0) {
             $this->template->setVariable('entries', $entries);
         }
 
+        $this->indexView();
+    }
+
+    public function indexView(): void
+    {
         $this->template->render('entry/all');
     }
 
@@ -125,9 +123,9 @@ class Entry extends AbstractController
         /** @see EntryValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $categoryId   = $_POST['category_id'];
-        $entryTitle   = Sanitizer::sanitizeString($_POST['entry_title'], 'strip|capitalize');
-        $entryContent = Sanitizer::sanitizeString($_POST['entry_content'], 'htmlspecialchars');
+        $categoryId   = Sanitize::int($_POST['category_id']);
+        $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
+        $entryContent = Sanitize::string($_POST['entry_content'], 'htmlspecialchars');
 
         $entryId = $this->entryService->createEntry($categoryId, $entryTitle, $entryContent);
 
@@ -163,9 +161,9 @@ class Entry extends AbstractController
         $this->validator->validate(__FUNCTION__);
 
         $entryId      = $this->getRouteParameters()['id'];
-        $categoryId   = $_POST['category_id'];
-        $entryTitle   = Sanitizer::sanitizeString($_POST['entry_title'], 'strip|capitalize');
-        $entryContent = Sanitizer::sanitizeString($_POST['entry_content'], 'htmlspecialchars');
+        $categoryId   = Sanitize::int($_POST['category_id']);
+        $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
+        $entryContent = Sanitize::string($_POST['entry_content'], 'htmlspecialchars');
 
         $this->entryService->updateEntry($entryId, $categoryId, $entryTitle, $entryContent);
 
