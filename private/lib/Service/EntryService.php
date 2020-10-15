@@ -8,7 +8,7 @@ use App\Database\Repository\CategoryRepository;
 use App\Database\Repository\EntryRepository;
 use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\NotFoundException;
-use App\Utility\Sanitizer;
+use App\Utility\Sanitize;
 use App\Utility\UserSession;
 use Doctrine\ORM\ORMException;
 
@@ -35,14 +35,26 @@ class EntryService
         ?int $limit,
         ?int $categoryId,
         ?int $startCreatedDate,
-        ?int $endCreatedDate
+        ?int $endCreatedDate,
+        ?int $offset
     ): ?array
     {
-        throw new \RuntimeException('Method not implemented');
         $session = UserSession::load();
 
-        $userId = $session->getUserId();
-        $entries = $this->entryRepository->findByUserIdStartTimeAndEndTime($userId, $startCreatedDate, $endCreatedDate);
+        if ($categoryId !== null) {
+            $category = $this->categoryRepository->getById($categoryId);
+            $this->categoryService->ensureUserOwnsCategory($category);
+        }
+
+        return $this->entryRepository->getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
+            $session->getUserId(),
+            $search,
+            $categoryId,
+            $startCreatedDate,
+            $endCreatedDate,
+            $offset,
+            $limit
+        );
     }
 
     public function createEntry(int $categoryId, string $title, string $content): int

@@ -11,11 +11,12 @@ class EntryValidator extends AbstractValidator
      */
     public function index(): void
     {
-        $this->ensureValueIsNumeric($this->get, 'categoryId');
-        $this->ensureValueIsNumeric($this->get, 'entries_limit');
+        $this->ensureOptionalValueIsNumeric($this->get, 'categoryId');
+        $this->ensureOptionalValueIsNumeric($this->get, 'entries_limit');
+        $this->ensureOptionalValueIsNumeric($this->get, 'offset');
 
-        $this->ensureDateFormatIsValid($this->get, 'date_from');
-        $this->ensureDateFormatIsValid($this->get, 'date_to');
+        $this->ensureOptionalDateFormatIsValid($this->get, 'date_from');
+        $this->ensureOptionalDateFormatIsValid($this->get, 'date_to');
     }
 
     /**
@@ -38,10 +39,11 @@ class EntryValidator extends AbstractValidator
         $this->create();
     }
 
-    private function ensureDateFormatIsValid(array $values, string $fieldName): void
+    private function ensureOptionalDateFormatIsValid(array $values, string $fieldName): void
     {
-        if (isset($values[$fieldName])) {
-            $date = \DateTime::createFromFormat('M d, Y', $values[$fieldName]);
+        $value = $values[$fieldName] ?? null;
+        if ($value !== null && $value !== '') {
+            $date = \DateTime::createFromFormat('M d, Y', trim($value));
 
             if ($date === false) {
                 throw InvalidParameterException::invalidDateFormat($fieldName);

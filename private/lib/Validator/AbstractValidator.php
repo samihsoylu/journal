@@ -59,6 +59,13 @@ abstract class AbstractValidator
         }
     }
 
+    protected function ensureOptionalValueIsNumeric(array $values, string $fieldName): void
+    {
+        if (isset($values[$fieldName])) {
+            $this->ensureValueIsNumeric($values, $fieldName);
+        }
+    }
+
     protected function ensureValueIsNotTooShort(array $values, string $fieldName, int $minLength): void
     {
         if (strlen($values[$fieldName]) < $minLength) {

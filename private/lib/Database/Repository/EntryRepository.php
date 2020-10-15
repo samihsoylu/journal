@@ -37,44 +37,51 @@ class EntryRepository extends AbstractRepository
         return $queryBuilder->getQuery()->getResult();
     }
 
-    public function findByUserIdStartTimeAndEndTime(int $userId, int $startTime, int $endTime)
-    {
-        $queryBuilder = $this->db->createQueryBuilder();
-
-        $queryBuilder->select('e')
-            ->from(self::RESOURCE_NAME, 'e')
-            ->where('e.referencedUser = :userId AND e.createdTimestamp BETWEEN :startTime AND :endTime')
-            ->setParameter('userId', $userId)
-            ->setParameter('startTime', $startTime)
-            ->setParameter('endTime', $endTime);
-
-        return $queryBuilder->getQuery()->getResult();
-    }
-
-    public function findByCategoryAndTimeFrame(
+    /**
+     * @return Entry[]
+     */
+    public function getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
         int $userId,
-        int $categoryId,
-        int $startTime,
-        int $endTime,
-        int $offset,
-        int $limit
+        ?string $search,
+        ?int $categoryId,
+        ?int $startCreatedDate,
+        ?int $endCreatedDate,
+        ?int $offset,
+        ?int $limit
     ): array {
         $qb = $this->db->createQueryBuilder();
 
-        $qb->add('select', 'e')
-            ->add('from', 'Entries e')
-            ->add('orderBy', 'e.createdTimestamp DESC')
-            ->setFirstResult($offset)
-            ->setMaxResults($limit);
-
-        $qb->where('e.categoryId = :categoryId AND e.userId = :userId')
-            ->setParameter('categoryId', $categoryId)
+        $qb->select('e')
+            ->from(self::RESOURCE_NAME, 'e')
+            ->where('e.referencedUser = :userId')
+            ->orderBy('e.createdTimestamp', 'DESC')
             ->setParameter('userId', $userId);
 
-        $qb->where('e.createdTimestamp BETWEEN :startTime AND :endTime')
-            ->setParameter('startTime', $startTime)
-            ->setParameter('endTime', $endTime);
+        if ($categoryId !== null) {
+            $qb->andWhere('e.referencedCategory = :categoryId')
+                ->setParameter('categoryId', $categoryId);
+        }
 
-        return $qb->getQuery()->getArrayResult();
+        if ($startCreatedDate !== null && $endCreatedDate !== null) {
+            $qb->andWhere('e.createdTimestamp BETWEEN :startTime AND :endTime')
+                ->setParameters([
+                'startTime' => $startCreatedDate,
+                'endTime' => $endCreatedDate,
+            ]);
+        }
+
+        if ($search !== null) {
+            $qb->andWhere($qb->expr()->like('e.title', $qb->expr()->literal('%:search%')))
+                ->setParameter('search', $search);
+        }
+
+        if ($limit !== null) {
+            $offset = $offset ?? 0;
+
+            $qb->setFirstResult($offset)
+                ->setMaxResults($limit);
+        }
+
+        return $qb->getQuery()->getResult();
     }
 }
