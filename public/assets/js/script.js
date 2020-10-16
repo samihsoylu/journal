@@ -21,4 +21,21 @@ $( document ).ready(function() {
     $(".corner-alert").click(function(){
         $(".corner-alert").hide();
     });
+
+    // Ensures that filters with blank values are not included in the get request
+    $("#desktopFilter").submit(function() {
+        $(this).find(":input").filter(function () {
+            return !this.value;
+        }).attr("name", '');
+
+        return true;
+    });
+
+    $("#filters").submit(function() {
+        $(this).find(":input").filter(function () {
+            return !this.value;
+        }).attr("name", '');
+
+        return true;
+    });
 });

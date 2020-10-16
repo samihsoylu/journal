@@ -50,11 +50,13 @@ class Entry extends AbstractController
      */
     public function index(): void
     {
+        $this->template->setVariable('get', $_GET);
+
         /** @see EntryValidator::index() */
         $this->validator->validate(__FUNCTION__);
 
         $searchQuery     = Sanitize::getVariable($_GET, 'search_by_title', 'string', 'trim|htmlspecialchars');
-        $categoryId      = Sanitize::getVariable($_GET, 'categoryId', 'int');
+        $categoryId      = Sanitize::getVariable($_GET, 'category_id', 'int');
         $createdDateFrom = Sanitize::getVariable($_GET, 'date_from', 'string', 'trim|htmlspecialchars');
         $createdDateTo   = Sanitize::getVariable($_GET, 'date_to', 'string', 'trim|htmlspecialchars');
         $limit           = Sanitize::getVariable($_GET, 'entries_limit', 'int');
@@ -75,16 +77,16 @@ class Entry extends AbstractController
             $createdDateTo,
             $offset
         );
-
-        if (count($entries) > 0) {
-            $this->template->setVariable('entries', $entries);
-        }
+        $this->template->setVariable('entries', $entries);
 
         $this->indexView();
     }
 
     public function indexView(): void
     {
+        $categories = $this->categoryService->getAllCategoriesForLoggedInUser();
+
+        $this->template->setVariable('categories', $categories);
         $this->template->render('entry/all');
     }
 

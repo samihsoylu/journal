@@ -14,7 +14,6 @@
         </div>
         <div class="row row-align">
 
-            @isset($entries)
             <!-- Mobile Filter Menu -->
             <div class="col s12 hide-on-med-and-up">
                 <ul id="filters-slide-out" class="sidenav filters">
@@ -23,19 +22,19 @@
 
                         <!-- Mobile Filter: Search bar -->
                         <li class="input-field ">
-                            <input id="search_m" name="search_by_title" type="text" />
+                            <input id="search_m" name="search_by_title" type="text" @isset($get['search_by_title']) value="{{ $get['search_by_title'] }}" @endisset />
                             <label for="search_m">Filter by title (optional)</label>
                         </li>
 
                         <!-- Mobile Filter: Dropdown -->
                         <li class="input-field">
                             <select id="entries_limit_m" name="entries_limit">
-                                <option value="25" selected>25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                                <option value="150">150</option>
-                                <option value="200">200</option>
-                                <option value="250">250</option>
+                                <option value="25" @if(@$get['entries_limit'] === '25') selected @endif>25</option>
+                                <option value="50" @if(@$get['entries_limit'] === '50') selected @endif>50</option>
+                                <option value="100" @if(@$get['entries_limit'] === '100') selected @endif>100</option>
+                                <option value="150" @if(@$get['entries_limit'] === '150') selected @endif>150</option>
+                                <option value="200" @if(@$get['entries_limit'] === '200') selected @endif>200</option>
+                                <option value="250" @if(@$get['entries_limit'] === '250') selected @endif>250</option>
                             </select>
                             <label for="entries_limit_m" class="dropdown-label">Show entries (required)</label>
                         </li>
@@ -43,30 +42,30 @@
                         <!-- Mobile Filter: Dropdown -->
                         <li class="input-field">
                             <select id="category_id_m" name="category_id">
-                                <option value="" selected>-</option>
-                                <option value="1">Personal</option>
-                                <option value="2">Diet</option>
-                                <option value="3">Dreams</option>
-                                <option value="4">Work</option>
+                                <option value="" selected>All</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->getId() }}" @if(@$get['category_id'] == $category->getId()) selected @endif>{{ $category->getName() }}</option>
+                                @endforeach
                             </select>
                             <label for="category_id_m" class="dropdown-label">Filter by category (optional)</label>
                         </li>
 
                         <!-- Mobile Filter: Datepicker -->
                         <li class="input-field">
-                            <input id="date_from_m" type="text" name="date_from" class="datepicker">
+                            <input id="date_from_m" type="text" name="date_from" class="datepicker" @isset($get['date_from']) value="{{ $get['date_from'] }}" @endisset>
                             <label for="date_from_m">Date from (optional)</label>
                         </li>
 
                         <!-- Mobile Filter: Datepicker -->
                         <li class="input-field">
-                            <input id="date_to_m" type="text" name="date_to" class="datepicker">
+                            <input id="date_to_m" type="text" name="date_to" class="datepicker" @isset($get['date_to']) value="{{ $get['date_to'] }}" @endisset>
                             <label for="date_to_m">Date to (optional)</label>
                         </li>
 
                         <!-- Mobile Filter: Button -->
                         <li>
                             <input class="btn btn-primary fullwidth" type="submit" value="Filter" />
+                            <button class="btn btn-default fullwidth" type="button" onclick="window.location='{{ $entries_url }}'">Reset page</button>
                         </li>
                     </form>
                 </ul>
@@ -76,38 +75,37 @@
 
             <!-- Desktop filters -->
             <div class="col hide-on-small-only m4 l3">
-                <form id="filters" method="GET">
+                <form id="desktopFilter" method="GET">
                     <div class="input-field ">
-                        <input id="search_d" name="search_by_title" type="text" />
+                        <input id="search_d" name="search_by_title" type="text"  @isset($get['search_by_title']) value="{{ $get['search_by_title'] }}" @endisset />
                         <label for="search_d">Filter by title (optional)</label>
                     </div>
                     <div class="input-field">
                         <select id="entries_limit_d" name="entries_limit">
-                            <option value="25" selected>25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                            <option value="150">150</option>
-                            <option value="200">200</option>
-                            <option value="250">250</option>
+                            <option value="25" @if(@$get['entries_limit'] === '25') selected @endif>25</option>
+                            <option value="50" @if(@$get['entries_limit'] === '50') selected @endif>50</option>
+                            <option value="100" @if(@$get['entries_limit'] === '100') selected @endif>100</option>
+                            <option value="150" @if(@$get['entries_limit'] === '150') selected @endif>150</option>
+                            <option value="200" @if(@$get['entries_limit'] === '200') selected @endif>200</option>
+                            <option value="250" @if(@$get['entries_limit'] === '250') selected @endif>250</option>
                         </select>
                         <label for="entries_limit_d">Show entries (required)</label>
                     </div>
                     <div class="input-field">
                         <select id="category_id_d" name="category_id">
-                            <option value="" selected>-</option>
-                            <option value="1">Personal</option>
-                            <option value="2">Diet</option>
-                            <option value="3">Dreams</option>
-                            <option value="4">Work</option>
+                            <option value="" selected>All</option>
+                            @foreach($categories as $category)
+                                <option value="{{ $category->getId() }}" @if(@$get['category_id'] == $category->getId()) selected @endif>{{ $category->getName() }}</option>
+                            @endforeach
                         </select>
                         <label for="category_id_d">Filter by category (optional)</label>
                     </div>
                     <div class="input-field">
-                        <input id="date_from_d" type="text" name="date_from" class="datepicker">
+                        <input id="date_from_d" type="text" name="date_from" class="datepicker" @isset($get['date_from']) value="{{ $get['date_from'] }}" @endisset>
                         <label for="date_from_d">Date from (optional)</label>
                     </div>
                     <div class="input-field">
-                        <input id="date_to_d" type="text" name="date_to" class="datepicker">
+                        <input id="date_to_d" type="text" name="date_to" class="datepicker" @isset($get['date_to']) value="{{ $get['date_to'] }}" @endisset>
                         <label for="date_to_d">Date to (optional)</label>
                     </div>
                     <div>
@@ -115,7 +113,6 @@
                     </div>
                 </form>
             </div>
-            @endisset
 
             <div class="col s12 m8 l9">
                 @isset($entries)
@@ -131,7 +128,7 @@
                     @endforeach
                 @endisset
                 @empty($entries)
-                        <p>No entries found, you still need to create your first entry.</p>
+                    <p>No entries found.</p>
                 @endempty
 
                 @isset($pages)

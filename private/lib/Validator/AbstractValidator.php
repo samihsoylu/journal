@@ -61,7 +61,9 @@ abstract class AbstractValidator
 
     protected function ensureOptionalValueIsNumeric(array $values, string $fieldName): void
     {
-        if (isset($values[$fieldName])) {
+        $value = $values[$fieldName] ?? null;
+
+        if ($value !== null && $value !== '') {
             $this->ensureValueIsNumeric($values, $fieldName);
         }
     }

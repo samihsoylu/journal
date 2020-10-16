@@ -11,7 +11,7 @@ class EntryValidator extends AbstractValidator
      */
     public function index(): void
     {
-        $this->ensureOptionalValueIsNumeric($this->get, 'categoryId');
+        $this->ensureOptionalValueIsNumeric($this->get, 'category_id');
         $this->ensureOptionalValueIsNumeric($this->get, 'entries_limit');
         $this->ensureOptionalValueIsNumeric($this->get, 'offset');
 
