@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Database\Model\User;
 use App\Service\AuthenticationService;
 use App\Utility\Sanitize;
+use App\Utility\Session;
 use App\Utility\Template;
 use App\Utility\Notification;
 use App\Utility\Redirect;
@@ -56,6 +57,9 @@ abstract class AbstractController
                 Notification::TYPE_ERROR,
                 'You must login before you can access this page'
             );
+
+            // keep track on which page the user attempted to load
+            Session::put('referred_from', $_GET['url']);
 
             Redirect::to(Authentication::LOGIN_URL);
         }

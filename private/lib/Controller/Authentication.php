@@ -6,6 +6,7 @@ use App\Service\AuthenticationService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
+use App\Utility\Session;
 use App\Validator\AuthenticationValidator;
 
 class Authentication extends AbstractController
@@ -85,6 +86,15 @@ class Authentication extends AbstractController
 
         // Log the user in
         $this->service->login($username, $password);
+
+        // This session is set in $this->redirectLoggedOutUsersToLoginPage()
+        // Ensures that user is taken back to the page they attempted to load after session cookie had expired.
+        $referredFrom = Session::get('referred_from');
+        if ($referredFrom !== null) {
+            Session::delete('referred_from');
+
+            Redirect::to(BASE_URL . "/{$referredFrom}");
+        }
 
         Redirect::to(Welcome::DASHBOARD_URL);
     }
