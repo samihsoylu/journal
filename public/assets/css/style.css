@@ -306,3 +306,19 @@ a .card:hover {
 .danger-modal .modal-footer {
 	padding:0px 24px;
 }
+.individual-entry-category {
+	float:right;
+	font-style:italic;
+	opacity:0.3;
+}
+
+.entry-content h1 { font-size: 3.2rem; }
+.entry-content h2 { font-size: 2.56rem; }
+.entry-content h3 { font-size: 1.92rem; }
+.entry-content h4 { font-size: 2.28rem; }
+.entry-content ul li {
+	list-style-type: disc;
+	list-style-position: inside;
+}
+.entry-content a { text-decoration: underline; }
+.entry-content a:hover { text-decoration: none; }

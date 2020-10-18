@@ -28,3 +28,7 @@
         </div>
     </div>
 @endsection
+
+@section('jquery-scripts')
+    @include('components/confirm-reload')
+@endsection

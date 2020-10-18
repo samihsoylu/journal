@@ -59,9 +59,19 @@ abstract class AbstractModel implements ModelInterface
         $this->lastUpdatedTimestamp = time();
     }
 
+    public function getLastUpdatedTimestampFormatted(): string
+    {
+        return $this->formatTimestamp($this->getLastUpdatedTimestamp());
+    }
+
     public function getCreatedTimestampFormatted(): string
     {
-        $date = new \DateTime("@{$this->getCreatedTimestamp()}");
+        return $this->formatTimestamp($this->getCreatedTimestamp());
+    }
+
+    private function formatTimestamp(int $timestamp): string
+    {
+        $date = new \DateTime("@{$timestamp}");
 
         return $date->format('d M Y H:i');
     }

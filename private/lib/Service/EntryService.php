@@ -30,14 +30,17 @@ class EntryService
         return $this->entryRepository->findByUser(UserSession::getUserObject());
     }
 
+    /**
+     * @return Entry[]
+     */
     public function getAllEntriesForUserFromFilter(
         ?string $search,
-        ?int $limit,
         ?int $categoryId,
         ?int $startCreatedDate,
         ?int $endCreatedDate,
-        ?int $offset
-    ): ?array
+        ?int $offset,
+        ?int $limit
+    ): array
     {
         $session = UserSession::load();
 

@@ -63,19 +63,23 @@ class Entry extends AbstractController
         $offset          = Sanitize::getVariable($_GET, 'page', 'int');
 
         if ($createdDateFrom !== null) {
-            $createdDateFrom = strtotime($createdDateFrom);
+            $date = new \DateTime($createdDateFrom);
+            $date->setTime(0, 0, 0);
+            $createdDateFrom = $date->getTimestamp();
         }
         if ($createdDateTo !== null) {
-            $createdDateTo = strtotime($createdDateTo);
+            $date = new \DateTime($createdDateTo);
+            $date->setTime(23, 59, 59);
+            $createdDateTo = $date->getTimestamp();
         }
 
         $entries = $this->entryService->getAllEntriesForUserFromFilter(
             $searchQuery,
-            $limit,
             $categoryId,
             $createdDateFrom,
             $createdDateTo,
-            $offset
+            $offset,
+            $limit
         );
         $this->template->setVariable('entries', $entries);
 
@@ -127,7 +131,7 @@ class Entry extends AbstractController
 
         $categoryId   = Sanitize::int($_POST['category_id']);
         $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
-        $entryContent = Sanitize::string($_POST['entry_content'], 'htmlspecialchars');
+        $entryContent = Sanitize::string($_POST['entry_content'], 'trim|htmlspecialchars');
 
         $entryId = $this->entryService->createEntry($categoryId, $entryTitle, $entryContent);
 
@@ -165,7 +169,7 @@ class Entry extends AbstractController
         $entryId      = $this->getRouteParameters()['id'];
         $categoryId   = Sanitize::int($_POST['category_id']);
         $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
-        $entryContent = Sanitize::string($_POST['entry_content'], 'htmlspecialchars');
+        $entryContent = Sanitize::string($_POST['entry_content'], 'trim|htmlspecialchars');
 
         $this->entryService->updateEntry($entryId, $categoryId, $entryTitle, $entryContent);
 

@@ -21,7 +21,7 @@
                         <label for="entry_title">Entry title</label>
                     </div>
                     <div class="input-field">
-                        <textarea id="entry_content" name="entry_content" style="min-height:100px;" class="materialize-textarea validate" required>@if(isset($post['entry_content'])) {{ $post['entry_content'] }} @else {{ $entry->getContent() }} @endif</textarea>
+                        <textarea id="entry_content" name="entry_content" style="min-height:250px;" class="materialize-textarea validate" required>@if(isset($post['entry_content'])){{ $post['entry_content'] }}@else{{ $entry->getContent() }}@endif</textarea>
                         <label for="entry_content">Entry content</label>
                     </div>
                     <div>
@@ -31,4 +31,8 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('jquery-scripts')
+    @include('components/confirm-reload')
 @endsection
