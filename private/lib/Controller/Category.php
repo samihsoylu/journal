@@ -51,7 +51,7 @@ class Category extends AbstractController
 
         $this->template->setVariable('categories', $categories);
 
-        $this->template->render('category/view-all');
+        $this->template->render('category/all');
     }
 
     public function create(): void
