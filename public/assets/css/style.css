@@ -312,10 +312,19 @@ a .card:hover {
 	opacity:0.3;
 }
 
-.entry-content h1 { font-size: 3.2rem; }
-.entry-content h2 { font-size: 2.56rem; }
-.entry-content h3 { font-size: 1.92rem; }
-.entry-content h4 { font-size: 2.28rem; }
+/* #Entry content
+================================================== */
+.entry-content h1, h2, h3, h4, h5, h6 {
+	margin:25px 0px 15px 0px;
+}
+.entry-content h1 { font-size: 30px; }
+.entry-content h2 { font-size: 24px; }
+.entry-content h3,
+.entry-content h4,
+.entry-content h5,
+.entry-content h6
+{ font-size: 16px; font-weight:bold; }
+
 .entry-content ul li {
 	list-style-type: disc;
 	list-style-position: inside;
