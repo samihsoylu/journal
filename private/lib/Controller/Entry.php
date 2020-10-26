@@ -73,7 +73,7 @@ class Entry extends AbstractController
             $createdDateTo = $date->getTimestamp();
         }
 
-        $entries = $this->entryService->getAllEntriesForUserFromFilter(
+        [$totalEntriesCount, $entries] = $this->entryService->getAllEntriesForUserFromFilter(
             $searchQuery,
             $categoryId,
             $createdDateFrom,
@@ -81,7 +81,11 @@ class Entry extends AbstractController
             $offset,
             $limit
         );
-        $this->template->setVariable('entries', $entries);
+
+        $this->template->setVariables([
+            'entries' => $entries,
+            'totalEntriesCount' => $totalEntriesCount,
+        ]);
 
         $this->indexView();
     }

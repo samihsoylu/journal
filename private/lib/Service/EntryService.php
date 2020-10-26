@@ -30,9 +30,6 @@ class EntryService
         return $this->entryRepository->findByUser(UserSession::getUserObject());
     }
 
-    /**
-     * @return Entry[]
-     */
     public function getAllEntriesForUserFromFilter(
         ?string $search,
         ?int $categoryId,
@@ -49,7 +46,7 @@ class EntryService
             $this->categoryService->ensureUserOwnsCategory($category);
         }
 
-        return $this->entryRepository->getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
+        $entries = $this->entryRepository->getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
             $session->getUserId(),
             $search,
             $categoryId,
@@ -58,6 +55,16 @@ class EntryService
             $offset,
             $limit
         );
+
+        $totalEntriesCount = $this->entryRepository->getTotalCountOfEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
+            $session->getUserId(),
+            $search,
+            $categoryId,
+            $startCreatedDate,
+            $endCreatedDate
+        );
+
+        return [$totalEntriesCount, $entries];
     }
 
     public function createEntry(int $categoryId, string $title, string $content): int

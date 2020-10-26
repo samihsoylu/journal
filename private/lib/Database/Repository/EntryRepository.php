@@ -4,6 +4,7 @@ namespace App\Database\Repository;
 
 use App\Database\Model\Entry;
 use App\Database\Model\User;
+use Doctrine\ORM\QueryBuilder;
 
 class EntryRepository extends AbstractRepository
 {
@@ -26,20 +27,17 @@ class EntryRepository extends AbstractRepository
      */
     public function findByUserIdAndCategoryId(int $userId, int $categoryId): array
     {
-        $queryBuilder = $this->db->createQueryBuilder();
+        $qb = $this->db->createQueryBuilder();
 
-        $queryBuilder->select('e')
+        $qb->select('e')
             ->from(self::RESOURCE_NAME, 'e')
             ->where('e.referencedCategory = :categoryId AND e.referencedUser = :userId')
             ->setParameter('categoryId', $categoryId)
             ->setParameter('userId', $userId);
 
-        return $queryBuilder->getQuery()->getResult();
+        return $qb->getQuery()->getResult();
     }
 
-    /**
-     * @return Entry[]
-     */
     public function getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
         int $userId,
         ?string $search,
@@ -51,8 +49,60 @@ class EntryRepository extends AbstractRepository
     ): array {
         $qb = $this->db->createQueryBuilder();
 
-        $qb->select('e')
-            ->from(self::RESOURCE_NAME, 'e')
+        $qb->select('e');
+
+        $this->addParametersToQueryBuilderSearchCategoryStartEndDate(
+            $qb,
+            $userId,
+            $search,
+            $categoryId,
+            $startCreatedDate,
+            $endCreatedDate
+        );
+
+        if ($limit !== null) {
+            $offset = $offset ?? 0;
+
+            $qb->setFirstResult($offset)
+                ->setMaxResults($limit);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function getTotalCountOfEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
+        int $userId,
+        ?string $search,
+        ?int $categoryId,
+        ?int $startCreatedDate,
+        ?int $endCreatedDate
+    ): int {
+        $qb = $this->db->createQueryBuilder();
+
+        $qb->select('count(e.id)');
+
+        $this->addParametersToQueryBuilderSearchCategoryStartEndDate(
+            $qb,
+            $userId,
+            $search,
+            $categoryId,
+            $startCreatedDate,
+            $endCreatedDate
+        );
+
+        return (int)$qb->getQuery()->getSingleScalarResult();
+    }
+
+    private function addParametersToQueryBuilderSearchCategoryStartEndDate(
+        QueryBuilder $qb,
+        $userId,
+        ?string $search,
+        ?int $categoryId,
+        ?int $startCreatedDate,
+        ?int $endCreatedDate
+    ): void
+    {
+        $qb->from(self::RESOURCE_NAME, 'e')
             ->where('e.referencedUser = :userId')
             ->orderBy('e.createdTimestamp', 'DESC')
             ->setParameter('userId', $userId);
@@ -72,14 +122,5 @@ class EntryRepository extends AbstractRepository
             $qb->andWhere($qb->expr()->like('e.title', ':search'))
                 ->setParameter('search', "%{$search}%");
         }
-
-        if ($limit !== null) {
-            $offset = $offset ?? 0;
-
-            $qb->setFirstResult($offset)
-                ->setMaxResults($limit);
-        }
-
-        return $qb->getQuery()->getResult();
     }
 }
