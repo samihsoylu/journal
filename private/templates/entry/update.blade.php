@@ -26,6 +26,7 @@
                     </div>
                     <div>
                         <button class="btn btn-primary" type="submit"><i class="material-icons">save</i> Save</button>
+                        <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('DANGER: This action will delete this entry', '{{ $entry_url }}/{{ $entry->getId() }}/delete')"><i class="material-icons">delete_forever</i> Delete</button>
                     </div>
                 </form>
             </div>

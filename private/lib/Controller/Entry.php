@@ -220,6 +220,8 @@ class Entry extends AbstractController
 
         $this->entryService->deleteEntry($entryId);
 
+        $this->setNotification(Notification::TYPE_SUCCESS, 'Entry was removed');
+
         $this->deleteView();
     }
 

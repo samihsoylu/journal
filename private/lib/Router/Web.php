@@ -24,7 +24,7 @@ $route->addRoute('POST', Entry::CREATE_ENTRY_POST_URL, 'Entry@create');
 $route->addRoute('GET', Entry::READ_ENTRY_URL, 'Entry@read');
 $route->addRoute('GET', Entry::UPDATE_ENTRY_URL, 'Entry@updateView');
 $route->addRoute('POST', Entry::UPDATE_ENTRY_POST_URL, 'Entry@update');
-$route->addRoute('POST', Entry::DELETE_ENTRY_URL, 'Entry@delete');
+$route->addRoute('GET', Entry::DELETE_ENTRY_URL, 'Entry@delete');
 
 // Categories
 $route->addRoute('GET', Category::CREATE_CATEGORY_URL, 'Category@createView');
