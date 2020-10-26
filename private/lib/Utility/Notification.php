@@ -3,7 +3,8 @@
 namespace App\Utility;
 
 /**
- * Class Notification is used to transfer user notifications between redirects in the web app using Sessions
+ * To transfer user notifications between redirects, this class creates and removes sessions for this purpose when
+ * necessary.
  */
 class Notification
 {
@@ -15,13 +16,6 @@ class Notification
     public const TYPE_WARNING = 'warning';
     public const TYPE_ERROR   = 'error';
 
-    protected array $allowedMessageTypes = [
-        self::TYPE_INFO,
-        self::TYPE_SUCCESS,
-        self::TYPE_WARNING,
-        self::TYPE_ERROR,
-    ];
-
     /**
      * Sets two notification sessions, type and message.
      *
@@ -30,7 +24,14 @@ class Notification
      */
     public function set(string $type, string $message): void
     {
-        if (!in_array($type, $this->allowedMessageTypes, true)) {
+        $allowedMessageTypes = [
+            self::TYPE_INFO,
+            self::TYPE_SUCCESS,
+            self::TYPE_WARNING,
+            self::TYPE_ERROR,
+        ];
+
+        if (!in_array($type, $allowedMessageTypes, true)) {
             throw new \RuntimeException("Invalid type '{$type}' provided");
         }
 

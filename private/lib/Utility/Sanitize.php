@@ -8,8 +8,12 @@ namespace App\Utility;
 class Sanitize
 {
     /**
-     * Cleans up a given string based on the provided options. The provided value is sanitized based on the order of
-     * given options.
+     * Provided value is sanitized based on the order of given options:
+     * - trim eliminates spaces that may exist at the start or end of the string.
+     * - capitalize makes the initial character of a string upper case and the rest lower case.
+     * - lowercase makes the entire string lower case
+     * - htmlspecialchars removes all html tags from the string
+     * - strip combines lowercase, trim and htmlspecialchars at once.
      *
      * @param string $value
      * @param string $options Sanitizing options separate with '|'. Options: trim, capitalize, lowercase, htmlspecialchars
