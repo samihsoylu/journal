@@ -11,7 +11,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "App\\": "private/lib/"
+            "App\\": "private/lib/",
+            "Tests\\": "tests/lib/"
         }
     },
     "require": {
@@ -25,6 +26,7 @@
         "erusev/parsedown": "^1.7"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-master"
+        "roave/security-advisories": "dev-master",
+        "phpunit/phpunit": "^9"
     }
 }

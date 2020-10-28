@@ -38,6 +38,9 @@ class EntryRepository extends AbstractRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @return Entry[]
+     */
     public function getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
         int $userId,
         ?string $search,

@@ -20,9 +20,10 @@ abstract class AbstractRepository
      */
     protected const RESOURCE_NAME = '';
 
-    public function __construct()
+    public function __construct(EntityManager $database = null)
     {
-        $this->db = Database::getInstance();
+        // This allows test cases to pass mocked database instances
+        $this->db = $database ?? Database::getInstance();
     }
 
     /**
@@ -32,8 +33,7 @@ abstract class AbstractRepository
      */
     public function getAll(): array
     {
-        $resource = $this->db->getRepository(static::RESOURCE_NAME);
-        return $resource->findAll();
+        return $this->db->getRepository(static::RESOURCE_NAME)->findAll();
     }
 
     /**
