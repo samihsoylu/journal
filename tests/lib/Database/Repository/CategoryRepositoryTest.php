@@ -8,7 +8,6 @@ use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class CategoryRepositoryTest extends TestCase
@@ -33,10 +32,7 @@ class CategoryRepositoryTest extends TestCase
     {
         $this->expectException(NotFoundException::class);
 
-        $mockEntityManager = $this->createMock(EntityManager::class);
-        $mockEntityManager->expects($this->once())
-            ->method('find')
-            ->willReturn(null);
+        $mockEntityManager = $this->createMockEntityManager('find', null);
 
         $repository = new CategoryRepository($mockEntityManager);
 
@@ -53,17 +49,14 @@ class CategoryRepositoryTest extends TestCase
         $mockCategory = $this->mockCategories[$expectedId];
 
         // Specifies findBy will return final result
-        $mockEntityRepository = $this->createMock(EntityRepository::class);
-        $mockEntityRepository->expects($this->once())
-            ->method('findBy')
-            ->with(['name' => 'Food'])
-            ->willReturn([0 => $mockCategory]);
+        $mockEntityRepository = $this->createMockEntityRepository(
+            'findBy',
+            ['name' => 'Food'],
+            [0 => $mockCategory]
+        );
 
         // Specifies that getRepository will return EntityRepository so that ->findBy() can be chained
-        $mockEntityManager = $this->createMock(EntityManager::class);
-        $mockEntityManager->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($mockEntityRepository);
+        $mockEntityManager = $this->createMockEntityManager('getRepository', $mockEntityRepository);
 
         $repository = new CategoryRepository($mockEntityManager);
         $category = $repository->getByName('Food');
@@ -79,17 +72,10 @@ class CategoryRepositoryTest extends TestCase
         $this->expectException(NotFoundException::class);
 
         // Specifies findBy will return final result
-        $mockEntityRepository = $this->createMock(EntityRepository::class);
-        $mockEntityRepository->expects($this->once())
-            ->method('findBy')
-            ->with(['name' => 'Ideas'])
-            ->willReturn([]);
+        $mockEntityRepository = $this->createMockEntityRepository('findBy', ['name' => 'Ideas'], []);
 
         // Specifies getRepository will return EntityRepository so that ->findBy() can be chained
-        $mockEntityManager = $this->createMock(EntityManager::class);
-        $mockEntityManager->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($mockEntityRepository);
+        $mockEntityManager = $this->createMockEntityManager('getRepository', $mockEntityRepository);
 
         $repository = new CategoryRepository($mockEntityManager);
 
@@ -112,22 +98,36 @@ class CategoryRepositoryTest extends TestCase
         $user->setLastUpdatedTimestamp();
 
         // Specifies findBy will return final result
-        $mockEntityRepository = $this->createMock(EntityRepository::class);
-        $mockEntityRepository->expects($this->once())
-            ->method('findBy')
-            ->with(['referencedUser' => $user])
-            ->willReturn([]);
+        $mockEntityRepository = $this->createMockEntityRepository('findBy', ['referencedUser' => $user], []);
 
         // Specifies getRepository will return EntityRepository so that ->findBy() can be chained
-        $mockEntityManager = $this->createMock(EntityManager::class);
-        $mockEntityManager->expects($this->once())
-            ->method('getRepository')
-            ->willReturn($mockEntityRepository);
+        $mockEntityManager = $this->createMockEntityManager('getRepository', $mockEntityRepository);
 
         $repository = new CategoryRepository($mockEntityManager);
         $categories = $repository->getAllCategoriesForUser($user);
 
         $this->assertIsArray($categories);
         $this->assertCount(0, $categories);
+    }
+
+    private function createMockEntityManager(string $hasMethod, $methodWillReturn): EntityManager
+    {
+        $mockEntityManager = $this->createMock(EntityManager::class);
+        $mockEntityManager->expects($this->once())
+            ->method($hasMethod)
+            ->willReturn($methodWillReturn);
+
+        return $mockEntityManager;
+    }
+
+    private function createMockEntityRepository(string $hasMethod, array $withExpectedParameters, $methodWillReturn): EntityRepository
+    {
+        $mockEntityRepository = $this->createMock(EntityRepository::class);
+        $mockEntityRepository->expects($this->once())
+            ->method($hasMethod)
+            ->with($withExpectedParameters)
+            ->willReturn($methodWillReturn);
+
+        return $mockEntityRepository;
     }
 }
