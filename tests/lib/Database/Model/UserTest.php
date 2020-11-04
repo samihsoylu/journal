@@ -14,7 +14,7 @@ class UserTest extends TestCase
         $expectedUsername = 'michael';
         $expectedPassword = 'm!ch4el#1';
         $expectedEmail = 'm.scott@mail.io';
-        $expectedPrivilegeLevel = 1;
+        $expectedPrivilegeLevel = User::PRIVILEGE_LEVEL_ADMIN;
 
         $user = new User();
         $user->setUsername($expectedUsername)

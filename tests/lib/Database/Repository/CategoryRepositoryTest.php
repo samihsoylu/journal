@@ -3,60 +3,60 @@
 namespace Tests\Database\Repository;
 
 use App\Database\Model\Category;
+use App\Database\Model\User;
 use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException\NotFoundException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class CategoryRepositoryTest extends TestCase
 {
-    /**
-     * In case the category is found, the $repository->getById() must return a valid category instance
-     */
-    public function testGetById(): void
-    {
-        $expectedId = 64;
-        $expectedName = 'Office Supplies';
+    private array $mockCategories;
 
-        // We specify here that the mock category class will return 64 when using $category->getId();
-        $mockCategory = $this->createConfiguredMock(Category::class, [
-            'getId' => $expectedId,
-            'getName' => $expectedName,
-        ]);
+    public function setUp(): void
+    {
+        $categories = ['Dreams', 'Diary', 'Food', 'Work', 'Personal'];
+        for ($i = 0; $i < 5; $i++) {
+            $this->mockCategories[$i] = $this->createConfiguredMock(Category::class, [
+                'getId' => $i,
+                'getName' => $categories[$i],
+            ]);
+        }
+    }
+
+    /**
+     * In case null is returned, $categoryRepository->getById() must throw an exception
+     */
+    public function testGetByIdNotFoundException(): void
+    {
+        $this->expectException(NotFoundException::class);
 
         $mockEntityManager = $this->createMock(EntityManager::class);
         $mockEntityManager->expects($this->once())
             ->method('find')
-            ->willReturn($mockCategory);
+            ->willReturn(null);
 
         $repository = new CategoryRepository($mockEntityManager);
 
-        /** @var Category $category */
-        $category = $repository->getById($expectedId);
-
-        $this->assertInstanceOf(Category::class, $category);
-        $this->assertEquals($expectedId, $category->getId());
-        $this->assertEquals($expectedName, $category->getName());
+        // This will throw a NotFoundException
+        $repository->getById(12345);
     }
 
     /**
-     * In case the category is found, the $repository->getByName() must return a category
+     * In case the category is found, the $categoryRepository->getByName() must return a category
      */
     public function testGetByName(): void
     {
-        $expectedId = 50;
+        $expectedId = 3;
+        $mockCategory = $this->mockCategories[$expectedId];
 
-        // We specify here that the mock category class will return 50 when using $category->getId();
-        $mockCategory = $this->createConfiguredMock(Category::class, ['getId' => $expectedId]);
-
-        // $mockEntityManager and $mockEntityRepository together mock the $this->db->getRepository->findBy() chain in
-        // CategoryRepository.
         // Specifies findBy will return final result
         $mockEntityRepository = $this->createMock(EntityRepository::class);
         $mockEntityRepository->expects($this->once())
             ->method('findBy')
-            ->with(['name' => 'Dreams'])
+            ->with(['name' => 'Food'])
             ->willReturn([0 => $mockCategory]);
 
         // Specifies that getRepository will return EntityRepository so that ->findBy() can be chained
@@ -66,25 +66,23 @@ class CategoryRepositoryTest extends TestCase
             ->willReturn($mockEntityRepository);
 
         $repository = new CategoryRepository($mockEntityManager);
-        $category = $repository->getByName('Dreams');
+        $category = $repository->getByName('Food');
 
         $this->assertEquals($expectedId, $category->getId());
     }
 
     /**
-     * In case an empty array is returned, $repository->getByName() must throw an exception
+     * In case an empty array is returned, $categoryRepository->getByName() must throw an exception
      */
     public function testGetByNameNotFoundException(): void
     {
         $this->expectException(NotFoundException::class);
 
-        // $mockEntityManager and $mockEntityRepository together mock the $this->db->getRepository->findBy() chain in
-        // CategoryRepository.
         // Specifies findBy will return final result
         $mockEntityRepository = $this->createMock(EntityRepository::class);
         $mockEntityRepository->expects($this->once())
             ->method('findBy')
-            ->with(['name' => 'Dreams'])
+            ->with(['name' => 'Ideas'])
             ->willReturn([]);
 
         // Specifies getRepository will return EntityRepository so that ->findBy() can be chained
@@ -96,6 +94,40 @@ class CategoryRepositoryTest extends TestCase
         $repository = new CategoryRepository($mockEntityManager);
 
         // This will throw a NotFoundException
-        $repository->getByName('Dreams');
+        $repository->getByName('Ideas');
+    }
+
+    public function testGetAllCategoriesForUser(): void
+    {
+        $expectedUsername = 'michael';
+        $expectedPassword = 'm!ch4el#1';
+        $expectedEmail = 'm.scott@mail.io';
+        $expectedPrivilegeLevel = User::PRIVILEGE_LEVEL_ADMIN;
+
+        $user = new User();
+        $user->setUsername($expectedUsername)
+            ->setPassword($expectedPassword)
+            ->setEmailAddress($expectedEmail)
+            ->setPrivilegeLevel($expectedPrivilegeLevel);
+        $user->setLastUpdatedTimestamp();
+
+        // Specifies findBy will return final result
+        $mockEntityRepository = $this->createMock(EntityRepository::class);
+        $mockEntityRepository->expects($this->once())
+            ->method('findBy')
+            ->with(['referencedUser' => $user])
+            ->willReturn([]);
+
+        // Specifies getRepository will return EntityRepository so that ->findBy() can be chained
+        $mockEntityManager = $this->createMock(EntityManager::class);
+        $mockEntityManager->expects($this->once())
+            ->method('getRepository')
+            ->willReturn($mockEntityRepository);
+
+        $repository = new CategoryRepository($mockEntityManager);
+        $categories = $repository->getAllCategoriesForUser($user);
+
+        $this->assertIsArray($categories);
+        $this->assertCount(0, $categories);
     }
 }
