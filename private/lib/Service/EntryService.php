@@ -86,10 +86,7 @@ class EntryService
     {
         $category = $this->categoryService->getCategoryById($categoryId);
 
-        /** @var Entry $entry */
-        $entry = $this->entryRepository->getById($entryId);
-        $this->ensureUserOwnsEntry($entry);
-
+        $entry = $this->getEntryById($entryId);
         $entry->setReferencedCategory($category)
               ->setTitle($entryTitle)
               ->setContent($entryContent);
@@ -105,7 +102,7 @@ class EntryService
      * @return Entry
      * @throws NotFoundException|ORMException
      */
-    public function findEntryById(int $entryId): Entry
+    public function getEntryById(int $entryId): Entry
     {
         /** @var Entry $entry */
         $entry = $this->entryRepository->getById($entryId);
@@ -123,8 +120,7 @@ class EntryService
     public function deleteEntry(int $entryId): void
     {
         /** @var Entry $entry */
-        $entry = $this->entryRepository->getById($entryId);
-        $this->ensureUserOwnsEntry($entry);
+        $entry = $this->getEntryById($entryId);
 
         $this->entryRepository->remove($entry);
         $this->entryRepository->save();

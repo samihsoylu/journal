@@ -57,12 +57,10 @@ class CategoryService
         }
     }
 
-    public function updateCategory(int $id, string $categoryName, string $categoryDescription): void
+    public function updateCategory(int $categoryId, string $categoryName, string $categoryDescription): void
     {
         /** @var Category $category */
-        $category = $this->categoryRepository->getById($id);
-        $this->ensureCategoryIsNotNull($category, $id);
-        $this->ensureUserOwnsCategory($category);
+        $category = $this->getCategoryById($categoryId);
 
         $category->setName($categoryName);
         $category->setDescription($categoryDescription);
@@ -74,9 +72,7 @@ class CategoryService
     public function deleteCategoryAndAssociatedEntries(int $categoryId): void
     {
         /** @var Category $category */
-        $category = $this->categoryRepository->getById($categoryId);
-        $this->ensureCategoryIsNotNull($category, $categoryId);
-        $this->ensureUserOwnsCategory($category);
+        $category = $this->getCategoryById($categoryId);
 
         // delete associated entries
         $entries = $this->entryRepository->findByUserIdAndCategoryId(

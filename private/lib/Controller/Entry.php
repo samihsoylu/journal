@@ -109,7 +109,7 @@ class Entry extends AbstractController
         $entryId = $this->getRouteParameters()['id'];
 
         try {
-            $entry = $this->entryService->findEntryById($entryId);
+            $entry = $this->entryService->getEntryById($entryId);
 
             $this->template->setVariable('entry', $entry);
         } catch (UserException $e) {
@@ -197,7 +197,7 @@ class Entry extends AbstractController
 
         try {
             $categories = $this->categoryService->getAllCategoriesForLoggedInUser();
-            $entry = $this->entryService->findEntryById($entryId);
+            $entry = $this->entryService->getEntryById($entryId);
 
             $this->template->setVariables([
                 'entry' => $entry,
