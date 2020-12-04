@@ -4,11 +4,10 @@ namespace App\Service;
 
 use App\Database\Model\Category;
 use App\Database\Repository\EntryRepository;
-use App\Database\Repository\UserRepository;
 use App\Database\Repository\CategoryRepository;
-use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\NotFoundException;
 use App\Exception\UserException\InvalidArgumentException;
+use App\Utility\Registry;
 use App\Utility\UserSession;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
@@ -16,20 +15,22 @@ class CategoryService
 {
     protected CategoryRepository $categoryRepository;
 
-    protected UserRepository $userRepository;
-
     protected EntryRepository $entryRepository;
 
     public function __construct()
     {
-        $this->categoryRepository = new CategoryRepository();
-        $this->userRepository = new UserRepository();
-        $this->entryRepository = new EntryRepository();
+        $this->categoryRepository = Registry::get(CategoryRepository::class);
+        $this->entryRepository    = Registry::get(EntryRepository::class);
     }
 
     public function getCategoryById(int $categoryId): Category
     {
-        return $this->categoryRepository->getById($categoryId);
+        /** @var Category $category */
+        $category = $this->categoryRepository->getById($categoryId);
+        $this->ensureCategoryIsNotNull($category, $categoryId);
+        $this->ensureUserOwnsCategory($category);
+
+        return $category;
     }
 
     /**
@@ -60,6 +61,7 @@ class CategoryService
     {
         /** @var Category $category */
         $category = $this->categoryRepository->getById($id);
+        $this->ensureCategoryIsNotNull($category, $id);
         $this->ensureUserOwnsCategory($category);
 
         $category->setName($categoryName);
@@ -73,12 +75,14 @@ class CategoryService
     {
         /** @var Category $category */
         $category = $this->categoryRepository->getById($categoryId);
-        $userId   = $category->getReferencedUser()->getId();
-
+        $this->ensureCategoryIsNotNull($category, $categoryId);
         $this->ensureUserOwnsCategory($category);
 
         // delete associated entries
-        $entries = $this->entryRepository->findByUserIdAndCategoryId($userId, $categoryId);
+        $entries = $this->entryRepository->findByUserIdAndCategoryId(
+            $category->getReferencedUser()->getId(),
+            $categoryId
+        );
         foreach ($entries as $entry) {
             $this->entryRepository->remove($entry);
         }
@@ -89,7 +93,14 @@ class CategoryService
         $this->categoryRepository->save();
     }
 
-    public function ensureUserOwnsCategory(Category $category): void
+    private function ensureCategoryIsNotNull(?Category $category, int $categoryId): void
+    {
+        if ($category === null) {
+            throw NotFoundException::entityIdNotFound(Category::class, $categoryId);
+        }
+    }
+
+    private function ensureUserOwnsCategory(Category $category): void
     {
         $session = UserSession::load();
 

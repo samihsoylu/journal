@@ -25,7 +25,7 @@ foreach ($argv as $categoryName) {
 
     // Creates a new category model and assigns a name
     $category = new Category();
-    $category->setCategoryName($categoryName);
+    $category->setName($categoryName);
 
     // Queue for saving in to the database
     $repository->queue($category);

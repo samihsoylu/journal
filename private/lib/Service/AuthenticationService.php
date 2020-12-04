@@ -6,6 +6,7 @@ use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
 use App\Exception\UserException\InvalidOperationException;
 use App\Utility\Cache;
+use App\Utility\Registry;
 use App\Utility\UserSession;
 use App\Exception\UserException\InvalidArgumentException;
 use Symfony\Component\Cache\CacheItem;
@@ -16,7 +17,7 @@ class AuthenticationService
 
     public function __construct()
     {
-        $this->repository = new UserRepository();
+        $this->repository = Registry::get(UserRepository::class);
     }
 
     public function register(string $username, string $password, string $email): void

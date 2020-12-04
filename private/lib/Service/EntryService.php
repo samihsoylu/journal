@@ -8,6 +8,7 @@ use App\Database\Repository\CategoryRepository;
 use App\Database\Repository\EntryRepository;
 use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\NotFoundException;
+use App\Utility\Registry;
 use App\Utility\Sanitize;
 use App\Utility\UserSession;
 use Doctrine\ORM\ORMException;
@@ -15,14 +16,12 @@ use Doctrine\ORM\ORMException;
 class EntryService
 {
     protected EntryRepository $entryRepository;
-    protected CategoryRepository $categoryRepository;
     protected CategoryService $categoryService;
 
     public function __construct()
     {
-        $this->entryRepository = new EntryRepository();
-        $this->categoryService = new CategoryService();
-        $this->categoryRepository = new CategoryRepository();
+        $this->entryRepository = Registry::get(EntryRepository::class);
+        $this->categoryService = Registry::get(CategoryRepository::class);
     }
 
     public function getAllEntriesForUser(): ?array
@@ -69,10 +68,7 @@ class EntryService
 
     public function createEntry(int $categoryId, string $title, string $content): int
     {
-        $category = $this->categoryRepository->getById($categoryId);
-
-        /** @var Category $category */
-        $this->categoryService->ensureUserOwnsCategory($category);
+        $category = $this->categoryService->getCategoryById($categoryId);
 
         $entry = new Entry();
         $entry->setReferencedCategory($category)
@@ -88,9 +84,7 @@ class EntryService
 
     public function updateEntry(int $entryId, int $categoryId, string $entryTitle, string $entryContent): void
     {
-        /** @var Category $category */
-        $category = $this->categoryRepository->getById($categoryId);
-        $this->categoryService->ensureUserOwnsCategory($category);
+        $category = $this->categoryService->getCategoryById($categoryId);
 
         /** @var Entry $entry */
         $entry = $this->entryRepository->getById($entryId);

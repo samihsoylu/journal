@@ -14,25 +14,6 @@ class CategoryRepository extends AbstractRepository
     protected const RESOURCE_NAME = Category::class;
 
     /**
-     * Queries the database, retrieves a category from the category table by the provided category name.
-     *
-     * @param string $categoryName
-     *
-     * @return Category
-     */
-    public function getByName(string $categoryName): Category
-    {
-        $category = $this->db->getRepository(self::RESOURCE_NAME)
-            ->findBy(['name' => $categoryName]);
-
-        if (!isset($category[0])) {
-            throw NotFoundException::entityNameNotFound(self::RESOURCE_NAME, $categoryName);
-        }
-
-        return $category[0];
-    }
-
-    /**
      * Queries the database for a list of categories that were created by the provided user
      *
      * @param User $user
@@ -40,13 +21,7 @@ class CategoryRepository extends AbstractRepository
      */
     public function getAllCategoriesForUser(User $user): array
     {
-        $categories = $this->db->getRepository(self::RESOURCE_NAME)
+        return $this->db->getRepository(self::RESOURCE_NAME)
             ->findBy(['referencedUser' => $user]);
-
-        if (!isset($categories[0])) {
-            return [];
-        }
-
-        return $categories;
     }
 }

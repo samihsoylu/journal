@@ -19,7 +19,7 @@ class Cache
         $this->cache = new FilesystemAdapter('', 0, SESSION_CACHE_PATH);
     }
 
-    public static function getInstance(): CacheInterface
+    public static function getInstance(): FilesystemAdapter
     {
         if (self::$instance === null) {
             self::$instance = new self();

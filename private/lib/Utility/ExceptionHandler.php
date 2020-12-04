@@ -42,7 +42,7 @@ class ExceptionHandler
         }
 
         if (strpos($methodName, 'View') === false) {
-            // Ensures action template is renamed to view, so login() changes to loginView()
+            // Ensures action template is renamed to view, example: login() changes to loginView()
             $methodName .= 'View';
         }
 
@@ -51,7 +51,6 @@ class ExceptionHandler
                 // Render a template
                 $controller->{$methodName}();
             } catch (\Exception $e) {
-                // In an unlikely event of a general exception from a view, this is caught here.
                 self::genericException($e);
             }
         }

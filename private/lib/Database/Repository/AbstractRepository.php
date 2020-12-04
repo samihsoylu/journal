@@ -20,10 +20,9 @@ abstract class AbstractRepository
      */
     protected const RESOURCE_NAME = '';
 
-    public function __construct(EntityManager $database = null)
+    public function __construct()
     {
-        // This allows test cases to pass mocked database instances
-        $this->db = $database ?? Database::getInstance();
+        $this->db = Database::getInstance();
     }
 
     /**
@@ -44,18 +43,9 @@ abstract class AbstractRepository
      * @return object
      * @throws NotFoundException|TransactionRequiredException|OptimisticLockException|ORMException
      */
-    public function getById(int $id): object
+    public function getById(int $id): ?object
     {
-        $modelName = static::RESOURCE_NAME;
-        $resource  = $this->db->find($modelName, $id);
-
-        if (!$resource) {
-            $className = last(explode('\\', static::RESOURCE_NAME));
-
-            throw NotFoundException::entityIdNotFound($className, $id);
-        }
-
-        return $resource;
+        return $this->db->find(static::RESOURCE_NAME, $id);
     }
 
     /**
