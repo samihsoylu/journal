@@ -149,6 +149,9 @@ class Template
             'site_title'  => $_ENV['SITE_TITLE'],
             'assets_url'  => ASSETS_URL,
             'active_page' => $this->getActivePage(),
+
+            // false because we don't care if the user is not signed in
+            'session'     => UserSession::load(false),
         ];
 
         $this->setVariables($struct);

@@ -3,7 +3,6 @@
 namespace App\Database\Repository;
 
 use App\Database\Model\User;
-use App\Exception\UserException\NotFoundException;
 use App\Database\Model\Category;
 
 class CategoryRepository extends AbstractRepository

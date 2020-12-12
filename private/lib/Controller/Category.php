@@ -22,7 +22,7 @@ class Category extends AbstractController
     public const UPDATE_CATEGORY_URL       = self::READ_CATEGORY_URL . '/update';
     public const UPDATE_CATEGORY_POST_URL  = self::UPDATE_CATEGORY_URL . '/action';
 
-    public const DELETE_CATEGORY_URL       = self::READ_CATEGORY_URL . '/delete';
+    public const DELETE_CATEGORY_URL       = self::READ_CATEGORY_URL . '/delete/{antiCsrfToken}';
 
     protected CategoryService $service;
 
@@ -88,11 +88,11 @@ class Category extends AbstractController
         /** @see CategoryValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
-        $id          = $this->getRouteParameters()['id'];
+        $categoryId  = $this->getRouteParameters()['id'];
         $title       = Sanitize::string($_POST['category_name'], 'strip|capitalize');
         $description = Sanitize::string($_POST['category_description'], 'htmlspecialchars');
 
-        $this->service->updateCategory($id, $title, $description);
+        $this->service->updateCategory($categoryId, $title, $description);
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
@@ -113,30 +113,33 @@ class Category extends AbstractController
         $parameters = $this->getRouteParameters();
 
         try {
-            // Find category
             $category = $this->service->getCategoryById($parameters['id']);
 
-            // Creates a variable in templating engine
             $this->template->setVariable('category', $category);
         } catch (UserException $e) {
             $this->setNotification(Notification::TYPE_ERROR, $e->getMessage());
         }
 
-        // Render template
         $this->template->render('category/update');
     }
 
     /**
      * Post action for deleting an existing category
-     * Url: /category/{id}/delete
+     * Url: /category/{id}/delete/{antiCsrfToken}
      *
      * @return void
      */
     public function delete(): void
     {
-        $id = $this->getRouteParameters()['id'];
+        $categoryId = $this->getRouteParameters()['id'];
 
-        $this->service->deleteCategoryAndAssociatedEntries($id);
+        // setting get variable for validator
+        $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
+
+        /** @see CategoryValidator::delete() */
+        $this->validator->validate(__FUNCTION__);
+
+        $this->service->deleteCategoryAndAssociatedEntries($categoryId);
 
         $this->setNotification(Notification::TYPE_SUCCESS, 'Category was removed');
 

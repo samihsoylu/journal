@@ -19,7 +19,7 @@ class Entry extends AbstractController
 
     public const READ_ENTRY_URL   = self::ENTRY_URL . '/{id:\d+}';
     public const UPDATE_ENTRY_URL = self::READ_ENTRY_URL . '/update';
-    public const DELETE_ENTRY_URL = self::READ_ENTRY_URL . '/delete';
+    public const DELETE_ENTRY_URL = self::READ_ENTRY_URL . '/delete/{antiCsrfToken}';
 
     public const CREATE_ENTRY_POST_URL = self::CREATE_ENTRY_URL . '/action';
     public const UPDATE_ENTRY_POST_URL = self::UPDATE_ENTRY_URL . '/action';
@@ -83,7 +83,7 @@ class Entry extends AbstractController
         );
 
         $this->template->setVariables([
-            'entries' => $entries,
+            'entries'     => $entries,
             'totalPages'  => $totalPages,
             'currentPage' => $currentPage,
             'filterUrl'   => $this->entryService->getUriForPageFilter($page),
@@ -223,6 +223,9 @@ class Entry extends AbstractController
     public function delete(): void
     {
         $entryId = $this->getRouteParameters()['id'];
+
+        // setting get variable for validator
+        $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
         $this->entryService->deleteEntry($entryId);
 

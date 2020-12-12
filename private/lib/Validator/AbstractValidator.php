@@ -2,8 +2,8 @@
 
 namespace App\Validator;
 
-use App\Exception\UserException;
 use App\Exception\UserException\InvalidParameterException;
+use App\Utility\UserSession;
 
 abstract class AbstractValidator
 {
@@ -30,19 +30,12 @@ abstract class AbstractValidator
         }
     }
 
-    /**
-     * Ensure that all $requireFields exist
-     *
-     * @param array $array
-     * @param array $requiredFields
-     * @throws InvalidParameterException
-     */
-    protected function ensureRequiredFieldsAreProvided(array $array, array $requiredFields): void
+    protected function ensureRequiredFieldsAreProvided(array $userProvidedData, array $requiredFields): void
     {
         $missingFields = [];
-        foreach ($requiredFields as $fieldName) {
-            if (!array_key_exists($fieldName, $array)) {
-                $missingFields[] = $fieldName;
+        foreach ($requiredFields as $requiredFieldName) {
+            if (!array_key_exists($requiredFieldName, $userProvidedData)) {
+                $missingFields[] = $requiredFieldName;
             }
         }
 
@@ -87,5 +80,17 @@ abstract class AbstractValidator
         if ($values[$fieldName] === '' || !filter_var($values[$fieldName], FILTER_VALIDATE_EMAIL)) {
             throw InvalidParameterException::invalidFieldValue($fieldName);
         }
+    }
+
+    protected function ensureUserHasProvidedValidAntiCSRFToken(?string $token): void
+    {
+        $session = UserSession::load();
+
+        if ($token === null || hash_equals($token, $session->getAntiCSRFToken()) === false) {
+            throw InvalidParameterException::invalidFieldValue('form_key');
+        }
+
+        // regenerate so that in the next request the user has a different token
+        $session->regenerateNewAntiCSRFToken();
     }
 }

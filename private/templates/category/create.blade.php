@@ -16,6 +16,7 @@
                         <input id="category_description" name="category_description" type="text" class="validate" required />
                         <label for="category_description">Category description</label>
                     </div>
+                    <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
                     <div>
                         <button class="btn btn-primary fullwidth" type="submit"><i class="material-icons">save</i> Save</button>
                     </div>

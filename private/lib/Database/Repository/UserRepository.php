@@ -2,7 +2,6 @@
 
 namespace App\Database\Repository;
 
-use App\Exception\UserException\NotFoundException;
 use App\Database\Model\User;
 
 class UserRepository extends AbstractRepository

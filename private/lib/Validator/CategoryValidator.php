@@ -13,6 +13,8 @@ class CategoryValidator extends AbstractValidator
     {
         $requiredFields = ['category_name', 'category_description'];
         $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
+
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
     }
 
     /**
@@ -21,5 +23,13 @@ class CategoryValidator extends AbstractValidator
     public function update(): void
     {
         $this->create();
+    }
+
+    /**
+     * @throws InvalidParameterException
+     */
+    public function delete(): void
+    {
+        $this->ensureUserHasProvidedValidAntiCSRFToken($_GET['form_key']);
     }
 }

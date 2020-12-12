@@ -24,8 +24,9 @@
                         <textarea id="entry_content" name="entry_content" style="min-height:250px;" class="materialize-textarea validate" required>@if(isset($post['entry_content'])){{ $post['entry_content'] }}@else{{ $entry->getContent() }}@endif</textarea>
                         <label for="entry_content">Entry content</label>
                     </div>
+                    <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
                     <div>
-                        <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('DANGER: This action will delete this entry', '{{ $entry_url }}/{{ $entry->getId() }}/delete')"><i class="material-icons">delete_forever</i> Delete</button>
+                        <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('DANGER: This action will delete this entry', '{{ $entry_url }}/{{ $entry->getId() }}/delete/{{ $session->getAntiCSRFToken() }}')"><i class="material-icons">delete_forever</i> Delete</button>
                         <button class="btn btn-primary" type="submit"><i class="material-icons">save</i> Save</button>
                     </div>
                 </form>

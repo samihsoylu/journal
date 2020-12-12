@@ -5,7 +5,6 @@ namespace App\Utility;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
 use App\Exception\UserException\InvalidOperationException;
-use App\Exception\UserException\NotFoundException;
 use Symfony\Component\Cache\CacheItem;
 
 /**
@@ -16,37 +15,26 @@ class UserSession
 {
     protected const DEFAULT_SESSION_EXPIRY_TIME = 86400; // 24 hours
 
-    /**
-     * @var string represents the id of the session stored in the visitors browser
-     */
     protected string $sessionId;
-
-    /**
-     * @var int represents the logged in user's id
-     */
     protected int $userId;
-
-    /**
-     * @var string represents the logged in user's username
-     */
     protected string $username;
-
-    /**
-     * @var int represents the logged in user's privilege level
-     */
     protected int $privilegeLevel;
+
+    protected string $antiCSRFToken;
 
     protected const SESSION_ID = 'SessionID';
     protected const USER_ID    = 'UserID';
     protected const USER_NAME  = 'Username';
-    protected const USER_PRIVILEGE_LEVEL = 'PrivlegeLevel';
+    protected const USER_PRIVILEGE_LEVEL = 'PrivilegeLevel';
+    protected const ANTI_CSRF_TOKEN      = 'AntiCSRFToken';
 
-    protected function __construct(string $id, int $userId, string $username, int $privilegeLevel)
+    protected function __construct(string $id, int $userId, string $username, int $privilegeLevel, string $antiCSRFToken)
     {
         $this->sessionId      = $id;
         $this->userId         = $userId;
         $this->username       = $username;
         $this->privilegeLevel = $privilegeLevel;
+        $this->antiCSRFToken  = $antiCSRFToken;
     }
 
     public function getSessionId(): string
@@ -89,13 +77,24 @@ class UserSession
         $this->privilegeLevel = $privilegeLevel;
     }
 
+    public function getAntiCSRFToken(): string
+    {
+        return $this->antiCSRFToken;
+    }
+
+    public function setAntiCSRFToken(string $antiCSRFToken): void
+    {
+        $this->antiCSRFToken = $antiCSRFToken;
+    }
+
     protected static function fromStruct(array $struct): self
     {
         return new self(
             $struct[self::SESSION_ID],
             $struct[self::USER_ID],
             $struct[self::USER_NAME],
-            $struct[self::USER_PRIVILEGE_LEVEL]
+            $struct[self::USER_PRIVILEGE_LEVEL],
+            $struct[self::ANTI_CSRF_TOKEN]
         );
     }
 
@@ -105,8 +104,22 @@ class UserSession
             self::SESSION_ID           => $this->sessionId,
             self::USER_ID              => $this->userId,
             self::USER_NAME            => $this->username,
-            self::USER_PRIVILEGE_LEVEL => $this->privilegeLevel
+            self::USER_PRIVILEGE_LEVEL => $this->privilegeLevel,
+            self::ANTI_CSRF_TOKEN      => $this->antiCSRFToken
         ];
+    }
+
+    private function generateNewAntiCSRFToken(): void
+    {
+        $prefix = sha1(random_bytes(5));
+
+        $this->antiCSRFToken = sha1($prefix . $this->sessionId);
+    }
+
+    public function regenerateNewAntiCSRFToken(): void
+    {
+        $this->generateNewAntiCSRFToken();
+        $this->save();
     }
 
     /**
@@ -129,9 +142,11 @@ class UserSession
             $sessionId,
             $userId,
             $username,
-            $privilegeLevel
+            $privilegeLevel,
+            ''
         );
 
+        $self->generateNewAntiCSRFToken();
         $self->save();
 
         return $self;
@@ -155,6 +170,7 @@ class UserSession
         $cache->save($item);
 
         Session::put(self::SESSION_ID, $this->sessionId);
+        Session::put(self::ANTI_CSRF_TOKEN, $this->antiCSRFToken);
     }
 
     /**
@@ -165,7 +181,7 @@ class UserSession
      * @return self|null
      * @throws InvalidOperationException
      */
-    public static function load($sessionIsRequired = true): ?self
+    public static function load(bool $sessionIsRequired = true): ?self
     {
         $sessionId = Session::get(self::SESSION_ID);
         if ($sessionId === null) {

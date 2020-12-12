@@ -24,6 +24,7 @@
                         <textarea id="entry_content" name="entry_content" style="min-height:250px;" class="materialize-textarea validate" required>@isset($post['entry_content']) {{ $post['entry_content'] }} @endisset</textarea>
                         <label for="entry_content">Entry content</label>
                     </div>
+                    <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
                     <div>
                         <button class="btn btn-primary" type="submit"><i class="material-icons">save</i> Save</button>
                     </div>

@@ -17,9 +17,10 @@
                         <input id="category_description" name="category_description" type="text" class="validate" value="{{ $category->getDescription() }}" required />
                         <label for="category_description">Category description</label>
                     </div>
+                    <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
                     <div>
                         <button class="btn btn-default" type="button" onclick="@if(isset($success)) window.location.href='{{ $categories_url }}' @else window.history.go(-1); return false; @endif"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
-                        <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('DANGER: This action will delete the {{ $category->getName() }} category and all existing entries inside of it!', '{{ $category_url }}/{{ $category->getId() }}/delete')"><i class="material-icons">delete_forever</i> Delete</button>
+                        <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('DANGER: This action will delete the {{ $category->getName() }} category and all existing entries inside of it!', '{{ $category_url }}/{{ $category->getId() }}/delete/{{ $session->getAntiCSRFToken() }}')"><i class="material-icons">delete_forever</i> Delete</button>
                         <button class="btn btn-primary" type="submit"><i class="material-icons">save</i> Save</button>
                     </div>
                 </form>
