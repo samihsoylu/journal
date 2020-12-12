@@ -2,14 +2,10 @@
 
 namespace App\Service;
 
-use App\Database\Model\Category;
 use App\Database\Model\Entry;
-use App\Database\Repository\CategoryRepository;
 use App\Database\Repository\EntryRepository;
-use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\NotFoundException;
 use App\Utility\Registry;
-use App\Utility\Sanitize;
 use App\Utility\UserSession;
 use Doctrine\ORM\ORMException;
 
@@ -21,7 +17,7 @@ class EntryService
     public function __construct()
     {
         $this->entryRepository = Registry::get(EntryRepository::class);
-        $this->categoryService = Registry::get(CategoryRepository::class);
+        $this->categoryService = Registry::get(CategoryService::class);
     }
 
     public function getAllEntriesForUser(): ?array
@@ -34,16 +30,17 @@ class EntryService
         ?int $categoryId,
         ?int $startCreatedDate,
         ?int $endCreatedDate,
-        ?int $offset,
-        ?int $limit
+        ?int $page = 1,
+        ?int $pageSize = 25
     ): array
     {
         $session = UserSession::load();
 
-        if ($categoryId !== null) {
-            $category = $this->categoryRepository->getById($categoryId);
-            $this->categoryService->ensureUserOwnsCategory($category);
+        if ($page < 1) {
+            $page = 1;
         }
+        $index = $page - 1;
+        $offset = $index * $pageSize;
 
         $entries = $this->entryRepository->getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
             $session->getUserId(),
@@ -52,7 +49,7 @@ class EntryService
             $startCreatedDate,
             $endCreatedDate,
             $offset,
-            $limit
+            $pageSize
         );
 
         $totalEntriesCount = $this->entryRepository->getTotalCountOfEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
@@ -63,7 +60,26 @@ class EntryService
             $endCreatedDate
         );
 
-        return [$totalEntriesCount, $entries];
+        $totalPages = 1;
+        if ($totalEntriesCount > 0) {
+            $totalPages = ceil($totalEntriesCount / $pageSize);
+        }
+
+        return [$page, $totalPages, $entries];
+    }
+
+    public function getUriForPageFilter($page): string
+    {
+        $filterUrl = str_replace("&page={$page}", '', $_SERVER['REQUEST_URI']);
+
+        // if no filters are currently being used
+        if (strpos($filterUrl, '?') === false) {
+            // /entires becomes /entries? for /entires?page=1
+            return "{$filterUrl}?";
+        }
+
+        // for /entries?something=1&page=1
+        return "{$filterUrl}&";
     }
 
     public function createEntry(int $categoryId, string $title, string $content): int

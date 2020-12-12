@@ -12,8 +12,8 @@ class EntryValidator extends AbstractValidator
     public function index(): void
     {
         $this->ensureOptionalValueIsNumeric($this->get, 'category_id');
-        $this->ensureOptionalValueIsNumeric($this->get, 'entries_limit');
-        $this->ensureOptionalValueIsNumeric($this->get, 'offset');
+        $this->ensureOptionalValueIsNumeric($this->get, 'page_size');
+        $this->ensureOptionalValueIsNumeric($this->get, 'page');
 
         $this->ensureOptionalDateFormatIsValid($this->get, 'date_from');
         $this->ensureOptionalDateFormatIsValid($this->get, 'date_to');

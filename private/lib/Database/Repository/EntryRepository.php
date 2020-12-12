@@ -4,6 +4,7 @@ namespace App\Database\Repository;
 
 use App\Database\Model\Entry;
 use App\Database\Model\User;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 
 class EntryRepository extends AbstractRepository
@@ -11,7 +12,7 @@ class EntryRepository extends AbstractRepository
     /**
      * @inheritdoc
      */
-    protected const RESOURCE_NAME = Entry::class;
+    public const RESOURCE_NAME = Entry::class;
 
     /**
      * @return Entry[]
@@ -111,7 +112,8 @@ class EntryRepository extends AbstractRepository
             ->setParameter('userId', $userId);
 
         if ($categoryId !== null) {
-            $qb->andWhere('e.referencedCategory = :categoryId')
+            $qb->innerJoin(CategoryRepository::RESOURCE_NAME, 'c', Join::WITH, 'e.referencedCategory = :categoryId')
+                ->where('c.referencedUser = :userId')
                 ->setParameter('categoryId', $categoryId);
         }
 

@@ -11,7 +11,7 @@ class CategoryRepository extends AbstractRepository
     /**
      * @inheritdoc
      */
-    protected const RESOURCE_NAME = Category::class;
+    public const RESOURCE_NAME = Category::class;
 
     /**
      * Queries the database for a list of categories that were created by the provided user

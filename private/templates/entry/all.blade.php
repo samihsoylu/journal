@@ -28,15 +28,15 @@
 
                         <!-- Mobile Filter: Dropdown -->
                         <li class="input-field">
-                            <select id="entries_limit_m" name="entries_limit">
-                                <option value="25" @if(@$get['entries_limit'] === '25') selected @endif>25</option>
-                                <option value="50" @if(@$get['entries_limit'] === '50') selected @endif>50</option>
-                                <option value="100" @if(@$get['entries_limit'] === '100') selected @endif>100</option>
-                                <option value="150" @if(@$get['entries_limit'] === '150') selected @endif>150</option>
-                                <option value="200" @if(@$get['entries_limit'] === '200') selected @endif>200</option>
-                                <option value="250" @if(@$get['entries_limit'] === '250') selected @endif>250</option>
+                            <select id="page_size_m" name="page_size">
+                                <option value="25" @if(@$get['page_size'] === '25') selected @endif>25</option>
+                                <option value="50" @if(@$get['page_size'] === '50') selected @endif>50</option>
+                                <option value="100" @if(@$get['page_size'] === '100') selected @endif>100</option>
+                                <option value="150" @if(@$get['page_size'] === '150') selected @endif>150</option>
+                                <option value="200" @if(@$get['page_size'] === '200') selected @endif>200</option>
+                                <option value="250" @if(@$get['page_size'] === '250') selected @endif>250</option>
                             </select>
-                            <label for="entries_limit_m" class="dropdown-label">Show entries (required)</label>
+                            <label for="page_size_m" class="dropdown-label">Show entries (required)</label>
                         </li>
 
                         <!-- Mobile Filter: Dropdown -->
@@ -81,15 +81,15 @@
                         <label for="search_d">Filter by title (optional)</label>
                     </div>
                     <div class="input-field">
-                        <select id="entries_limit_d" name="entries_limit">
-                            <option value="25" @if(@$get['entries_limit'] === '25') selected @endif>25</option>
-                            <option value="50" @if(@$get['entries_limit'] === '50') selected @endif>50</option>
-                            <option value="100" @if(@$get['entries_limit'] === '100') selected @endif>100</option>
-                            <option value="150" @if(@$get['entries_limit'] === '150') selected @endif>150</option>
-                            <option value="200" @if(@$get['entries_limit'] === '200') selected @endif>200</option>
-                            <option value="250" @if(@$get['entries_limit'] === '250') selected @endif>250</option>
+                        <select id="page_size_d" name="page_size">
+                            <option value="25" @if(@$get['page_size'] === '25') selected @endif>25</option>
+                            <option value="50" @if(@$get['page_size'] === '50') selected @endif>50</option>
+                            <option value="100" @if(@$get['page_size'] === '100') selected @endif>100</option>
+                            <option value="150" @if(@$get['page_size'] === '150') selected @endif>150</option>
+                            <option value="200" @if(@$get['page_size'] === '200') selected @endif>200</option>
+                            <option value="250" @if(@$get['page_size'] === '250') selected @endif>250</option>
                         </select>
-                        <label for="entries_limit_d">Show entries (required)</label>
+                        <label for="page_size_d">Show entries (required)</label>
                     </div>
                     <div class="input-field">
                         <select id="category_id_d" name="category_id">
@@ -131,22 +131,29 @@
                     <p>No entries found.</p>
                 @endempty
 
-                @isset($pages)
-                    <div class="row">
-                        <div class="col s12">
-                            <ul class="pagination center">
-                                @foreach ($pages as $page)
-                                    <li class="waves-effect"><a href="#!">{{ $page->getNumber() }}</a></li>
-                                @endforeach
-                                <li class="disabled"><a href="#!"><i class="material-icons">chevron_left</i></a></li>
-                                <li class="active"><a href="#!">1</a></li>
-                                <li class="waves-effect"><a href="#!">2</a></li>
-                                <li class="waves-effect"><a href="#!">3</a></li>
-                                <li class="waves-effect"><a href="#!"><i class="material-icons">chevron_right</i></a></li>
-                            </ul>
-                        </div>
+                @php($leftIconClass  = 'waves-effect')
+                @php($rightIconClass = 'waves-effect')
+                @php($leftIconUrl    = "{$filterUrl}page=" . ($currentPage - 1))
+                @php($rightIconUrl   = "{$filterUrl}page=" . ($currentPage + 1))
+                @if($currentPage == 1)
+                    @php($leftIconClass = 'disabled')
+                    @php($leftIconUrl   = '#!')
+                @endif
+                @if($currentPage == $totalPages)
+                    @php($rightIconClass = 'disabled')
+                    @php($rightIconUrl   = '#!')
+                @endif
+                <div class="row">
+                    <div class="col s12">
+                        <ul class="pagination center">
+                            <li class="{{ $leftIconClass }}"><a href="{{ $leftIconUrl }}"> <i class="material-icons">chevron_left</i></a></li>
+                            @for ($i = 1; $i <= $totalPages; $i++)
+                                <li class="@if($currentPage === $i) active @else waves-effect @endif"><a href="{{ $filterUrl }}page={{ $i }}">{{ $i }}</a></li>
+                            @endfor
+                            <li class="{{ $rightIconClass }}"><a href="{{ $rightIconUrl }}"><i class="material-icons">chevron_right</i></a></li>
+                        </ul>
                     </div>
-                @endisset
+                </div>
 
             </div>
         </div>

@@ -18,7 +18,7 @@ abstract class AbstractRepository
     /**
      * @var string RESOURCE_NAME name of the database model (name of table)
      */
-    protected const RESOURCE_NAME = '';
+    public const RESOURCE_NAME = '';
 
     public function __construct()
     {

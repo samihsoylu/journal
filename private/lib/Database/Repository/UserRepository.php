@@ -10,7 +10,7 @@ class UserRepository extends AbstractRepository
     /**
      * @inheritdoc
      */
-    protected const RESOURCE_NAME = User::class;
+    public const RESOURCE_NAME = User::class;
 
     /**
      * Retrieves a user from the users table via the provided username.

@@ -67,9 +67,9 @@ class Sanitize
      * @param string $dataType int|string
      * @param string|null $options must be provided when using dataType 'string'
      *
-     * @return string|null
+     * @return int|string|null
      */
-    public static function getVariable(array $getVariable, string $fieldName, string $dataType, string $options = null): ?string
+    public static function getVariable(array $getVariable, string $fieldName, string $dataType, string $options = null)
     {
         $value = $getVariable[$fieldName] ?? null;
 
@@ -81,7 +81,6 @@ class Sanitize
             switch ($dataType) {
                 case 'int':
                     return self::int($value);
-                    break;
                 case 'string':
                     return self::string($value, $options);
             }

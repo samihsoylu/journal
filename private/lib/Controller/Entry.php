@@ -59,8 +59,8 @@ class Entry extends AbstractController
         $categoryId      = Sanitize::getVariable($_GET, 'category_id', 'int');
         $createdDateFrom = Sanitize::getVariable($_GET, 'date_from', 'string', 'trim|htmlspecialchars');
         $createdDateTo   = Sanitize::getVariable($_GET, 'date_to', 'string', 'trim|htmlspecialchars');
-        $limit           = Sanitize::getVariable($_GET, 'entries_limit', 'int');
-        $offset          = Sanitize::getVariable($_GET, 'page', 'int');
+        $pageSize        = Sanitize::getVariable($_GET, 'page_size', 'int') ?? 25;
+        $page            = Sanitize::getVariable($_GET, 'page', 'int') ?? 1;
 
         if ($createdDateFrom !== null) {
             $date = new \DateTime($createdDateFrom);
@@ -73,18 +73,20 @@ class Entry extends AbstractController
             $createdDateTo = $date->getTimestamp();
         }
 
-        [$totalEntriesCount, $entries] = $this->entryService->getAllEntriesForUserFromFilter(
+        [$currentPage, $totalPages, $entries] = $this->entryService->getAllEntriesForUserFromFilter(
             $searchQuery,
             $categoryId,
             $createdDateFrom,
             $createdDateTo,
-            $offset,
-            $limit
+            $page,
+            $pageSize
         );
 
         $this->template->setVariables([
             'entries' => $entries,
-            'totalEntriesCount' => $totalEntriesCount,
+            'totalPages'  => $totalPages,
+            'currentPage' => $currentPage,
+            'filterUrl'   => $this->entryService->getUriForPageFilter($page),
         ]);
 
         $this->indexView();

@@ -71,10 +71,9 @@ class CategoryService
 
     public function deleteCategoryAndAssociatedEntries(int $categoryId): void
     {
-        /** @var Category $category */
         $category = $this->getCategoryById($categoryId);
 
-        // delete associated entries
+        // get associated entries and delete them
         $entries = $this->entryRepository->findByUserIdAndCategoryId(
             $category->getReferencedUser()->getId(),
             $categoryId
