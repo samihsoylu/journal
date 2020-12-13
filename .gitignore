@@ -10,3 +10,20 @@
 !/private/cache/templates/
 /private/cache/templates/*
 !/private/cache/templates/.gitkeep
+
+!/private/cache/sessions/
+/private/cache/sessions/*
+!/private/cache/sessions/.gitkeep
+
+!/private/cache/database/
+/private/cache/database/*
+!/private/cache/database/cache/
+/private/cache/database/cache/*
+!/private/cache/database/cache/.gitkeep
+
+!/private/cache/database/proxy/
+/private/cache/database/proxy/*
+!/private/cache/database/proxy/.gitkeep
+
+# Media files
+*.psd
