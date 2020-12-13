@@ -21,7 +21,7 @@ $route->addRoute('GET', Authentication::LOGOUT_URL, 'Authentication@logout');
 $route->addRoute('GET', Entry::ENTRIES_URL, 'Entry@index');
 $route->addRoute('GET', Entry::CREATE_ENTRY_URL, 'Entry@createView');
 $route->addRoute('POST', Entry::CREATE_ENTRY_POST_URL, 'Entry@create');
-$route->addRoute('GET', Entry::READ_ENTRY_URL, 'Entry@read');
+$route->addRoute('GET', Entry::READ_ENTRY_URL, 'Entry@readView');
 $route->addRoute('GET', Entry::UPDATE_ENTRY_URL, 'Entry@updateView');
 $route->addRoute('POST', Entry::UPDATE_ENTRY_POST_URL, 'Entry@update');
 $route->addRoute('GET', Entry::DELETE_ENTRY_URL, 'Entry@delete');

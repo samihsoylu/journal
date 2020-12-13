@@ -106,7 +106,7 @@ class Entry extends AbstractController
      *
      * @return void
      */
-    public function read(): void
+    public function readView(): void
     {
         $entryId = $this->getRouteParameters()['id'];
 

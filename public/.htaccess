@@ -3,7 +3,7 @@ Options -MultiViews
 <IfModule mod_php7.c>
     # Session timeout
     php_value session.cookie_lifetime 86400
-    php_value session.gc_maxlifetime 200000
+    php_value session.gc_maxlifetime 86400
 </IfModule>
 
 RewriteEngine On

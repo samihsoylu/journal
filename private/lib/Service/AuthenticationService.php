@@ -5,13 +5,11 @@ namespace App\Service;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
 use App\Exception\UserException\InvalidOperationException;
-use App\Utility\Cache;
+use App\Service\Helpers\AuthenticationHelper;
 use App\Utility\Encryptor;
 use App\Utility\Registry;
 use App\Utility\UserSession;
 use App\Exception\UserException\InvalidArgumentException;
-use Defuse\Crypto\KeyProtectedByPassword;
-use Symfony\Component\Cache\CacheItem;
 
 class AuthenticationService
 {
@@ -19,10 +17,13 @@ class AuthenticationService
 
     protected Encryptor $encryptor;
 
+    private AuthenticationHelper $helper;
+
     public function __construct()
     {
         $this->repository = Registry::get(UserRepository::class);
         $this->encryptor  = Registry::get(Encryptor::class);
+        $this->helper     = Registry::get(AuthenticationHelper::class);
     }
 
     public function register(string $username, string $password, string $email): void
@@ -53,14 +54,14 @@ class AuthenticationService
 
     public function login(string $username, string $password): void
     {
-        $userFailedLoginCount = $this->getFailedLoginCount();
+        $userFailedLoginCount = $this->helper->getFailedLoginCount();
         if ($userFailedLoginCount >= 10) {
             throw InvalidOperationException::loginAttemptsExceeded($userFailedLoginCount);
         }
 
         $user = $this->repository->getByUsername($username);
         if ($user === null || !password_verify($password, $user->getPassword())) {
-            $this->setFailedLoginCount($userFailedLoginCount + 1);
+            $this->helper->setFailedLoginCount($userFailedLoginCount + 1);
 
             // Username or password is incorrect
             throw InvalidArgumentException::incorrectLogin();
@@ -78,7 +79,7 @@ class AuthenticationService
             $encodedEncryptionKey
         );
 
-        $this->setFailedLoginCount(0);
+        $this->helper->setFailedLoginCount(0);
     }
 
     public function logout(): void
@@ -107,33 +108,5 @@ class AuthenticationService
         }
 
         return ($session->getPrivilegeLevel() === $requiredPrivilegeLevel);
-    }
-
-    private function getFailedLoginCount(): int
-    {
-        $ipAddress = $_SERVER['REMOTE_ADDR'];
-        $cache = Cache::getInstance();
-
-        /** @var CacheItem $item */
-        $item = $cache->getItem($ipAddress);
-
-        if ($item->isHit()) {
-            return (int)$item->get();
-        }
-
-        return 0;
-    }
-
-    private function setFailedLoginCount(int $count): void
-    {
-        $ipAddress = $_SERVER['REMOTE_ADDR'];
-        $cache = Cache::getInstance();
-
-        /** @var CacheItem $item */
-        $item = $cache->getItem($ipAddress);
-
-        $item->expiresAfter(3600);
-        $item->set($count);
-        $cache->save($item);
     }
 }

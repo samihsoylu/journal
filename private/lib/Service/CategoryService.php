@@ -5,8 +5,8 @@ namespace App\Service;
 use App\Database\Model\Category;
 use App\Database\Repository\EntryRepository;
 use App\Database\Repository\CategoryRepository;
-use App\Exception\UserException\NotFoundException;
 use App\Exception\UserException\InvalidArgumentException;
+use App\Service\Helpers\CategoryHelper;
 use App\Utility\Registry;
 use App\Utility\UserSession;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -17,18 +17,21 @@ class CategoryService
 
     protected EntryRepository $entryRepository;
 
+    private CategoryHelper $helper;
+
     public function __construct()
     {
         $this->categoryRepository = Registry::get(CategoryRepository::class);
         $this->entryRepository    = Registry::get(EntryRepository::class);
+        $this->helper             = Registry::get(CategoryHelper::class);
     }
 
     public function getCategoryById(int $categoryId): Category
     {
         /** @var Category $category */
         $category = $this->categoryRepository->getById($categoryId);
-        $this->ensureCategoryIsNotNull($category, $categoryId);
-        $this->ensureUserOwnsCategory($category);
+        $this->helper->ensureCategoryIsNotNull($category, $categoryId);
+        $this->helper->ensureUserOwnsCategory($category);
 
         return $category;
     }
@@ -86,22 +89,5 @@ class CategoryService
         // delete category
         $this->categoryRepository->remove($category);
         $this->categoryRepository->save();
-    }
-
-    private function ensureCategoryIsNotNull(?Category $category, int $categoryId): void
-    {
-        if ($category === null) {
-            throw NotFoundException::entityIdNotFound(Category::class, $categoryId);
-        }
-    }
-
-    private function ensureUserOwnsCategory(Category $category): void
-    {
-        $session = UserSession::load();
-
-        if ($category->getReferencedUser()->getId() !== $session->getUserId()) {
-            // found category does not belong to the logged in user
-            throw NotFoundException::entityIdNotFound(Category::class, $category->getId());
-        }
     }
 }
