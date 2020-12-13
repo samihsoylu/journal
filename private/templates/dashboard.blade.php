@@ -12,7 +12,7 @@
                                 <div class="card-image">
                                     <img src="{{ $assets_url }}/images/journal-handwriting-woman.jpg">
                                     <span class="card-title">Create an entry</span>
-                                    <a class="btn-floating halfway-fab waves-effect waves-light green"><i class="material-icons">add</i></a>
+                                    <a href="{{ $create_entry_url }}" class="btn-floating halfway-fab waves-effect waves-light green"><i class="material-icons">add</i></a>
                                 </div>
                                 <div class="dashboard card-content">
                                     <p>Organise your thoughts, feelings and opinions.</p>

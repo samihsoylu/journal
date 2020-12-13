@@ -1,23 +1,18 @@
 <header>
     <!-- Account menu dropdown (desktop) -->
     <ul id="account_menu" class="dropdown-content">
-        <li><a href="#!">Profile</a></li>
+        <li><a href="#!">Account</a></li>
         <li class="divider"></li>
         <li><a href="{{ $logout_url }}">Logout</a></li>
 
     </ul>
-    <!-- Create menu dropdown (desktop) -->
-    <ul id="create_menu" class="dropdown-content">
-        <li><a href="#!">Entry</a></li>
-        <li><a href="#!">Category</a></li>
-    </ul>
 
     <ul id="mobile_menu" class="sidenav">
-        <li><a href="#!">Dashboard</a></li>
-        <li><a href="#!">Entries</a></li>
-        <li><a href="#!">Categories</a></li>
+        <li><a href="{{ $dashboard_url }}">Dashboard</a></li>
+        <li><a href="{{ $entries_url }}">Entries</a></li>
+        <li><a href="{{ $categories_url }}">Categories</a></li>
         <li><a href="#!">Users</a></li>
-        <li><a href="#!">Profile</a></li>
+        <li><a href="#!">Account</a></li>
         <li><a href="{{ $logout_url }}">Logout</a></li>
     </ul>
 
@@ -38,7 +33,7 @@
     </div>
 
     <div class="parallax-container parallax-page-heading">
-        <div class="parallax"><img src="{{ $assets_url }}/images/title-images/photo-of-island-during-golden-hour-1119973.jpg"></div>
+        <div class="parallax"><img style="height:225px;" src="{{ $assets_url }}/images/header/parallax-photo.jpg"></div>
         <div class="container">
             <h2 class="white-text text-shadow vertical-center">@yield('pageTitle')</h2>
         </div>
