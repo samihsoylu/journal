@@ -70,7 +70,7 @@ abstract class AbstractValidator
 
     protected function ensureValueIsNotTooLong(array $values, string $fieldName, int $maxLength): void
     {
-        if(strlen($values[$fieldName]) > $maxLength) {
+        if (strlen($values[$fieldName]) > $maxLength) {
             throw InvalidParameterException::stringTooLong($fieldName, $maxLength);
         }
     }

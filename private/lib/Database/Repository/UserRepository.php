@@ -28,5 +28,4 @@ class UserRepository extends AbstractRepository
         return $this->db->getRepository(self::RESOURCE_NAME)
             ->findOneBy(['emailAddress' => $emailAddress]);
     }
-
 }

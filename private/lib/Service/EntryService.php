@@ -30,8 +30,7 @@ class EntryService
         ?int $endCreatedDate,
         ?int $page = 1,
         ?int $pageSize = 25
-    ): array
-    {
+    ): array {
         $session = UserSession::load();
 
         if ($page < 1) {

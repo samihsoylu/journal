@@ -104,8 +104,7 @@ class EntryRepository extends AbstractRepository
         ?int $categoryId,
         ?int $startCreatedDate,
         ?int $endCreatedDate
-    ): void
-    {
+    ): void {
         $qb->from(self::RESOURCE_NAME, 'e')
             ->where('e.referencedUser = :userId')
             ->orderBy('e.createdTimestamp', 'DESC')

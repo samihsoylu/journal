@@ -1,5 +1,7 @@
 <?php
 
+// This is a configuration file for the doctrine cli
+
 use App\Database\Database;
 use Doctrine\ORM\Tools\Console\ConsoleRunner;
 

@@ -99,7 +99,7 @@ class Template
 
         $variableList = [];
         foreach ($controllers as $controller) {
-            if (strpos($controller,'Abstract') !== false) {
+            if (strpos($controller, 'Abstract') !== false) {
                 // ignore abstract class
                 continue;
             }
