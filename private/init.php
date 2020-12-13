@@ -1,13 +1,21 @@
 <?php
 
-// Session lifetime 24 hours
-ini_set('session.cookie_lifetime', 86400);
-ini_set('session.gc_maxlifetime', 200000);
+// **PREVENTING SESSION HIJACKING**
+// Prevents javascript XSS attacks aimed to steal the session ID
+ini_set('session.cookie_httponly', 1);
 
-session_start();
+// **PREVENTING SESSION FIXATION**
+// Session ID cannot be passed through URLs
+ini_set('session.use_only_cookies', 1);
 
+// Uses a secure connection (HTTPS) if possible
+ini_set('session.cookie_secure', 1);
+
+// Default error settings
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
+
+session_start();
 
 // BASE_PATH = Parent directory
 define('BASE_PATH', dirname(__DIR__));
@@ -30,9 +38,11 @@ if (!DEBUG_MODE) {
 }
 
 // Project constants
-const MODEL_PATH          = BASE_PATH . '/private/lib/Database/Model/';
-const TEMPLATE_PATH       = BASE_PATH . '/private/templates/';
-const TEMPLATE_CACHE_PATH = BASE_PATH . '/private/cache/templates/';
-const SESSION_CACHE_PATH  = BASE_PATH . '/private/cache/sessions/';
-const ASSETS_URL          = BASE_URL  . '/assets';
-
+const MODEL_PATH                  = BASE_PATH . '/private/lib/Database/Model/';
+const TEMPLATE_PATH               = BASE_PATH . '/private/templates/';
+const TEMPLATE_CACHE_PATH         = BASE_PATH . '/private/cache/templates/';
+const SESSION_CACHE_PATH          = BASE_PATH . '/private/cache/sessions/';
+const DATABASE_CACHE_PATH         = BASE_PATH . '/private/cache/database';
+const ASSETS_URL                  = BASE_URL  . '/assets';
+const DEFAULT_CACHE_EXPIRY_TIME   = 3600; // 1 hour
+const DEFAULT_SESSION_EXPIRY_TIME = 3600 * 2;

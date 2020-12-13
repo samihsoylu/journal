@@ -13,28 +13,27 @@ use Symfony\Component\Cache\CacheItem;
  */
 class UserSession
 {
-    protected const DEFAULT_SESSION_EXPIRY_TIME = 86400; // 24 hours
-
     protected string $sessionId;
-    protected int $userId;
+    protected int    $userId;
     protected string $username;
-    protected int $privilegeLevel;
+    protected int    $privilegeLevel;
 
     protected string $antiCSRFToken;
+    protected string $encryptionKey;
 
     protected const SESSION_ID = 'SessionID';
     protected const USER_ID    = 'UserID';
     protected const USER_NAME  = 'Username';
     protected const USER_PRIVILEGE_LEVEL = 'PrivilegeLevel';
     protected const ANTI_CSRF_TOKEN      = 'AntiCSRFToken';
+    protected const ENCRYPTION_KEY       = 'EncodedKey';
 
-    protected function __construct(string $id, int $userId, string $username, int $privilegeLevel, string $antiCSRFToken)
+    protected function __construct(string $id, int $userId, string $username, int $privilegeLevel)
     {
         $this->sessionId      = $id;
         $this->userId         = $userId;
         $this->username       = $username;
         $this->privilegeLevel = $privilegeLevel;
-        $this->antiCSRFToken  = $antiCSRFToken;
     }
 
     public function getSessionId(): string
@@ -87,14 +86,23 @@ class UserSession
         $this->antiCSRFToken = $antiCSRFToken;
     }
 
+    public function getEncryptionKey(): string
+    {
+        return $this->encryptionKey;
+    }
+
+    public function setEncryptionKey(string $encryptionKey): void
+    {
+        $this->encryptionKey = $encryptionKey;
+    }
+
     protected static function fromStruct(array $struct): self
     {
         return new self(
             $struct[self::SESSION_ID],
             $struct[self::USER_ID],
             $struct[self::USER_NAME],
-            $struct[self::USER_PRIVILEGE_LEVEL],
-            $struct[self::ANTI_CSRF_TOKEN]
+            $struct[self::USER_PRIVILEGE_LEVEL]
         );
     }
 
@@ -105,7 +113,6 @@ class UserSession
             self::USER_ID              => $this->userId,
             self::USER_NAME            => $this->username,
             self::USER_PRIVILEGE_LEVEL => $this->privilegeLevel,
-            self::ANTI_CSRF_TOKEN      => $this->antiCSRFToken
         ];
     }
 
@@ -122,15 +129,7 @@ class UserSession
         $this->save();
     }
 
-    /**
-     * Creates a new session instance
-     *
-     * @param int $userId
-     * @param string $username
-     * @param int $privilegeLevel
-     * @return self
-     */
-    public static function create(int $userId, string $username, int $privilegeLevel): self
+    public static function create(int $userId, string $username, int $privilegeLevel, string $encodedEncryptionKey): self
     {
         // Generate a random prefix
         $prefix = sha1(random_bytes(5));
@@ -142,11 +141,11 @@ class UserSession
             $sessionId,
             $userId,
             $username,
-            $privilegeLevel,
-            ''
+            $privilegeLevel
         );
 
         $self->generateNewAntiCSRFToken();
+        $self->setEncryptionKey($encodedEncryptionKey);
         $self->save();
 
         return $self;
@@ -166,11 +165,12 @@ class UserSession
 
         /** @var CacheItem $item */
         $item->set($this->toStruct());
-        $item->expiresAfter(self::DEFAULT_SESSION_EXPIRY_TIME);
+        $item->expiresAfter(DEFAULT_SESSION_EXPIRY_TIME);
         $cache->save($item);
 
         Session::put(self::SESSION_ID, $this->sessionId);
         Session::put(self::ANTI_CSRF_TOKEN, $this->antiCSRFToken);
+        \setcookie(self::ENCRYPTION_KEY, $this->encryptionKey, time() + DEFAULT_SESSION_EXPIRY_TIME, '/');
     }
 
     /**
@@ -200,7 +200,21 @@ class UserSession
             return null;
         }
 
-        return self::fromStruct($item->get());
+        $self          = self::fromStruct($item->get());
+        $token         = Session::get(self::ANTI_CSRF_TOKEN);
+        $encryptionKey = $_COOKIE[self::ENCRYPTION_KEY] ?? null;
+        if ($encryptionKey === null) {
+            $self::destroy();
+            if ($sessionIsRequired) {
+                throw InvalidOperationException::userIsNotLoggedIn();
+            }
+            return null;
+        }
+
+        $self->setAntiCSRFToken($token);
+        $self->setEncryptionKey($encryptionKey);
+
+        return $self;
     }
 
     /**
@@ -221,6 +235,7 @@ class UserSession
             // deletes stored userId, username & privilegeLevel from cache
             $cache->delete($sessionId);
         }
+        unset($_COOKIE[self::ENCRYPTION_KEY]);
 
         Session::destroy();
     }

@@ -2,6 +2,8 @@
 
 namespace App\Database\Model;
 
+use App\Utility\Encryptor;
+use App\Utility\UserSession;
 use Doctrine\ORM\Mapping\Index;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -100,7 +102,7 @@ class Entry extends AbstractModel
         $parser = new \Parsedown();
         $parser->setSafeMode(true);
 
-        return $parser->text($this->getContent());
+        return $parser->text($this->getContentDecrypted());
     }
 
     public function setContent(string $content): self
@@ -108,5 +110,29 @@ class Entry extends AbstractModel
         $this->content = $content;
 
         return $this;
+    }
+
+    public function getContentDecrypted(): string
+    {
+        $session   = UserSession::load();
+        $encryptor = new Encryptor();
+        $key       = $encryptor->getKeyFromEncodedEncryptionKey(
+            $session->getEncryptionKey()
+        );
+
+        return $encryptor->decrypt($this->content, $key);
+    }
+
+    public function setContentAndEncrypt(string $content): self
+    {
+        $session   = UserSession::load();
+        $encryptor = new Encryptor();
+        $key       = $encryptor->getKeyFromEncodedEncryptionKey(
+            $session->getEncryptionKey()
+        );
+
+        $encryptedContent = $encryptor->encrypt($content, $key);
+
+        return $this->setContent($encryptedContent);
     }
 }

@@ -86,7 +86,7 @@ class Entry extends AbstractController
             'entries'     => $entries,
             'totalPages'  => $totalPages,
             'currentPage' => $currentPage,
-            'filterUrl'   => $this->entryService->getUriForPageFilter($page),
+            'filterUrl'   => $this->entryService->getHelper()->getUriForPageFilter($page),
         ]);
 
         $this->indexView();

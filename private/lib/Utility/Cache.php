@@ -16,7 +16,7 @@ class Cache
 
     protected function __construct()
     {
-        $this->cache = new FilesystemAdapter('', 0, SESSION_CACHE_PATH);
+        $this->cache = new FilesystemAdapter('', DEFAULT_CACHE_EXPIRY_TIME, SESSION_CACHE_PATH);
     }
 
     public static function getInstance(): FilesystemAdapter

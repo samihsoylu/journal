@@ -47,6 +47,11 @@ class User extends AbstractModel
     protected int $privilegeLevel;
 
     /**
+     * @ORM\Column(type="text")
+     */
+    protected string $encryptionKey;
+
+    /**
      * @ORM\Column(type="integer")
      */
     protected int $createdTimestamp;
@@ -97,8 +102,20 @@ class User extends AbstractModel
         return $this->privilegeLevel;
     }
 
-    public function setPrivilegeLevel(int $privilegeLevel): void
+    public function setPrivilegeLevel(int $privilegeLevel): self
     {
         $this->privilegeLevel = $privilegeLevel;
+
+        return $this;
+    }
+
+    public function getEncryptionKey(): string
+    {
+        return $this->encryptionKey;
+    }
+
+    public function setEncryptionKey(string $encryptionKey): void
+    {
+        $this->encryptionKey = $encryptionKey;
     }
 }

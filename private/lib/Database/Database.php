@@ -2,6 +2,7 @@
 
 namespace App\Database;
 
+use Doctrine\Common\Cache\PhpFileCache;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 
@@ -23,9 +24,9 @@ final class Database
 
         $config = Setup::createAnnotationMetadataConfiguration(
             [MODEL_PATH],
-            $_ENV['DEBUG_MODE'],
-            null,
-            null,
+            DEBUG_MODE,
+            DATABASE_CACHE_PATH . '/proxy/',
+            new PhpFileCache(DATABASE_CACHE_PATH . '/cache/'),
             false
         );
 

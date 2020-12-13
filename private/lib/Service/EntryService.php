@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Database\Model\Entry;
 use App\Database\Repository\EntryRepository;
 use App\Exception\UserException\NotFoundException;
+use App\Service\Helpers\EntryHelper;
 use App\Utility\Registry;
 use App\Utility\UserSession;
 use Doctrine\ORM\ORMException;
@@ -13,16 +14,13 @@ class EntryService
 {
     protected EntryRepository $entryRepository;
     protected CategoryService $categoryService;
+    protected EntryHelper $helper;
 
     public function __construct()
     {
         $this->entryRepository = Registry::get(EntryRepository::class);
         $this->categoryService = Registry::get(CategoryService::class);
-    }
-
-    public function getAllEntriesForUser(): ?array
-    {
-        return $this->entryRepository->findByUser(UserSession::getUserObject());
+        $this->helper          = Registry::get(EntryHelper::class);
     }
 
     public function getAllEntriesForUserFromFilter(
@@ -68,20 +66,6 @@ class EntryService
         return [$page, $totalPages, $entries];
     }
 
-    public function getUriForPageFilter($page): string
-    {
-        $filterUrl = str_replace("&page={$page}", '', $_SERVER['REQUEST_URI']);
-
-        // if no filters are currently being used
-        if (strpos($filterUrl, '?') === false) {
-            // /entires becomes /entries? for /entires?page=1
-            return "{$filterUrl}?";
-        }
-
-        // for /entries?something=1&page=1
-        return "{$filterUrl}&";
-    }
-
     public function createEntry(int $categoryId, string $title, string $content): int
     {
         $category = $this->categoryService->getCategoryById($categoryId);
@@ -90,7 +74,7 @@ class EntryService
         $entry->setReferencedCategory($category)
             ->setReferencedUser(UserSession::getUserObject())
             ->setTitle($title)
-            ->setContent($content);
+            ->setContentAndEncrypt($content);
 
         $this->entryRepository->queue($entry);
         $this->entryRepository->save();
@@ -98,14 +82,14 @@ class EntryService
         return $entry->getId();
     }
 
-    public function updateEntry(int $entryId, int $categoryId, string $entryTitle, string $entryContent): void
+    public function updateEntry(int $entryId, int $categoryId, string $title, string $content): void
     {
         $category = $this->categoryService->getCategoryById($categoryId);
 
         $entry = $this->getEntryById($entryId);
         $entry->setReferencedCategory($category)
-              ->setTitle($entryTitle)
-              ->setContent($entryContent);
+              ->setTitle($title)
+              ->setContentAndEncrypt($content);
 
         $this->entryRepository->queue($entry);
         $this->entryRepository->save();
@@ -122,7 +106,7 @@ class EntryService
     {
         /** @var Entry $entry */
         $entry = $this->entryRepository->getById($entryId);
-        $this->ensureUserOwnsEntry($entry);
+        $this->helper->ensureUserOwnsEntry($entry);
 
         return $entry;
     }
@@ -135,20 +119,14 @@ class EntryService
      */
     public function deleteEntry(int $entryId): void
     {
-        /** @var Entry $entry */
         $entry = $this->getEntryById($entryId);
 
         $this->entryRepository->remove($entry);
         $this->entryRepository->save();
     }
 
-    public function ensureUserOwnsEntry(Entry $entry): void
+    public function getHelper(): EntryHelper
     {
-        $session = UserSession::load();
-
-        if ($entry->getReferencedUser()->getId() !== $session->getUserId()) {
-            // Found entry does not belong to the logged in user
-            throw NotFoundException::entityIdNotFound('Entry', $entry->getId());
-        }
+        return $this->helper;
     }
 }

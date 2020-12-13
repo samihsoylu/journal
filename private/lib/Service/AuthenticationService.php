@@ -6,18 +6,23 @@ use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
 use App\Exception\UserException\InvalidOperationException;
 use App\Utility\Cache;
+use App\Utility\Encryptor;
 use App\Utility\Registry;
 use App\Utility\UserSession;
 use App\Exception\UserException\InvalidArgumentException;
+use Defuse\Crypto\KeyProtectedByPassword;
 use Symfony\Component\Cache\CacheItem;
 
 class AuthenticationService
 {
     protected UserRepository $repository;
 
+    protected Encryptor $encryptor;
+
     public function __construct()
     {
         $this->repository = Registry::get(UserRepository::class);
+        $this->encryptor  = Registry::get(Encryptor::class);
     }
 
     public function register(string $username, string $password, string $email): void
@@ -32,13 +37,15 @@ class AuthenticationService
             throw InvalidArgumentException::alreadyRegistered('email', $email);
         }
 
-        $encryptedPassword = password_hash($password, PASSWORD_ARGON2ID);
+        $encryptedPassword      = password_hash($password, PASSWORD_ARGON2ID);
+        $protectedEncryptionKey = $this->encryptor->generateProtectedEncryptionKey($password);
 
         $user = new User();
         $user->setUsername($username)
             ->setPassword($encryptedPassword)
             ->setEmailAddress($email)
-            ->setPrivilegeLevel(User::PRIVILEGE_LEVEL_USER);
+            ->setPrivilegeLevel(User::PRIVILEGE_LEVEL_USER)
+            ->setEncryptionKey($protectedEncryptionKey);
 
         $this->repository->queue($user);
         $this->repository->save();
@@ -59,10 +66,16 @@ class AuthenticationService
             throw InvalidArgumentException::incorrectLogin();
         }
 
+        $encodedEncryptionKey = $this->encryptor->getEncodedEncryptionKeyFromProtectedEncryptionKey(
+            $user->getEncryptionKey(),
+            $password
+        );
+
         UserSession::create(
             $user->getId(),
             $user->getUsername(),
-            $user->getPrivilegeLevel()
+            $user->getPrivilegeLevel(),
+            $encodedEncryptionKey
         );
 
         $this->setFailedLoginCount(0);
