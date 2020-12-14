@@ -80,8 +80,9 @@ abstract class AbstractController
     protected function ensureUserHasAdminRights(): void
     {
         $userIsAdmin = $this->authService->userHasPrivilege(User::PRIVILEGE_LEVEL_ADMIN);
+        $userIsOwner = $this->authService->userHasPrivilege(User::PRIVILEGE_LEVEL_OWNER);
 
-        if (!$userIsAdmin) {
+        if (!$userIsAdmin && !$userIsOwner) {
             http_response_code(403);
             $this->template->render('errors/403');
             exit();

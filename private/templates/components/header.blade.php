@@ -11,7 +11,7 @@
         <li><a href="{{ $dashboard_url }}">Dashboard</a></li>
         <li><a href="{{ $entries_url }}">Entries</a></li>
         <li><a href="{{ $categories_url }}">Categories</a></li>
-        <li><a href="#!">Users</a></li>
+        <li><a href="{{ $users_url }}">Users</a></li>
         <li><a href="#!">Account</a></li>
         <li><a href="{{ $logout_url }}">Logout</a></li>
     </ul>
@@ -19,13 +19,13 @@
     <div class="navbar-fixed">
         <nav>
             <div class="nav-wrapper">
-                <a href="#!" class="brand-logo">Journal</a>
+                <a href="{{ $dashboard_url }}" class="brand-logo">{{ $site_title }}</a>
                 <a href="#" data-target="mobile_menu" class="sidenav-trigger"><i class="material-icons">menu</i></a>
                 <ul class="right hide-on-med-and-down">
                     <li @if ($active_page === 'dashboard') class="active" @endif><a href="{{ $dashboard_url }}">Dashboard</a></li>
                     <li @if ($active_page === 'entries') class="active" @endif><a href="{{ $entries_url }}">Entries</a></li>
                     <li @if ($active_page === 'categories') class="active" @endif><a href="{{ $categories_url }}">Categories</a></li>
-                    <li @if ($active_page === 'users') class="active" @endif><a href="#!">Users</a></li>
+                    <li @if ($active_page === 'users') class="active" @endif><a href="{{ $users_url }}">Users</a></li>
                     <li><a class="dropdown-trigger" href="#!" data-target="account_menu"><i class="material-icons right">account_box arrow_drop_down</i></a></li>
                 </ul>
             </div>

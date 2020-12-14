@@ -41,7 +41,7 @@ abstract class AbstractRepository
      * @param int $id
      *
      * @return object
-     * @throws NotFoundException|TransactionRequiredException|OptimisticLockException|ORMException
+     * @throws TransactionRequiredException|OptimisticLockException|ORMException
      */
     public function getById(int $id): ?object
     {

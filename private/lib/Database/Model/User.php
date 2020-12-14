@@ -16,8 +16,9 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
  */
 class User extends AbstractModel
 {
-    public const PRIVILEGE_LEVEL_ADMIN = 1;
-    public const PRIVILEGE_LEVEL_USER  = 2;
+    public const PRIVILEGE_LEVEL_OWNER = 1;
+    public const PRIVILEGE_LEVEL_ADMIN = 2;
+    public const PRIVILEGE_LEVEL_USER  = 3;
 
     /**
      * @ORM\Id
@@ -100,6 +101,20 @@ class User extends AbstractModel
     public function getPrivilegeLevel(): int
     {
         return $this->privilegeLevel;
+    }
+
+    public function getPrivilegeLevelAsString(): string
+    {
+        switch ($this->privilegeLevel) {
+            case self::PRIVILEGE_LEVEL_OWNER:
+                return 'Owner';
+            case self::PRIVILEGE_LEVEL_ADMIN:
+                return 'Admin';
+            case self::PRIVILEGE_LEVEL_USER:
+                return 'User';
+            default:
+                return 'Unknown';
+        }
     }
 
     public function setPrivilegeLevel(int $privilegeLevel): self

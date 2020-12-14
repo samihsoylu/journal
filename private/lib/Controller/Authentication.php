@@ -30,8 +30,7 @@ class Authentication extends AbstractController
     }
 
     /**
-     * Action for post request when registration is submitted in /auth/register
-     * Url: /auth/register/action
+     * Register a user
      *
      * @return void
      */
@@ -63,14 +62,18 @@ class Authentication extends AbstractController
         $this->registerView();
     }
 
+    /**
+     * Display a registration form
+     *
+     * @return
+     */
     public function registerView(): void
     {
         $this->template->render('authenticate/register');
     }
 
     /**
-     * Action for post request when login details are submitted on /auth/login
-     * Url: /auth/login/action
+     * Login a user
      *
      * @return void
      */
@@ -99,6 +102,11 @@ class Authentication extends AbstractController
         Redirect::to(Welcome::DASHBOARD_URL);
     }
 
+    /**
+     * Display a login form
+     *
+     * @return
+     */
     public function loginView(): void
     {
         $this->redirectLoggedInUsersToDashboard();
@@ -107,7 +115,7 @@ class Authentication extends AbstractController
     }
 
     /**
-     * Action for logging out a user, triggered when visiting /auth/logout
+     * Logout a user
      *
      * @return void
      */

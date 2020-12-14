@@ -1,16 +1,5 @@
 <?php
 
-// **PREVENTING SESSION HIJACKING**
-// Prevents javascript XSS attacks aimed to steal the session ID
-ini_set('session.cookie_httponly', 1);
-
-// **PREVENTING SESSION FIXATION**
-// Session ID cannot be passed through URLs
-ini_set('session.use_only_cookies', 1);
-
-// Uses a secure connection (HTTPS) if possible
-ini_set('session.cookie_secure', 1);
-
 // Default error settings
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -31,10 +20,24 @@ $dotenv->required('DEBUG_MODE')->isBoolean();
 
 define('BASE_URL', rtrim($_ENV['BASE_URL'], '/'));
 define('DEBUG_MODE', ($_ENV['DEBUG_MODE'] === 'true'));
+define('SSL_IS_ENABLED', ($_ENV['USE_SSL'] === 'true'));
 
 if (!DEBUG_MODE) {
     ini_set('display_errors', 0);
     error_reporting(0);
+}
+
+if (SSL_IS_ENABLED) {
+    // **PREVENTING SESSION HIJACKING**
+    // Prevents javascript XSS attacks aimed to steal the session ID
+    ini_set('session.cookie_httponly', 1);
+
+    // **PREVENTING SESSION FIXATION**
+    // Session ID cannot be passed through URLs
+    ini_set('session.use_only_cookies', 1);
+
+    // Uses a secure connection (HTTPS) if possible
+    ini_set('session.cookie_secure', 1);
 }
 
 // Project constants

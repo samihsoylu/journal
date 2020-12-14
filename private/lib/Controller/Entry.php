@@ -17,9 +17,9 @@ class Entry extends AbstractController
 
     public const CREATE_ENTRY_URL = self::ENTRY_URL . '/create';
 
-    public const READ_ENTRY_URL   = self::ENTRY_URL . '/{id:\d+}';
-    public const UPDATE_ENTRY_URL = self::READ_ENTRY_URL . '/update';
-    public const DELETE_ENTRY_URL = self::READ_ENTRY_URL . '/delete/{antiCsrfToken}';
+    public const VIEW_ENTRY_URL   = self::ENTRY_URL . '/{id:\d+}';
+    public const UPDATE_ENTRY_URL = self::VIEW_ENTRY_URL . '/update';
+    public const DELETE_ENTRY_URL = self::VIEW_ENTRY_URL . '/delete/{antiCsrfToken}';
 
     public const CREATE_ENTRY_POST_URL = self::CREATE_ENTRY_URL . '/action';
     public const UPDATE_ENTRY_POST_URL = self::UPDATE_ENTRY_URL . '/action';
@@ -43,8 +43,7 @@ class Entry extends AbstractController
     }
 
     /**
-     * View, displays all entries in the system associated with the logged in user
-     * Url: /entries/
+     * Display all entries related to logged in user
      *
      * @return void
      */
@@ -101,12 +100,11 @@ class Entry extends AbstractController
     }
 
     /**
-     * View, displays a specific entry by the provided id in the url
-     * Url: /entry/{id}
+     * Display a single entry
      *
      * @return void
      */
-    public function readView(): void
+    public function entryView(): void
     {
         $entryId = $this->getRouteParameters()['id'];
 
@@ -125,8 +123,7 @@ class Entry extends AbstractController
     }
 
     /**
-     * Post Action to create a new entry
-     * Url: /entry/create/post
+     * Create an new entry
      *
      * @return void
      */
@@ -147,8 +144,7 @@ class Entry extends AbstractController
     }
 
     /**
-     * View, displays create an entry form
-     * Url: /entry/create
+     * Display create a new entry form
      *
      * @return void
      */
@@ -161,7 +157,7 @@ class Entry extends AbstractController
     }
 
     /**
-     * Url: /entry/{id}/update/post
+     * Update an entry
      *
      * @return void
      */
@@ -188,8 +184,7 @@ class Entry extends AbstractController
     }
 
     /**
-     * View for updating an existing entry
-     * Url: /entry/{id}/update
+     * Display an update entry form
      *
      * @return void
      */
@@ -216,7 +211,7 @@ class Entry extends AbstractController
     }
 
     /**
-     * Action for deleting an existing entry
+     * Delete an existing entry
      *
      * @return void
      */
@@ -235,10 +230,9 @@ class Entry extends AbstractController
     }
 
     /**
-     * Redirects user to entries page, this is in its own method because when an error is triggered in the delete()
-     * method then the error handler will load this view method, which in turn will load the entries page and then
-     * display a nice error.
+     * Redirect user to all entries page
      *
+     * @note This is in its own method for the convenience of the error handler.
      * @return void
      */
     public function deleteView(): void

@@ -40,20 +40,23 @@ class Category extends AbstractController
     }
 
     /**
-     * View, displays categories related to the logged in user
-     * Url: /categories/
+     * Display all categories that belong to the logged in user
      *
      * @return void
      */
-    public function read(): void
+    public function indexView(): void
     {
         $categories = $this->service->getAllCategoriesForLoggedInUser();
 
         $this->template->setVariable('categories', $categories);
-
         $this->template->render('category/all');
     }
 
+    /**
+     * Create a new category
+     *
+     * @return void
+     */
     public function create(): void
     {
         /** @see CategoryValidator::create() */
@@ -72,14 +75,18 @@ class Category extends AbstractController
         Redirect::to(self::CATEGORIES_URL);
     }
 
+    /**
+     * Display a create category form
+     *
+     * @return void
+     */
     public function createView(): void
     {
         $this->template->render('category/create');
     }
 
     /**
-     * Post action for updating an existing category
-     * Url: /category/{id}/update/post
+     * Update an existing category
      *
      * @return void
      */
@@ -103,8 +110,7 @@ class Category extends AbstractController
     }
 
     /**
-     * View, displays update
-     * Url: /category/{id}/update
+     * Display an update category form
      *
      * @return void
      */
@@ -124,8 +130,7 @@ class Category extends AbstractController
     }
 
     /**
-     * Post action for deleting an existing category
-     * Url: /category/{id}/delete/{antiCsrfToken}
+     * Delete a category
      *
      * @return void
      */
@@ -146,6 +151,12 @@ class Category extends AbstractController
         $this->deleteView();
     }
 
+    /**
+     * Redirect the user to all categories page
+     *
+     * @note This is in its own method for the convenience of the error handler.
+     * @return void
+     */
     public function deleteView(): void
     {
         Redirect::to(self::CATEGORIES_URL);
