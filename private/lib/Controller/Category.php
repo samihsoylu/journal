@@ -7,6 +7,7 @@ use App\Service\CategoryService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
+use App\Utility\UserSession;
 use App\Validator\CategoryValidator;
 
 class Category extends AbstractController
@@ -24,8 +25,7 @@ class Category extends AbstractController
 
     public const DELETE_CATEGORY_URL       = self::READ_CATEGORY_URL . '/delete/{antiCsrfToken}';
 
-    protected CategoryService $service;
-
+    protected CategoryService   $service;
     protected CategoryValidator $validator;
 
     public function __construct(array $routeParameters)
@@ -46,7 +46,7 @@ class Category extends AbstractController
      */
     public function indexView(): void
     {
-        $categories = $this->service->getAllCategoriesForLoggedInUser();
+        $categories = $this->service->getAllUserCategories(UserSession::getUserObject());
 
         $this->template->setVariable('categories', $categories);
         $this->template->render('category/all');

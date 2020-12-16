@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Service\UserService;
+use App\Utility\UserSession;
 use App\Validator\UserValidator;
 
 class User extends AbstractController
@@ -54,9 +55,18 @@ class User extends AbstractController
     {
         $userId = $this->getRouteParameters()['id'];
 
-        $user = $this->service->getUser($userId);
+        $requestedUser = $this->service->getUser($userId);
+        $loggedInUser  = UserSession::getUserObject();
 
-        $this->template->setVariable('user', $user);
+        $this->template->setVariables([
+            'user'            => $requestedUser,
+            'isReadOnly'      => !$this->service->getHelper()->loggedInUserHasUpdatePrivilegesForThisUser(
+                $requestedUser,
+                $loggedInUser
+            ),
+            'totalEntries'    => $this->service->getEntryService()->getEntryCountForUser($requestedUser),
+            'totalCategories' => $this->service->getCategoryService()->getCategoryCountForUser($requestedUser),
+        ]);
         $this->template->render('user/view');
     }
 }

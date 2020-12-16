@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Database\Model\Category;
+use App\Database\Model\User;
 use App\Database\Repository\EntryRepository;
 use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException\InvalidArgumentException;
@@ -21,9 +22,18 @@ class CategoryService
 
     public function __construct()
     {
-        $this->categoryRepository = Registry::get(CategoryRepository::class);
-        $this->entryRepository    = Registry::get(EntryRepository::class);
-        $this->helper             = Registry::get(CategoryHelper::class);
+        /** @var CategoryRepository $categoryRepository */
+        $categoryRepository = Registry::get(CategoryRepository::class);
+
+        /** @var EntryRepository $entryRepository */
+        $entryRepository = Registry::get(EntryRepository::class);
+
+        /** @var CategoryHelper $helper */
+        $helper = Registry::get(CategoryHelper::class);
+
+        $this->categoryRepository = $categoryRepository;
+        $this->entryRepository    = $entryRepository;
+        $this->helper             = $helper;
     }
 
     public function getCategoryById(int $categoryId): Category
@@ -37,11 +47,12 @@ class CategoryService
     }
 
     /**
+     * @param User $user
      * @return Category[]
      */
-    public function getAllCategoriesForLoggedInUser(): array
+    public function getAllUserCategories(User $user): array
     {
-        return $this->categoryRepository->getAllCategoriesForUser(UserSession::getUserObject());
+        return $this->categoryRepository->findByUser($user);
     }
 
     public function createCategory(string $categoryTitle, string $categoryDescription): void
@@ -62,7 +73,6 @@ class CategoryService
 
     public function updateCategory(int $categoryId, string $categoryName, string $categoryDescription): void
     {
-        /** @var Category $category */
         $category = $this->getCategoryById($categoryId);
 
         $category->setName($categoryName);
@@ -89,5 +99,12 @@ class CategoryService
         // delete category
         $this->categoryRepository->remove($category);
         $this->categoryRepository->save();
+    }
+
+    public function getCategoryCountForUser(User $user): int
+    {
+        $categories = $this->getAllUserCategories($user);
+
+        return count($categories);
     }
 }

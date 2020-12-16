@@ -67,6 +67,12 @@ footer {
 .small-text {
 	font-size: 8pt;
 }
+.small-text.title {
+	margin-bottom:0px;
+}
+.small-text.context {
+	margin-top:3px;
+}
 @media only screen and (max-width: 400px) {
 	/** Screens smaller than 400px **/
 	.hide-on-tiny {
@@ -129,6 +135,13 @@ footer {
 .btn-primary:focus-within, .btn-primary:focus, .btn-primary:active {
 	background-color:#279f43;
 	background-image:none;
+}
+.btn-primary.disabled, .btn-primary:disabled {
+	background-color: #94d3a2;
+	background-image: none;
+	border-color: rgba(27,31,35,.2);
+	box-shadow: none;
+	color: hsla(0,0%,100%,.75);
 }
 .btn-default {
 	background-color:#eff3f6;

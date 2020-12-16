@@ -20,6 +20,12 @@ class User extends AbstractModel
     public const PRIVILEGE_LEVEL_ADMIN = 2;
     public const PRIVILEGE_LEVEL_USER  = 3;
 
+    public const ALLOWED_PRIVILEGE_LEVELS = [
+        self::PRIVILEGE_LEVEL_OWNER => 'Owner',
+        self::PRIVILEGE_LEVEL_ADMIN => 'Admin',
+        self::PRIVILEGE_LEVEL_USER  => 'User',
+    ];
+
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -105,20 +111,20 @@ class User extends AbstractModel
 
     public function getPrivilegeLevelAsString(): string
     {
-        switch ($this->privilegeLevel) {
-            case self::PRIVILEGE_LEVEL_OWNER:
-                return 'Owner';
-            case self::PRIVILEGE_LEVEL_ADMIN:
-                return 'Admin';
-            case self::PRIVILEGE_LEVEL_USER:
-                return 'User';
-            default:
-                return 'Unknown';
+        $privilegeLevelAsString = self::ALLOWED_PRIVILEGE_LEVELS[$this->privilegeLevel] ?? null;
+        if ($privilegeLevelAsString === null) {
+            throw new \RuntimeException("Privilege level {$this->privilegeLevel} does not exist");
         }
+
+        return $privilegeLevelAsString;
     }
 
     public function setPrivilegeLevel(int $privilegeLevel): self
     {
+        if (!array_key_exists($privilegeLevel, self::ALLOWED_PRIVILEGE_LEVELS)) {
+            throw new \RuntimeException("Privilege level {$privilegeLevel} does not exist");
+        }
+
         $this->privilegeLevel = $privilegeLevel;
 
         return $this;

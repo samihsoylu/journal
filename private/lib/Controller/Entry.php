@@ -8,6 +8,7 @@ use App\Service\EntryService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
+use App\Utility\UserSession;
 use App\Validator\EntryValidator;
 
 class Entry extends AbstractController
@@ -24,9 +25,7 @@ class Entry extends AbstractController
     public const CREATE_ENTRY_POST_URL = self::CREATE_ENTRY_URL . '/action';
     public const UPDATE_ENTRY_POST_URL = self::UPDATE_ENTRY_URL . '/action';
 
-    protected EntryService $entryService;
-
-    protected CategoryService $categoryService;
+    protected EntryService $service;
 
     protected EntryValidator $validator;
 
@@ -37,8 +36,7 @@ class Entry extends AbstractController
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->entryService = new EntryService();
-        $this->categoryService = new CategoryService();
+        $this->service   = new EntryService();
         $this->validator = new EntryValidator($_POST, $_GET);
     }
 
@@ -72,7 +70,8 @@ class Entry extends AbstractController
             $createdDateTo = $date->getTimestamp();
         }
 
-        [$currentPage, $totalPages, $entries] = $this->entryService->getAllEntriesForUserFromFilter(
+        [$currentPage, $totalPages, $entries] = $this->service->getAllEntriesForUserFromFilter(
+            UserSession::load()->getUserId(),
             $searchQuery,
             $categoryId,
             $createdDateFrom,
@@ -85,7 +84,7 @@ class Entry extends AbstractController
             'entries'     => $entries,
             'totalPages'  => $totalPages,
             'currentPage' => $currentPage,
-            'filterUrl'   => $this->entryService->getHelper()->getUriForPageFilter($page),
+            'filterUrl'   => $this->service->getHelper()->getUriForPageFilter($page),
         ]);
 
         $this->indexView();
@@ -93,7 +92,7 @@ class Entry extends AbstractController
 
     public function indexView(): void
     {
-        $categories = $this->categoryService->getAllCategoriesForLoggedInUser();
+        $categories = $this->service->getCategoryService()->getAllUserCategories(UserSession::getUserObject());
 
         $this->template->setVariable('categories', $categories);
         $this->template->render('entry/all');
@@ -109,7 +108,7 @@ class Entry extends AbstractController
         $entryId = $this->getRouteParameters()['id'];
 
         try {
-            $entry = $this->entryService->getEntryById($entryId);
+            $entry = $this->service->getEntryById($entryId);
 
             $this->template->setVariable('entry', $entry);
         } catch (UserException $e) {
@@ -136,7 +135,7 @@ class Entry extends AbstractController
         $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
         $entryContent = Sanitize::string($_POST['entry_content'], 'trim|htmlspecialchars');
 
-        $entryId = $this->entryService->createEntry($categoryId, $entryTitle, $entryContent);
+        $entryId = $this->service->createEntry($categoryId, $entryTitle, $entryContent);
 
         $this->setNotification(Notification::TYPE_SUCCESS, "Entry {$entryTitle} has been created");
 
@@ -150,7 +149,7 @@ class Entry extends AbstractController
      */
     public function createView(): void
     {
-        $categories = $this->categoryService->getAllCategoriesForLoggedInUser();
+        $categories = $this->service->getCategoryService()->getAllUserCategories(UserSession::getUserObject());
         $this->template->setVariable('categories', $categories);
 
         $this->template->render('entry/create');
@@ -173,7 +172,7 @@ class Entry extends AbstractController
         $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
         $entryContent = Sanitize::string($_POST['entry_content'], 'trim|htmlspecialchars');
 
-        $this->entryService->updateEntry($entryId, $categoryId, $entryTitle, $entryContent);
+        $this->service->updateEntry($entryId, $categoryId, $entryTitle, $entryContent);
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
@@ -193,8 +192,8 @@ class Entry extends AbstractController
         $entryId = $this->getRouteParameters()['id'];
 
         try {
-            $categories = $this->categoryService->getAllCategoriesForLoggedInUser();
-            $entry = $this->entryService->getEntryById($entryId);
+            $categories = $this->service->getCategoryService()->getAllUserCategories(UserSession::getUserObject());
+            $entry = $this->service->getEntryById($entryId);
 
             $this->template->setVariables([
                 'entry' => $entry,
@@ -222,7 +221,7 @@ class Entry extends AbstractController
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
-        $this->entryService->deleteEntry($entryId);
+        $this->service->deleteEntry($entryId);
 
         $this->setNotification(Notification::TYPE_SUCCESS, 'Entry was removed');
 

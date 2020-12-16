@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Database\Model\Entry;
+use App\Database\Model\User;
 use App\Database\Repository\EntryRepository;
 use App\Exception\UserException\NotFoundException;
 use App\Service\Helpers\EntryHelper;
@@ -18,12 +19,22 @@ class EntryService
 
     public function __construct()
     {
-        $this->entryRepository = Registry::get(EntryRepository::class);
-        $this->categoryService = Registry::get(CategoryService::class);
-        $this->helper          = Registry::get(EntryHelper::class);
+        /** @var EntryRepository $entryRepository */
+        $entryRepository = Registry::get(EntryRepository::class);
+
+        /** @var CategoryService $categoryService */
+        $categoryService = Registry::get(CategoryService::class);
+
+        /** @var EntryHelper $helper */
+        $helper = Registry::get(EntryHelper::class);
+
+        $this->entryRepository = $entryRepository;
+        $this->categoryService = $categoryService;
+        $this->helper          = $helper;
     }
 
     public function getAllEntriesForUserFromFilter(
+        int $userId,
         ?string $search,
         ?int $categoryId,
         ?int $startCreatedDate,
@@ -31,8 +42,6 @@ class EntryService
         ?int $page = 1,
         ?int $pageSize = 25
     ): array {
-        $session = UserSession::load();
-
         if ($page < 1) {
             $page = 1;
         }
@@ -40,7 +49,7 @@ class EntryService
         $offset = $index * $pageSize;
 
         $entries = $this->entryRepository->getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
-            $session->getUserId(),
+            $userId,
             $search,
             $categoryId,
             $startCreatedDate,
@@ -50,7 +59,7 @@ class EntryService
         );
 
         $totalEntriesCount = $this->entryRepository->getTotalCountOfEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
-            $session->getUserId(),
+            $userId,
             $search,
             $categoryId,
             $startCreatedDate,
@@ -124,8 +133,20 @@ class EntryService
         $this->entryRepository->save();
     }
 
+    public function getEntryCountForUser(User $user): int
+    {
+        $entries = $this->entryRepository->findByUser($user);
+        
+        return count($entries);
+    }
+
     public function getHelper(): EntryHelper
     {
         return $this->helper;
+    }
+
+    public function getCategoryService(): CategoryService
+    {
+        return $this->categoryService;
     }
 }

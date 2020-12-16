@@ -17,13 +17,13 @@ class UserRepository extends AbstractRepository
      * @param string $username
      * @return User
      */
-    public function getByUsername(string $username): ?User
+    public function findByUsername(string $username): ?User
     {
         return $this->db->getRepository(self::RESOURCE_NAME)
             ->findOneBy(['username' => $username]);
     }
 
-    public function getByEmailAddress(string $emailAddress): ?User
+public function findByEmailAddress(string $emailAddress): ?User
     {
         return $this->db->getRepository(self::RESOURCE_NAME)
             ->findOneBy(['emailAddress' => $emailAddress]);

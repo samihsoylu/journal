@@ -28,12 +28,12 @@ class AuthenticationService
 
     public function register(string $username, string $password, string $email): void
     {
-        $user = $this->repository->getByUsername($username);
+        $user = $this->repository->findByUsername($username);
         if ($user !== null) {
             throw InvalidArgumentException::alreadyRegistered('username', $username);
         }
 
-        $user = $this->repository->getByEmailAddress($email);
+        $user = $this->repository->findByEmailAddress($email);
         if ($user !== null) {
             throw InvalidArgumentException::alreadyRegistered('email', $email);
         }
@@ -59,7 +59,7 @@ class AuthenticationService
             throw InvalidOperationException::loginAttemptsExceeded($userFailedLoginCount);
         }
 
-        $user = $this->repository->getByUsername($username);
+        $user = $this->repository->findByUsername($username);
         if ($user === null || !password_verify($password, $user->getPassword())) {
             $this->helper->setFailedLoginCount($userFailedLoginCount + 1);
 

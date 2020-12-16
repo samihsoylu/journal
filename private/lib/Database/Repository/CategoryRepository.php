@@ -18,7 +18,7 @@ class CategoryRepository extends AbstractRepository
      * @param User $user
      * @return Category[]
      */
-    public function getAllCategoriesForUser(User $user): array
+    public function findByUser(User $user): array
     {
         return $this->db->getRepository(self::RESOURCE_NAME)
             ->findBy(['referencedUser' => $user]);

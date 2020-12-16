@@ -246,6 +246,9 @@ class UserSession
 
         $repository = new UserRepository();
 
-        return $repository->getById($session->getUserId());
+        /** @var User $user */
+        $user = $repository->getById($session->getUserId());
+
+        return $user;
     }
 }
