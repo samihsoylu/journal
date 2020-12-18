@@ -6,7 +6,7 @@ class ExceptionHandler
 {
     public static function genericException(\Exception $e): void
     {
-        mail('mail@samihsoylu.nl', 'Exception in Journal', print_r($e, true));
+        //mail('mail@samihsoylu.nl', 'Exception in Journal', print_r($e, true));
 
         if (DEBUG_MODE) {
             throw $e;

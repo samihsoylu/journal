@@ -3,10 +3,11 @@
 namespace App\Service;
 
 use App\Database\Model\User;
-use App\Database\Repository\CategoryRepository;
 use App\Database\Repository\UserRepository;
+use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\NotFoundException;
 use App\Service\Helpers\UserHelper;
+use App\Utility\Encryptor;
 use App\Utility\Registry;
 
 class UserService
@@ -15,28 +16,23 @@ class UserService
     private UserHelper $helper;
     private CategoryService $categoryService;
     private EntryService $entryService;
+    private Encryptor $encryptor;
 
     public function __construct()
     {
         /** @var UserRepository $repository */
         $repository = Registry::get(UserRepository::class);
-
-        /** @var UserHelper $helper */
-        $helper = Registry::get(UserHelper::class);
-
-        /** @var CategoryService $categoryService */
-        $categoryService = Registry::get(CategoryService::class);
-
-        /** @var EntryService $entryService */
-        $entryService = Registry::get(EntryService::class);
-
         $this->repository = $repository;
-        $this->helper = $helper;
-        $this->categoryService = $categoryService;
-        $this->entryService = $entryService;
+
+        $this->helper          = new UserHelper();
+        $this->categoryService = new CategoryService();
+        $this->entryService    = new EntryService();
+        $this->encryptor       = new Encryptor();
     }
 
     /**
+     * Get all registered users from the database
+     *
      * @return User[]
      */
     public function getAllUsers(): array
@@ -44,7 +40,12 @@ class UserService
         return $this->repository->getAll();
     }
 
-    public function getUser(int $userId): User
+    /**
+     * Finds a user based on a provided user id
+     *
+     * @return User
+     */
+    public function getUserById(int $userId): User
     {
         /** @var User $user */
         $user = $this->repository->getById($userId);
@@ -55,18 +56,54 @@ class UserService
         return $user;
     }
 
-    public function getHelper(): UserHelper
+    /**
+     * Create a new user account
+     *
+     * @return int User id
+     */
+    public function register(string $username, string $password, string $email): int
     {
-        return $this->helper;
+        $user = $this->repository->findByUsername($username);
+        if ($user !== null) {
+            throw InvalidArgumentException::alreadyRegistered('username', $username);
+        }
+
+        $user = $this->repository->findByEmailAddress($email);
+        if ($user !== null) {
+            throw InvalidArgumentException::alreadyRegistered('email', $email);
+        }
+
+        $encryptedPassword      = password_hash($password, PASSWORD_ARGON2ID);
+        $protectedEncryptionKey = $this->encryptor->generateProtectedEncryptionKey($password);
+
+        $user = new User();
+        $user->setUsername($username)
+            ->setPassword($encryptedPassword)
+            ->setEmailAddress($email)
+            ->setPrivilegeLevel(User::PRIVILEGE_LEVEL_USER)
+            ->setEncryptionKey($protectedEncryptionKey);
+
+        $this->repository->queue($user);
+        $this->repository->save();
+
+        return $user->getId();
     }
 
-    public function getCategoryService(): CategoryService
+    /**
+     * Generate a struct for the single user view page
+     *
+     * @return array
+     */
+    public function getUserViewStruct(int $loggedInUserId, int $requestedUserId): array
     {
-        return $this->categoryService;
-    }
+        $targetUser = $this->getUserById($requestedUserId);
+        $user       = $this->getUserById($loggedInUserId);
 
-    public function getEntryService(): EntryService
-    {
-        return $this->entryService;
+        return [
+            'user'            => $targetUser,
+            'isReadOnly'      => !$this->helper->userHasEditPrivilegesForTargetUser($user, $targetUser),
+            'totalEntries'    => $this->entryService->getEntryCountForUser($targetUser),
+            'totalCategories' => $this->categoryService->getCategoryCountForUser($targetUser),
+        ];
     }
 }

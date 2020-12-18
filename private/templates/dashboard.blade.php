@@ -46,18 +46,20 @@
                             </div>
                         </div>
 
-                        <div class="col s12 m6 l4">
-                            <div class="card">
-                                <div class="card-image">
-                                    <img src="{{ $assets_url }}/images/friends.jpg">
-                                    <span class="card-title">Manage users</span>
-                                    <a href="{{ $users_url }}" class="btn-floating halfway-fab waves-effect waves-light blue-grey"><i class="material-icons">people</i></a>
-                                </div>
-                                <div class="dashboard card-content">
-                                    <p>Invite friends or family to join in on this journey of keeping an organised mind.</p>
+                        @if ($session->loggedInUserIsAdmin())
+                            <div class="col s12 m6 l4">
+                                <div class="card">
+                                    <div class="card-image">
+                                        <img src="{{ $assets_url }}/images/friends.jpg">
+                                        <span class="card-title">Manage users</span>
+                                        <a href="{{ $users_url }}" class="btn-floating halfway-fab waves-effect waves-light blue-grey"><i class="material-icons">people</i></a>
+                                    </div>
+                                    <div class="dashboard card-content">
+                                        <p>Invite friends or family to join in on this journey of keeping an organised mind.</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
 
                         <div class="col s12 m6 l4">
                             <div class="card">

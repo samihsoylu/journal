@@ -70,8 +70,8 @@ class Entry extends AbstractController
             $createdDateTo = $date->getTimestamp();
         }
 
-        [$currentPage, $totalPages, $entries] = $this->service->getAllEntriesForUserFromFilter(
-            UserSession::load()->getUserId(),
+       $indexViewStruct = $this->service->getAllEntriesForUserFromFilter(
+            $this->getUserId(),
             $searchQuery,
             $categoryId,
             $createdDateFrom,
@@ -80,19 +80,13 @@ class Entry extends AbstractController
             $pageSize
         );
 
-        $this->template->setVariables([
-            'entries'     => $entries,
-            'totalPages'  => $totalPages,
-            'currentPage' => $currentPage,
-            'filterUrl'   => $this->service->getHelper()->getUriForPageFilter($page),
-        ]);
-
+        $this->template->setVariables($indexViewStruct);
         $this->indexView();
     }
 
     public function indexView(): void
     {
-        $categories = $this->service->getCategoryService()->getAllUserCategories(UserSession::getUserObject());
+        $categories = $this->service->getCategoryService()->getAllCategoriesForUser();
 
         $this->template->setVariable('categories', $categories);
         $this->template->render('entry/all');
@@ -108,9 +102,12 @@ class Entry extends AbstractController
         $entryId = $this->getRouteParameters()['id'];
 
         try {
-            $entry = $this->service->getEntryById($entryId);
+            $entry = $this->service->getEntryForUser($entryId, $this->getUserId());
 
-            $this->template->setVariable('entry', $entry);
+            $this->template->setVariables([
+                'entry' => $entry,
+                'entry_content' => $entry->getContentAsMarkup($this->getUserEncryptionKey())
+            ]);
         } catch (UserException $e) {
             $this->template->setVariable(
                 Notification::TYPE_ERROR,
@@ -135,7 +132,7 @@ class Entry extends AbstractController
         $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
         $entryContent = Sanitize::string($_POST['entry_content'], 'trim|htmlspecialchars');
 
-        $entryId = $this->service->createEntry($categoryId, $entryTitle, $entryContent);
+        $entryId = $this->service->createEntry($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $entryTitle, $entryContent);
 
         $this->setNotification(Notification::TYPE_SUCCESS, "Entry {$entryTitle} has been created");
 
@@ -149,7 +146,7 @@ class Entry extends AbstractController
      */
     public function createView(): void
     {
-        $categories = $this->service->getCategoryService()->getAllUserCategories(UserSession::getUserObject());
+        $categories = $this->service->getCategoryService()->getAllCategoriesForUser();
         $this->template->setVariable('categories', $categories);
 
         $this->template->render('entry/create');
@@ -172,7 +169,7 @@ class Entry extends AbstractController
         $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
         $entryContent = Sanitize::string($_POST['entry_content'], 'trim|htmlspecialchars');
 
-        $this->service->updateEntry($entryId, $categoryId, $entryTitle, $entryContent);
+        $this->service->updateEntry($this->getUserId(), $this->getUserEncryptionKey(), $entryId, $categoryId, $entryTitle, $entryContent);
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
@@ -192,8 +189,8 @@ class Entry extends AbstractController
         $entryId = $this->getRouteParameters()['id'];
 
         try {
-            $categories = $this->service->getCategoryService()->getAllUserCategories(UserSession::getUserObject());
-            $entry = $this->service->getEntryById($entryId);
+            $categories = $this->service->getCategoryService()->getAllCategoriesForUser();
+            $entry = $this->service->getEntryForUser($entryId);
 
             $this->template->setVariables([
                 'entry' => $entry,
@@ -221,7 +218,7 @@ class Entry extends AbstractController
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
-        $this->service->deleteEntry($entryId);
+        $this->service->deleteEntry($entryId, $this->getUserId());
 
         $this->setNotification(Notification::TYPE_SUCCESS, 'Entry was removed');
 

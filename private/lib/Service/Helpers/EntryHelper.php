@@ -4,22 +4,12 @@ namespace App\Service\Helpers;
 
 use App\Database\Model\Entry;
 use App\Exception\UserException\NotFoundException;
-use App\Utility\Encryptor;
-use App\Utility\Registry;
-use App\Utility\UserSession;
 
 class EntryHelper
 {
-    private UserSession $session;
-
-    public function __construct()
+    public function ensureUserOwnsEntry(Entry $entry, int $userId): void
     {
-        $this->session   = UserSession::load();
-    }
-
-    public function ensureUserOwnsEntry(Entry $entry): void
-    {
-        if ($entry->getReferencedUser()->getId() !== $this->session->getUserId()) {
+        if ($entry->getReferencedUser()->getId() !== $userId) {
             // Found entry does not belong to the logged in user
             throw NotFoundException::entityIdNotFound('Entry', $entry->getId());
         }

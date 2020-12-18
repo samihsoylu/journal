@@ -40,4 +40,9 @@ class InvalidParameterException extends UserException
     {
         return new self("Field {$fieldName} provided an incorrect date format", $code);
     }
+
+    public static function invalidFormKey(): self
+    {
+        return new self("Invalid Form Key. Please try again.");
+    }
 }

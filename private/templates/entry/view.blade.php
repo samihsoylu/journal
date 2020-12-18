@@ -10,7 +10,7 @@
         <div class="row row-align">
             <div class="col s12 m10 l7 offset-m1 offset-l2 entry-content">
                 @isset($entry)
-                    <p>{!! $entry->getContentAsMarkup() !!}</p>
+                    <p>{!! $entry_content !!}</p>
                 @endisset
             </div>
         </div>

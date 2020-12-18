@@ -3,8 +3,10 @@
 namespace App\Controller;
 
 use App\Service\UserService;
-use App\Utility\UserSession;
+use App\Utility\Notification;
+use App\Utility\Sanitize;
 use App\Validator\UserValidator;
+use App\Database\Model\User as UserModel;
 
 class User extends AbstractController
 {
@@ -27,7 +29,7 @@ class User extends AbstractController
 
         // for every action in this controller, the user must be logged in and have admin rights
         $this->redirectLoggedOutUsersToLoginPage();
-        $this->ensureUserHasAdminRights();
+        $this->ensureUserHasAdminPrivileges();
 
         $this->validator = new UserValidator($_POST);
         $this->service   = new UserService();
@@ -53,20 +55,37 @@ class User extends AbstractController
      */
     public function userView(): void
     {
-        $userId = $this->getRouteParameters()['id'];
+        $requestedUserId = $this->getRouteParameters()['id'];
 
-        $requestedUser = $this->service->getUser($userId);
-        $loggedInUser  = UserSession::getUserObject();
+        $userViewStruct = $this->service->getUserViewStruct($this->getUserId(), $requestedUserId);
 
-        $this->template->setVariables([
-            'user'            => $requestedUser,
-            'isReadOnly'      => !$this->service->getHelper()->loggedInUserHasUpdatePrivilegesForThisUser(
-                $requestedUser,
-                $loggedInUser
-            ),
-            'totalEntries'    => $this->service->getEntryService()->getEntryCountForUser($requestedUser),
-            'totalCategories' => $this->service->getCategoryService()->getCategoryCountForUser($requestedUser),
-        ]);
+        $this->template->setVariables($userViewStruct);
         $this->template->render('user/view');
+    }
+
+    public function createView(): void
+    {
+        $this->template->setVariable('allowedPrivilegeLevels', UserModel::ALLOWED_PRIVILEGE_LEVELS);
+        $this->template->render('user/create');
+    }
+
+    public function create(): void
+    {
+        /** @see UserValidator::create() */
+        $this->validator->validate(__FUNCTION__);
+
+        $username = Sanitize::string($_POST['username'], 'strip');
+        $email    = Sanitize::string($_POST['email'], 'strip');
+        $password = $_POST['password'];
+
+        $this->service->register($username, $password, $email);
+
+        // Present success message
+        $this->setNotification(
+            Notification::TYPE_SUCCESS,
+            'Registration successful'
+        );
+
+        $this->createView();
     }
 }

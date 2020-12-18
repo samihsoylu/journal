@@ -87,7 +87,7 @@ abstract class AbstractValidator
         $session = UserSession::load();
 
         if ($token === null || hash_equals($token, $session->getAntiCSRFToken()) === false) {
-            throw InvalidParameterException::invalidFieldValue('form_key');
+            throw InvalidParameterException::invalidFormKey();
         }
 
         // regenerate so that in the next request the user has a different token

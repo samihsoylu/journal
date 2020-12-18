@@ -14,8 +14,6 @@ class Authentication extends AbstractController
     // Route url constants, to keep paths consistent within multiple classes
     public const LOGIN_URL         = BASE_URL . '/login';
     public const LOGIN_POST_URL    = self::LOGIN_URL . '/action';
-    public const REGISTER_URL      = BASE_URL . '/register';
-    public const REGISTER_POST_URL = self::REGISTER_URL . '/action';
     public const LOGOUT_URL        = BASE_URL . '/logout';
 
     private AuthenticationService $service;
@@ -27,49 +25,6 @@ class Authentication extends AbstractController
 
         $this->service   = new AuthenticationService();
         $this->validator = new AuthenticationValidator($_POST);
-    }
-
-    /**
-     * Register a user
-     *
-     * @return void
-     */
-    public function register(): void
-    {
-        // Registration is not open, administrators can only create user accounts
-        //$this->ensureUserHasAdminRights();
-
-        /** @see AuthenticationValidator::register() */
-        $this->validator->validate(__FUNCTION__);
-
-        $username = Sanitize::string($_POST['username'], 'strip');
-        $email    = Sanitize::string($_POST['email'], 'strip');
-        $password = $_POST['password'];
-
-        // Register the user
-        $this->service->register(
-            $username,
-            $password,
-            $email
-        );
-
-        // Present success message
-        $this->setNotification(
-            Notification::TYPE_SUCCESS,
-            'Registration successful'
-        );
-
-        $this->registerView();
-    }
-
-    /**
-     * Display a registration form
-     *
-     * @return
-     */
-    public function registerView(): void
-    {
-        $this->template->render('authenticate/register');
     }
 
     /**

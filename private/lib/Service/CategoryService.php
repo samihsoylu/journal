@@ -4,106 +4,97 @@ namespace App\Service;
 
 use App\Database\Model\Category;
 use App\Database\Model\User;
-use App\Database\Repository\EntryRepository;
 use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Service\Helpers\CategoryHelper;
 use App\Utility\Registry;
-use App\Utility\UserSession;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class CategoryService
 {
-    protected CategoryRepository $categoryRepository;
-
-    protected EntryRepository $entryRepository;
-
+    private CategoryRepository $repository;
     private CategoryHelper $helper;
+    private UserService $userService;
+    private EntryService $entryService;
 
     public function __construct()
     {
         /** @var CategoryRepository $categoryRepository */
         $categoryRepository = Registry::get(CategoryRepository::class);
 
-        /** @var EntryRepository $entryRepository */
-        $entryRepository = Registry::get(EntryRepository::class);
-
-        /** @var CategoryHelper $helper */
-        $helper = Registry::get(CategoryHelper::class);
-
-        $this->categoryRepository = $categoryRepository;
-        $this->entryRepository    = $entryRepository;
-        $this->helper             = $helper;
+        $this->repository   = $categoryRepository;
+        $this->helper       = new CategoryHelper();
+        $this->userService  = new UserService();
+        $this->entryService = new EntryService();
     }
 
-    public function getCategoryById(int $categoryId): Category
+    public function getCategoryForUser(int $categoryId, $userId): Category
     {
         /** @var Category $category */
-        $category = $this->categoryRepository->getById($categoryId);
+        $category = $this->repository->getById($categoryId);
         $this->helper->ensureCategoryIsNotNull($category, $categoryId);
-        $this->helper->ensureUserOwnsCategory($category);
+        $this->helper->ensureUserOwnsCategory($category, $userId);
 
         return $category;
     }
 
     /**
-     * @param User $user
      * @return Category[]
      */
-    public function getAllUserCategories(User $user): array
+    public function getAllCategoriesForUser(int $userId): array
     {
-        return $this->categoryRepository->findByUser($user);
+        $user = $this->userService->getUserById($userId);
+
+        return $this->repository->findByUser($user);
     }
 
-    public function createCategory(string $categoryTitle, string $categoryDescription): void
+    public function createCategory(int $userId, string $categoryTitle, string $categoryDescription): void
     {
+        $user = $this->userService->getUserById($userId);
+
         $category = new Category();
-        $category->setReferencedUser(UserSession::getUserObject());
+        $category->setReferencedUser($user);
         $category->setName($categoryTitle);
         $category->setDescription($categoryDescription);
 
-        $this->categoryRepository->queue($category);
+        $this->repository->queue($category);
 
         try {
-            $this->categoryRepository->save();
+            $this->repository->save();
         } catch (UniqueConstraintViolationException $e) {
             throw InvalidArgumentException::categoryAlreadyExists($categoryTitle);
         }
     }
 
-    public function updateCategory(int $categoryId, string $categoryName, string $categoryDescription): void
+    public function updateCategory(int $userId, int $categoryId, string $categoryName, string $categoryDescription): void
     {
-        $category = $this->getCategoryById($categoryId);
+        $category = $this->getCategoryForUser($categoryId, $userId);
 
         $category->setName($categoryName);
         $category->setDescription($categoryDescription);
 
-        $this->categoryRepository->queue($category);
-        $this->categoryRepository->save();
+        $this->repository->queue($category);
+        $this->repository->save();
     }
 
-    public function deleteCategoryAndAssociatedEntries(int $categoryId): void
+    public function deleteCategoryAndAssociatedEntries(int $categoryId, int $userId): void
     {
-        $category = $this->getCategoryById($categoryId);
+        $category = $this->getCategoryForUser($categoryId, $userId);
 
         // get associated entries and delete them
-        $entries = $this->entryRepository->findByUserIdAndCategoryId(
-            $category->getReferencedUser()->getId(),
-            $categoryId
-        );
+        $entries = $this->entryService->getEntiresForUserByCategoryId($userId, $categoryId);
         foreach ($entries as $entry) {
-            $this->entryRepository->remove($entry);
+            $this->repository->remove($entry);
         }
-        $this->entryRepository->save();
 
         // delete category
-        $this->categoryRepository->remove($category);
-        $this->categoryRepository->save();
+        $this->repository->remove($category);
+        $this->repository->save();
     }
 
     public function getCategoryCountForUser(User $user): int
     {
-        $categories = $this->getAllUserCategories($user);
+        $categories = $this->repository->findByUser($user);
 
         return count($categories);
     }

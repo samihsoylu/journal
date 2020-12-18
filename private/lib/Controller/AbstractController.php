@@ -4,10 +4,12 @@ namespace App\Controller;
 
 use App\Database\Model\User;
 use App\Service\AuthenticationService;
+use App\Utility\Registry;
 use App\Utility\Session;
 use App\Utility\Template;
 use App\Utility\Notification;
 use App\Utility\Redirect;
+use Defuse\Crypto\Key;
 
 abstract class AbstractController
 {
@@ -19,7 +21,7 @@ abstract class AbstractController
     /**
      * @var AuthenticationService used to determine user is logged in or not in inheriting controller classes
      */
-    private AuthenticationService $authService;
+    private AuthenticationService $authenticationService;
 
     /**
      * @var Notification gives the ability to set notifications for inheriting controller classes
@@ -33,15 +35,14 @@ abstract class AbstractController
 
     public function __construct(array $routeParameters)
     {
+        /** @var AuthenticationService $authenticationService */
+        $authenticationService = Registry::get(AuthenticationService::class);
+        $this->authenticationService = $authenticationService;
+
         // Router variables (/user/{userId}/entry/{entryId}/)
         $this->routeParameters = $routeParameters;
-
-        // Services that are needed for all classes that inherit abstract controller.
-        $this->authService = new AuthenticationService();
-        $this->template    = Template::getInstance();
-
-        // User later to create notifications for the user
-        $this->notification = new Notification();
+        $this->template        = Template::getInstance($authenticationService->getNotRequiredUserSession());
+        $this->notification    = new Notification();
     }
 
     protected function getRouteParameters(): array
@@ -51,13 +52,12 @@ abstract class AbstractController
 
     protected function redirectLoggedOutUsersToLoginPage(): void
     {
-        if ($this->authService->userIsLoggedIn() === false) {
+        if (!$this->authenticationService->isUserLoggedIn()) {
             $this->setNotification(
                 Notification::TYPE_ERROR,
                 'You must login before you can access this page'
             );
 
-            /** @see Authentication::login() */
             // keep track on which page the user attempted to load
             Session::put('referred_from', $_GET['url']);
 
@@ -67,7 +67,7 @@ abstract class AbstractController
 
     protected function redirectLoggedInUsersToDashboard(): void
     {
-        if ($this->authService->userIsLoggedIn()) {
+        if ($this->authenticationService->isUserLoggedIn()) {
             Redirect::to(Welcome::DASHBOARD_URL);
         }
     }
@@ -77,12 +77,9 @@ abstract class AbstractController
      *
      * @return void
      */
-    protected function ensureUserHasAdminRights(): void
+    protected function ensureUserHasAdminPrivileges(): void
     {
-        $userIsAdmin = $this->authService->userHasPrivilege(User::PRIVILEGE_LEVEL_ADMIN);
-        $userIsOwner = $this->authService->userHasPrivilege(User::PRIVILEGE_LEVEL_OWNER);
-
-        if (!$userIsAdmin && !$userIsOwner) {
+        if ($this->authenticationService->userHasAdminPrivileges() === false) {
             http_response_code(403);
             $this->template->render('errors/403');
             exit();
@@ -99,5 +96,25 @@ abstract class AbstractController
     protected function setNotification(string $notificationType, string $notificationMessage): void
     {
         $this->notification->set($notificationType, $notificationMessage);
+    }
+
+    /**
+     * Get the user id of the logged in user
+     *
+     * @return int
+     */
+    protected function getUserId(): int
+    {
+        return $this->authenticationService->getUserSession()->getUserId();
+    }
+
+    /**
+     * Get the encryption key of the logged in user
+     *
+     * @return Key
+     */
+    protected function getUserEncryptionKey(): Key
+    {
+        return $this->authenticationService->getUserDecodedEncryptionKey();
     }
 }

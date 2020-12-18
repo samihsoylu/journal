@@ -2,9 +2,6 @@
 
 namespace App\Utility;
 
-use App\Database\Model\User;
-use App\Database\Repository\UserRepository;
-use App\Exception\UserException\InvalidOperationException;
 use Symfony\Component\Cache\CacheItem;
 
 /**
@@ -19,16 +16,16 @@ class UserSession
     protected int    $privilegeLevel;
 
     protected string $antiCSRFToken;
-    protected string $encryptionKey;
+    protected string $encodedEncryptionKey;
 
     protected const SESSION_ID = 'SessionID';
     protected const USER_ID    = 'UserID';
     protected const USER_NAME  = 'Username';
     protected const USER_PRIVILEGE_LEVEL = 'PrivilegeLevel';
-    protected const ANTI_CSRF_TOKEN      = 'AntiCSRFToken';
-    protected const ENCRYPTION_KEY       = 'EncodedKey';
+    protected const ANTI_CSRF_TOKEN        = 'AntiCSRFToken';
+    protected const ENCODED_ENCRYPTION_KEY = 'EncodedEncryptionKey';
 
-    protected function __construct(string $id, int $userId, string $username, int $privilegeLevel)
+    private function __construct(string $id, int $userId, string $username, int $privilegeLevel)
     {
         $this->sessionId      = $id;
         $this->userId         = $userId;
@@ -86,17 +83,17 @@ class UserSession
         $this->antiCSRFToken = $antiCSRFToken;
     }
 
-    public function getEncryptionKey(): string
+    public function getEncodedEncryptionKey(): string
     {
-        return $this->encryptionKey;
+        return $this->encodedEncryptionKey;
     }
 
-    public function setEncryptionKey(string $encryptionKey): void
+    public function setEncodedEncryptionKey(string $encodedEncryptionKey): void
     {
-        $this->encryptionKey = $encryptionKey;
+        $this->encodedEncryptionKey = $encodedEncryptionKey;
     }
 
-    protected static function fromStruct(array $struct): self
+    private static function fromStruct(array $struct): self
     {
         return new self(
             $struct[self::SESSION_ID],
@@ -106,7 +103,7 @@ class UserSession
         );
     }
 
-    protected function toStruct(): array
+    private function toStruct(): array
     {
         return [
             self::SESSION_ID           => $this->sessionId,
@@ -145,7 +142,7 @@ class UserSession
         );
 
         $self->generateNewAntiCSRFToken();
-        $self->setEncryptionKey($encodedEncryptionKey);
+        $self->setEncodedEncryptionKey($encodedEncryptionKey);
         $self->save();
 
         return $self;
@@ -170,51 +167,39 @@ class UserSession
 
         Session::put(self::SESSION_ID, $this->sessionId);
         Session::put(self::ANTI_CSRF_TOKEN, $this->antiCSRFToken);
-        \setcookie(self::ENCRYPTION_KEY, $this->encryptionKey, time() + DEFAULT_SESSION_EXPIRY_TIME, '/');
+        self::setCookie(self::ENCODED_ENCRYPTION_KEY, $this->encodedEncryptionKey, time() + DEFAULT_SESSION_EXPIRY_TIME);
     }
 
     /**
      * Reads the user $_SESSION and returns an UserSession instance if it exists in the cache. Returns null if user is
      * not logged in.
      *
-     * @param bool $sessionIsRequired (default: true) When specified true, exception is thrown when session is not found
      * @return self|null
-     * @throws InvalidOperationException
      */
-    public static function load(bool $sessionIsRequired = true): ?self
+    public static function load(): ?self
     {
         $sessionId = Session::get(self::SESSION_ID);
-        if ($sessionId === null) {
-            if ($sessionIsRequired) {
-                throw InvalidOperationException::userIsNotLoggedIn();
-            }
+        $encodedEncryptionKey = $_COOKIE[self::ENCODED_ENCRYPTION_KEY] ?? null;
+
+        if (!$sessionId || !$encodedEncryptionKey) {
             return null;
         }
 
-        $cache = Cache::getInstance();
-
         /** @var CacheItem $item */
+        $cache = Cache::getInstance();
         $item = $cache->getItem($sessionId);
         if (!$item->isHit()) {
             // Cache item has expired, user is no longer considered to be logged in
             return null;
         }
 
-        $self          = self::fromStruct($item->get());
-        $token         = Session::get(self::ANTI_CSRF_TOKEN);
-        $encryptionKey = $_COOKIE[self::ENCRYPTION_KEY] ?? null;
-        if ($encryptionKey === null) {
-            $self::destroy();
-            if ($sessionIsRequired) {
-                throw InvalidOperationException::userIsNotLoggedIn();
-            }
-            return null;
-        }
+        $userSession = self::fromStruct($item->get());
+        $token = Session::get(self::ANTI_CSRF_TOKEN);
 
-        $self->setAntiCSRFToken($token);
-        $self->setEncryptionKey($encryptionKey);
+        $userSession->setAntiCSRFToken($token);
+        $userSession->setEncodedEncryptionKey($encodedEncryptionKey);
 
-        return $self;
+        return $userSession;
     }
 
     /**
@@ -232,23 +217,17 @@ class UserSession
         $cache     = Cache::getInstance();
         $cacheItem = $cache->getItem($sessionId);
         if ($cacheItem->isHit()) {
-            // deletes stored userId, username & privilegeLevel from cache
             $cache->delete($sessionId);
         }
-        unset($_COOKIE[self::ENCRYPTION_KEY]);
+
+        unset($_COOKIE[self::ENCODED_ENCRYPTION_KEY]);
+        self::setCookie(self::ENCODED_ENCRYPTION_KEY, '', time() - 3600);
 
         Session::destroy();
     }
 
-    public static function getUserObject(): User
+    private static function setCookie(string $cookieName, string $cookieValue, int $cookieExpiryTime): void
     {
-        $session = self::load();
-
-        $repository = new UserRepository();
-
-        /** @var User $user */
-        $user = $repository->getById($session->getUserId());
-
-        return $user;
+        \setcookie($cookieName, $cookieValue, $cookieExpiryTime, '/');
     }
 }

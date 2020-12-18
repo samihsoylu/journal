@@ -6,8 +6,9 @@ use App\Database\Model\User;
 
 class UserHelper
 {
-    public function loggedInUserHasUpdatePrivilegesForThisUser(User $userThatWillBeModified, User $loggedInUser): bool
+    public function userHasEditPrivilegesForTargetUser(User $user, User $targetUser): bool
     {
-        return ($userThatWillBeModified->getPrivilegeLevel() < $loggedInUser->getPrivilegeLevel());
+        // if logged in user has higher privilege level than target user
+        return ($user->getPrivilegeLevel() < $targetUser->getPrivilegeLevel());
     }
 }

@@ -10,46 +10,22 @@ use App\Utility\Encryptor;
 use App\Utility\Registry;
 use App\Utility\UserSession;
 use App\Exception\UserException\InvalidArgumentException;
+use Defuse\Crypto\Key;
 
 class AuthenticationService
 {
-    protected UserRepository $repository;
-
-    protected Encryptor $encryptor;
-
+    private UserRepository $repository;
+    private Encryptor $encryptor;
     private AuthenticationHelper $helper;
 
     public function __construct()
     {
-        $this->repository = Registry::get(UserRepository::class);
-        $this->encryptor  = Registry::get(Encryptor::class);
-        $this->helper     = Registry::get(AuthenticationHelper::class);
-    }
+        /** @var UserRepository $repository */
+        $repository = Registry::get(UserRepository::class);
+        $this->repository = $repository;
 
-    public function register(string $username, string $password, string $email): void
-    {
-        $user = $this->repository->findByUsername($username);
-        if ($user !== null) {
-            throw InvalidArgumentException::alreadyRegistered('username', $username);
-        }
-
-        $user = $this->repository->findByEmailAddress($email);
-        if ($user !== null) {
-            throw InvalidArgumentException::alreadyRegistered('email', $email);
-        }
-
-        $encryptedPassword      = password_hash($password, PASSWORD_ARGON2ID);
-        $protectedEncryptionKey = $this->encryptor->generateProtectedEncryptionKey($password);
-
-        $user = new User();
-        $user->setUsername($username)
-            ->setPassword($encryptedPassword)
-            ->setEmailAddress($email)
-            ->setPrivilegeLevel(User::PRIVILEGE_LEVEL_USER)
-            ->setEncryptionKey($protectedEncryptionKey);
-
-        $this->repository->queue($user);
-        $this->repository->save();
+        $this->helper     = new AuthenticationHelper();
+        $this->encryptor  = new Encryptor();
     }
 
     public function login(string $username, string $password): void
@@ -87,10 +63,15 @@ class AuthenticationService
         UserSession::destroy();
     }
 
-    public function userIsLoggedIn(): bool
+    public function isUserLoggedIn(): bool
     {
-        $session = UserSession::load(false);
-        return !($session === null);
+        try {
+            $userSession = $this->getUserSession();
+        } catch(InvalidOperationException $e) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -100,13 +81,41 @@ class AuthenticationService
      * @param int $requiredPrivilegeLevel User::PRIVILEGE_LEVEL_USER | User::PRIVILEGE_LEVEL_ADMIN
      * @return bool
      */
-    public function userHasPrivilege(int $requiredPrivilegeLevel): bool
+    public function userHasPrivilegeLevel(int $requiredPrivilegeLevel): bool
     {
-        $session = UserSession::load(false);
-        if ($session === null) {
-            return false;
+        return ($this->getUserSession() === $requiredPrivilegeLevel);
+    }
+
+    public function getUserSession(): UserSession
+    {
+        $userSession = UserSession::load();
+        if ($userSession === null) {
+            throw InvalidOperationException::userIsNotLoggedIn();
         }
 
-        return ($session->getPrivilegeLevel() === $requiredPrivilegeLevel);
+        return $userSession;
+    }
+
+    public function getNotRequiredUserSession(): ?UserSession
+    {
+        try {
+            return $this->getUserSession();
+        } catch (InvalidOperationException $e) {
+            return null;
+        }
+    }
+
+    public function userHasAdminPrivileges(): bool
+    {
+        // 1|2 <= 2 - is true for admin and owner
+        return ($this->getUserSession()->getPrivilegeLevel() <= User::PRIVILEGE_LEVEL_ADMIN);
+    }
+
+    public function getUserDecodedEncryptionKey(): Key
+    {
+        $encodedEncryptionKey = $this->getUserSession()->getEncodedEncryptionKey();
+
+        $encryptor = new Encryptor();
+        return $encryptor->getKeyFromEncodedEncryptionKey($encodedEncryptionKey);
     }
 }

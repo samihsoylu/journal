@@ -14,8 +14,8 @@ $route->addRoute('GET', Welcome::DASHBOARD_URL, 'Welcome@dashboard');
 // Authentication
 $route->addRoute('GET', Authentication::LOGIN_URL, 'Authentication@loginView');
 $route->addRoute('POST', Authentication::LOGIN_POST_URL, 'Authentication@login');
-$route->addRoute('GET', Authentication::REGISTER_URL, 'Authentication@registerView');
-$route->addRoute('POST', Authentication::REGISTER_POST_URL, 'Authentication@register');
+//$route->addRoute('GET', Authentication::REGISTER_URL, 'Authentication@registerView');
+//$route->addRoute('POST', Authentication::REGISTER_POST_URL, 'Authentication@register');
 $route->addRoute('GET', Authentication::LOGOUT_URL, 'Authentication@logout');
 
 // Entries
@@ -38,3 +38,5 @@ $route->addRoute('GET', Category::DELETE_CATEGORY_URL, 'Category@delete');
 // Users
 $route->addRoute('GET', User::USERS_URL, 'User@indexView');
 $route->addRoute('GET', User::VIEW_USER_URL, 'User@userView');
+$route->addRoute('GET', User::CREATE_USER_URL, 'User@createView');
+$route->addRoute('POST', User::CREATE_USER_POST_URL, 'User@create');

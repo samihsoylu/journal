@@ -5,34 +5,33 @@ namespace App\Service;
 use App\Database\Model\Entry;
 use App\Database\Model\User;
 use App\Database\Repository\EntryRepository;
-use App\Exception\UserException\NotFoundException;
 use App\Service\Helpers\EntryHelper;
 use App\Utility\Registry;
-use App\Utility\UserSession;
-use Doctrine\ORM\ORMException;
+use Defuse\Crypto\Key;
 
 class EntryService
 {
-    protected EntryRepository $entryRepository;
-    protected CategoryService $categoryService;
-    protected EntryHelper $helper;
+    private EntryRepository $repository;
+    private EntryHelper $helper;
+    private CategoryService $categoryService;
+    private UserService $userService;
 
     public function __construct()
     {
-        /** @var EntryRepository $entryRepository */
-        $entryRepository = Registry::get(EntryRepository::class);
+        /** @var EntryRepository $repository */
+        $repository = Registry::get(EntryRepository::class);
 
-        /** @var CategoryService $categoryService */
-        $categoryService = Registry::get(CategoryService::class);
-
-        /** @var EntryHelper $helper */
-        $helper = Registry::get(EntryHelper::class);
-
-        $this->entryRepository = $entryRepository;
-        $this->categoryService = $categoryService;
-        $this->helper          = $helper;
+        $this->repository      = $repository;
+        $this->helper          = new EntryHelper();
+        $this->categoryService = new CategoryService();
+        $this->userService     = new UserService();
     }
 
+    /**
+     * Gets entries for a user based on the provided filter parameters
+     *
+     * @return array
+     */
     public function getAllEntriesForUserFromFilter(
         int $userId,
         ?string $search,
@@ -45,10 +44,10 @@ class EntryService
         if ($page < 1) {
             $page = 1;
         }
-        $index = $page - 1;
+        $index  = $page - 1;
         $offset = $index * $pageSize;
 
-        $entries = $this->entryRepository->getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
+        $entries = $this->repository->getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
             $userId,
             $search,
             $categoryId,
@@ -58,7 +57,7 @@ class EntryService
             $pageSize
         );
 
-        $totalEntriesCount = $this->entryRepository->getTotalCountOfEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
+        $totalEntriesCount = $this->repository->getTotalCountOfEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
             $userId,
             $search,
             $categoryId,
@@ -71,82 +70,96 @@ class EntryService
             $totalPages = ceil($totalEntriesCount / $pageSize);
         }
 
-        return [$page, $totalPages, $entries];
+        return [
+            'entries'     => $entries,
+            'totalPages'  => $totalPages,
+            'currentPage' => $page,
+            'filterUrl'   => $this->helper->getUriForPageFilter($page),
+        ];
     }
 
-    public function createEntry(int $categoryId, string $title, string $content): int
+    /**
+     * Create a new entry for a user
+     *
+     * @return int Entry id
+     */
+    public function createEntry(int $userId, Key $encryptionKey, int $categoryId, string $title, string $content): int
     {
-        $category = $this->categoryService->getCategoryById($categoryId);
+        $category = $this->categoryService->getCategoryForUser($categoryId, $userId);
+
+        $user = $this->userService->getUserById($userId);
 
         $entry = new Entry();
         $entry->setReferencedCategory($category)
-            ->setReferencedUser(UserSession::getUserObject())
+            ->setReferencedUser($user)
             ->setTitle($title)
-            ->setContentAndEncrypt($content);
+            ->setContentAndEncrypt($content, $encryptionKey);
 
-        $this->entryRepository->queue($entry);
-        $this->entryRepository->save();
+        $this->repository->queue($entry);
+        $this->repository->save();
 
         return $entry->getId();
     }
 
-    public function updateEntry(int $entryId, int $categoryId, string $title, string $content): void
+    /**
+     * Update an entry for a user
+     *
+     * @return void
+     */
+    public function updateEntry(int $userId, Key $encryptionKey, int $entryId, int $categoryId, string $title, string $content): void
     {
-        $category = $this->categoryService->getCategoryById($categoryId);
+        $category = $this->categoryService->getCategoryForUser($categoryId, $userId);
 
-        $entry = $this->getEntryById($entryId);
+        $entry = $this->getEntryForUser($entryId, $userId);
         $entry->setReferencedCategory($category)
               ->setTitle($title)
-              ->setContentAndEncrypt($content);
+              ->setContentAndEncrypt($content, $encryptionKey);
 
-        $this->entryRepository->queue($entry);
-        $this->entryRepository->save();
+        $this->repository->queue($entry);
+        $this->repository->save();
     }
 
-    /**
-     * Finds the requested entry by the provided id
-     *
-     * @param int $entryId
-     * @return Entry
-     * @throws NotFoundException|ORMException
-     */
-    public function getEntryById(int $entryId): Entry
+    public function getEntryForUser(int $entryId, int $userId): Entry
     {
         /** @var Entry $entry */
-        $entry = $this->entryRepository->getById($entryId);
-        $this->helper->ensureUserOwnsEntry($entry);
+        $entry = $this->repository->getById($entryId);
+        $this->helper->ensureUserOwnsEntry($entry, $userId);
 
         return $entry;
     }
 
     /**
-     * Removes an existing entry from the database
+     * Removes an existing entry for user
      *
-     * @param int $entryId
-     * @throws NotFoundException|ORMException
+     * @return void
      */
-    public function deleteEntry(int $entryId): void
+    public function deleteEntry(int $entryId, int $userId): void
     {
-        $entry = $this->getEntryById($entryId);
+        $entry = $this->getEntryForUser($entryId, $userId);
 
-        $this->entryRepository->remove($entry);
-        $this->entryRepository->save();
+        $this->repository->remove($entry);
+        $this->repository->save();
     }
 
+    /**
+     * Count the total existing for a user
+     *
+     * @return int
+     */
     public function getEntryCountForUser(User $user): int
     {
-        $entries = $this->entryRepository->findByUser($user);
+        $entries = $this->repository->findByUser($user);
         
         return count($entries);
     }
 
-    public function getHelper(): EntryHelper
+    /**
+     * Get category specific entries for a user
+     *
+     * @return Entry[]
+     */
+    public function getEntiresForUserByCategoryId(int $userId, int $categoryId): array
     {
-        return $this->helper;
-    }
-
-    public function getCategoryService(): CategoryService
-    {
-        return $this->categoryService;
+        return $this->repository->findByUserIdAndCategoryId($userId, $categoryId);
     }
 }

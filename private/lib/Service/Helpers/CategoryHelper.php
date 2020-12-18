@@ -4,7 +4,6 @@ namespace App\Service\Helpers;
 
 use App\Database\Model\Category;
 use App\Exception\UserException\NotFoundException;
-use App\Utility\UserSession;
 
 class CategoryHelper
 {
@@ -15,11 +14,9 @@ class CategoryHelper
         }
     }
 
-    public function ensureUserOwnsCategory(Category $category): void
+    public function ensureUserOwnsCategory(Category $category, int $userId): void
     {
-        $session = UserSession::load();
-
-        if ($category->getReferencedUser()->getId() !== $session->getUserId()) {
+        if ($category->getReferencedUser()->getId() !== $userId) {
             // found category does not belong to the logged in user
             throw NotFoundException::entityIdNotFound(Category::class, $category->getId());
         }

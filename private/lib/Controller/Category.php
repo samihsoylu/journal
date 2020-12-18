@@ -46,7 +46,7 @@ class Category extends AbstractController
      */
     public function indexView(): void
     {
-        $categories = $this->service->getAllUserCategories(UserSession::getUserObject());
+        $categories = $this->service->getAllCategoriesForUser($this->getUserId());
 
         $this->template->setVariable('categories', $categories);
         $this->template->render('category/all');
@@ -65,7 +65,7 @@ class Category extends AbstractController
         $title       = Sanitize::string($_POST['category_name'], 'strip|capitalize');
         $description = Sanitize::string($_POST['category_description'], 'htmlspecialchars');
 
-        $this->service->createCategory($title, $description);
+        $this->service->createCategory($this->getUserId(), $title, $description);
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
@@ -99,7 +99,7 @@ class Category extends AbstractController
         $title       = Sanitize::string($_POST['category_name'], 'strip|capitalize');
         $description = Sanitize::string($_POST['category_description'], 'htmlspecialchars');
 
-        $this->service->updateCategory($categoryId, $title, $description);
+        $this->service->updateCategory($this->getUserId(), $categoryId, $title, $description);
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
@@ -119,7 +119,7 @@ class Category extends AbstractController
         $parameters = $this->getRouteParameters();
 
         try {
-            $category = $this->service->getCategoryById($parameters['id']);
+            $category = $this->service->getCategoryForUser($parameters['id'], $this->getUserId());
 
             $this->template->setVariable('category', $category);
         } catch (UserException $e) {
@@ -144,7 +144,7 @@ class Category extends AbstractController
         /** @see CategoryValidator::delete() */
         $this->validator->validate(__FUNCTION__);
 
-        $this->service->deleteCategoryAndAssociatedEntries($categoryId);
+        $this->service->deleteCategoryAndAssociatedEntries($categoryId, $this->getUserId());
 
         $this->setNotification(Notification::TYPE_SUCCESS, 'Category was removed');
 
