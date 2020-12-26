@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Validator;
 
@@ -19,7 +19,7 @@ class UserValidator extends AbstractValidator
         $this->ensureValueIsNotTooLong($this->post, 'username', 64);
         $this->ensureEmailIsValid($this->post, 'email');
 
-        $this->ensureValueIsNumeric($this->post,'privilegeLevel');
+        $this->ensureValueIsNumeric($this->post, 'privilegeLevel');
         $this->ensureProvidedPrivilegeLevelExists($this->post['privilegeLevel'], 'privilegeLevel');
 
         $this->ensureUserHasProvidedValidAntiCSRFToken($_POST['form_key']);

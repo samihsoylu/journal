@@ -1,6 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace App\Service\Helpers;
+namespace App\Logic\Helper;
 
 use App\Database\Model\Category;
 use App\Exception\UserException\NotFoundException;

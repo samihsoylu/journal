@@ -25,11 +25,11 @@
                             <label for="email">Email address</label>
                         </div>
                         <div class="input-field">
-                            <input id="created" type="text" value="{{ $user->getCreatedTimestampFormatted() }}" disabled />
+                            <input id="created" type="text" value="{{ $user->getCreatedTimestamp() }}" disabled />
                             <label for="created">Created date</label>
                         </div>
                         <div class="input-field">
-                            <select id="privilege" name="privilege" @if($isReadOnly) disabled @endif>
+                            <select id="privilege" name="privilege" @if($user->isReadOnly()) disabled @endif>
                                 @foreach($user::ALLOWED_PRIVILEGE_LEVELS as $privilegeLevelId => $privilegeLevelName)
                                     <option value="{{ $privilegeLevelId }}" @if($privilegeLevelId === $user->getPrivilegeLevel()) selected @endif @if($session->getPrivilegeLevel() >= $privilegeLevelId) disabled @endif>{{ $privilegeLevelName }}</option>
                                 @endforeach
@@ -39,14 +39,14 @@
 
                         <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
 
-                        <p class="small-text">Last updated: {{ $user->getLastUpdatedTimestampFormatted() }}</p>
+                        <p class="small-text">Last updated: {{ $user->getLastUpdatedTimestamp() }}</p>
 
                         <p class="small-text title"><b>Usage Statistics</b></p>
-                        <p class="small-text context">Entries: {{ $totalEntries }} <br />Categories: {{ $totalCategories }}</p>
+                        <p class="small-text context">Entries: {{ $user->getTotalEntries() }} <br />Categories: {{ $user->getTotalCategories() }}</p>
 
                         <!-- javascript in the back button ensures that the filters are not lost when you go back to the users page -->
                         <button class="btn btn-default" type="button" onclick="@if(isset($success)) window.location.href='{{ $users_url }}' @else window.history.go(-1); return false; @endif"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
-                        <button class="btn btn-primary" type="submit" @if($isReadOnly) disabled @endif><i class="material-icons">save</i> Save</button>
+                        <button class="btn btn-primary" type="submit" @if($user->isReadOnly()) disabled @endif><i class="material-icons">save</i> Save</button>
                     </form>
                 @endisset
             </div>

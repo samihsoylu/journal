@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Utility;
 
@@ -53,7 +53,7 @@ class Sanitize
 
     public static function int(string $value): int
     {
-        return filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+        return (int)filter_var($value, FILTER_SANITIZE_NUMBER_INT);
     }
 
     /**

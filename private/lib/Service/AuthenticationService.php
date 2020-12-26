@@ -1,21 +1,21 @@
-<?php declare(strict_types=1);
+<?php
 
 namespace App\Service;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Decorator\SessionDecorator;
+use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
-use App\Service\Helpers\AuthenticationHelper;
+use App\Service\Helper\AuthenticationHelper;
 use App\Utility\Encryptor;
 use App\Utility\Registry;
 use App\Utility\UserSession;
-use App\Exception\UserException\InvalidArgumentException;
 use Defuse\Crypto\Key;
 
 class AuthenticationService
 {
     private UserRepository $repository;
-    private Encryptor $encryptor;
     private AuthenticationHelper $helper;
 
     public function __construct()
@@ -24,8 +24,12 @@ class AuthenticationService
         $repository = Registry::get(UserRepository::class);
         $this->repository = $repository;
 
-        $this->helper     = new AuthenticationHelper();
-        $this->encryptor  = new Encryptor();
+        $this->helper = new AuthenticationHelper();
+    }
+
+    public function getUserSession(): ?UserSession
+    {
+        return UserSession::load();
     }
 
     public function login(string $username, string $password): void
@@ -43,7 +47,8 @@ class AuthenticationService
             throw InvalidArgumentException::incorrectLogin();
         }
 
-        $encodedEncryptionKey = $this->encryptor->getEncodedEncryptionKeyFromProtectedEncryptionKey(
+        $encryptor = new Encryptor();
+        $encodedEncryptionKey = $encryptor->getEncodedEncryptionKeyFromProtectedEncryptionKey(
             $user->getEncryptionKey(),
             $password
         );
@@ -65,57 +70,59 @@ class AuthenticationService
 
     public function isUserLoggedIn(): bool
     {
-        try {
-            $userSession = $this->getUserSession();
-        } catch(InvalidOperationException $e) {
-            return false;
-        }
+        $session = $this->getUserSession();
 
-        return true;
-    }
-
-    /**
-     * Check if the current logged in user has a specific privilege level. Responds with `true` if the required level
-     * is a match.
-     *
-     * @param int $requiredPrivilegeLevel User::PRIVILEGE_LEVEL_USER | User::PRIVILEGE_LEVEL_ADMIN
-     * @return bool
-     */
-    public function userHasPrivilegeLevel(int $requiredPrivilegeLevel): bool
-    {
-        return ($this->getUserSession() === $requiredPrivilegeLevel);
-    }
-
-    public function getUserSession(): UserSession
-    {
-        $userSession = UserSession::load();
-        if ($userSession === null) {
-            throw InvalidOperationException::userIsNotLoggedIn();
-        }
-
-        return $userSession;
-    }
-
-    public function getNotRequiredUserSession(): ?UserSession
-    {
-        try {
-            return $this->getUserSession();
-        } catch (InvalidOperationException $e) {
-            return null;
-        }
+        return ($session !== null);
     }
 
     public function userHasAdminPrivileges(): bool
     {
+        $session = $this->getUserSession();
+        if ($session === null) {
+            return false;
+        }
+
         // 1|2 <= 2 - is true for admin and owner
-        return ($this->getUserSession()->getPrivilegeLevel() <= User::PRIVILEGE_LEVEL_ADMIN);
+        return ($session->getPrivilegeLevel() <= User::PRIVILEGE_LEVEL_ADMIN);
     }
 
     public function getUserDecodedEncryptionKey(): Key
     {
-        $encodedEncryptionKey = $this->getUserSession()->getEncodedEncryptionKey();
+        $session = $this->getUserSession();
+        $this->ensureSessionIsNotNull($session);
+
+        $encodedEncryptionKey = $session->getEncodedEncryptionKey();
 
         $encryptor = new Encryptor();
         return $encryptor->getKeyFromEncodedEncryptionKey($encodedEncryptionKey);
+    }
+
+    public function getUserId(): int
+    {
+        $session = $this->getUserSession();
+        $this->ensureSessionIsNotNull($session);
+
+        return $session->getUserId();
+    }
+
+    public function getSessionDecorator(): ?SessionDecorator
+    {
+        $session = $this->getUserSession();
+        if ($session === null) {
+            return null;
+        }
+
+        return new SessionDecorator(
+            $this->userHasAdminPrivileges(),
+            $session->getAntiCSRFToken(),
+            $session->getPrivilegeLevel()
+        );
+    }
+
+    private function ensureSessionIsNotNull(?UserSession $session): void
+    {
+        if ($session === null) {
+            throw InvalidOperationException::userIsNotLoggedIn();
+        }
     }
 }

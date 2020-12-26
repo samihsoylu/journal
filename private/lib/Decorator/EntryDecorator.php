@@ -1,31 +1,30 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Decorator;
-
-use App\Database\Model\Entry;
-use Defuse\Crypto\Key;
 
 class EntryDecorator
 {
     private int $entryId;
     private string $entryTitle;
+    private int $categoryId;
     private string $categoryName;
     private string $entryContent;
     private string $getLastUpdatedTimestamp;
 
-    public function __construct(Entry $entry, Key $encryptionKey)
-    {
-        $this->entryId                       = $entry->getId();
-        $this->entryTitle                    = $entry->getTitle();
-        $this->categoryName                  = $entry->getReferencedCategory()->getName();
-        $this->getLastUpdatedTimestamp = $entry->getLastUpdatedTimestampFormatted();
-
-        $this->entryContent = $this->decodeEntryContentAsMarkup($entry, $encryptionKey);
-    }
-
-    public function decodeEntryContentAsMarkup(Entry $entry, Key $encryptionKey): string
-    {
-        return $entry->getContentAsMarkup($encryptionKey);
+    public function __construct(
+        int $entryId,
+        string $entryTitle,
+        int $categoryId,
+        string $categoryName,
+        string $entryContent,
+        string $getLastUpdatedTimestamp
+    ) {
+        $this->entryId                 = $entryId;
+        $this->entryTitle              = $entryTitle;
+        $this->categoryId              = $categoryId;
+        $this->categoryName            = $categoryName;
+        $this->entryContent            = $entryContent;
+        $this->getLastUpdatedTimestamp = $getLastUpdatedTimestamp;
     }
 
     public function getEntryId(): int
@@ -38,6 +37,14 @@ class EntryDecorator
         return $this->entryTitle;
     }
 
+    /**
+     * @return int
+     */
+    public function getCategoryId(): int
+    {
+        return $this->categoryId;
+    }
+
     public function getCategoryName(): string
     {
         return $this->categoryName;
@@ -48,7 +55,7 @@ class EntryDecorator
         return $this->entryContent;
     }
 
-    public function getGetLastUpdatedTimestamp(): string
+    public function getLastUpdatedTimestamp(): string
     {
         return $this->getLastUpdatedTimestamp;
     }

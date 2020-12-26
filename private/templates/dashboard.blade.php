@@ -46,7 +46,7 @@
                             </div>
                         </div>
 
-                        @if ($session->loggedInUserIsAdmin())
+                        @if ($session->userHasAdminPrivileges())
                             <div class="col s12 m6 l4">
                                 <div class="card">
                                     <div class="card-image">

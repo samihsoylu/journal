@@ -11,7 +11,7 @@
         <li><a href="{{ $dashboard_url }}">Dashboard</a></li>
         <li><a href="{{ $entries_url }}">Entries</a></li>
         <li><a href="{{ $categories_url }}">Categories</a></li>
-        @if ($session->loggedInUserIsAdmin())
+        @if ($session->userHasAdminPrivileges())
             <li><a href="{{ $users_url }}">Users</a></li>
         @endif
         <li><a href="#!">Account</a></li>
@@ -27,7 +27,7 @@
                     <li @if ($active_page === 'dashboard') class="active" @endif><a href="{{ $dashboard_url }}">Dashboard</a></li>
                     <li @if ($active_page === 'entries') class="active" @endif><a href="{{ $entries_url }}">Entries</a></li>
                     <li @if ($active_page === 'categories') class="active" @endif><a href="{{ $categories_url }}">Categories</a></li>
-                    @if ($session->loggedInUserIsAdmin())
+                    @if ($session->userHasAdminPrivileges())
                         <li @if ($active_page === 'users') class="active" @endif><a href="{{ $users_url }}">Users</a></li>
                     @endif
                     <li><a class="dropdown-trigger" href="#!" data-target="account_menu"><i class="material-icons right">account_box arrow_drop_down</i></a></li>

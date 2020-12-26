@@ -1,6 +1,6 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace App\Service\Helpers;
+namespace App\Service\Helper;
 
 use App\Utility\Cache;
 use Symfony\Component\Cache\CacheItem;

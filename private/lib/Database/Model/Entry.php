@@ -3,7 +3,6 @@
 namespace App\Database\Model;
 
 use App\Utility\Encryptor;
-use App\Utility\UserSession;
 use Defuse\Crypto\Key;
 use Doctrine\ORM\Mapping\Index;
 use Doctrine\ORM\Mapping\JoinColumn;

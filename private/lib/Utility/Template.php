@@ -29,19 +29,19 @@ class Template
      */
     protected array $variables;
 
-    private function __construct(?UserSession $userSession = null)
+    private function __construct()
     {
         $this->blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH);
         $this->notification = new Notification();
 
         $this->setAllUrlConstantsToVariables();
-        $this->setDefaultVariables($userSession);
+        $this->setDefaultVariables();
     }
 
-    public static function getInstance(?UserSession $userSession = null): self
+    public static function getInstance(): self
     {
         if (self::$instance === null) {
-            self::$instance = new self($userSession);
+            self::$instance = new self();
         }
 
         return self::$instance;
@@ -141,18 +141,14 @@ class Template
     /**
      * Sets default variables required to render all templates
      *
-     * @param UserSession|null $userSession
      * @return void
      */
-    private function setDefaultVariables(?UserSession $userSession): void
+    private function setDefaultVariables(): void
     {
         $struct = [
             'site_title'  => $_ENV['SITE_TITLE'],
             'assets_url'  => ASSETS_URL,
             'active_page' => $this->getActivePage(),
-
-            // false because we don't care if the user is not signed in
-            'session'     => $userSession,
         ];
 
         $this->setVariables($struct);

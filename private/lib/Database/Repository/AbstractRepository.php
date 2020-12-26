@@ -3,7 +3,6 @@
 namespace App\Database\Repository;
 
 use App\Database\Database;
-use App\Exception\UserException\NotFoundException;
 use App\Database\Model\ModelInterface;
 use \Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;

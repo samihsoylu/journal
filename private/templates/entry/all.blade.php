@@ -116,7 +116,7 @@
 
             <div class="col s12 m8 l9">
                 @isset($entries)
-                    @foreach ($entries as $entry)
+                    @foreach ($entries->getEntries() as $entry)
                         <a href="{{ $entry_url }}/{{ $entry->getId() }}">
                             <div class="card">
                                 <div class="card-content">
@@ -127,19 +127,21 @@
                         </a>
                     @endforeach
                 @endisset
-                @empty($entries)
+                @empty($entries->getEntries())
                     <p>No entries found.</p>
                 @endempty
 
+                @php($leftIconUrl  = $entries->getPreviousPageUrl())
+                @php($rightIconUrl = $entries->getNextPageUrl())
+
                 @php($leftIconClass  = 'waves-effect')
                 @php($rightIconClass = 'waves-effect')
-                @php($leftIconUrl    = "{$filterUrl}page=" . ($currentPage - 1))
-                @php($rightIconUrl   = "{$filterUrl}page=" . ($currentPage + 1))
-                @if($currentPage == 1)
+
+                @if($entries->getCurrentPage() === 1)
                     @php($leftIconClass = 'disabled')
                     @php($leftIconUrl   = '#!')
                 @endif
-                @if($currentPage == $totalPages)
+                @if($entries->getCurrentPage() === $entries->getTotalPages())
                     @php($rightIconClass = 'disabled')
                     @php($rightIconUrl   = '#!')
                 @endif
@@ -147,10 +149,10 @@
                     <div class="col s12">
                         <ul class="pagination center">
                             <li class="{{ $leftIconClass }}"><a href="{{ $leftIconUrl }}"> <i class="material-icons">chevron_left</i></a></li>
-                            @for ($i = 1; $i <= $totalPages; $i++)
-                                <li class="@if($currentPage === $i) active @else waves-effect @endif"><a href="{{ $filterUrl }}page={{ $i }}">{{ $i }}</a></li>
+                            @for ($i = 1; $i <= $entries->getTotalPages(); $i++)
+                                <li class="@if($entries->getCurrentPage() === $i) active @else waves-effect @endif"><a href="{{ $entries->getPaginationFilterUri() }}page={{ $i }}">{{ $i }}</a></li>
                             @endfor
-                            <li class="{{ $rightIconClass }}"><a href="{{ $rightIconUrl }}"><i class="material-icons">chevron_right</i></a></li>
+                            <li class="{{ $rightIconClass }}"><a href="{{ $rightIconUrl  }}"><i class="material-icons">chevron_right</i></a></li>
                         </ul>
                     </div>
                 </div>

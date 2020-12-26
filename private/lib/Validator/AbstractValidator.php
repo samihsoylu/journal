@@ -1,7 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Validator;
 
+use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\InvalidParameterException;
 use App\Utility\UserSession;
 
@@ -85,6 +86,9 @@ abstract class AbstractValidator
     protected function ensureUserHasProvidedValidAntiCSRFToken(?string $token): void
     {
         $session = UserSession::load();
+        if ($session === null) {
+            throw InvalidOperationException::userIsNotLoggedIn();
+        }
 
         if ($token === null || hash_equals($token, $session->getAntiCSRFToken()) === false) {
             throw InvalidParameterException::invalidFormKey();

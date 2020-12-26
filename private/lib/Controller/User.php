@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Controller;
 
@@ -20,7 +20,6 @@ class User extends AbstractController
     public const DELETE_USER_URL = self::VIEW_USER_URL . '/delete/{antiCsrfToken}';
 
     private UserValidator $validator;
-
     private UserService $service;
 
     public function __construct(array $routeParameters)
@@ -55,11 +54,11 @@ class User extends AbstractController
      */
     public function userView(): void
     {
-        $requestedUserId = $this->getRouteParameters()['id'];
+        $requestedUserId = Sanitize::int($this->getRouteParameters()['id']);
 
-        $userViewStruct = $this->service->getUserViewStruct($this->getUserId(), $requestedUserId);
+        $user = $this->service->getUserForLoggedInUser($this->getUserId(), $requestedUserId);
 
-        $this->template->setVariables($userViewStruct);
+        $this->template->setVariable('user', $user);
         $this->template->render('user/view');
     }
 

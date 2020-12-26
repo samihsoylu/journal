@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Database\Model\User;
 use App\Service\AuthenticationService;
 use App\Utility\Registry;
 use App\Utility\Session;
@@ -41,8 +40,10 @@ abstract class AbstractController
 
         // Router variables (/user/{userId}/entry/{entryId}/)
         $this->routeParameters = $routeParameters;
-        $this->template        = Template::getInstance($authenticationService->getNotRequiredUserSession());
+        $this->template        = Template::getInstance();
         $this->notification    = new Notification();
+
+        $this->template->setVariable('session', $this->authenticationService->getSessionDecorator());
     }
 
     protected function getRouteParameters(): array
@@ -105,7 +106,7 @@ abstract class AbstractController
      */
     protected function getUserId(): int
     {
-        return $this->authenticationService->getUserSession()->getUserId();
+        return $this->authenticationService->getUserId();
     }
 
     /**

@@ -2,7 +2,6 @@
 
 namespace App;
 
-use App\Controller\AbstractController;
 use App\Exception\UserException;
 use App\Utility\ExceptionHandler;
 use FastRoute\Dispatcher;

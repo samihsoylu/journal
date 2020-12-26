@@ -3,57 +3,51 @@
 namespace App\Service;
 
 use App\Database\Model\User;
+use App\Database\Model\User as UserModel;
 use App\Database\Repository\UserRepository;
+use App\Decorator\UserDecorator;
 use App\Exception\UserException\InvalidArgumentException;
-use App\Exception\UserException\NotFoundException;
-use App\Service\Helpers\UserHelper;
-use App\Utility\Encryptor;
+use App\Logic\UserLogic;
+use App\Logic\CategoryLogic;
+use App\Logic\EntryLogic;
 use App\Utility\Registry;
 
 class UserService
 {
     private UserRepository $repository;
-    private UserHelper $helper;
-    private CategoryService $categoryService;
-    private EntryService $entryService;
-    private Encryptor $encryptor;
+    private UserLogic $userLogic;
+    private CategoryLogic $categoryLogic;
+    private EntryLogic $entryLogic;
 
     public function __construct()
     {
         /** @var UserRepository $repository */
         $repository = Registry::get(UserRepository::class);
-        $this->repository = $repository;
 
-        $this->helper          = new UserHelper();
-        $this->categoryService = new CategoryService();
-        $this->entryService    = new EntryService();
-        $this->encryptor       = new Encryptor();
+        $this->repository    = $repository;
+        $this->userLogic     = new UserLogic();
+        $this->categoryLogic = new CategoryLogic();
+        $this->entryLogic    = new EntryLogic();
     }
 
     /**
-     * Get all registered users from the database
+     * Get all registered users
      *
-     * @return User[]
+     * @return UserModel[]
      */
     public function getAllUsers(): array
     {
-        return $this->repository->getAll();
+        return $this->userLogic->getAllUsers();
     }
 
     /**
      * Finds a user based on a provided user id
      *
-     * @return User
+     * @return UserModel
      */
-    public function getUserById(int $userId): User
+    public function getUserById(int $userId): UserModel
     {
-        /** @var User $user */
-        $user = $this->repository->getById($userId);
-        if ($user === null) {
-            throw NotFoundException::entityIdNotFound('User', $userId);
-        }
-
-        return $user;
+        return $this->userLogic->getUserById($userId);
     }
 
     /**
@@ -76,11 +70,11 @@ class UserService
         $encryptedPassword      = password_hash($password, PASSWORD_ARGON2ID);
         $protectedEncryptionKey = $this->encryptor->generateProtectedEncryptionKey($password);
 
-        $user = new User();
+        $user = new UserModel();
         $user->setUsername($username)
             ->setPassword($encryptedPassword)
             ->setEmailAddress($email)
-            ->setPrivilegeLevel(User::PRIVILEGE_LEVEL_USER)
+            ->setPrivilegeLevel(UserModel::PRIVILEGE_LEVEL_USER)
             ->setEncryptionKey($protectedEncryptionKey);
 
         $this->repository->queue($user);
@@ -89,21 +83,28 @@ class UserService
         return $user->getId();
     }
 
-    /**
-     * Generate a struct for the single user view page
-     *
-     * @return array
-     */
-    public function getUserViewStruct(int $loggedInUserId, int $requestedUserId): array
+    public function getUserForLoggedInUser(int $loggedInUserId, int $requestedUserId): UserDecorator
     {
-        $targetUser = $this->getUserById($requestedUserId);
         $user       = $this->getUserById($loggedInUserId);
+        $targetUser = $this->getUserById($requestedUserId);
 
-        return [
-            'user'            => $targetUser,
-            'isReadOnly'      => !$this->helper->userHasEditPrivilegesForTargetUser($user, $targetUser),
-            'totalEntries'    => $this->entryService->getEntryCountForUser($targetUser),
-            'totalCategories' => $this->categoryService->getCategoryCountForUser($targetUser),
-        ];
+
+        $targetUserIsReadOnly = !$this->userHasEditPrivilegesForTargetUser($user, $targetUser);
+
+        $targetUserTotalEntries = $this->entryLogic->getEntryCountForUser($targetUser);
+        $targetUserTotalCategories = $this->categoryLogic->getCategoryCountForUser($targetUser);
+
+        return new UserDecorator(
+            $targetUser,
+            $targetUserIsReadOnly,
+            $targetUserTotalCategories,
+            $targetUserTotalEntries
+        );
+    }
+
+    private function userHasEditPrivilegesForTargetUser(UserModel $user, UserModel $targetUser): bool
+    {
+        // Owners can edit admins and lower, and admins can edit users.
+        return ($user->getPrivilegeLevel() < $targetUser->getPrivilegeLevel());
     }
 }

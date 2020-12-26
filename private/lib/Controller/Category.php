@@ -1,14 +1,13 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Controller;
 
 use App\Exception\UserException;
-use App\Service\CategoryService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
-use App\Utility\UserSession;
 use App\Validator\CategoryValidator;
+use App\Service\CategoryService;
 
 class Category extends AbstractController
 {
@@ -25,7 +24,7 @@ class Category extends AbstractController
 
     public const DELETE_CATEGORY_URL       = self::READ_CATEGORY_URL . '/delete/{antiCsrfToken}';
 
-    protected CategoryService   $service;
+    protected CategoryService $service;
     protected CategoryValidator $validator;
 
     public function __construct(array $routeParameters)
@@ -95,7 +94,7 @@ class Category extends AbstractController
         /** @see CategoryValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
-        $categoryId  = $this->getRouteParameters()['id'];
+        $categoryId  = Sanitize::int($this->getRouteParameters()['id']);
         $title       = Sanitize::string($_POST['category_name'], 'strip|capitalize');
         $description = Sanitize::string($_POST['category_description'], 'htmlspecialchars');
 
@@ -116,10 +115,10 @@ class Category extends AbstractController
      */
     public function updateView(): void
     {
-        $parameters = $this->getRouteParameters();
+        $categoryId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
-            $category = $this->service->getCategoryForUser($parameters['id'], $this->getUserId());
+            $category = $this->service->getCategoryForUser($categoryId, $this->getUserId());
 
             $this->template->setVariable('category', $category);
         } catch (UserException $e) {

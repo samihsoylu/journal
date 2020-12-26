@@ -1,9 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Utility;
 
 /**
- * Stores instances in a static variable. This allows feeding mock instances in to service classes when PHPUnit testing
+ * Stores instances in a static variable. This allows registering mock instances in to service classes when performing
+ * tests with phpunit.
  */
 class Registry
 {
