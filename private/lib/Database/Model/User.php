@@ -59,11 +59,6 @@ class User extends AbstractModel
     protected string $encryptionKey;
 
     /**
-     * @ORM\Column(type="integer", options={"unsigned":true, "default":0})
-     */
-    protected int $lastLoginTimestamp;
-
-    /**
      * @ORM\Column(type="integer", options={"unsigned":true})
      */
     protected int $createdTimestamp;
@@ -143,15 +138,5 @@ class User extends AbstractModel
     public function setEncryptionKey(string $encryptionKey): void
     {
         $this->encryptionKey = $encryptionKey;
-    }
-
-    public function getLastLoginTimestamp(): int
-    {
-        return $this->lastLoginTimestamp;
-    }
-
-    public function setLastLoginTimestamp(int $lastLoginTimestamp): void
-    {
-        $this->lastLoginTimestamp = $lastLoginTimestamp;
     }
 }
