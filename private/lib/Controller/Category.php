@@ -153,11 +153,11 @@ class Category extends AbstractController
     /**
      * Redirect the user to all categories page
      *
-     * @note This is in its own method for the convenience of the error handler.
      * @return void
      */
     public function deleteView(): void
     {
+        // This is in its own method for the convenience of the error handler.
         Redirect::to(self::CATEGORIES_URL);
     }
 }

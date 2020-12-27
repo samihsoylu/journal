@@ -28,12 +28,6 @@
                         </select>
                         <label for="privilegeLevel" class="dropdown-label">Privilege level</label>
                     </div>
-                    <p>
-                        <label>
-                            <input name="forcePasswordChange" class="filled-in" type="checkbox" @if(isset($_POST['forcePasswordChange'])) checked="checked" @endif />
-                            <span>Force password change on next login</span>
-                        </label>
-                    </p>
 
                     <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
 
@@ -44,4 +38,8 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('jquery-scripts')
+    @include('components/confirm-reload')
 @endsection

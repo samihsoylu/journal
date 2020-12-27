@@ -36,7 +36,7 @@ class CategoryService
     {
         $user = $this->userLogic->getUserById($userId);
 
-        return $this->repository->findByUser($user);
+        return $this->categoryLogic->getAllCategoriesForUser($user);
     }
 
     public function getCategoryForUser(int $categoryId, int $userId): CategoryModel

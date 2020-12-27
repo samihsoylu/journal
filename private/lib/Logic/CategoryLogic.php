@@ -2,6 +2,7 @@
 
 namespace App\Logic;
 
+use App\Database\Model\Category;
 use App\Database\Model\Category as CategoryModel;
 use App\Database\Model\User;
 use App\Database\Repository\CategoryRepository;
@@ -30,6 +31,14 @@ class CategoryLogic
         $this->helper->ensureUserOwnsCategory($category, $userId);
 
         return $category;
+    }
+
+    /**
+     * @return Category[]
+     */
+    public function getAllCategoriesForUser(User $user): array
+    {
+        return $this->repository->findByUser($user);
     }
 
     public function updateCategory(int $userId, int $categoryId, string $categoryName, string $categoryDescription): void

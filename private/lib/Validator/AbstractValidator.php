@@ -46,11 +46,14 @@ abstract class AbstractValidator
         }
     }
 
-    protected function ensureValueIsNumeric(array $values, string $fieldName): void
+    protected function ensureValueIsNumeric(array $values, string $fieldName): int
     {
-        if (!is_numeric($values[$fieldName])) {
+        $value = $values[$fieldName];
+        if (!is_numeric($value)) {
             throw InvalidParameterException::notNumeric($fieldName);
         }
+
+        return (int)$value;
     }
 
     protected function ensureOptionalValueIsNumeric(array $values, string $fieldName): void

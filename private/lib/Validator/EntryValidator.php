@@ -2,6 +2,7 @@
 
 namespace App\Validator;
 
+use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\InvalidParameterException;
 
 class EntryValidator extends AbstractValidator
@@ -20,7 +21,7 @@ class EntryValidator extends AbstractValidator
     }
 
     /**
-     * @throws InvalidParameterException
+     * @throws InvalidParameterException|InvalidOperationException
      */
     public function create(): void
     {

@@ -242,6 +242,9 @@ class Entry extends AbstractController
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
+        /** @see EntryValidator::delete() */
+        $this->validator->validate(__FUNCTION__);
+
         $this->service->deleteEntry($entryId, $this->getUserId());
 
         $this->setNotification(Notification::TYPE_SUCCESS, 'Entry was removed');
@@ -252,11 +255,11 @@ class Entry extends AbstractController
     /**
      * Redirect user to all entries page
      *
-     * @note This is in its own method for the convenience of the error handler.
      * @return void
      */
     public function deleteView(): void
     {
+        // This is in its own method for the convenience of the error handler.
         Redirect::to(self::ENTRIES_URL);
     }
 }

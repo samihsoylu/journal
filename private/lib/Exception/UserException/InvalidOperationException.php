@@ -2,6 +2,7 @@
 
 namespace App\Exception\UserException;
 
+use App\Database\Model\User;
 use App\Exception\UserException;
 
 class InvalidOperationException extends UserException
@@ -14,5 +15,10 @@ class InvalidOperationException extends UserException
     public static function loginAttemptsExceeded(int $loginCount): self
     {
         return new self("You have {$loginCount} failed login attempts, you have been blocked from logging in for 1 hour");
+    }
+
+    public static function insufficientPrivileges(string $userPrivilegeLevelAsString): self
+    {
+        return new self("Your privilege level is {$userPrivilegeLevelAsString} which is not enough to perform this operation");
     }
 }

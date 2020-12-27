@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\UserService;
 use App\Utility\Notification;
+use App\Utility\Redirect;
 use App\Utility\Sanitize;
 use App\Validator\UserValidator;
 use App\Database\Model\User as UserModel;
@@ -54,9 +55,9 @@ class User extends AbstractController
      */
     public function userView(): void
     {
-        $requestedUserId = Sanitize::int($this->getRouteParameters()['id']);
+        $targetUserId = Sanitize::int($this->getRouteParameters()['id']);
 
-        $user = $this->service->getUserForLoggedInUser($this->getUserId(), $requestedUserId);
+        $user = $this->service->getUserForLoggedInUser($this->getUserId(), $targetUserId);
 
         $this->template->setVariable('user', $user);
         $this->template->render('user/view');
@@ -73,11 +74,12 @@ class User extends AbstractController
         /** @see UserValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $username = Sanitize::string($_POST['username'], 'strip');
-        $email    = Sanitize::string($_POST['email'], 'strip');
-        $password = $_POST['password'];
+        $username       = Sanitize::string($_POST['username'], 'strip');
+        $email          = Sanitize::string($_POST['email'], 'strip');
+        $privilegeLevel = Sanitize::int($_POST['privilegeLevel']);
+        $password       = $_POST['password'];
 
-        $this->service->register($username, $password, $email);
+        $userId = $this->service->register($this->getUserId(), $username, $password, $email, $privilegeLevel);
 
         // Present success message
         $this->setNotification(
@@ -85,6 +87,34 @@ class User extends AbstractController
             'Registration successful'
         );
 
-        $this->createView();
+        Redirect::to(self::USER_URL . "/{$userId}");
+    }
+
+    public function delete(): void
+    {
+        $targetUserId = Sanitize::int($this->getRouteParameters()['id']);
+
+        // setting get variable for validator
+        $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
+
+        /** @see UserValidator::delete() */
+        $this->validator->validate(__FUNCTION__);
+
+        $this->service->deleteUser($this->getUserId(), $targetUserId);
+
+        $this->setNotification(Notification::TYPE_SUCCESS, 'User was removed');
+
+        $this->deleteView();
+    }
+
+    /**
+     * Redirect user to all users page
+     *
+     * @return void
+     */
+    public function deleteView(): void
+    {
+        // This is in its own method for the convenience of the error handler.
+        Redirect::to(self::USERS_URL);
     }
 }

@@ -24,6 +24,14 @@ class EntryLogic
     }
 
     /**
+     * @return EntryModel[]
+     */
+    public function getAllEntriesForUser(User $user): array
+    {
+        return $this->repository->findByUser($user);
+    }
+
+    /**
      * Gets entries for a user based on the provided filter parameters
      *
      * @return EntriesDecorator
