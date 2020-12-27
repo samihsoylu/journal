@@ -9,12 +9,11 @@ class AuthenticationHelper
 {
     public function getFailedLoginCount(): int
     {
-        $ipAddress = $_SERVER['REMOTE_ADDR'];
         $cache = Cache::getInstance();
 
-        /** @var CacheItem $item */
-        $item = $cache->getItem($ipAddress);
+        $item = $cache->getItem($this->getIpAddressHashed());
 
+        /** @var CacheItem $item */
         if ($item->isHit()) {
             return (int)$item->get();
         }
@@ -24,14 +23,19 @@ class AuthenticationHelper
 
     public function setFailedLoginCount(int $count): void
     {
-        $ipAddress = $_SERVER['REMOTE_ADDR'];
         $cache = Cache::getInstance();
 
-        /** @var CacheItem $item */
-        $item = $cache->getItem($ipAddress);
+        // Since the `:` symbol is a reserved character, hashing the IP prevents an exception when using IPv6
+        $item = $cache->getItem($this->getIpAddressHashed());
 
+        /** @var CacheItem $item */
         $item->expiresAfter(3600);
         $item->set($count);
         $cache->save($item);
+    }
+
+    private function getIpAddressHashed(): string
+    {
+        return crypt($_SERVER['REMOTE_ADDR'], 'abcdef');
     }
 }

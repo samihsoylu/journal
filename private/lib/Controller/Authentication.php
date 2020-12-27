@@ -45,8 +45,7 @@ class Authentication extends AbstractController
         // Log the user in
         $this->service->login($username, $password);
 
-        // This session is set in $this->redirectLoggedOutUsersToLoginPage()
-        // Ensures that user is taken back to the page they attempted to load after session cookie had expired.
+        /** @see AbstractController::redirectLoggedOutUsersToLoginPage() */
         $referredFrom = Session::get('referred_from');
         if ($referredFrom !== null) {
             Session::delete('referred_from');
@@ -60,7 +59,7 @@ class Authentication extends AbstractController
     /**
      * Display a login form
      *
-     * @return
+     * @return void
      */
     public function loginView(): void
     {
