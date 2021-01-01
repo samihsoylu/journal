@@ -135,7 +135,7 @@ class Category extends AbstractController
      */
     public function delete(): void
     {
-        $categoryId = $this->getRouteParameters()['id'];
+        $categoryId = Sanitize::int($this->getRouteParameters()['id']);
 
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
