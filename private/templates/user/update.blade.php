@@ -8,11 +8,6 @@
     @include('components/header')
     <div class="container">
         <div class="row row-align">
-            <div class="col s12 m10 l7 offset-m1 offset-l2 entry-content">
-
-            </div>
-        </div>
-        <div class="row row-align">
             <div class="col s12 m10 l7 offset-m1 offset-l2">
                 @isset($user)
                     <form method="post" action="{{ $user_url }}/{{ $user->getId() }}/update">
@@ -29,12 +24,12 @@
                             <label for="created">Created date</label>
                         </div>
                         <div class="input-field">
-                            <select id="privilege" name="privilege" @if($user->isReadOnly()) disabled @endif>
+                            <select id="privilegeLevel" name="privilegeLevel" @if($user->isReadOnly()) disabled @endif>
                                 @foreach($user::ALLOWED_PRIVILEGE_LEVELS as $privilegeLevelId => $privilegeLevelName)
                                     <option value="{{ $privilegeLevelId }}" @if($privilegeLevelId === $user->getPrivilegeLevel()) selected @endif @if($session->getPrivilegeLevel() >= $privilegeLevelId) disabled @endif>{{ $privilegeLevelName }}</option>
                                 @endforeach
                             </select>
-                            <label for="privilege" class="dropdown-label">Privilege level</label>
+                            <label for="privilegeLevel" class="dropdown-label">Privilege level</label>
                         </div>
 
                         <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
@@ -56,5 +51,5 @@
 @endsection
 
 @section('jquery-scripts')
-    @include('components/confirm-reload')
+    @include('components/delete-button-warning')
 @endsection

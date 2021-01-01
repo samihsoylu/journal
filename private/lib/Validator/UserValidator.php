@@ -26,6 +26,17 @@ class UserValidator extends AbstractValidator
         $this->ensureUserHasProvidedValidAntiCSRFToken($_POST['form_key']);
     }
 
+    public function update(): void
+    {
+        $requiredFields = ['privilegeLevel', 'form_key'];
+        $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
+
+        $privilegeLevel = $this->ensureValueIsNumeric($this->post, 'privilegeLevel');
+        $this->ensureProvidedPrivilegeLevelExists($privilegeLevel, 'privilegeLevel');
+
+        $this->ensureUserHasProvidedValidAntiCSRFToken($_POST['form_key']);
+    }
+
     public function delete(): void
     {
         $this->ensureUserHasProvidedValidAntiCSRFToken($_GET['form_key']);

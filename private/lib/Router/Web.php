@@ -37,7 +37,8 @@ $route->addRoute('GET', Category::DELETE_CATEGORY_URL, 'Category@delete');
 
 // Users
 $route->addRoute('GET', User::USERS_URL, 'User@indexView');
-$route->addRoute('GET', User::VIEW_USER_URL, 'User@userView');
 $route->addRoute('GET', User::CREATE_USER_URL, 'User@createView');
 $route->addRoute('POST', User::CREATE_USER_POST_URL, 'User@create');
 $route->addRoute('GET', User::DELETE_USER_URL, 'User@delete');
+$route->addRoute('POST', User::UPDATE_USER_URL, 'User@update');
+$route->addRoute('GET', User::VIEW_USER_URL, 'User@updateView');

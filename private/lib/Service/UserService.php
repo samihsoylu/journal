@@ -103,6 +103,24 @@ class UserService
         );
     }
 
+    public function updateUserPrivileges(int $loggedInUserId, int $targetUserId, int $newPrivilegeLevel): void
+    {
+        $loggedInUser = $this->userLogic->getUserById($loggedInUserId);
+        $targetUser = $this->userLogic->getUserById($targetUserId);
+
+        $this->ensureUserHasUpdatePrivileges($loggedInUser, $targetUser);
+
+        if ($newPrivilegeLevel <= $loggedInUser->getPrivilegeLevel()) {
+            // logged in user may not give the same privileges or higher to the target user
+            throw InvalidOperationException::insufficientPrivileges($loggedInUser->getPrivilegeLevelAsString());
+        }
+
+        $targetUser->setPrivilegeLevel($newPrivilegeLevel);
+
+        $this->repository->queue($targetUser);
+        $this->repository->save();
+    }
+
     public function deleteUser(int $loggedInUserId, int $targetUserId): void
     {
         $loggedInUser = $this->userLogic->getUserById($loggedInUserId);

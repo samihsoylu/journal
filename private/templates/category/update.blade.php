@@ -31,5 +31,5 @@
 @endsection
 
 @section('jquery-scripts')
-    @include('components/confirm-reload')
+    @include('components/delete-button-warning')
 @endsection
