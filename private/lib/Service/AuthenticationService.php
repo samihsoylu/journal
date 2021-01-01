@@ -41,7 +41,7 @@ class AuthenticationService
 
         $user = $this->repository->findByUsername($username);
         if ($user === null || !password_verify($password, $user->getPassword())) {
-            $this->helper->setFailedLoginCount($userFailedLoginCount + 1);
+            $this->helper->setFailedLoginCount(++$userFailedLoginCount);
 
             // Username or password is incorrect
             throw InvalidArgumentException::incorrectLogin();

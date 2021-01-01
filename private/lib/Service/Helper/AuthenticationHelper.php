@@ -36,6 +36,6 @@ class AuthenticationHelper
 
     private function getIpAddressHashed(): string
     {
-        return crypt($_SERVER['REMOTE_ADDR'], 'abcdef');
+        return md5($_SERVER['REMOTE_ADDR']);
     }
 }
