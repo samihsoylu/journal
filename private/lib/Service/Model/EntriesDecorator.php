@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Decorator;
+namespace App\Service\Model;
 
 use App\Database\Model\Entry;
 
