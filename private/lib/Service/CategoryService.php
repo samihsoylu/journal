@@ -5,18 +5,18 @@ namespace App\Service;
 use App\Database\Model\Category as CategoryModel;
 use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException\InvalidArgumentException;
-use App\Logic\CategoryLogic;
-use App\Logic\UserLogic;
-use App\Logic\EntryLogic;
+use App\Service\Helper\CategoryHelper;
+use App\Service\Helper\EntryHelper;
+use App\Service\Helper\UserHelper;
 use App\Utility\Registry;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class CategoryService
 {
     private CategoryRepository $repository;
-    private CategoryLogic $categoryLogic;
-    private UserLogic $userLogic;
-    private EntryLogic $entryLogic;
+    private CategoryHelper $categoryHelper;
+    private UserHelper $userHelper;
+    private EntryHelper $entryHelper;
 
     public function __construct()
     {
@@ -24,9 +24,9 @@ class CategoryService
         $repository = Registry::get(CategoryRepository::class);
         $this->repository    = $repository;
 
-        $this->categoryLogic = new CategoryLogic();
-        $this->userLogic     = new UserLogic();
-        $this->entryLogic    = new EntryLogic();
+        $this->categoryHelper = new CategoryHelper();
+        $this->userHelper     = new UserHelper();
+        $this->entryHelper    = new EntryHelper();
     }
 
     /**
@@ -34,19 +34,19 @@ class CategoryService
      */
     public function getAllCategoriesForUser(int $userId): array
     {
-        $user = $this->userLogic->getUserById($userId);
+        $user = $this->userHelper->getUserById($userId);
 
-        return $this->categoryLogic->getAllCategoriesForUser($user);
+        return $this->categoryHelper->getAllCategoriesForUser($user);
     }
 
     public function getCategoryForUser(int $categoryId, int $userId): CategoryModel
     {
-        return $this->categoryLogic->getCategoryForUser($categoryId, $userId);
+        return $this->categoryHelper->getCategoryForUser($categoryId, $userId);
     }
 
     public function createCategory(int $userId, string $categoryTitle, string $categoryDescription): void
     {
-        $user = $this->userLogic->getUserById($userId);
+        $user = $this->userHelper->getUserById($userId);
 
         $category = new CategoryModel();
         $category->setReferencedUser($user);
@@ -64,15 +64,21 @@ class CategoryService
 
     public function updateCategory(int $userId, int $categoryId, string $categoryName, string $categoryDescription): void
     {
-        $this->categoryLogic->updateCategory($userId, $categoryId, $categoryName, $categoryDescription);
+        $category = $this->getCategoryForUser($categoryId, $userId);
+
+        $category->setName($categoryName);
+        $category->setDescription($categoryDescription);
+
+        $this->repository->queue($category);
+        $this->repository->save();
     }
 
     public function deleteCategoryAndAssociatedEntries(int $categoryId, int $userId): void
     {
-        $category = $this->categoryLogic->getCategoryForUser($categoryId, $userId);
+        $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
         // get associated entries and queue for deleting
-        $entries = $this->entryLogic->getEntiresForUserByCategoryId($userId, $categoryId);
+        $entries = $this->entryHelper->getEntiresForUserByCategoryId($userId, $categoryId);
         foreach ($entries as $entry) {
             $this->repository->remove($entry);
         }

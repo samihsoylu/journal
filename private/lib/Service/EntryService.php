@@ -4,29 +4,29 @@ namespace App\Service;
 
 use App\Database\Model\Entry as EntryModel;
 use App\Database\Repository\EntryRepository;
-use App\Decorator\EntriesDecorator;
-use App\Logic\CategoryLogic;
-use App\Logic\EntryLogic;
-use App\Logic\UserLogic;
+use App\Service\Model\EntriesDecorator;
+use App\Service\Helper\CategoryHelper;
+use App\Service\Helper\EntryHelper;
+use App\Service\Helper\UserHelper;
 use App\Utility\Registry;
 use Defuse\Crypto\Key;
 
 class EntryService
 {
     private EntryRepository $repository;
-    private EntryLogic $entryLogic;
-    private CategoryLogic $categoryLogic;
-    private UserLogic $userLogic;
+    private EntryHelper $entryHelper;
+    private CategoryHelper $categoryHelper;
+    private UserHelper $userHelper;
 
     public function __construct()
     {
         /** @var EntryRepository $repository */
         $repository = Registry::get(EntryRepository::class);
 
-        $this->repository    = $repository;
-        $this->entryLogic    = new EntryLogic();
-        $this->categoryLogic = new CategoryLogic();
-        $this->userLogic     = new UserLogic();
+        $this->repository     = $repository;
+        $this->entryHelper    = new EntryHelper();
+        $this->categoryHelper = new CategoryHelper();
+        $this->userHelper     = new UserHelper();
     }
 
     /**
@@ -36,9 +36,9 @@ class EntryService
      */
     public function createEntry(int $userId, Key $encryptionKey, int $categoryId, string $title, string $content): int
     {
-        $category = $this->categoryLogic->getCategoryForUser($categoryId, $userId);
+        $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
-        $user = $this->userLogic->getUserById($userId);
+        $user = $this->userHelper->getUserById($userId);
 
         $entry = new EntryModel();
         $entry->setReferencedCategory($category)
@@ -59,9 +59,9 @@ class EntryService
      */
     public function updateEntry(int $userId, Key $encryptionKey, int $entryId, int $categoryId, string $title, string $content): void
     {
-        $category = $this->categoryLogic->getCategoryForUser($categoryId, $userId);
+        $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
-        $entry = $this->entryLogic->getEntryForUser($entryId, $userId);
+        $entry = $this->entryHelper->getEntryForUser($entryId, $userId);
         $entry->setReferencedCategory($category)
             ->setTitle($title)
             ->setContentAndEncrypt($content, $encryptionKey);
@@ -79,20 +79,41 @@ class EntryService
         ?int $page = 1,
         ?int $pageSize = 25
     ): EntriesDecorator {
-        return $this->entryLogic->getAllEntriesForUserFromFilter(
+        if ($page < 1) {
+            $page = 1;
+        }
+        $index  = $page - 1;
+        $offset = $index * $pageSize;
+
+        $entries = $this->repository->getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
             $userId,
             $search,
             $categoryId,
             $startCreatedDate,
             $endCreatedDate,
-            $page,
+            $offset,
             $pageSize
         );
+
+        $totalEntriesCount = $this->repository->getTotalCountOfEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
+            $userId,
+            $search,
+            $categoryId,
+            $startCreatedDate,
+            $endCreatedDate
+        );
+
+        $totalPages = 1;
+        if ($totalEntriesCount > 0) {
+            $totalPages = (int)ceil($totalEntriesCount / $pageSize);
+        }
+
+        return new EntriesDecorator($entries, $totalPages, $page);
     }
 
     public function getEntryForUser(int $entryId, int $userId): EntryModel
     {
-        return $this->entryLogic->getEntryForUser($entryId, $userId);
+        return $this->entryHelper->getEntryForUser($entryId, $userId);
     }
 
     /**
@@ -102,6 +123,12 @@ class EntryService
      */
     public function deleteEntry(int $entryId, int $userId): void
     {
-        $this->entryLogic->deleteEntry($entryId, $userId);
+        $entry = $this->entryHelper->getEntryForUser($entryId, $userId);
+
+        // queue entry to be removed
+        $this->repository->remove($entry);
+
+        // executed queued tasks
+        $this->repository->save();
     }
 }

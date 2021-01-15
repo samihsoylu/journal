@@ -1,13 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace App\Logic;
+namespace App\Service\Helper;
 
 use App\Database\Model\User as UserModel;
 use App\Database\Repository\UserRepository;
 use App\Exception\UserException\NotFoundException;
 use App\Utility\Registry;
 
-class UserLogic
+class UserHelper
 {
     private UserRepository $repository;
 

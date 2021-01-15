@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
-use App\Decorator\SessionDecorator;
+use App\Service\Model\SessionDecorator;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
 use App\Service\Helper\AuthenticationHelper;

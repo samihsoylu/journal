@@ -3,43 +3,42 @@
 namespace App\Service;
 
 use App\Database\Model\User;
-use App\Database\Model\User as UserModel;
 use App\Database\Repository\UserRepository;
-use App\Decorator\UserDecorator;
+use App\Service\Model\UserDecorator;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
-use App\Logic\UserLogic;
-use App\Logic\CategoryLogic;
-use App\Logic\EntryLogic;
+use App\Service\Helper\CategoryHelper;
+use App\Service\Helper\EntryHelper;
+use App\Service\Helper\UserHelper;
 use App\Utility\Encryptor;
 use App\Utility\Registry;
 
 class UserService
 {
     private UserRepository $repository;
-    private UserLogic $userLogic;
-    private CategoryLogic $categoryLogic;
-    private EntryLogic $entryLogic;
+    private UserHelper $userHelper;
+    private CategoryHelper $categoryHelper;
+    private EntryHelper $entryHelper;
 
     public function __construct()
     {
         /** @var UserRepository $repository */
         $repository = Registry::get(UserRepository::class);
 
-        $this->repository    = $repository;
-        $this->userLogic     = new UserLogic();
-        $this->categoryLogic = new CategoryLogic();
-        $this->entryLogic    = new EntryLogic();
+        $this->repository     = $repository;
+        $this->userHelper     = new UserHelper();
+        $this->categoryHelper = new CategoryHelper();
+        $this->entryHelper    = new EntryHelper();
     }
 
     /**
      * Get all registered users
      *
-     * @return UserModel[]
+     * @return User[]
      */
     public function getAllUsers(): array
     {
-        return $this->userLogic->getAllUsers();
+        return $this->userHelper->getAllUsers();
     }
 
     /**
@@ -49,7 +48,7 @@ class UserService
      */
     public function register(int $loggedInUserId, string $username, string $password, string $email, int $privilegeLevel): int
     {
-        $loggedInUser = $this->userLogic->getUserById($loggedInUserId);
+        $loggedInUser = $this->userHelper->getUserById($loggedInUserId);
 
         if ($loggedInUser->getPrivilegeLevel() >= $privilegeLevel) {
             // 'admin' users are only allowed to create users with the 'user' privilege level
@@ -71,7 +70,7 @@ class UserService
         $encryptor = new Encryptor();
         $protectedEncryptionKey = $encryptor->generateProtectedEncryptionKey($password);
 
-        $user = new UserModel();
+        $user = new User();
         $user->setUsername($username)
             ->setPassword($encryptedPassword)
             ->setEmailAddress($email)
@@ -86,14 +85,13 @@ class UserService
 
     public function getUserForLoggedInUser(int $loggedInUserId, int $targetUserId): UserDecorator
     {
-        $user       = $this->userLogic->getUserById($loggedInUserId);
-        $targetUser = $this->userLogic->getUserById($targetUserId);
-
+        $user       = $this->userHelper->getUserById($loggedInUserId);
+        $targetUser = $this->userHelper->getUserById($targetUserId);
 
         $targetUserIsReadOnly = !$this->userHasEditPrivilegesForTargetUser($user, $targetUser);
 
-        $targetUserTotalEntries = $this->entryLogic->getEntryCountForUser($targetUser);
-        $targetUserTotalCategories = $this->categoryLogic->getCategoryCountForUser($targetUser);
+        $targetUserTotalEntries = $this->entryHelper->getEntryCountForUser($targetUser);
+        $targetUserTotalCategories = $this->categoryHelper->getCategoryCountForUser($targetUser);
 
         return new UserDecorator(
             $targetUser,
@@ -105,8 +103,8 @@ class UserService
 
     public function updateUserPrivileges(int $loggedInUserId, int $targetUserId, int $newPrivilegeLevel): void
     {
-        $loggedInUser = $this->userLogic->getUserById($loggedInUserId);
-        $targetUser = $this->userLogic->getUserById($targetUserId);
+        $loggedInUser = $this->userHelper->getUserById($loggedInUserId);
+        $targetUser = $this->userHelper->getUserById($targetUserId);
 
         $this->ensureUserHasUpdatePrivileges($loggedInUser, $targetUser);
 
@@ -123,17 +121,17 @@ class UserService
 
     public function deleteUser(int $loggedInUserId, int $targetUserId): void
     {
-        $loggedInUser = $this->userLogic->getUserById($loggedInUserId);
-        $targetUser = $this->userLogic->getUserById($targetUserId);
+        $loggedInUser = $this->userHelper->getUserById($loggedInUserId);
+        $targetUser = $this->userHelper->getUserById($targetUserId);
 
         $this->ensureUserHasUpdatePrivileges($loggedInUser, $targetUser);
 
-        $entries = $this->entryLogic->getAllEntriesForUser($targetUser);
+        $entries = $this->entryHelper->getAllEntriesForUser($targetUser);
         foreach ($entries as $entry) {
             $this->repository->remove($entry);
         }
 
-        $categories = $this->categoryLogic->getAllCategoriesForUser($targetUser);
+        $categories = $this->categoryHelper->getAllCategoriesForUser($targetUser);
         foreach ($categories as $category) {
             $this->repository->remove($category);
         }
@@ -144,14 +142,14 @@ class UserService
         $this->repository->save();
     }
 
-    private function ensureUserHasUpdatePrivileges(UserModel $user, UserModel $targetUser): void
+    private function ensureUserHasUpdatePrivileges(User $user, User $targetUser): void
     {
         if (!$this->userHasEditPrivilegesForTargetUser($user, $targetUser)) {
             throw InvalidOperationException::insufficientPrivileges($user->getPrivilegeLevelAsString());
         }
     }
 
-    private function userHasEditPrivilegesForTargetUser(UserModel $user, UserModel $targetUser): bool
+    private function userHasEditPrivilegesForTargetUser(User $user, User $targetUser): bool
     {
         // Owners can edit admins and lower, and admins can edit users.
         return ($user->getPrivilegeLevel() < $targetUser->getPrivilegeLevel());

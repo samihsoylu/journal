@@ -9,7 +9,7 @@ use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
 use App\Validator\EntryValidator;
-use App\Decorator\EntryDecorator;
+use App\Service\Model\EntryDecorator;
 
 class Entry extends AbstractController
 {
