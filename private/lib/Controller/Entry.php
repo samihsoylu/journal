@@ -9,7 +9,6 @@ use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
 use App\Validator\EntryValidator;
-use App\Service\Model\EntryDecorator;
 
 class Entry extends AbstractController
 {
@@ -104,18 +103,9 @@ class Entry extends AbstractController
         $entryId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
-            $entry = $this->service->getEntryForUser($entryId, $this->getUserId());
+            $decorator = $this->service->getEntryForUser($entryId, $this->getUserId(), $this->getUserEncryptionKey());
 
-            $entry = new EntryDecorator(
-                $entry->getId(),
-                $entry->getTitle(),
-                $entry->getReferencedCategory()->getId(),
-                $entry->getReferencedCategory()->getName(),
-                $entry->getContentAsMarkup($this->getUserEncryptionKey()),
-                $entry->getLastUpdatedTimestampFormatted(),
-            );
-
-            $this->template->setVariable('entry', $entry);
+            $this->template->setVariable('entry', $decorator);
         } catch (UserException $e) {
             $this->template->setVariable(
                 Notification::TYPE_ERROR,
@@ -205,16 +195,7 @@ class Entry extends AbstractController
 
         try {
             $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
-            $entry = $this->service->getEntryForUser($entryId, $this->getUserId());
-
-            $decorator = new EntryDecorator(
-                $entry->getId(),
-                $entry->getTitle(),
-                $entry->getReferencedCategory()->getId(),
-                $entry->getReferencedCategory()->getName(),
-                $entry->getContentDecrypted($this->getUserEncryptionKey()),
-                $entry->getLastUpdatedTimestampFormatted(),
-            );
+            $decorator = $this->service->getEntryForUser($entryId, $this->getUserId(), $this->getUserEncryptionKey());
 
             $this->template->setVariables([
                 'entry' => $decorator,

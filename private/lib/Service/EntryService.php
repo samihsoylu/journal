@@ -2,12 +2,13 @@
 
 namespace App\Service;
 
-use App\Database\Model\Entry as EntryModel;
+use App\Database\Model\Entry;
 use App\Database\Repository\EntryRepository;
 use App\Service\Model\EntriesDecorator;
 use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\EntryHelper;
 use App\Service\Helper\UserHelper;
+use App\Service\Model\EntryDecorator;
 use App\Utility\Registry;
 use Defuse\Crypto\Key;
 
@@ -40,7 +41,7 @@ class EntryService
 
         $user = $this->userHelper->getUserById($userId);
 
-        $entry = new EntryModel();
+        $entry = new Entry();
         $entry->setReferencedCategory($category)
             ->setReferencedUser($user)
             ->setTitle($title)
@@ -111,9 +112,18 @@ class EntryService
         return new EntriesDecorator($entries, $totalPages, $page);
     }
 
-    public function getEntryForUser(int $entryId, int $userId): EntryModel
+    public function getEntryForUser(int $entryId, int $userId, Key $key): EntryDecorator
     {
-        return $this->entryHelper->getEntryForUser($entryId, $userId);
+        $entry = $this->entryHelper->getEntryForUser($entryId, $userId);
+
+        return new EntryDecorator(
+            $entry->getId(),
+            $entry->getTitle(),
+            $entry->getReferencedCategory()->getId(),
+            $entry->getReferencedCategory()->getName(),
+            $entry->getContentAsMarkup($key),
+            $entry->getLastUpdatedTimestampFormatted(),
+        );
     }
 
     /**
