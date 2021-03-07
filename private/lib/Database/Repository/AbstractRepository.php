@@ -4,15 +4,12 @@ namespace App\Database\Repository;
 
 use App\Database\Database;
 use App\Database\Model\ModelInterface;
-use \Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
-use \Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\TransactionRequiredException;
 
 abstract class AbstractRepository
 {
-    /** @var EntityManager $db database instance */
-    protected EntityManager $db;
+    protected EntityManagerInterface $db;
 
     /**
      * @var string RESOURCE_NAME name of the database model (name of table)
@@ -21,7 +18,7 @@ abstract class AbstractRepository
 
     public function __construct()
     {
-        $this->db = Database::getInstance();
+        $this->db = Database::getInstance()->getEntityManager();
     }
 
     /**
@@ -40,7 +37,6 @@ abstract class AbstractRepository
      * @param int $id
      *
      * @return object
-     * @throws TransactionRequiredException|OptimisticLockException|ORMException
      */
     public function getById(int $id): ?object
     {
@@ -53,8 +49,6 @@ abstract class AbstractRepository
      *
      * @param ModelInterface $model
      * @return void
-     *
-     * @throws ORMException
      */
     public function queue(ModelInterface $model): void
     {
@@ -82,8 +76,6 @@ abstract class AbstractRepository
      * Saves all queued changes to the database
      *
      * @return void
-     *
-     * @throws ORMException|OptimisticLockException
      */
     public function save(): void
     {

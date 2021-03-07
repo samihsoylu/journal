@@ -3,6 +3,11 @@
 namespace App\Database;
 
 use Doctrine\Common\Cache\PhpFileCache;
+use Doctrine\DBAL\DriverManager;
+use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
+use Doctrine\Migrations\Configuration\Migration\ConfigurationLoader;
+use Doctrine\Migrations\Configuration\Migration\JsonFile;
+use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 
@@ -10,7 +15,7 @@ final class Database
 {
     private static ?Database $instance = null;
 
-    private EntityManager $entityManager;
+    private DependencyFactory $dependencyFactory;
 
     private function __construct()
     {
@@ -31,14 +36,16 @@ final class Database
         );
 
         $this->entityManager = EntityManager::create($dbParams, $config);
+
+        $this->dependencyFactory = DependencyFactory::fromEntityManager(new JsonFile(BASE_PATH . '/migrations.json'), new ExistingEntityManager($this->entityManager));
     }
 
-    public static function getInstance(): EntityManager
+    public static function getInstance(): DependencyFactory
     {
         if (self::$instance === null) {
             self::$instance = new self();
         }
 
-        return (self::$instance)->entityManager;
+        return (self::$instance)->dependencyFactory;
     }
 }
