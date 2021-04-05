@@ -9,8 +9,14 @@ session_start();
 // BASE_PATH = Parent directory
 define('BASE_PATH', dirname(__DIR__));
 
+$autoloaderPath = BASE_PATH . '/vendor/autoload.php';
+if (!file_exists($autoloaderPath)) {
+    echo "The composer autoloader can not be found, did you forget to run 'composer install --no-dev'?";
+    exit(1);
+}
+
 // Composer autoloader
-require(BASE_PATH . '/vendor/autoload.php');
+require($autoloaderPath);
 
 // Load .env file
 $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
