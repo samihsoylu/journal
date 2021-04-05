@@ -348,3 +348,12 @@ a .card:hover {
 }
 .entry-content a { text-decoration: underline; }
 .entry-content a:hover { text-decoration: none; }
+
+.markdown-modal-button { margin-top:3px; }
+.markdown-table-body tr { border:none; }
+.markdown-table-body tr td { padding:0; }
+.markdown-table-body tr td.heading {
+	font-weight:bold;
+	padding-top:20px;
+	font-size:14px;
+}

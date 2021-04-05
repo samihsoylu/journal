@@ -38,4 +38,7 @@ $( document ).ready(function() {
 
         return true;
     });
+
+    // Tool tips
+    $('.tooltipped').tooltip();
 });

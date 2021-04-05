@@ -13,7 +13,7 @@ $route->addRoute('GET', Welcome::DASHBOARD_URL, 'Welcome@dashboard');
 
 // Authentication
 $route->addRoute('GET', Authentication::LOGIN_URL, 'Authentication@loginView');
-$route->addRoute('POST', Authentication::LOGIN_POST_URL, 'Authentication@login');
+$route->addRoute(['GET', 'POST'], Authentication::LOGIN_POST_URL, 'Authentication@login');
 //$route->addRoute('GET', Authentication::REGISTER_URL, 'Authentication@registerView');
 //$route->addRoute('POST', Authentication::REGISTER_POST_URL, 'Authentication@register');
 $route->addRoute('GET', Authentication::LOGOUT_URL, 'Authentication@logout');
@@ -22,23 +22,23 @@ $route->addRoute('GET', Authentication::LOGOUT_URL, 'Authentication@logout');
 $route->addRoute('GET', Entry::ENTRIES_URL, 'Entry@index');
 $route->addRoute('GET', Entry::VIEW_ENTRY_URL, 'Entry@entryView');
 $route->addRoute('GET', Entry::CREATE_ENTRY_URL, 'Entry@createView');
-$route->addRoute('POST', Entry::CREATE_ENTRY_POST_URL, 'Entry@create');
+$route->addRoute(['GET', 'POST'], Entry::CREATE_ENTRY_POST_URL, 'Entry@create');
 $route->addRoute('GET', Entry::UPDATE_ENTRY_URL, 'Entry@updateView');
-$route->addRoute('POST', Entry::UPDATE_ENTRY_POST_URL, 'Entry@update');
+$route->addRoute(['GET', 'POST'], Entry::UPDATE_ENTRY_POST_URL, 'Entry@update');
 $route->addRoute('GET', Entry::DELETE_ENTRY_URL, 'Entry@delete');
 
 // Categories
 $route->addRoute('GET', Category::CATEGORIES_URL, 'Category@indexView');
 $route->addRoute('GET', Category::CREATE_CATEGORY_URL, 'Category@createView');
-$route->addRoute('POST', Category::CREATE_CATEGORY_POST_URL, 'Category@create');
+$route->addRoute(['GET', 'POST'], Category::CREATE_CATEGORY_POST_URL, 'Category@create');
 $route->addRoute('GET', Category::UPDATE_CATEGORY_URL, 'Category@updateView');
-$route->addRoute('POST', Category::UPDATE_CATEGORY_POST_URL, 'Category@update');
+$route->addRoute(['GET', 'POST'], Category::UPDATE_CATEGORY_POST_URL, 'Category@update');
 $route->addRoute('GET', Category::DELETE_CATEGORY_URL, 'Category@delete');
 
 // Users
 $route->addRoute('GET', User::USERS_URL, 'User@indexView');
 $route->addRoute('GET', User::CREATE_USER_URL, 'User@createView');
-$route->addRoute('POST', User::CREATE_USER_POST_URL, 'User@create');
+$route->addRoute(['GET', 'POST'], User::CREATE_USER_POST_URL, 'User@create');
 $route->addRoute('GET', User::DELETE_USER_URL, 'User@delete');
-$route->addRoute('POST', User::UPDATE_USER_URL, 'User@update');
+$route->addRoute(['GET', 'POST'], User::UPDATE_USER_URL, 'User@update');
 $route->addRoute('GET', User::VIEW_USER_URL, 'User@updateView');

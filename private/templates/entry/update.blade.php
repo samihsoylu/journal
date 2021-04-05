@@ -29,6 +29,7 @@
                         <button class="btn btn-default" type="button" onclick="window.history.go(-1);"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
                         <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('DANGER: This action will delete this entry', '{{ $entry_url }}/{{ $entry->getEntryId() }}/delete/{{ $session->getAntiCSRFToken() }}')"><i class="material-icons">delete_forever</i> Delete</button>
                         <button class="btn btn-primary" type="submit"><i class="material-icons">save</i> Save</button>
+                        @include('components/markdown-modal')
                     </div>
                 </form>
             </div>

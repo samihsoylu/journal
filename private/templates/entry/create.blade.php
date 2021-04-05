@@ -27,9 +27,9 @@
                     <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
                     <div>
                         <button class="btn btn-primary" type="submit"><i class="material-icons">save</i> Save</button>
+                        @include('components/markdown-modal')
                     </div>
                 </form>
-
             </div>
         </div>
     </div>

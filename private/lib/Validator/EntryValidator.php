@@ -30,7 +30,7 @@ class EntryValidator extends AbstractValidator
 
         $this->ensureValueIsNumeric($this->post, 'category_id');
         $this->ensureValueIsNotTooShort($this->post, 'entry_title', 4);
-        $this->ensureValueIsNotTooShort($this->post, 'entry_content', 50);
+        $this->ensureValueIsNotTooShort($this->post, 'entry_content', 1);
 
         $this->ensureValueIsNotTooLong($this->post, 'entry_title', 128);
 
