@@ -66,6 +66,7 @@ class User extends AbstractController
         $password       = $_POST['password'];
 
         $userId = $this->service->register($this->getUserId(), $username, $password, $email, $privilegeLevel);
+        $this->service->createDefaultCategoriesForUser($userId);
 
         // Present success message
         $this->setNotification(

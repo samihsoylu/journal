@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Database\Model\Category;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
 use App\Service\Model\UserDecorator;
@@ -153,5 +154,42 @@ class UserService
     {
         // Owners can edit admins and lower, and admins can edit users.
         return ($user->getPrivilegeLevel() < $targetUser->getPrivilegeLevel());
+    }
+
+    public function createDefaultCategoriesForUser(int $userId): void
+    {
+        $user = $this->userHelper->getUserById($userId);
+
+        $personal = new Category();
+        $personal->setName('Personal');
+        $personal->setDescription('Stories about your passions and ambitions');
+        $personal->setReferencedUser($user);
+        $this->repository->queue($personal);
+
+        $diet = new Category();
+        $diet->setName('Diet');
+        $diet->setDescription('Food journaling for reaching healthy eating goals');
+        $diet->setReferencedUser($user);
+        $this->repository->queue($diet);
+
+        $dreams = new Category();
+        $dreams->setName('Dreams');
+        $dreams->setDescription('Recording dream experiences allow you to start analyzing what your dreams mean');
+        $dreams->setReferencedUser($user);
+        $this->repository->queue($dreams);
+
+        $work = new Category();
+        $work->setName('Work');
+        $work->setDescription('Meeting notes, deadlines, countless other bits of information that are best stored here instead of your brain');
+        $work->setReferencedUser($user);
+        $this->repository->queue($work);
+
+        $gifts = new Category();
+        $gifts->setName('Gifts');
+        $gifts->setDescription('Gifts you have received or given to friends and family');
+        $gifts->setReferencedUser($user);
+        $this->repository->queue($gifts);
+
+        $this->repository->save();
     }
 }
