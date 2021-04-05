@@ -38,6 +38,8 @@ final class Database
         $this->entityManager = EntityManager::create($dbParams, $config);
 
         $this->dependencyFactory = DependencyFactory::fromEntityManager(new JsonFile(BASE_PATH . '/migrations.json'), new ExistingEntityManager($this->entityManager));
+
+        $this->testDatabaseConnection();
     }
 
     public static function getInstance(): DependencyFactory
@@ -47,5 +49,15 @@ final class Database
         }
 
         return (self::$instance)->dependencyFactory;
+    }
+
+    private function testDatabaseConnection(): void
+    {
+        try {
+            $this->dependencyFactory->getEntityManager()->getConnection()->connect();
+        } catch (\Exception $e) {
+            echo "<h2>Error establishing a database connection</h2><pre>{$e->getMessage()}</pre>";
+            exit();
+        }
     }
 }
