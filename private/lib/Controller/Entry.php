@@ -87,6 +87,8 @@ class Entry extends AbstractController
 
     public function indexView(): void
     {
+        $this->injectSessionVariableToTemplate();
+
         $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
 
         $this->template->setVariable('categories', $categories);
@@ -100,6 +102,8 @@ class Entry extends AbstractController
      */
     public function entryView(): void
     {
+        $this->injectSessionVariableToTemplate();
+
         $entryId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
@@ -144,6 +148,8 @@ class Entry extends AbstractController
      */
     public function createView(): void
     {
+        $this->injectSessionVariableToTemplate();
+
         $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
         $this->template->setVariable('categories', $categories);
 
@@ -191,6 +197,8 @@ class Entry extends AbstractController
      */
     public function updateView(): void
     {
+        $this->injectSessionVariableToTemplate();
+
         $entryId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
@@ -240,6 +248,8 @@ class Entry extends AbstractController
      */
     public function deleteView(): void
     {
+        $this->injectSessionVariableToTemplate();
+
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::ENTRIES_URL);
     }

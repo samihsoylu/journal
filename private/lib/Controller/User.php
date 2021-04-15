@@ -44,6 +44,7 @@ class User extends AbstractController
      */
     public function indexView(): void
     {
+        $this->injectSessionVariableToTemplate();
         $users = $this->service->getAllUsers();
 
         $this->template->setVariable('users', $users);
@@ -84,6 +85,7 @@ class User extends AbstractController
      */
     public function createView(): void
     {
+        $this->injectSessionVariableToTemplate();
         $this->template->setVariable('allowedPrivilegeLevels', UserModel::ALLOWED_PRIVILEGE_LEVELS);
         $this->template->render('user/create');
     }
@@ -112,6 +114,8 @@ class User extends AbstractController
      */
     public function updateView(): void
     {
+        $this->injectSessionVariableToTemplate();
+
         $targetUserId = Sanitize::int($this->getRouteParameters()['id']);
 
         $user = $this->service->getUserForLoggedInUser($this->getUserId(), $targetUserId);
@@ -149,6 +153,8 @@ class User extends AbstractController
      */
     public function deleteView(): void
     {
+        $this->injectSessionVariableToTemplate();
+
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::USERS_URL);
     }

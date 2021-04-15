@@ -42,7 +42,19 @@ abstract class AbstractController
         $this->routeParameters = $routeParameters;
         $this->template        = Template::getInstance();
         $this->notification    = new Notification();
+    }
 
+    /**
+     * This action was moved out of the constructor. Injecting sessions when the controller class loaded caused invalid
+     * CSRF Form Key errors frequently. The errors were caused due to CSRF Form Keys being validated and re-generated
+     * inside validator methods in-advance before any action was run from a controller method. Essentially, a new CSRF
+     * Form Key was generated after the session key was set in the templating engine due to UserException's and then it
+     * was declared as invalid.
+     *
+     * @return void
+     */
+    protected function injectSessionVariableToTemplate(): void
+    {
         $this->template->setVariable('session', $this->authenticationService->getSessionDecorator());
     }
 

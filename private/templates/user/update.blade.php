@@ -40,7 +40,7 @@
                         <p class="small-text context">Entries: {{ $user->getTotalEntries() }} <br />Categories: {{ $user->getTotalCategories() }}</p>
 
                         <!-- javascript in the back button ensures that the filters are not lost when you go back to the users page -->
-                        <button class="btn btn-default" type="button" onclick="@if(isset($success)) window.location.href='{{ $users_url }}' @else window.history.go(-1); return false; @endif"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
+                        <button class="btn btn-default" type="button" onclick="window.location.href='{{ $users_url }}'"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
                         <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('DANGER: This action will delete this user', '{{ $user_url }}/{{ $user->getId() }}/delete/{{ $session->getAntiCSRFToken() }}')" @if($user->isReadOnly()) disabled @endif><i class="material-icons">delete_forever</i> Delete</button>
                         <button class="btn btn-primary" type="submit" @if($user->isReadOnly()) disabled @endif><i class="material-icons">save</i> Save</button>
                     </form>
