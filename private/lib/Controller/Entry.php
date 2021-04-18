@@ -107,7 +107,7 @@ class Entry extends AbstractController
         $entryId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
-            $decorator = $this->service->getEntryForUser($entryId, $this->getUserId(), $this->getUserEncryptionKey());
+            $decorator = $this->service->getEntryForUser($entryId, $this->getUserId(), $this->getUserEncryptionKey(), true);
 
             $this->template->setVariable('entry', $decorator);
         } catch (UserException $e) {

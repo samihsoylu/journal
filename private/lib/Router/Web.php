@@ -1,5 +1,6 @@
 <?php
 
+use App\Controller\Account;
 use App\Controller\Authentication;
 use App\Controller\Category;
 use App\Controller\Entry;
@@ -42,3 +43,9 @@ $route->addRoute(['GET', 'POST'], User::CREATE_USER_POST_URL, 'User@create');
 $route->addRoute('GET', User::DELETE_USER_URL, 'User@delete');
 $route->addRoute(['GET', 'POST'], User::UPDATE_USER_URL, 'User@update');
 $route->addRoute('GET', User::VIEW_USER_URL, 'User@updateView');
+
+// Account
+$route->addRoute('GET', Account::ACCOUNT_URL, 'Account@indexView');
+$route->addRoute('POST', Account::CHANGE_PASSWORD_POST_URL, 'Account@changePassword');
+$route->addRoute('POST', Account::UPDATE_EMAIL_POST_URL, 'Account@changeEmail');
+$route->addRoute('POST', Account::DELETE_ACCOUNT_POST_URL, 'Account@deleteAccount');

@@ -348,6 +348,7 @@ a .card:hover {
 }
 .entry-content a { text-decoration: underline; }
 .entry-content a:hover { text-decoration: none; }
+.entry-content { word-wrap:break-word; }
 
 .markdown-modal-button { margin-top:3px; }
 .markdown-table-body tr { border:none; }

@@ -10,7 +10,18 @@ use Defuse\Crypto\KeyProtectedByPassword;
 class Encryptor
 {
     /**
-     * @return string protected encryption key that should be store in the database
+     * @return string protected encryption key that should be stored in the database
+     */
+    public function changePassword(string $protectedEncryptionKey, $currentPassword, $newPassword): string
+    {
+        $protectedEncryptionKeyObject = KeyProtectedByPassword::loadFromAsciiSafeString($protectedEncryptionKey);
+        $protectedEncryptionKeyObject->changePassword($currentPassword ,$newPassword);
+
+        return $protectedEncryptionKeyObject->saveToAsciiSafeString();
+    }
+
+    /**
+     * @return string protected encryption key that should be stored in the database
      */
     public function generateProtectedEncryptionKey(string $password): string
     {

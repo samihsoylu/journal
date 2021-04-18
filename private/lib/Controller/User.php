@@ -139,7 +139,7 @@ class User extends AbstractController
         /** @see UserValidator::delete() */
         $this->validator->validate(__FUNCTION__);
 
-        $this->service->deleteUser($this->getUserId(), $targetUserId);
+        $this->service->deleteUserForAdmin($this->getUserId(), $targetUserId);
 
         $this->setNotification(Notification::TYPE_SUCCESS, 'User was removed');
 
@@ -153,8 +153,6 @@ class User extends AbstractController
      */
     public function deleteView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::USERS_URL);
     }

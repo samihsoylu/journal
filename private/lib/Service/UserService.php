@@ -13,6 +13,7 @@ use App\Service\Helper\EntryHelper;
 use App\Service\Helper\UserHelper;
 use App\Utility\Encryptor;
 use App\Utility\Registry;
+use App\Utility\UserSession;
 
 class UserService
 {
@@ -20,6 +21,8 @@ class UserService
     private UserHelper $userHelper;
     private CategoryHelper $categoryHelper;
     private EntryHelper $entryHelper;
+
+    private const DEFAULT_PASSWORD_HASH_ALGORITHM = PASSWORD_ARGON2ID;
 
     public function __construct()
     {
@@ -66,7 +69,7 @@ class UserService
             throw InvalidArgumentException::alreadyRegistered('email', $email);
         }
 
-        $encryptedPassword = password_hash($password, PASSWORD_ARGON2ID);
+        $encryptedPassword = password_hash($password, self::DEFAULT_PASSWORD_HASH_ALGORITHM);
 
         $encryptor = new Encryptor();
         $protectedEncryptionKey = $encryptor->generateProtectedEncryptionKey($password);
@@ -120,13 +123,35 @@ class UserService
         $this->repository->save();
     }
 
-    public function deleteUser(int $loggedInUserId, int $targetUserId): void
+    public function deleteUserForAdmin(int $loggedInUserId, int $targetUserId): void
     {
         $loggedInUser = $this->userHelper->getUserById($loggedInUserId);
         $targetUser = $this->userHelper->getUserById($targetUserId);
 
         $this->ensureUserHasUpdatePrivileges($loggedInUser, $targetUser);
 
+        $this->deleteUserFromDatabase($targetUser);
+    }
+
+    public function deleteUser(string $currentPassword, int $userId): void
+    {
+        $user = $this->userHelper->getUserById($userId);
+
+        if ($user->getPrivilegeLevel() === User::PRIVILEGE_LEVEL_OWNER) {
+            throw InvalidOperationException::insufficientPrivileges($user->getPrivilegeLevelAsString());
+        }
+
+        if (!password_verify($currentPassword, $user->getPassword())) {
+            throw InvalidArgumentException::incorrectPassword();
+        }
+
+        $this->deleteUserFromDatabase($user);
+
+        UserSession::destroy();
+    }
+
+    private function deleteUserFromDatabase(User $targetUser): void
+    {
         $entries = $this->entryHelper->getAllEntriesForUser($targetUser);
         foreach ($entries as $entry) {
             $this->repository->remove($entry);
@@ -190,6 +215,38 @@ class UserService
         $gifts->setReferencedUser($user);
         $this->repository->queue($gifts);
 
+        $this->repository->save();
+    }
+
+    public function changePassword(int $userId, string $currentPassword, string $newPassword): void
+    {
+        $user = $this->userHelper->getUserById($userId);
+        if (!password_verify($currentPassword, $user->getPassword())) {
+            throw InvalidArgumentException::incorrectPassword();
+        }
+
+        $newEncryptedPassword = password_hash($newPassword, self::DEFAULT_PASSWORD_HASH_ALGORITHM);
+        $user->setPassword($newEncryptedPassword);
+
+        $encryptor = new Encryptor();
+        $newEncryptedKey = $encryptor->changePassword($user->getEncryptionKey(), $currentPassword, $newPassword);
+        $user->setEncryptionKey($newEncryptedKey);
+
+        $this->repository->queue($user);
+        $this->repository->save();
+    }
+
+    public function getUser(int $loggedInUserId): User
+    {
+        return $this->userHelper->getUserById($loggedInUserId);
+    }
+
+    public function changeUserEmail(int $userId, string $newEmailAddress): void
+    {
+        $user = $this->userHelper->getUserById($userId);
+        $user->setEmailAddress($newEmailAddress);
+
+        $this->repository->queue($user);
         $this->repository->save();
     }
 }

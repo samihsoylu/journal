@@ -18,11 +18,21 @@ class InvalidArgumentException extends UserException
 
     public static function alreadyRegistered(string $fieldName, string $fieldValue, int $code = 406): self
     {
-        return new self("User with {$fieldName} '{$fieldValue}' already exists");
+        return new self("User with {$fieldName} '{$fieldValue}' already exists", $code);
     }
 
     public static function categoryAlreadyExists(string $categoryName, int $code = 406): self
     {
-        return new self("The category with name '{$categoryName}' already exists");
+        return new self("The category with name '{$categoryName}' already exists", $code);
+    }
+
+    public static function incorrectPassword(int $code = 406): self
+    {
+        return new self("The password you provided is incorrect", $code);
+    }
+
+    public static function passwordsDoNotMatch(int $code = 406): self
+    {
+        return new self("The two passwords provided do not match", $code);
     }
 }

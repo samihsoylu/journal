@@ -1,7 +1,7 @@
 <header>
     <!-- Account menu dropdown (desktop) -->
     <ul id="account_menu" class="dropdown-content">
-        <li><a href="#!">Account</a></li>
+        <li><a href="{{ $account_url }}">Account</a></li>
         <li class="divider"></li>
         <li><a href="{{ $logout_url }}">Logout</a></li>
 
@@ -14,7 +14,7 @@
         @if ($session->userHasAdminPrivileges())
             <li><a href="{{ $users_url }}">Users</a></li>
         @endif
-        <li><a href="#!">Account</a></li>
+        <li><a href="{{ $account_url }}">Account</a></li>
         <li><a href="{{ $logout_url }}">Logout</a></li>
     </ul>
 
