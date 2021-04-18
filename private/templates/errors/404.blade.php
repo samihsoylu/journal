@@ -1,17 +1,10 @@
-@extends('base')
+@extends('errors/base')
 
 @section('pageTitle', '404')
 
-@section('content')
-    <div class="container-lg clearfix">
-        <div class="col-4 float-left border p-4">
-            404
-        </div>
-        <div class="col-4 float-left border p-4">
-            Page not found
-        </div>
-        <div class="col-4 float-left border p-4">
-            <a href="#">Go back?</a>
-        </div>
+@section('error_content')
+    <h1 class="heading">404</h1>
+    <div class="item">
+        <h2 class="normal-text">Page Not Found</h2>
     </div>
 @endsection
