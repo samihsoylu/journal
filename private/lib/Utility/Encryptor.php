@@ -12,41 +12,30 @@ class Encryptor
     /**
      * @return string protected encryption key that should be stored in the database
      */
-    public function changePassword(string $protectedEncryptionKey, $currentPassword, $newPassword): string
+    public function generateProtectedKey(string $password): string
     {
-        $protectedEncryptionKeyObject = KeyProtectedByPassword::loadFromAsciiSafeString($protectedEncryptionKey);
-        $protectedEncryptionKeyObject->changePassword($currentPassword ,$newPassword);
+        $protectedKeyObject = KeyProtectedByPassword::createRandomPasswordProtectedKey($password);
 
-        return $protectedEncryptionKeyObject->saveToAsciiSafeString();
-    }
-
-    /**
-     * @return string protected encryption key that should be stored in the database
-     */
-    public function generateProtectedEncryptionKey(string $password): string
-    {
-        $protectedEncryptionKeyObject = KeyProtectedByPassword::createRandomPasswordProtectedKey($password);
-
-        return $protectedEncryptionKeyObject->saveToAsciiSafeString();
+        return $protectedKeyObject->saveToAsciiSafeString();
     }
 
     /**
      * @return string encoded key that should be stored in the user session
      */
-    public function getEncodedEncryptionKeyFromProtectedEncryptionKey(string $protectedEncryptionKey, string $password): string
+    public function getEncodedKeyFromProtectedKey(string $protectedKey, string $password): string
     {
-        $protectedEncryptionKeyObject = KeyProtectedByPassword::loadFromAsciiSafeString($protectedEncryptionKey);
-        $encryptionKeyObject = $protectedEncryptionKeyObject->unlockKey($password);
+        $protectedKeyObject = KeyProtectedByPassword::loadFromAsciiSafeString($protectedKey);
+        $keyObject = $protectedKeyObject->unlockKey($password);
 
-        return $encryptionKeyObject->saveToAsciiSafeString();
+        return $keyObject->saveToAsciiSafeString();
     }
 
     /**
-     * @return Key key object that allows encrypting and decrypting
+     * @return Key object that you must provide for $this->encrypt() and $this->decrypt()
      */
-    public function getKeyFromEncodedEncryptionKey(string $encodedEncryptionKey): Key
+    public function getKeyObjectFromEncodedKey(string $encodedKey): Key
     {
-        return Key::loadFromAsciiSafeString($encodedEncryptionKey);
+        return Key::loadFromAsciiSafeString($encodedKey);
     }
 
     public function encrypt(string $unencryptedString, Key $key): string
@@ -60,5 +49,16 @@ class Encryptor
     public function decrypt(string $encryptedString, Key $key): string
     {
         return Crypto::decrypt($encryptedString, $key);
+    }
+
+    /**
+     * @return string protected encryption key that should be stored in the database
+     */
+    public function changePassword(string $protectedKey, $currentPassword, $newPassword): string
+    {
+        $protectedKeyObject = KeyProtectedByPassword::loadFromAsciiSafeString($protectedKey);
+        $protectedKeyObject->changePassword($currentPassword, $newPassword);
+
+        return $protectedKeyObject->saveToAsciiSafeString();
     }
 }

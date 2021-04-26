@@ -72,7 +72,7 @@ class UserService
         $encryptedPassword = password_hash($password, self::DEFAULT_PASSWORD_HASH_ALGORITHM);
 
         $encryptor = new Encryptor();
-        $protectedEncryptionKey = $encryptor->generateProtectedEncryptionKey($password);
+        $protectedEncryptionKey = $encryptor->generateProtectedKey($password);
 
         $user = new User();
         $user->setUsername($username)
