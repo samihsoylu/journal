@@ -4,8 +4,6 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-session_start();
-
 // BASE_PATH = Parent directory
 define('BASE_PATH', dirname(__DIR__));
 
@@ -55,3 +53,7 @@ const DATABASE_CACHE_PATH         = BASE_PATH . '/private/cache/database';
 const ASSETS_URL                  = BASE_URL  . '/assets';
 const DEFAULT_CACHE_EXPIRY_TIME   = 3600;  // 1 hour
 const DEFAULT_SESSION_EXPIRY_TIME = 86400; // 24 hours
+
+const PROJECT_VERSION = '1.0.0';
+
+session_start();

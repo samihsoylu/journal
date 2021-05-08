@@ -46,11 +46,11 @@ class UserService
     }
 
     /**
-     * Create a new user account
+     * Create a new user account for a logged in user
      *
      * @return int User id
      */
-    public function register(int $loggedInUserId, string $username, string $password, string $email, int $privilegeLevel): int
+    public function registerNewUserForLoggedInUser(int $loggedInUserId, string $username, string $password, string $email, int $privilegeLevel): int
     {
         $loggedInUser = $this->userHelper->getUserById($loggedInUserId);
 
@@ -59,6 +59,16 @@ class UserService
             throw InvalidOperationException::insufficientPrivileges($loggedInUser->getPrivilegeLevelAsString());
         }
 
+        return $this->registerNewUser($username, $password, $email, $privilegeLevel);
+    }
+
+    /**
+     * Create a new user account
+     *
+     * @return int
+     */
+    public function registerNewUser(string $username, string $password, string $email, int $privilegeLevel): int
+    {
         $user = $this->repository->findByUsername($username);
         if ($user !== null) {
             throw InvalidArgumentException::alreadyRegistered('username', $username);
@@ -150,7 +160,7 @@ class UserService
         UserSession::destroy();
     }
 
-    private function deleteUserFromDatabase(User $targetUser): void
+    public function deleteUserFromDatabase(User $targetUser): void
     {
         $entries = $this->entryHelper->getAllEntriesForUser($targetUser);
         foreach ($entries as $entry) {

@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Exception\UserException;
 use App\Service\UserService;
 use App\Utility\Notification;
 use App\Utility\Redirect;

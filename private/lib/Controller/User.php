@@ -66,7 +66,7 @@ class User extends AbstractController
         $privilegeLevel = Sanitize::int($_POST['privilegeLevel']);
         $password       = $_POST['password'];
 
-        $userId = $this->service->register($this->getUserId(), $username, $password, $email, $privilegeLevel);
+        $userId = $this->service->registerNewUserForLoggedInUser($this->getUserId(), $username, $password, $email, $privilegeLevel);
         $this->service->createDefaultCategoriesForUser($userId);
 
         // Present success message

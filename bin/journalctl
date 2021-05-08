@@ -1,0 +1,27 @@
+#!/usr/bin/env php
+<?php
+
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
+
+require_once(dirname(__DIR__) . '/private/init.php');
+
+$app = new Application("Journal control", PROJECT_VERSION);
+
+$finder = new \Symfony\Component\Finder\Finder();
+$finder->files()->in(dirname(__DIR__) . '/private/lib/Console/Command');
+
+$namespace = '\App\Console\Command\\';
+foreach ($finder as $file) {
+    $className = str_replace('.php', '', $file->getRelativePathname());
+    $className = str_replace('/', '\\', $className);
+
+    $fullClassName = "{$namespace}{$className}";
+
+    $reflectionClass = new ReflectionClass($fullClassName);
+    if ($reflectionClass->isInstantiable() && $reflectionClass->isSubclassOf(Command::class)) {
+        $app->add(new $fullClassName);
+    }
+}
+
+$app->run();
