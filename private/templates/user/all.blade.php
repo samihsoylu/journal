@@ -19,7 +19,7 @@
                         <a href="{{ $user_url }}/{{ $user->getId() }}">
                             <div class="card">
                                 <div class="card-content">
-                                    <span class="card-title">{{ ucfirst($user->getUsername()) }}</span>
+                                    <span class="card-title">{{ $user->getUsername() }}</span>
                                     <p>Created: {{ $user->getCreatedTimestampFormatted() }} <span title="Privilege" class="individual-entry-category">{{ $user->getPrivilegeLevelAsString() }}</span></p>
                                 </div>
                             </div>
