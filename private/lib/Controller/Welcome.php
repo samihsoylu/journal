@@ -2,6 +2,8 @@
 
 namespace App\Controller;
 
+use App\Service\EntryService;
+
 class Welcome extends AbstractController
 {
     public const DASHBOARD_URL = BASE_URL . '/dashboard';
@@ -16,6 +18,19 @@ class Welcome extends AbstractController
     {
         $this->redirectLoggedOutUsersToLoginPage();
         $this->injectSessionVariableToTemplate();
+
+        $service = new EntryService();
+        $entries = $service->getAllEntriesForUserFromFilter(
+            $this->getUserId(),
+            null,
+            null,
+            null,
+            null,
+            1,
+            5
+        );
+
+        $this->template->setVariable('entries', $entries);
         $this->template->render('dashboard');
     }
 }

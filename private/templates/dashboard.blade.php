@@ -4,10 +4,10 @@
 
 @section('content')
             @include('components/header')
-            <div class="container">
+            <div class="container large">
                 <div class="section">
                     <div class="row row-align">
-                        <div class="col s12 m6 l4">
+                        <div class="col s12 m6 l3">
                             <div class="card">
                                 <div class="card-image">
                                     <img src="{{ $assets_url }}/images/journal-handwriting-woman.jpg">
@@ -20,7 +20,7 @@
                             </div>
                         </div>
 
-                        <div class="col s12 m6 l4">
+                        <div class="col s12 m6 l3">
                             <div class="card">
                                 <div class="card-image">
                                     <img src="{{ $assets_url }}/images/chapter-of-a-book.jpg">
@@ -33,7 +33,7 @@
                             </div>
                         </div>
 
-                        <div class="col s12 m6 l4">
+                        <div class="col s12 m6 l3">
                             <div class="card">
                                 <div class="card-image">
                                     <img src="{{ $assets_url }}/images/book-case.jpg">
@@ -47,7 +47,7 @@
                         </div>
 
                         @if ($session->userHasAdminPrivileges())
-                            <div class="col s12 m6 l4">
+                            <div class="col s12 m6 l3">
                                 <div class="card">
                                     <div class="card-image">
                                         <img src="{{ $assets_url }}/images/friends.jpg">
@@ -59,35 +59,35 @@
                                     </div>
                                 </div>
                             </div>
+                        @else
+                            <div class="col s12 m6 l3">
+                                <div class="card">
+                                    <div class="card-image">
+                                        <img src="{{ $assets_url }}/images/setting.jpg">
+                                        <span class="card-title">Account settings</span>
+                                        <a href="{{ $account_url }}" class="btn-floating halfway-fab waves-effect waves-light purple"><i class="material-icons">person</i></a>
+                                    </div>
+                                    <div class="dashboard card-content">
+                                        <p>Explore account specific settings</p>
+                                    </div>
+                                </div>
+                            </div>
                         @endif
-
-                        <div class="col s12 m6 l4">
-                            <div class="card">
-                                <div class="card-image">
-                                    <img src="{{ $assets_url }}/images/setting.jpg">
-                                    <span class="card-title">Account settings</span>
-                                    <a class="btn-floating halfway-fab waves-effect waves-light purple"><i class="material-icons">person</i></a>
-                                </div>
-                                <div class="dashboard card-content">
-                                    <p>Explore account specific settings</p>
-                                </div>
-                            </div>
+                    </div>
+                    <div class="row row-align">
+                        <div class="col s12">
+                            @foreach ($entries->getEntries() as $entry)
+                                <a href="{{ $entry_url }}/{{ $entry->getId() }}">
+                                    <div class="card">
+                                        <div class="card-content">
+                                            <span class="card-title">{{ $entry->getTitle() }}</span>
+                                            <p> {{ $entry->getCreatedTimestampFormatted() }} <span title="Category" class="individual-entry-category">{{ $entry->getReferencedCategory()->getName() }}</span></p>
+                                        </div>
+                                    </div>
+                                </a>
+                            @endforeach
                         </div>
-
-
-                        <div class="col s12 m6 l4">
-                            <div class="card">
-                                <div class="card-image">
-                                    <img src="{{ $assets_url }}/images/exit.jpg">
-                                    <span class="card-title">Logout</span>
-                                    <a href="{{ $logout_url }}" class="btn-floating halfway-fab waves-effect waves-light red"><i class="material-icons">exit_to_app</i></a>
-                                </div>
-                                <div class="dashboard card-content">
-                                    <p>Are you finished? Safely logout here.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div><!-- /.row -->
+                    </div>
                 </div><!-- /.section -->
             </div>
 @endsection
