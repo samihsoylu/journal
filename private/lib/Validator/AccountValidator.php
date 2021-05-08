@@ -22,7 +22,6 @@ class AccountValidator extends AbstractValidator
         $this->ensureEmailIsValid($this->post, 'email');
 
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
-
     }
 
     public function deleteAccount(): void
