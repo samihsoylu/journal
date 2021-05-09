@@ -4,7 +4,7 @@
 /* Table of Content
 ==================================================
     #General styles
-	#Firefox specific styles
+	#Mobile specific fixes
     #Helpers
     #Header
     #Button styles
@@ -12,6 +12,9 @@
     #Dashboard card content
     #Nav bar
     #Cards
+    #Modals
+    #Entry content
+ */
 
 /* #General styles
   ================================================== */
@@ -30,10 +33,14 @@ footer {
 ================================================== */
 .datepicker-controls .select-month input { width:80px }
 
-/* #Firefox specific styles
+/* #Mobile specific fixes
 ================================================== */
-@-moz-document url-prefix() {
-	/** Firefox specific styles go here **/
+@media only screen and (max-width: 768px) {
+	/** Disable dropdown animation on mobile **/
+	.select-wrapper * {
+		transition: none !important;
+		transform: none !important;
+	}
 }
 
 /* #Helpers
