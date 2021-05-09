@@ -132,7 +132,7 @@ class Entry extends AbstractController
 
         $categoryId   = Sanitize::int($_POST['category_id']);
         $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
-        $entryContent = Sanitize::string($_POST['entry_content'], 'trim|htmlspecialchars');
+        $entryContent = Sanitize::string($_POST['entry_content'], 'trim');
 
         $entryId = $this->service->createEntry($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $entryTitle, $entryContent);
 
@@ -171,7 +171,7 @@ class Entry extends AbstractController
         $entryId      = Sanitize::int($this->getRouteParameters()['id']);
         $categoryId   = Sanitize::int($_POST['category_id']);
         $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
-        $entryContent = Sanitize::string($_POST['entry_content'], 'trim|htmlspecialchars');
+        $entryContent = Sanitize::string($_POST['entry_content'], 'trim');
 
         $this->service->updateEntry(
             $this->getUserId(),

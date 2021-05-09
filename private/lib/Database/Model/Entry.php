@@ -102,7 +102,7 @@ class Entry extends AbstractModel
         $parser = new \Parsedown();
         $parser->setSafeMode(true);
 
-        return $parser->text($this->getContentDecrypted($encryptionKey));
+        return $parser->text(htmlspecialchars($this->getContentDecrypted($encryptionKey)));
     }
 
     public function setContent(string $content): self
