@@ -19,12 +19,14 @@ require($pathToAutoLoader);
 // Load .env file
 $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
 $dotenv->load();
-$dotenv->required(['DB_HOST', 'DB_SCHEMA', 'DB_USERNAME', 'DB_PASSWORD', 'BASE_URL', 'DEBUG_MODE']);
+$dotenv->required(['SITE_TITLE', 'DB_HOST', 'DB_SCHEMA', 'DB_USERNAME', 'DB_PASSWORD', 'BASE_URL', 'DEBUG_MODE', 'ADMIN_EMAIL_ADDRESS']);
 $dotenv->required('DEBUG_MODE')->isBoolean();
 
 define('BASE_URL', rtrim($_ENV['BASE_URL'], '/'));
 define('DEBUG_MODE', ($_ENV['DEBUG_MODE'] === 'true'));
 define('SSL_IS_ENABLED', ($_ENV['USE_SSL'] === 'true'));
+define('SITE_TITLE', $_ENV['SITE_TITLE']);
+define('ADMIN_EMAIL_ADDRESS', $_ENV['ADMIN_EMAIL_ADDRESS']);
 
 if (!DEBUG_MODE) {
     ini_set('display_errors', 0);

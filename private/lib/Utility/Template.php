@@ -146,7 +146,7 @@ class Template
     private function setDefaultVariables(): void
     {
         $struct = [
-            'site_title'  => $_ENV['SITE_TITLE'],
+            'site_title'  => SITE_TITLE,
             'assets_url'  => ASSETS_URL,
             'active_page' => $this->getActivePage(),
         ];

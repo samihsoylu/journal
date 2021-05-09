@@ -4,13 +4,23 @@ namespace App\Utility;
 
 class ExceptionHandler
 {
-    public static function genericException(\Exception $e): void
+    public static function genericException(\Throwable $e): void
     {
-        //mail('mail@samihsoylu.nl', 'Exception in Journal', print_r($e, true));
-
         if (DEBUG_MODE) {
             throw $e;
         }
+
+        $exceptionsFile = BASE_PATH . '/exceptions.txt';
+        if (!file_exists($exceptionsFile)) {
+            file_put_contents($exceptionsFile, '');
+        }
+
+        $contents = file_get_contents($exceptionsFile);
+        $contents .= "\n{$e}\n";
+
+        file_put_contents($exceptionsFile, $contents);
+
+        mail(ADMIN_EMAIL_ADDRESS, 'An internal exception occured in ' . SITE_TITLE, $e->getMessage());
     }
 
     /**

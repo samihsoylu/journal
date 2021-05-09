@@ -18,4 +18,9 @@ class ErrorPage extends AbstractController
     {
         $this->template->render('errors/405');
     }
+
+    public function internalError(): void
+    {
+        $this->template->render('errors/500');
+    }
 }
