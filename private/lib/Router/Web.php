@@ -15,8 +15,6 @@ $route->addRoute('GET', Welcome::DASHBOARD_URL, 'Welcome@dashboard');
 // Authentication
 $route->addRoute('GET', Authentication::LOGIN_URL, 'Authentication@loginView');
 $route->addRoute(['GET', 'POST'], Authentication::LOGIN_POST_URL, 'Authentication@login');
-//$route->addRoute('GET', Authentication::REGISTER_URL, 'Authentication@registerView');
-//$route->addRoute('POST', Authentication::REGISTER_POST_URL, 'Authentication@register');
 $route->addRoute('GET', Authentication::LOGOUT_URL, 'Authentication@logout');
 
 // Entries
