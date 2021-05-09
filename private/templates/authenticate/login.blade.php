@@ -38,7 +38,7 @@
                         </div>
                     </div>
                     <footer class="center-align">
-                        <p>&copy; 2020 <a href="https://samihsoylu.nl/" target="_blank">SS</a></p>
+                        <p>&copy; 2020 - {{ date('Y') }} <a href="https://github.com/samihsoylu/journal/" target="_blank">SS</a></p>
                     </footer>
                 </div>
             </div>
