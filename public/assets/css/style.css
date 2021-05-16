@@ -289,7 +289,7 @@ footer {
 @media only screen and (min-width: 1400px) {
 	/** Screens bigger that 1400px **/
 	.dashboard.card-content {
-		height: 90px;
+		height: 110px;
 	}
 }
 
