@@ -47,3 +47,4 @@ $route->addRoute('GET', Account::ACCOUNT_URL, 'Account@indexView');
 $route->addRoute('POST', Account::CHANGE_PASSWORD_POST_URL, 'Account@changePassword');
 $route->addRoute('POST', Account::UPDATE_EMAIL_POST_URL, 'Account@changeEmail');
 $route->addRoute('POST', Account::DELETE_ACCOUNT_POST_URL, 'Account@deleteAccount');
+$route->addRoute('POST', Account::UPDATE_WIDGETS_POST_URL, 'Account@updateWidgets');

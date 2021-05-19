@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Exception\UserException;
 use App\Service\CategoryService;
 use App\Service\EntryService;
+use App\Service\WidgetService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
@@ -27,6 +28,7 @@ class Entry extends AbstractController
     private EntryService $service;
     private EntryValidator $validator;
     private CategoryService $categoryService;
+    private WidgetService $widgetService;
 
     public function __construct(array $routeParameters)
     {
@@ -39,6 +41,7 @@ class Entry extends AbstractController
         $this->validator = new EntryValidator($_POST, $_GET);
 
         $this->categoryService = new CategoryService();
+        $this->widgetService = new WidgetService();
     }
 
     /**
@@ -81,6 +84,10 @@ class Entry extends AbstractController
             $pageSize
         );
 
+        $this->template->setVariable(
+            'enabledWidgets',
+            $this->widgetService->getEnabledWidgetsForUser($this->getUserId())
+        );
         $this->template->setVariable('entries', $entries);
         $this->indexView();
     }

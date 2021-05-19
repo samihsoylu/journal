@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Service\UserService;
+use App\Service\WidgetService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
@@ -14,8 +15,10 @@ class Account extends AbstractController
     public const UPDATE_EMAIL_POST_URL = self::ACCOUNT_URL . '/update/email';
     public const CHANGE_PASSWORD_POST_URL = self::ACCOUNT_URL . '/change-password';
     public const DELETE_ACCOUNT_POST_URL = self::ACCOUNT_URL . '/delete';
+    public const UPDATE_WIDGETS_POST_URL = self::ACCOUNT_URL . '/widgets/update';
 
-    private UserService $service;
+    private UserService $userService;
+    private WidgetService $widgetService;
     private AccountValidator $validator;
 
     public function __construct(array $routeParameters)
@@ -25,7 +28,8 @@ class Account extends AbstractController
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->service = new UserService();
+        $this->userService = new UserService();
+        $this->widgetService = new WidgetService();
         $this->validator = new AccountValidator($_POST);
     }
 
@@ -38,7 +42,11 @@ class Account extends AbstractController
     {
         $this->injectSessionVariableToTemplate();
 
-        $this->template->setVariable('user', $this->service->getUser($this->getUserId()));
+        $user = $this->userService->getUser($this->getUserId());
+        $this->template->setVariable('user', $user);
+
+        $enabledWidgets = $this->widgetService->getEnabledWidgetsForUser($this->getUserId());
+        $this->template->setVariable('enabledWidgets', $enabledWidgets);
 
         $this->template->render('account/index');
     }
@@ -59,7 +67,7 @@ class Account extends AbstractController
             "Email was updated to {$newEmail}"
         );
 
-        $this->service->changeUserEmail($this->getUserId(), $newEmail);
+        $this->userService->changeUserEmail($this->getUserId(), $newEmail);
 
         $this->changeEmailView();
     }
@@ -78,7 +86,7 @@ class Account extends AbstractController
     {
         $this->validator->validate(__FUNCTION__);
 
-        $this->service->changePassword($this->getUserId(), $_POST['currentPassword'], $_POST['newPassword']);
+        $this->userService->changePassword($this->getUserId(), $_POST['currentPassword'], $_POST['newPassword']);
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
@@ -102,7 +110,7 @@ class Account extends AbstractController
     {
         $this->validator->validate(__FUNCTION__);
 
-        $this->service->deleteUser($_POST['password'], $this->getUserId());
+        $this->userService->deleteUser($_POST['password'], $this->getUserId());
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
@@ -113,6 +121,35 @@ class Account extends AbstractController
     }
 
     public function deleteAccountView(): void
+    {
+        Redirect::to(self::ACCOUNT_URL);
+    }
+
+    /**
+     * Update widget settings post action
+     *
+     * @return void
+     */
+    public function updateWidgets(): void
+    {
+        $this->validator->validate(__FUNCTION__);
+
+        unset($_POST['form_key']);
+
+        $this->widgetService->updateWidgetSettingsForUser(
+            $this->getUserId(),
+            $_POST
+        );
+
+        $this->setNotification(
+            Notification::TYPE_SUCCESS,
+            'Widgets updated'
+        );
+
+        $this->updateWidgetsView();
+    }
+
+    public function updateWidgetsView(): void
     {
         Redirect::to(self::ACCOUNT_URL);
     }

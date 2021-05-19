@@ -2,6 +2,7 @@
 
 namespace App\Validator;
 
+use App\Exception\UserException\ActionNotPermittedException;
 use App\Exception\UserException\InvalidArgumentException;
 
 class AccountValidator extends AbstractValidator
@@ -27,6 +28,22 @@ class AccountValidator extends AbstractValidator
     public function deleteAccount(): void
     {
         $this->ensureRequiredFieldsAreProvided($this->post, ['password']);
+
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
+    }
+
+    public function updateWidgets(): void
+    {
+        $allowedFields = [
+            'quickAddEntriesBoxEntriesOverview',
+            'form_key',
+        ];
+
+        foreach ($this->post as $fieldName => $fieldValue) {
+            if (!in_array($fieldName, $allowedFields, true)) {
+                throw ActionNotPermittedException::invalidFormFieldProvided($fieldName);
+            }
+        }
 
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
     }

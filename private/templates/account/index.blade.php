@@ -34,6 +34,23 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- Enable / Disable widgets -->
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Widgets</span>
+                        <form method="post" action="{{ $update_widgets_post_url }}">
+                            <p class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="quickAddEntriesBoxEntriesOverview" class="filled-in" @isset($enabledWidgets['quickAddEntriesBoxEntriesOverview']) checked="checked" @endisset />
+                                    <span>Enable quick add box in entries overview page (not available on mobile view)</span>
+                                </label>
+                            </p>
+                            <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
+                            <button class="btn btn-default" type="submit"><i class="material-icons">lock</i> Save widgets</button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <div class="col s12 m6">
@@ -68,10 +85,11 @@
 
                             <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
 
-                            <button class="btn btn-danger" id="delete" type="submit"><i class="material-icons">delete_forever</i> Delete account</input>
+                            <button class="btn btn-danger" id="delete" type="submit"><i class="material-icons">delete_forever</i> Delete account</button>
                         </form>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
