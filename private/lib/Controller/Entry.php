@@ -138,6 +138,9 @@ class Entry extends AbstractController
 
         $this->setNotification(Notification::TYPE_SUCCESS, "Entry {$entryTitle} has been created");
 
+        if (isset($_POST['redirectToEntriesOverview'])) {
+            Redirect::to(self::ENTRIES_URL);
+        }
         Redirect::to(self::ENTRY_URL . "/{$entryId}");
     }
 
