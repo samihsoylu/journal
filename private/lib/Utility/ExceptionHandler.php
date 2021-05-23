@@ -15,12 +15,14 @@ class ExceptionHandler
             file_put_contents($exceptionsFile, '');
         }
 
+        $timestamp = date('d-m-Y H:i:s');
+
         $contents = file_get_contents($exceptionsFile);
-        $contents .= "\n{$e}\n";
+        $contents .= "\n[{$timestamp}] {$e}\n";
 
         file_put_contents($exceptionsFile, $contents);
 
-        mail(ADMIN_EMAIL_ADDRESS, 'An internal exception occured in ' . SITE_TITLE, $e->getMessage());
+        mail(ADMIN_EMAIL_ADDRESS, 'An internal exception occurred in ' . SITE_TITLE, $e->getMessage());
     }
 
     /**
