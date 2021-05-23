@@ -202,7 +202,7 @@ class CategoryServiceTest extends TestCase
             ->method('queue')
             ->with(
                 $this->callback(
-                    function($model) {
+                    function ($model) {
                         return ($model instanceof Category);
                     }
                 )
@@ -272,7 +272,7 @@ class CategoryServiceTest extends TestCase
             ->method('queue')
             ->with(
                 $this->callback(
-                    function($model) {
+                    function ($model) {
                         return ($model instanceof Category);
                     }
                 )
