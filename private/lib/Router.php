@@ -77,12 +77,12 @@ class Router
                 } catch (UserException $e) {
                     ExceptionHandler::userException($e->getMessage(), $controller, $methodName);
                 } catch (\Throwable|\Exception $e) {
-                   if (!DEBUG_MODE) {
+                    if (!DEBUG_MODE) {
                         http_response_code(500);
                         $errorController->internalError();
-                   }
+                    }
 
-                   ExceptionHandler::genericException($e);
+                    ExceptionHandler::genericException($e);
                 }
 
                 break;

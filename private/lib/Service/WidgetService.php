@@ -3,7 +3,6 @@
 
 namespace App\Service;
 
-
 use App\Database\Model\Widget;
 use App\Database\Repository\WidgetRepository;
 use App\Service\Helper\UserHelper;
