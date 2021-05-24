@@ -11,6 +11,7 @@
                             <div class="alert-login-page">
 @include('components/alerts')
                             </div>
+                            <h3 class="center hidden show-on-tiny">Journal</h3>
                             <div class="card card-login">
                                 <div class="card-login-splash hide-on-tiny">
                                     <div class="wrapper">

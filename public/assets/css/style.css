@@ -90,7 +90,13 @@ footer {
 		/** Hides element on very small screens **/
 		display:none !important;
 	}
+	.show-on-tiny {
+		display:block !important;
+	}
 }
+
+.hidden { display:none; }
+
 @media only screen and (max-width: 768px) {
 	.mobile-fullwidth {
 		width:100%;
