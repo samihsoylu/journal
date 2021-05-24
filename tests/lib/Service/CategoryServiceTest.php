@@ -37,7 +37,7 @@ class CategoryServiceTest extends TestCase
     /**
      * @return Category|MockObject
      */
-    private function getMockCategory(User $user,?int $categoryId): Category
+    private function getMockCategory(User $user, ?int $categoryId): Category
     {
         $mock = $this->createMock(Category::class);
         $mock->method('getReferencedUser')
