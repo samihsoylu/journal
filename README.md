@@ -37,9 +37,9 @@ Download the zip package from the [releases page](https://github.com/samihsoylu/
 
 Extract the downloaded zip file and upload it to your web server.
 
-**To install via composer:**
+**To install via composer (skip step 3):**
 ```
-composer create-project samihsoylu/journal
+composer create-project samihsoylu/journal --no-dev
 ```
 
 ### 2. Edit .env file
