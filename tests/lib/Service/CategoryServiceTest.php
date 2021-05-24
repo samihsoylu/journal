@@ -3,6 +3,7 @@
 namespace Tests\Service;
 
 use App\Database\Model\Category;
+use App\Database\Model\Entry;
 use App\Database\Model\User;
 use App\Database\Repository\CategoryRepository;
 use App\Database\Repository\EntryRepository;
@@ -34,6 +35,23 @@ class CategoryServiceTest extends TestCase
     }
 
     /**
+     * @return Category|MockObject
+     */
+    private function getMockCategory(User $user,?int $categoryId): Category
+    {
+        $mock = $this->createMock(Category::class);
+        $mock->method('getReferencedUser')
+            ->willReturn($user);
+
+        if ($categoryId !== null) {
+            $mock->method('getId')
+                ->willReturn($categoryId);
+        }
+
+        return $mock;
+    }
+
+    /**
      * @return Category[]|MockObject[]
      */
     private function getMockCategories(User $user): array
@@ -42,8 +60,6 @@ class CategoryServiceTest extends TestCase
 
         for ($i = 0; $i < 5; $i++) {
             $mock = $this->createMock(Category::class);
-            $mock->method('getName')->willReturn("Space {$i}");
-            $mock->method('getDescription')->willReturn("Space desc {$i}");
             $mock->method('getReferencedUser')
                 ->willReturn($user);
 
@@ -60,15 +76,27 @@ class CategoryServiceTest extends TestCase
     {
         $mockUser = $this->createMock(User::class);
         $mockUser->method('getId')->willReturn($userId);
-        $mockUser->method('getUsername')->willReturn('username1');
-        $mockUser->method('getEmailAddress')->willReturn('email1@email.com');
-        $mockUser->method('getPrivilegeLevel')->willReturn(User::PRIVILEGE_LEVEL_ADMIN);
 
         return $mockUser;
     }
 
+    private function getMockEntries(User $user, Category $category): array
+    {
+        $mockEntries = [];
+        for ($i = 0; $i < 5; $i++) {
+            $mock = $this->createMock(Entry::class);
+            $mock->method('getReferencedCategory')
+                ->willReturn($category);
+            $mock->method('getReferencedUser')
+                ->willReturn($user);
+
+            $mockEntries[] = $mock;
+        }
+        return $mockEntries;
+    }
+
     /**
-     * Tests that all categories are returned in an array and no exception is thrown if the user exists.
+     * Tests that all categories are returned in an array.
      *
      * @return void
      */
@@ -95,7 +123,7 @@ class CategoryServiceTest extends TestCase
     }
 
     /**
-     * Tests whether an exception is thrown if a user does not when making this resource call
+     * Tests whether an exception is thrown if a user does not exist when making this resource call
      *
      * @return void
      */
@@ -109,7 +137,7 @@ class CategoryServiceTest extends TestCase
             ->with($userId)
             ->willReturn(null);
 
-        $service    = new CategoryService();
+        $service = new CategoryService();
         $service->getAllCategoriesForUser($userId);
     }
 
@@ -125,8 +153,7 @@ class CategoryServiceTest extends TestCase
 
         $mockUser = $this->getMockUser($userId);
 
-        $mockCategory = $this->getMockCategories($mockUser)[0];
-        $mockCategory->method('getId')->willReturn($categoryId);
+        $mockCategory = $this->getMockCategory($mockUser, $categoryId);
 
         $this->categoryRepository
             ->method('getById')
@@ -138,48 +165,6 @@ class CategoryServiceTest extends TestCase
 
         $this->assertEquals($category->getId(), $categoryId);
         $this->assertEquals($category->getReferencedUser()->getId(), $userId);
-    }
-
-    /**
-     * Tests whether an exception is thrown if the category does not exist
-     *
-     * @return void
-     */
-    public function testGetCategoryForUserNotFoundException(): void
-    {
-        $this->expectException(NotFoundException::class);
-
-        $this->categoryRepository
-            ->method('getById')
-            ->willReturn(null);
-
-        $service = new CategoryService();
-        $service->getCategoryForUser(5, 0);
-    }
-
-    /**
-     * Tests whether an exception is thrown if the user does not exist
-     *
-     * @return void
-     */
-    public function testGetCategoryForUserNotFoundExceptionForNotMatchingUserId(): void
-    {
-        $this->expectException(NotFoundException::class);
-
-        $categoryId = 1;
-        $userId = 2;
-
-        $mockUser = $this->getMockUser($userId);
-
-        $mockCategory = $this->getMockCategories($mockUser)[0];
-        $mockCategory->method('getId')->willReturn($categoryId);
-
-        $this->categoryRepository
-            ->method('getById')
-            ->willReturn($mockCategory);
-
-        $service = new CategoryService();
-        $service->getCategoryForUser($categoryId, 65);
     }
 
     /**
@@ -258,9 +243,7 @@ class CategoryServiceTest extends TestCase
         $categoryId = 5;
 
         $mockUser = $this->getMockUser($userId);
-
-        $mockCategory = $this->getMockCategories($mockUser)[0];
-        $mockCategory->method('getId')->willReturn($categoryId);
+        $mockCategory = $this->getMockCategory($mockUser, $categoryId);
 
         $this->categoryRepository
             ->method('getById')
@@ -283,5 +266,42 @@ class CategoryServiceTest extends TestCase
 
         $service = new CategoryService();
         $service->updateCategory($userId, $categoryId, 'New Category Name', 'New Category Description');
+    }
+
+    public function testDeleteCategoryAndAssociatedEntries(): void
+    {
+        $userId = 5;
+        $categoryId = 10;
+        $mockUser = $this->getMockUser($userId);
+        $mockCategory = $this->getMockCategory($mockUser, $categoryId);
+        $mockEntries = $this->getMockEntries($mockUser, $mockCategory);
+        $entriesCount = count($mockEntries);
+
+        $this->categoryRepository
+            ->method('getById')
+            ->with($categoryId)
+            ->willReturn($mockCategory);
+
+        $this->entryRepository
+            ->method('findByUserIdAndCategoryId')
+            ->willReturn($mockEntries);
+
+        // + 1 for removing category
+        $this->categoryRepository->expects(self::exactly($entriesCount + 1))
+            ->method('remove')
+            ->withConsecutive(
+                [$this->identicalTo($mockEntries[0])],
+                [$this->identicalTo($mockEntries[1])],
+                [$this->identicalTo($mockEntries[2])],
+                [$this->identicalTo($mockEntries[3])],
+                [$this->identicalTo($mockEntries[4])],
+                [$this->identicalTo($mockCategory)]
+            );
+
+        $this->categoryRepository->expects(self::once())
+            ->method('save');
+
+        $service = new CategoryService();
+        $service->deleteCategoryAndAssociatedEntries($categoryId, $userId);
     }
 }
