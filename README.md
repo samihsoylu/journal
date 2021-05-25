@@ -1,5 +1,5 @@
 # Journal
-Journal is a privacy first, self hosted digital log book. It was designed with the idea that it should be accessible anywhere you go. Using your password as an encryption key, Journal stores your entries encrypted.
+Journal is a privacy first, self hosted digital log book. It is designed to be accessible anywhere you go, allowing you to organize your thoughts, feelings and opinions in one place. Your Journals are stored with AES 256 encryption using your own password as the encryption key, resulting in a protected and inaccessible log book from outsiders.
 
 <img src="https://samihsoylu.nl/downloads/dashboard-journal.png">
 
