@@ -13,8 +13,8 @@ class Template extends AbstractController
     public const TEMPLATES_URL = BASE_URL . '/templates';
     public const TEMPLATE_URL = BASE_URL . '/template';
 
-    public const CREATE_TEMPLATE_VIEW = self::TEMPLATE_URL . '/create';
-    public const CREATE_TEMPLATE_POST_VIEW = self::TEMPLATE_URL . '/create/action';
+    public const CREATE_TEMPLATE_URL = self::TEMPLATE_URL . '/create';
+    public const CREATE_TEMPLATE_POST_URL = self::TEMPLATE_URL . '/create/action';
     public const VIEW_TEMPLATE_URL = self::TEMPLATE_URL . '/{id:\d+}';
     public const UPDATE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/update';
     public const UPDATE_TEMPLATE_POST_URL = self::VIEW_TEMPLATE_URL . '/update/action';
@@ -39,7 +39,10 @@ class Template extends AbstractController
 
     public function indexView(): void
     {
-        $this->template->setVariable('templates', $this->service->getAllTemplatesForUser($this->getUserId()));
+        $this->injectSessionVariableToTemplate();
+        $templates = $this->service->getAllTemplatesForUser($this->getUserId());
+
+        $this->template->setVariable('templates', $templates);
         $this->template->render('templates/all');
     }
 
@@ -48,6 +51,7 @@ class Template extends AbstractController
      */
     public function createView(): void
     {
+        $this->injectSessionVariableToTemplate();
         $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
 
         $this->template->setVariable('categories', $categories);
