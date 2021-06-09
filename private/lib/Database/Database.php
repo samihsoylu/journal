@@ -35,9 +35,9 @@ final class Database
             false
         );
 
-        $this->entityManager = EntityManager::create($dbParams, $config);
+        $entityManager = EntityManager::create($dbParams, $config);
 
-        $this->dependencyFactory = DependencyFactory::fromEntityManager(new JsonFile(BASE_PATH . '/migrations.json'), new ExistingEntityManager($this->entityManager));
+        $this->dependencyFactory = DependencyFactory::fromEntityManager(new JsonFile(BASE_PATH . '/migrations.json'), new ExistingEntityManager($entityManager));
 
         $this->testDatabaseConnection();
     }
