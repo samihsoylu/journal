@@ -26,6 +26,11 @@ class InvalidArgumentException extends UserException
         return new self("The category with name '{$categoryName}' already exists", $code);
     }
 
+    public static function templateAlreadyExists(string $templateTitle, int $code = 406): self
+    {
+        return new self("The template with title '{$templateTitle}' already exists", $code);
+    }
+
     public static function incorrectPassword(int $code = 406): self
     {
         return new self("The password you provided is incorrect", $code);
