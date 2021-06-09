@@ -4,6 +4,7 @@ use App\Controller\Account;
 use App\Controller\Authentication;
 use App\Controller\Category;
 use App\Controller\Entry;
+use App\Controller\Template;
 use App\Controller\User;
 use App\Controller\Welcome;
 
@@ -48,3 +49,6 @@ $route->addRoute('POST', Account::CHANGE_PASSWORD_POST_URL, 'Account@changePassw
 $route->addRoute('POST', Account::UPDATE_EMAIL_POST_URL, 'Account@changeEmail');
 $route->addRoute('POST', Account::DELETE_ACCOUNT_POST_URL, 'Account@deleteAccount');
 $route->addRoute('POST', Account::UPDATE_WIDGETS_POST_URL, 'Account@updateWidgets');
+
+// Template
+$route->addRoute('GET', Template::TEMPLATES_URL, 'Template@indexView');
