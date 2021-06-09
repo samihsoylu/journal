@@ -7,7 +7,7 @@
     <div class="container">
         <div class="row row-align button-row">
             <div class="col s12 m10 l7 offset-m1 offset-l2">
-                <form method="post" action="{{ $create_entry_post_url }}">
+                <form method="post" action="{{ $create_template_post_url }}">
                     <div class="input-field">
                         <select id="category_id_d" name="category_id">
                             @foreach ($categories as $category)
