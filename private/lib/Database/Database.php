@@ -3,9 +3,7 @@
 namespace App\Database;
 
 use Doctrine\Common\Cache\PhpFileCache;
-use Doctrine\DBAL\DriverManager;
 use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
-use Doctrine\Migrations\Configuration\Migration\ConfigurationLoader;
 use Doctrine\Migrations\Configuration\Migration\JsonFile;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\EntityManager;
@@ -35,9 +33,9 @@ final class Database
             false
         );
 
-        $this->entityManager = EntityManager::create($dbParams, $config);
+        $entityManager = EntityManager::create($dbParams, $config);
 
-        $this->dependencyFactory = DependencyFactory::fromEntityManager(new JsonFile(BASE_PATH . '/migrations.json'), new ExistingEntityManager($this->entityManager));
+        $this->dependencyFactory = DependencyFactory::fromEntityManager(new JsonFile(BASE_PATH . '/migrations.json'), new ExistingEntityManager($entityManager));
 
         $this->testDatabaseConnection();
     }
