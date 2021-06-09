@@ -52,7 +52,7 @@ class EntryHelper
     /**
      * @return EntryModel[]
      */
-    public function getEntiresForUserByCategoryId(int $userId, int $categoryId): array
+    public function getEntriesForUserByCategoryId(int $userId, int $categoryId): array
     {
         return $this->repository->findByUserIdAndCategoryId($userId, $categoryId);
     }
