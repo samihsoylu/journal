@@ -1,6 +1,6 @@
 @extends('base')
 
-@section('pageTitle', 'Create entry')
+@section('pageTitle', 'Create entry template')
 
 @section('content')
     @include('components/header')
@@ -9,20 +9,12 @@
             <div class="col s12 m10 l7 offset-m1 offset-l2">
                 <form method="post" action="{{ $create_entry_post_url }}">
                     <div class="input-field">
-                        <select id="template_id_d" name="template_id">
-                            @foreach ($templates as $template)
-                                <option value="{{ $template->getId() }}">{{ $template->getName() }}</option>
-                            @endforeach
-                        </select>
-                        <label for="template_id">Template</label>
-                    </div>
-                    <div class="input-field">
                         <select id="category_id_d" name="category_id">
                             @foreach ($categories as $category)
                             <option value="{{ $category->getId() }}">{{ $category->getName() }}</option>
                             @endforeach
                         </select>
-                        <label for="category_id">Category</label>
+                        <label for="category_id">Default category</label>
                     </div>
                     <div class="input-field">
                         <input id="entry_title" name="entry_title" type="text" class="validate" @isset($post['entry_title']) value="{{ $post['entry_title'] }}" @endisset  required />
