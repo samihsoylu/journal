@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Database\Model\Category;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Service\Helper\WidgetHelper;
 use App\Service\Model\UserDecorator;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
@@ -21,6 +22,7 @@ class UserService
     private UserHelper $userHelper;
     private CategoryHelper $categoryHelper;
     private EntryHelper $entryHelper;
+    private WidgetHelper $widgetHelper;
 
     private const DEFAULT_PASSWORD_HASH_ALGORITHM = PASSWORD_ARGON2ID;
 
@@ -33,6 +35,7 @@ class UserService
         $this->userHelper     = new UserHelper();
         $this->categoryHelper = new CategoryHelper();
         $this->entryHelper    = new EntryHelper();
+        $this->widgetHelper   = new WidgetHelper();
     }
 
     /**
@@ -170,6 +173,11 @@ class UserService
         $categories = $this->categoryHelper->getAllCategoriesForUser($targetUser);
         foreach ($categories as $category) {
             $this->repository->remove($category);
+        }
+
+        $widgets = $this->widgetHelper->getAllWidgetsForUser($targetUser);
+        foreach ($widgets as $widget) {
+            $this->repository->remove($widget);
         }
 
         $this->repository->remove($targetUser);
