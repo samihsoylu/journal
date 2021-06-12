@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Database\Model\Category;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Service\Helper\WidgetHelper;
 use App\Service\Model\UserDecorator;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
@@ -21,6 +22,7 @@ class UserService
     private UserHelper $userHelper;
     private CategoryHelper $categoryHelper;
     private EntryHelper $entryHelper;
+    private WidgetHelper $widgetHelper;
 
     private const DEFAULT_PASSWORD_HASH_ALGORITHM = PASSWORD_ARGON2ID;
 
@@ -33,6 +35,7 @@ class UserService
         $this->userHelper     = new UserHelper();
         $this->categoryHelper = new CategoryHelper();
         $this->entryHelper    = new EntryHelper();
+        $this->widgetHelper   = new WidgetHelper();
     }
 
     /**
@@ -172,6 +175,11 @@ class UserService
             $this->repository->remove($category);
         }
 
+        $widgets = $this->widgetHelper->getAllWidgetsForUser($targetUser);
+        foreach ($widgets as $widget) {
+            $this->repository->remove($widget);
+        }
+
         $this->repository->remove($targetUser);
 
         // Execute queued changes
@@ -197,7 +205,7 @@ class UserService
 
         $personal = new Category();
         $personal->setName('Personal');
-        $personal->setDescription('Stories about your passions and ambitions');
+        $personal->setDescription('Stories about your experiences, passions and ambitions');
         $personal->setReferencedUser($user);
         $this->repository->queue($personal);
 
@@ -207,23 +215,11 @@ class UserService
         $diet->setReferencedUser($user);
         $this->repository->queue($diet);
 
-        $dreams = new Category();
-        $dreams->setName('Dreams');
-        $dreams->setDescription('Recording dream experiences allow you to start analyzing what your dreams mean');
-        $dreams->setReferencedUser($user);
-        $this->repository->queue($dreams);
-
         $work = new Category();
         $work->setName('Work');
         $work->setDescription('Meeting notes, deadlines, countless other bits of information that are best stored here instead of your brain');
         $work->setReferencedUser($user);
         $this->repository->queue($work);
-
-        $gifts = new Category();
-        $gifts->setName('Gifts');
-        $gifts->setDescription('Gifts you have received or given to friends and family');
-        $gifts->setReferencedUser($user);
-        $this->repository->queue($gifts);
 
         $this->repository->save();
     }
