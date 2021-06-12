@@ -205,7 +205,7 @@ class UserService
 
         $personal = new Category();
         $personal->setName('Personal');
-        $personal->setDescription('Stories about your passions and ambitions');
+        $personal->setDescription('Stories about your experiences, passions and ambitions');
         $personal->setReferencedUser($user);
         $this->repository->queue($personal);
 
@@ -215,23 +215,11 @@ class UserService
         $diet->setReferencedUser($user);
         $this->repository->queue($diet);
 
-        $dreams = new Category();
-        $dreams->setName('Dreams');
-        $dreams->setDescription('Recording dream experiences allow you to start analyzing what your dreams mean');
-        $dreams->setReferencedUser($user);
-        $this->repository->queue($dreams);
-
         $work = new Category();
         $work->setName('Work');
         $work->setDescription('Meeting notes, deadlines, countless other bits of information that are best stored here instead of your brain');
         $work->setReferencedUser($user);
         $this->repository->queue($work);
-
-        $gifts = new Category();
-        $gifts->setName('Gifts');
-        $gifts->setDescription('Gifts you have received or given to friends and family');
-        $gifts->setReferencedUser($user);
-        $this->repository->queue($gifts);
 
         $this->repository->save();
     }
