@@ -27,6 +27,14 @@ $route->addRoute('GET', Entry::UPDATE_ENTRY_URL, 'Entry@updateView');
 $route->addRoute(['GET', 'POST'], Entry::UPDATE_ENTRY_POST_URL, 'Entry@update');
 $route->addRoute('GET', Entry::DELETE_ENTRY_URL, 'Entry@delete');
 
+// Template
+$route->addRoute('GET', Template::TEMPLATES_URL, 'Template@indexView');
+$route->addRoute('GET', Template::CREATE_TEMPLATE_URL, 'Template@createView');
+$route->addRoute(['GET', 'POST'], Template::CREATE_TEMPLATE_POST_URL, 'Template@create');
+$route->addRoute('GET', Template::UPDATE_TEMPLATE_URL, 'Template@updateView');
+$route->addRoute(['GET', 'POST'], Template::UPDATE_TEMPLATE_POST_URL, 'Template@update');
+$route->addRoute('GET', Template::DELETE_TEMPLATE_URL, 'Template@delete');
+
 // Categories
 $route->addRoute('GET', Category::CATEGORIES_URL, 'Category@indexView');
 $route->addRoute('GET', Category::CREATE_CATEGORY_URL, 'Category@createView');
@@ -49,11 +57,3 @@ $route->addRoute('POST', Account::CHANGE_PASSWORD_POST_URL, 'Account@changePassw
 $route->addRoute('POST', Account::UPDATE_EMAIL_POST_URL, 'Account@changeEmail');
 $route->addRoute('POST', Account::DELETE_ACCOUNT_POST_URL, 'Account@deleteAccount');
 $route->addRoute('POST', Account::UPDATE_WIDGETS_POST_URL, 'Account@updateWidgets');
-
-// Template
-$route->addRoute('GET', Template::TEMPLATES_URL, 'Template@indexView');
-$route->addRoute('GET', Template::CREATE_TEMPLATE_URL, 'Template@createView');
-$route->addRoute('POST', Template::CREATE_TEMPLATE_POST_URL, 'Template@create');
-$route->addRoute('GET', Template::UPDATE_TEMPLATE_URL, 'Template@updateView');
-$route->addRoute('POST', Template::UPDATE_TEMPLATE_POST_URL, 'Template@update');
-$route->addRoute('GET', Template::DELETE_TEMPLATE_URL, 'Template@delete');
