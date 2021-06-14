@@ -2,11 +2,40 @@
 
 namespace App\Validator;
 
+use App\Exception\UserException\InvalidParameterException;
+
 class TemplateValidator extends AbstractValidator
 {
+    /**
+     * @throws InvalidParameterException
+     */
     public function create(): void
     {
-        $entryValidator = new EntryValidator($this->post);
-        $entryValidator->create();
+        $requiredFields = ['category_id', 'template_title', 'template_content'];
+        $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
+
+        $this->ensureValueIsNumeric($this->post, 'category_id');
+
+        $this->ensureValueIsNotTooShort($this->post, 'template_title', 4);
+        $this->ensureValueIsNotTooLong($this->post, 'template_title', 128);
+        $this->ensureValueIsNotTooShort($this->post, 'template_content', 1);
+
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
+    }
+
+    /**
+     * @throws InvalidParameterException
+     */
+    public function update(): void
+    {
+        $this->create();
+    }
+
+    /**
+     * @throws InvalidParameterException
+     */
+    public function delete(): void
+    {
+        $this->ensureUserHasProvidedValidAntiCSRFToken($_GET['form_key']);
     }
 }
