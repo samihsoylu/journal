@@ -52,3 +52,8 @@ $route->addRoute('POST', Account::UPDATE_WIDGETS_POST_URL, 'Account@updateWidget
 
 // Template
 $route->addRoute('GET', Template::TEMPLATES_URL, 'Template@indexView');
+$route->addRoute('GET', Template::CREATE_TEMPLATE_URL, 'Template@createView');
+$route->addRoute('POST', Template::CREATE_TEMPLATE_POST_URL, 'Template@create');
+$route->addRoute('GET', Template::UPDATE_TEMPLATE_URL, 'Template@updateView');
+$route->addRoute('POST', Template::UPDATE_TEMPLATE_POST_URL, 'Template@update');
+$route->addRoute('GET', Template::DELETE_TEMPLATE_URL, 'Template@delete');

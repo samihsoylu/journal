@@ -61,7 +61,7 @@ class TemplateService
         try {
             $this->repository->save();
         } catch (UniqueConstraintViolationException $e) {
-            throw InvalidArgumentException::TemplateAlreadyExists($templateTitle);
+            throw InvalidArgumentException::templateAlreadyExists($templateTitle);
         }
     }
 

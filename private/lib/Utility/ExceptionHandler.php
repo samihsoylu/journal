@@ -22,7 +22,10 @@ class ExceptionHandler
 
         file_put_contents($exceptionsFile, $contents);
 
-        mail(ADMIN_EMAIL_ADDRESS, 'An internal exception occurred in ' . SITE_TITLE, $e->getMessage());
+        $to      = ADMIN_EMAIL_ADDRESS;
+        $subject = 'An internal exception occurred in ' . SITE_TITLE;
+        $message = $e->getMessage();
+        mail($to, $subject, $message);
     }
 
     /**

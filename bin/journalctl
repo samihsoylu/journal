@@ -6,7 +6,8 @@ use Symfony\Component\Console\Command\Command;
 
 require_once(dirname(__DIR__) . '/private/init.php');
 
-$app = new Application("Journal control", PROJECT_VERSION);
+$version = PROJECT_VERSION;
+$app = new Application("Journal <comment>v{$version}</comment>");
 
 $finder = new \Symfony\Component\Finder\Finder();
 $finder->files()->in(dirname(__DIR__) . '/private/lib/Console/Command');

@@ -56,6 +56,6 @@ const ASSETS_URL                  = BASE_URL  . '/assets';
 const DEFAULT_CACHE_EXPIRY_TIME   = 3600;  // 1 hour
 const DEFAULT_SESSION_EXPIRY_TIME = 86400; // 24 hours
 
-const PROJECT_VERSION = '1.0.0';
+const PROJECT_VERSION = '1.0.1';
 
 session_start();
