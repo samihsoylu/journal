@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Database\Model\Category;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\WidgetHelper;
 use App\Service\Model\UserDecorator;
 use App\Exception\UserException\InvalidArgumentException;
@@ -23,6 +24,7 @@ class UserService
     private CategoryHelper $categoryHelper;
     private EntryHelper $entryHelper;
     private WidgetHelper $widgetHelper;
+    private TemplateHelper $templateHelper;
 
     private const DEFAULT_PASSWORD_HASH_ALGORITHM = PASSWORD_ARGON2ID;
 
@@ -35,6 +37,7 @@ class UserService
         $this->userHelper     = new UserHelper();
         $this->categoryHelper = new CategoryHelper();
         $this->entryHelper    = new EntryHelper();
+        $this->templateHelper = new TemplateHelper();
         $this->widgetHelper   = new WidgetHelper();
     }
 
@@ -109,12 +112,14 @@ class UserService
 
         $targetUserTotalEntries = $this->entryHelper->getEntryCountForUser($targetUser);
         $targetUserTotalCategories = $this->categoryHelper->getCategoryCountForUser($targetUser);
+        $targetUserTotalTemplates = $this->templateHelper->getTemplateCountForUser($targetUser);
 
         return new UserDecorator(
             $targetUser,
             $targetUserIsReadOnly,
             $targetUserTotalCategories,
-            $targetUserTotalEntries
+            $targetUserTotalEntries,
+            $targetUserTotalTemplates
         );
     }
 
@@ -173,6 +178,11 @@ class UserService
         $categories = $this->categoryHelper->getAllCategoriesForUser($targetUser);
         foreach ($categories as $category) {
             $this->repository->remove($category);
+        }
+
+        $templates = $this->templateHelper->getAllTemplatesForUser($targetUser);
+        foreach ($templates as $template) {
+            $this->repository->remove($template);
         }
 
         $widgets = $this->widgetHelper->getAllWidgetsForUser($targetUser);
