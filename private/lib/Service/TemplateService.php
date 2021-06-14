@@ -44,7 +44,7 @@ class TemplateService
         return $this->templateHelper->getTemplateForUser($templateId, $userId);
     }
 
-    public function createTemplate(int $userId, int $categoryId, string $templateTitle, string $templateContent): void
+    public function createTemplate(int $userId, int $categoryId, string $templateTitle, string $templateContent): int
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
@@ -63,14 +63,18 @@ class TemplateService
         } catch (UniqueConstraintViolationException $e) {
             throw InvalidArgumentException::templateAlreadyExists($templateTitle);
         }
+
+        return $template->getId();
     }
 
-    public function updateTemplate(int $userId, int $templateId, string $templateTitle, string $templateContent): void
+    public function updateTemplate(int $userId, int $categoryId, int $templateId, string $templateTitle, string $templateContent): void
     {
-        $template = $this->getTemplateForUser($templateId, $userId);
+        $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
+        $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 
-        $template->setTitle($templateTitle);
-        $template->setContent($templateContent);
+        $template->setTitle($templateTitle)
+                 ->setContent($templateContent)
+                 ->setReferencedCategory($category);
 
         $this->repository->queue($template);
         $this->repository->save();
@@ -83,7 +87,7 @@ class TemplateService
      */
     public function deleteTemplate(int $templateId, int $userId): void
     {
-        $template = $this->getTemplateForUser($templateId, $userId);
+        $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 
         // queue entry to be removed
         $this->repository->remove($template);
