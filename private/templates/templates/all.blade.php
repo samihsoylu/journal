@@ -12,7 +12,7 @@
                 <a href="{{ $template_url }}/{{ $template->getId() }}/update">
                     <div class="card">
                         <div class="card-content">
-                            <span class="card-title">{{ $template->getName() }}</span>
+                            <span class="card-title">{{ $template->getTitle() }}</span>
                             <p>{{ $template->getContent() }}</p>
                         </div>
                     </div>

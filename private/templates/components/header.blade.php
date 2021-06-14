@@ -10,8 +10,8 @@
     <ul id="mobile_menu" class="sidenav">
         <li><a href="{{ $dashboard_url }}">Dashboard</a></li>
         <li><a href="{{ $entries_url }}">Entries</a></li>
-        <li><a href="{{ $categories_url }}">Categories</a></li>
         <li><a href="{{ $templates_url }}">Templates</a></li>
+        <li><a href="{{ $categories_url }}">Categories</a></li>
         @if ($session->userHasAdminPrivileges())
             <li><a href="{{ $users_url }}">Users</a></li>
         @endif
@@ -27,8 +27,8 @@
                 <ul class="right hide-on-med-and-down">
                     <li @if ($active_page === 'dashboard') class="active" @endif><a href="{{ $dashboard_url }}">Dashboard</a></li>
                     <li @if ($active_page === 'entries') class="active" @endif><a href="{{ $entries_url }}">Entries</a></li>
-                    <li @if ($active_page === 'categories') class="active" @endif><a href="{{ $categories_url }}">Categories</a></li>
                     <li @if ($active_page === 'templates') class="active" @endif><a href="{{ $templates_url }}">Templates</a></li>
+                    <li @if ($active_page === 'categories') class="active" @endif><a href="{{ $categories_url }}">Categories</a></li>
                     @if ($session->userHasAdminPrivileges())
                         <li @if ($active_page === 'users') class="active" @endif><a href="{{ $users_url }}">Users</a></li>
                     @endif
