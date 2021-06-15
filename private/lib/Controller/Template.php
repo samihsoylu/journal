@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Exception\UserException;
 use App\Service\CategoryService;
 use App\Service\TemplateService;
+use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
 use App\Validator\TemplateValidator;
@@ -45,7 +47,7 @@ class Template extends AbstractController
         $templates = $this->service->getAllTemplatesForUser($this->getUserId());
 
         $this->template->setVariable('templates', $templates);
-        $this->template->render('templates/all');
+        $this->template->render('template/all');
     }
 
     public function create(): void
@@ -64,7 +66,7 @@ class Template extends AbstractController
         if (isset($_POST['redirectToTemplatesOverview'])) {
             Redirect::to(self::TEMPLATES_URL);
         }
-        Redirect::to(self::TEMPLATE_URL . "/{$templateId}");
+        Redirect::to(self::TEMPLATES_URL);
     }
 
     public function createView(): void
@@ -73,7 +75,7 @@ class Template extends AbstractController
         $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
 
         $this->template->setVariable('categories', $categories);
-        $this->template->render('templates/create');
+        $this->template->render('template/create');
     }
 
     public function update(): void
@@ -90,8 +92,8 @@ class Template extends AbstractController
 
         $this->service->updateTemplate(
             $this->getUserId(),
-            $templateId,
             $categoryId,
+            $templateId,
             $templateTitle,
             $templateContent
         );
