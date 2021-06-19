@@ -17,8 +17,8 @@ $('#load-template').on('click', function(){
             $('#entry_content').val(data.content);
             $(".input-field label[for='entry_content']").attr("class", "active");
         },
-        error: function(){
-            alert('Error getting template content')
+        error: function(xhr){
+            alert(xhr.responseText + ', please refresh the page and try again.');
         }
     });
 });

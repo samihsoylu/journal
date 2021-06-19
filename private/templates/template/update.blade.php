@@ -7,6 +7,7 @@
     <div class="container">
         <div class="row row-align button-row">
             <div class="col s12 m10 l7 offset-m1 offset-l2">
+                @isset($template)
                 <form method="post" action="{{ $template_url }}/{{ $template->getId() }}/update/action">
                     <div class="input-field">
                         <select id="category_id_d" name="category_id">
@@ -32,6 +33,7 @@
                         @include('components/markdown-modal')
                     </div>
                 </form>
+                @endisset
             </div>
         </div>
     </div>

@@ -159,7 +159,7 @@ class Template extends AbstractController
      *
      * @return void
      */
-    public function getTemplateAsJson(): void
+    public function getTemplateAsJsonView(): void
     {
         $templateId = Sanitize::int($this->getRouteParameters()['id']);
 
@@ -168,10 +168,8 @@ class Template extends AbstractController
 
             echo json_encode($template, JSON_PRETTY_PRINT);
         } catch (UserException $e) {
-            $this->template->setVariable(
-                Notification::TYPE_ERROR,
-                $e->getMessage()
-            );
+            http_response_code(404);
+            echo $e->getMessage();
         }
     }
 }

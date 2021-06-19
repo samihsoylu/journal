@@ -34,7 +34,7 @@ $route->addRoute(['GET', 'POST'], Template::CREATE_TEMPLATE_POST_URL, 'Template@
 $route->addRoute('GET', Template::UPDATE_TEMPLATE_URL, 'Template@updateView');
 $route->addRoute(['GET', 'POST'], Template::UPDATE_TEMPLATE_POST_URL, 'Template@update');
 $route->addRoute('GET', Template::DELETE_TEMPLATE_URL, 'Template@delete');
-$route->addRoute('GET', Template::GET_TEMPLATE_DATA_AS_JSON_URL, 'Template@getTemplateAsJson');
+$route->addRoute('GET', Template::GET_TEMPLATE_DATA_AS_JSON_URL, 'Template@getTemplateAsJsonView');
 
 // Categories
 $route->addRoute('GET', Category::CATEGORIES_URL, 'Category@indexView');

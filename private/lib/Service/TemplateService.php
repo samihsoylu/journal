@@ -41,14 +41,11 @@ class TemplateService
         return $this->templateHelper->getAllTemplatesForUser($user);
     }
 
-    public function getTemplateForUser(int $templateId, int $userId, Key $key, bool $getEntryContentAsMarkup = false): TemplateDecorator
+    public function getTemplateForUser(int $templateId, int $userId, Key $key, bool $getTemplateContentAsMarkup = false): TemplateDecorator
     {
         $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 
-        $templateContent = $template->getContentAsMarkup($key);
-        if ($getEntryContentAsMarkup === false) {
-            $templateContent = $template->getContentDecrypted($key);
-        }
+        $templateContent = $template->getContentDecrypted($key);
 
         return new TemplateDecorator(
             $template->getId(),

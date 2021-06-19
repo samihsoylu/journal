@@ -48,7 +48,7 @@ class TemplateHelper
     private function ensureTemplateIsNotNull(?Template $template, int $templateId): void
     {
         if ($template === null) {
-            throw NotFoundException::entityIdNotFound(Template::class, $templateId);
+            throw NotFoundException::entityIdNotFound(Template::getClassName(), $templateId);
         }
     }
 
@@ -56,7 +56,7 @@ class TemplateHelper
     {
         if ($template->getReferencedUser()->getId() !== $userId) {
             // found template does not belong to the logged in user
-            throw NotFoundException::entityIdNotFound(Template::class, $template->getId());
+            throw NotFoundException::entityIdNotFound(Template::getClassName(), $template->getId());
         }
     }
 }

@@ -48,7 +48,7 @@ class CategoryHelper
     private function ensureCategoryIsNotNull(?Category $category, int $categoryId): void
     {
         if ($category === null) {
-            throw NotFoundException::entityIdNotFound(Category::class, $categoryId);
+            throw NotFoundException::entityIdNotFound(Category::getClassName(), $categoryId);
         }
     }
 
@@ -56,7 +56,7 @@ class CategoryHelper
     {
         if ($category->getReferencedUser()->getId() !== $userId) {
             // found category does not belong to the logged in user
-            throw NotFoundException::entityIdNotFound(Category::class, $category->getId());
+            throw NotFoundException::entityIdNotFound(Category::getClassName(), $category->getId());
         }
     }
 }

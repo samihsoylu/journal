@@ -17,7 +17,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
  *     @UniqueConstraint(name="unique_template_title",columns={"userId", "title"})
  * })
  */
-class Template extends AbstractModel implements \JsonSerializable
+class Template extends AbstractModel
 {
     /**
      * @ORM\Id
@@ -128,16 +128,5 @@ class Template extends AbstractModel implements \JsonSerializable
         $this->setContent($encryptedContent);
 
         return $this;
-    }
-
-    public function jsonSerialize(): array
-    {
-        return [
-            'id' => $this->getId(),
-            'title' => $this->getTitle(),
-            'content' => $this->getContent(),
-            'categoryId' => $this->getReferencedCategory()->getId(),
-            'categoryName' => $this->getReferencedCategory()->getName(),
-        ];
     }
 }

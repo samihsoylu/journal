@@ -2,7 +2,7 @@
 
 namespace App\Service\Model;
 
-class TemplateDecorator
+class TemplateDecorator implements \JsonSerializable
 {
     private int $id;
     private string $title;
@@ -47,5 +47,10 @@ class TemplateDecorator
     public function getContent(): string
     {
         return $this->content;
+    }
+
+    public function jsonSerialize()
+    {
+        return get_object_vars($this);
     }
 }
