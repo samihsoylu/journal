@@ -17,7 +17,6 @@ class Welcome extends AbstractController
     public function dashboard(): void
     {
         $this->redirectLoggedOutUsersToLoginPage();
-        $this->injectSessionVariableToTemplate();
 
         $service = new EntryService();
         $entries = $service->getAllEntriesForUserFromFilter(
@@ -31,6 +30,6 @@ class Welcome extends AbstractController
         );
 
         $this->template->setVariable('entries', $entries);
-        $this->template->render('dashboard');
+        $this->renderTemplate('dashboard');
     }
 }

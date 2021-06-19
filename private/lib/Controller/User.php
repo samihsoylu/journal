@@ -44,11 +44,10 @@ class User extends AbstractController
      */
     public function indexView(): void
     {
-        $this->injectSessionVariableToTemplate();
         $users = $this->service->getAllUsers();
 
         $this->template->setVariable('users', $users);
-        $this->template->render('user/all');
+        $this->renderTemplate('user/all');
     }
 
     /**
@@ -85,9 +84,8 @@ class User extends AbstractController
      */
     public function createView(): void
     {
-        $this->injectSessionVariableToTemplate();
         $this->template->setVariable('allowedPrivilegeLevels', UserModel::ALLOWED_PRIVILEGE_LEVELS);
-        $this->template->render('user/create');
+        $this->renderTemplate('user/create');
     }
 
     /**
@@ -114,14 +112,12 @@ class User extends AbstractController
      */
     public function updateView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         $targetUserId = Sanitize::int($this->getRouteParameters()['id']);
 
         $user = $this->service->getUserForLoggedInUser($this->getUserId(), $targetUserId);
 
         $this->template->setVariable('user', $user);
-        $this->template->render('user/update');
+        $this->renderTemplate('user/update');
     }
 
     /**

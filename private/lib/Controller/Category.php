@@ -45,12 +45,10 @@ class Category extends AbstractController
      */
     public function indexView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         $categories = $this->service->getAllCategoriesForUser($this->getUserId());
 
         $this->template->setVariable('categories', $categories);
-        $this->template->render('category/all');
+        $this->renderTemplate('category/all');
     }
 
     /**
@@ -83,9 +81,7 @@ class Category extends AbstractController
      */
     public function createView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
-        $this->template->render('category/create');
+        $this->renderTemplate('category/create');
     }
 
     /**
@@ -119,8 +115,6 @@ class Category extends AbstractController
      */
     public function updateView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         $categoryId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
@@ -131,7 +125,7 @@ class Category extends AbstractController
             $this->setNotification(Notification::TYPE_ERROR, $e->getMessage());
         }
 
-        $this->template->render('category/update');
+        $this->renderTemplate('category/update');
     }
 
     /**
@@ -163,8 +157,6 @@ class Category extends AbstractController
      */
     public function deleteView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::CATEGORIES_URL);
     }

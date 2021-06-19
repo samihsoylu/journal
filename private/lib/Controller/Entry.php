@@ -94,12 +94,10 @@ class Entry extends AbstractController
 
     public function indexView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
 
         $this->template->setVariable('categories', $categories);
-        $this->template->render('entry/all');
+        $this->renderTemplate('entry/all');
     }
 
     /**
@@ -109,8 +107,6 @@ class Entry extends AbstractController
      */
     public function entryView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         $entryId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
@@ -124,7 +120,7 @@ class Entry extends AbstractController
             );
         }
 
-        $this->template->render('entry/view');
+        $this->renderTemplate('entry/view');
     }
 
     /**
@@ -158,12 +154,10 @@ class Entry extends AbstractController
      */
     public function createView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
         $this->template->setVariable('categories', $categories);
 
-        $this->template->render('entry/create');
+        $this->renderTemplate('entry/create');
     }
 
     /**
@@ -173,8 +167,6 @@ class Entry extends AbstractController
      */
     public function update(): void
     {
-        $this->template->setVariable('post', $_POST);
-
         /** @see EntryValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
@@ -207,8 +199,6 @@ class Entry extends AbstractController
      */
     public function updateView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         $entryId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
@@ -226,7 +216,7 @@ class Entry extends AbstractController
             );
         }
 
-        $this->template->render('entry/update');
+        $this->renderTemplate('entry/update');
     }
 
     /**
@@ -258,8 +248,6 @@ class Entry extends AbstractController
      */
     public function deleteView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::ENTRIES_URL);
     }
