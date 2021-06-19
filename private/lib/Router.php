@@ -4,6 +4,7 @@ namespace App;
 
 use App\Controller\Error;
 use App\Exception\UserException;
+use App\Exception\UserException\NotFoundException;
 use App\Utility\ExceptionHandler;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
@@ -85,10 +86,6 @@ class Router
     private static function handleException(\Throwable $exception, object $controller, string $methodName): void
     {
         $handleException = new ExceptionHandler($exception);
-
-        if ($exception instanceof UserException\NotFoundException) {
-            $handleException->renderNotFoundPage();
-        }
 
         if ($exception instanceof UserException) {
             $handleException->userException($controller, $methodName);

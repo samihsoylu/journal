@@ -116,8 +116,10 @@ class EntryService
     {
         $entry = $this->entryHelper->getEntryForUser($entryId, $userId);
 
+        // gets the entry content parsed to html
         $entryContent = $entry->getContentAsMarkup($key);
         if ($getEntryContentAsMarkup === false) {
+            // gets the entry content as raw
             $entryContent = $entry->getContentDecrypted($key);
         }
 

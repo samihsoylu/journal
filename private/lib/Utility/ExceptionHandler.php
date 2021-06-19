@@ -40,13 +40,6 @@ class ExceptionHandler
         $this->notifier->set(Notification::TYPE_ERROR, $message);
     }
 
-    public function renderNotFoundPage(): void
-    {
-        $this->setNotification($this->getException()->getMessage());
-
-        $this->getTemplatingEngine()->render('errors/404');
-    }
-
     /**
      * User related errors are handled by this method. This method makes use of the rule that an action must have a view
      * to display a nice error message to the user. This is why every action has an implemented "View" method that
@@ -92,7 +85,7 @@ class ExceptionHandler
         $timestamp = date('d-m-Y H:i:s');
 
         $contents = file_get_contents($exceptionsFile);
-        $contents .= "\n[{$timestamp}] {$this->getException()}\n";
+        $contents .= "\n[{$timestamp}] {$this->getException()->getTraceAsString()}\n";
 
         file_put_contents($exceptionsFile, $contents);
 
