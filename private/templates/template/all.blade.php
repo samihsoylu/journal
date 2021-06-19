@@ -13,7 +13,6 @@
                     <div class="card">
                         <div class="card-content">
                             <span class="card-title">{{ $template->getTitle() }}</span>
-                            <p>{{ $template->getContent() }}</p>
                         </div>
                     </div>
                 </a>
