@@ -24,6 +24,8 @@ class Template extends AbstractController
 
     public const DELETE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/delete/{antiCsrfToken}';
 
+    public const GET_TEMPLATE_DATA_AS_JSON_URL = self::VIEW_TEMPLATE_URL . '/ajax';
+
     private TemplateService $service;
     private TemplateValidator $validator;
     private CategoryService $categoryService;
@@ -63,9 +65,7 @@ class Template extends AbstractController
 
         $this->setNotification(Notification::TYPE_SUCCESS, "Template {$templateTitle} has been created");
 
-        if (isset($_POST['redirectToTemplatesOverview'])) {
-            Redirect::to(self::TEMPLATES_URL);
-        }
+
         Redirect::to(self::TEMPLATES_URL);
     }
 
@@ -153,5 +153,22 @@ class Template extends AbstractController
 
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::TEMPLATES_URL);
+    }
+
+    public function getTemplateAsJson(): void
+    {
+        $templateId = Sanitize::int($this->getRouteParameters()['id']);
+
+        try {
+            $template = $this->service->getTemplateForUser($templateId, $this->getUserId());
+
+            echo json_encode($template, JSON_PRETTY_PRINT);
+            exit();
+        } catch (UserException $e) {
+            $this->template->setVariable(
+                Notification::TYPE_ERROR,
+                $e->getMessage()
+            );
+        }
     }
 }
