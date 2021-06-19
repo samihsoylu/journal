@@ -197,7 +197,7 @@ class CategoryServiceTest extends TestCase
             ->method('save');
 
         $service = new CategoryService();
-        $service->createCategory($userId, 'Random title', 'Random description');
+        $service->createCategory($userId, 'Random name', 'Random description');
     }
 
     /**

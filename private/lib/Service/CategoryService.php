@@ -44,13 +44,16 @@ class CategoryService
         return $this->categoryHelper->getCategoryForUser($categoryId, $userId);
     }
 
-    public function createCategory(int $userId, string $categoryTitle, string $categoryDescription): void
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function createCategory(int $userId, string $categoryName, string $categoryDescription): void
     {
         $user = $this->userHelper->getUserById($userId);
 
         $category = new CategoryModel();
         $category->setReferencedUser($user);
-        $category->setName($categoryTitle);
+        $category->setName($categoryName);
         $category->setDescription($categoryDescription);
 
         $this->repository->queue($category);
@@ -58,7 +61,7 @@ class CategoryService
         try {
             $this->repository->save();
         } catch (UniqueConstraintViolationException $e) {
-            throw InvalidArgumentException::categoryAlreadyExists($categoryTitle);
+            throw InvalidArgumentException::categoryAlreadyExists($categoryName);
         }
     }
 
@@ -78,7 +81,7 @@ class CategoryService
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
         // get associated entries and queue for deleting
-        $entries = $this->entryHelper->getEntiresForUserByCategoryId($userId, $categoryId);
+        $entries = $this->entryHelper->getEntriesForUserByCategoryId($userId, $categoryId);
         foreach ($entries as $entry) {
             $this->repository->remove($entry);
         }

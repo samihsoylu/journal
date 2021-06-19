@@ -138,7 +138,7 @@ class Template
         // Remove sub pages
         $activePage = explode('/', $activePage)[1];
 
-        // Remove get request
+        // Remove get request parameters
         $activePage = explode('?', $activePage)[0];
 
         return $activePage;

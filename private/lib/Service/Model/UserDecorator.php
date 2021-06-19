@@ -18,8 +18,9 @@ class UserDecorator
     private bool $isReadOnly;
     private int $totalCategories;
     private int $totalEntries;
+    private int $totalTemplates;
 
-    public function __construct(User $user, bool $isReadOnly, int $totalCategories, int $totalEntries)
+    public function __construct(User $user, bool $isReadOnly, int $totalCategories, int $totalEntries, int $totalTemplates)
     {
         $this->id                   = $user->getId();
         $this->username             = $user->getUsername();
@@ -31,6 +32,7 @@ class UserDecorator
         $this->isReadOnly           = $isReadOnly;
         $this->totalCategories      = $totalCategories;
         $this->totalEntries         = $totalEntries;
+        $this->totalTemplates       = $totalTemplates;
     }
 
     public function getId(): int
@@ -76,5 +78,10 @@ class UserDecorator
     public function getTotalEntries(): int
     {
         return $this->totalEntries;
+    }
+
+    public function getTotalTemplates(): int
+    {
+        return $this->totalTemplates;
     }
 }
