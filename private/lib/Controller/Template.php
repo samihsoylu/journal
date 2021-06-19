@@ -45,11 +45,10 @@ class Template extends AbstractController
 
     public function indexView(): void
     {
-        $this->injectSessionVariableToTemplate();
         $templates = $this->service->getAllTemplatesForUser($this->getUserId());
 
         $this->template->setVariable('templates', $templates);
-        $this->template->render('template/all');
+        $this->renderTemplate('template/all');
     }
 
     public function create(): void
@@ -65,17 +64,15 @@ class Template extends AbstractController
 
         $this->setNotification(Notification::TYPE_SUCCESS, "Template {$templateTitle} has been created");
 
-
         Redirect::to(self::TEMPLATES_URL);
     }
 
     public function createView(): void
     {
-        $this->injectSessionVariableToTemplate();
         $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
 
         $this->template->setVariable('categories', $categories);
-        $this->template->render('template/create');
+        $this->renderTemplate('template/create');
     }
 
     public function update(): void
@@ -109,8 +106,6 @@ class Template extends AbstractController
 
     public function updateView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         $templateId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
@@ -128,7 +123,7 @@ class Template extends AbstractController
             );
         }
 
-        $this->template->render('template/update');
+        $this->renderTemplate('template/update');
     }
 
     public function delete(): void
