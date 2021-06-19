@@ -2,6 +2,8 @@
 
 namespace App\Database\Model;
 
+use App\Utility\Encryptor;
+use Defuse\Crypto\Key;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
@@ -97,9 +99,33 @@ class Template extends AbstractModel implements \JsonSerializable
         return $this->content;
     }
 
+    public function getContentAsMarkup(Key $encryptionKey): string
+    {
+        $parser = new \Parsedown();
+        $parser->setSafeMode(true);
+
+        return $parser->text($this->getContentDecrypted($encryptionKey));
+    }
+
     public function setContent(string $content): self
     {
         $this->content = $content;
+
+        return $this;
+    }
+
+    public function getContentDecrypted(Key $encryptionKey): string
+    {
+        $encryptor = new Encryptor();
+        return $encryptor->decrypt($this->content, $encryptionKey);
+    }
+
+    public function setContentAndEncrypt(string $content, Key $encryptionKey): self
+    {
+        $encryptor = new Encryptor();
+        $encryptedContent = $encryptor->encrypt($content, $encryptionKey);
+
+        $this->setContent($encryptedContent);
 
         return $this;
     }

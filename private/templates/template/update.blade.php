@@ -11,7 +11,7 @@
                     <div class="input-field">
                         <select id="category_id_d" name="category_id">
                             @foreach ($categories as $category)
-                                <option value="{{ $category->getId() }}" @if(isset($post['category_id']) && (int)$post['category_id'] === $category->getId()) selected @elseif(($template->getReferencedCategory())->getId() === $category->getId()) selected @endif>{{ $category->getName() }}</option>
+                                <option value="{{ $category->getId() }}" @if(isset($post['category_id']) && (int)$post['category_id'] === $category->getId()) selected @elseif($template->getCategoryId() === $category->getId()) selected @endif>{{ $category->getName() }}</option>
                             @endforeach
                         </select>
                         <label for="category_id">Category</label>

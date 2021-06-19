@@ -17,7 +17,7 @@
                         <label for="template_id">Template</label>
                     </div>
                     <div>
-                        <button id = "load-template" class="btn btn-primary" type="button"><i class="material-icons">update</i> Load</button>
+                        <button id="load-template" class="btn btn-primary" type="button"><i class="material-icons">update</i> Load</button>
                     </div>
                     <div class="input-field">
                         <select id="category_id_d" name="category_id">

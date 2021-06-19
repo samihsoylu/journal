@@ -37,7 +37,7 @@ class Template extends AbstractController
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->service = new TemplateService();
+        $this->service   = new TemplateService();
         $this->validator = new TemplateValidator($_POST, $_GET);
         
         $this->categoryService = new CategoryService();
@@ -57,11 +57,11 @@ class Template extends AbstractController
         /** @see TemplateValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $categoryId   = Sanitize::int($_POST['category_id']);
+        $categoryId      = Sanitize::int($_POST['category_id']);
         $templateTitle   = Sanitize::string($_POST['template_title'], 'strip|capitalize');
         $templateContent = Sanitize::string($_POST['template_content'], 'trim');
 
-        $templateId = $this->service->createTemplate($this->getUserId(), $categoryId, $templateTitle, $templateContent);
+        $this->service->createTemplate($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $templateTitle, $templateContent);
 
         $this->setNotification(Notification::TYPE_SUCCESS, "Template {$templateTitle} has been created");
 
@@ -92,6 +92,7 @@ class Template extends AbstractController
 
         $this->service->updateTemplate(
             $this->getUserId(),
+            $this->getUserEncryptionKey(),
             $categoryId,
             $templateId,
             $templateTitle,
@@ -114,7 +115,7 @@ class Template extends AbstractController
 
         try {
             $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
-            $template = $this->service->getTemplateForUser($templateId, $this->getUserId());
+            $template = $this->service->getTemplateForUser($templateId, $this->getUserId(), $this->getUserEncryptionKey());
 
             $this->template->setVariables([
                 'template' => $template,
@@ -149,21 +150,23 @@ class Template extends AbstractController
 
     public function deleteView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::TEMPLATES_URL);
     }
 
+    /**
+     * Displays a JSON output of the queried template id. Used in AJAX call in create entry page
+     *
+     * @return void
+     */
     public function getTemplateAsJson(): void
     {
         $templateId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
-            $template = $this->service->getTemplateForUser($templateId, $this->getUserId());
+            $template = $this->service->getTemplateForUser($templateId, $this->getUserId(), $this->getUserEncryptionKey());
 
             echo json_encode($template, JSON_PRETTY_PRINT);
-            exit();
         } catch (UserException $e) {
             $this->template->setVariable(
                 Notification::TYPE_ERROR,

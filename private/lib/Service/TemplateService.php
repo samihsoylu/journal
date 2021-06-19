@@ -2,13 +2,15 @@
 
 namespace App\Service;
 
-use App\Database\Model\Template as TemplateModel;
+use App\Database\Model\Template;
 use App\Database\Repository\TemplateRepository;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserHelper;
+use App\Service\Model\TemplateDecorator;
 use App\Utility\Registry;
+use Defuse\Crypto\Key;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class TemplateService
@@ -22,7 +24,7 @@ class TemplateService
     {
         /** @var TemplateRepository $repository */
         $repository = Registry::get(TemplateRepository::class);
-        $this->repository    = $repository;
+        $this->repository     = $repository;
 
         $this->templateHelper = new TemplateHelper();
         $this->userHelper     = new UserHelper();
@@ -30,7 +32,7 @@ class TemplateService
     }
 
     /**
-     * @return TemplateModel[]
+     * @return Template[]
      */
     public function getAllTemplatesForUser(int $userId): array
     {
@@ -39,22 +41,35 @@ class TemplateService
         return $this->templateHelper->getAllTemplatesForUser($user);
     }
 
-    public function getTemplateForUser(int $templateId, int $userId): TemplateModel
+    public function getTemplateForUser(int $templateId, int $userId, Key $key, bool $getEntryContentAsMarkup = false): TemplateDecorator
     {
-        return $this->templateHelper->getTemplateForUser($templateId, $userId);
+        $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
+
+        $templateContent = $template->getContentAsMarkup($key);
+        if ($getEntryContentAsMarkup === false) {
+            $templateContent = $template->getContentDecrypted($key);
+        }
+
+        return new TemplateDecorator(
+            $template->getId(),
+            $template->getTitle(),
+            $template->getReferencedCategory()->getId(),
+            $template->getReferencedCategory()->getName(),
+            $templateContent,
+        );
     }
 
-    public function createTemplate(int $userId, int $categoryId, string $templateTitle, string $templateContent): int
+    public function createTemplate(int $userId, Key $encryptionKey, int $categoryId, string $templateTitle, string $templateContent)
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
         $user = $this->userHelper->getUserById($userId);
 
-        $template = new TemplateModel();
-        $template->setReferencedUser($user);
-        $template->setReferencedCategory($category);
-        $template->setTitle($templateTitle);
-        $template->setContent($templateContent);
+        $template = new Template();
+        $template->setReferencedUser($user)
+                 ->setReferencedCategory($category)
+                 ->setTitle($templateTitle)
+                 ->setContentAndEncrypt($templateContent, $encryptionKey);
 
         $this->repository->queue($template);
 
@@ -63,17 +78,15 @@ class TemplateService
         } catch (UniqueConstraintViolationException $e) {
             throw InvalidArgumentException::templateAlreadyExists($templateTitle);
         }
-
-        return $template->getId();
     }
 
-    public function updateTemplate(int $userId, int $categoryId, int $templateId, string $templateTitle, string $templateContent): void
+    public function updateTemplate(int $userId, Key $encryptionKey, int $categoryId, int $templateId, string $templateTitle, string $templateContent): void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
         $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 
         $template->setTitle($templateTitle)
-                 ->setContent($templateContent)
+                 ->setContentAndEncrypt($templateContent, $encryptionKey)
                  ->setReferencedCategory($category);
 
         $this->repository->queue($template);
