@@ -3,7 +3,6 @@
 namespace App\Service\Helper;
 
 use App\Database\Model\Entry;
-use App\Database\Model\Entry as EntryModel;
 use App\Database\Model\User;
 use App\Database\Repository\EntryRepository;
 use App\Exception\UserException\NotFoundException;
@@ -29,9 +28,9 @@ class EntryHelper
         return $this->repository->findByUser($user);
     }
 
-    public function getEntryForUser(int $entryId, int $userId): EntryModel
+    public function getEntryForUser(int $entryId, int $userId): Entry
     {
-        /** @var EntryModel $entry */
+        /** @var Entry $entry */
         $entry = $this->repository->getById($entryId);
         $this->ensureEntryIsNotNull($entry, $entryId);
         $this->ensureUserOwnsEntry($entry, $userId);
@@ -50,9 +49,9 @@ class EntryHelper
     }
 
     /**
-     * @return EntryModel[]
+     * @return Entry[]
      */
-    public function getEntiresForUserByCategoryId(int $userId, int $categoryId): array
+    public function getEntriesForUserByCategoryId(int $userId, int $categoryId): array
     {
         return $this->repository->findByUserIdAndCategoryId($userId, $categoryId);
     }
@@ -61,14 +60,14 @@ class EntryHelper
     {
         if ($entry->getReferencedUser()->getId() !== $userId) {
             // Found entry does not belong to the logged in user
-            throw NotFoundException::entityIdNotFound('Entry', $entry->getId());
+            throw NotFoundException::entityIdNotFound(Entry::getClassName(), $entry->getId());
         }
     }
 
     private function ensureEntryIsNotNull(?Entry $entry, $entryId): void
     {
         if ($entry === null) {
-            throw NotFoundException::entityIdNotFound('Entry', $entryId);
+            throw NotFoundException::entityIdNotFound(Entry::getClassName(), $entryId);
         }
     }
 }

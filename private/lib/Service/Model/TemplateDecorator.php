@@ -2,29 +2,26 @@
 
 namespace App\Service\Model;
 
-class EntryDecorator
+class TemplateDecorator implements \JsonSerializable
 {
     private int $id;
     private string $title;
     private int $categoryId;
     private string $categoryName;
     private string $content;
-    private string $getLastUpdatedTimestamp;
 
     public function __construct(
         int $id,
         string $title,
         int $categoryId,
         string $categoryName,
-        string $content,
-        string $getLastUpdatedTimestamp
+        string $content
     ) {
-        $this->id                      = $id;
-        $this->title                   = $title;
-        $this->categoryId              = $categoryId;
-        $this->categoryName            = $categoryName;
-        $this->content                 = $content;
-        $this->getLastUpdatedTimestamp = $getLastUpdatedTimestamp;
+        $this->id           = $id;
+        $this->title        = $title;
+        $this->categoryId   = $categoryId;
+        $this->categoryName = $categoryName;
+        $this->content      = $content;
     }
 
     public function getId(): int
@@ -37,9 +34,6 @@ class EntryDecorator
         return $this->title;
     }
 
-    /**
-     * @return int
-     */
     public function getCategoryId(): int
     {
         return $this->categoryId;
@@ -55,8 +49,8 @@ class EntryDecorator
         return $this->content;
     }
 
-    public function getLastUpdatedTimestamp(): string
+    public function jsonSerialize()
     {
-        return $this->getLastUpdatedTimestamp;
+        return get_object_vars($this);
     }
 }

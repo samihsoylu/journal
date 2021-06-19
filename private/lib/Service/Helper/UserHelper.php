@@ -2,7 +2,7 @@
 
 namespace App\Service\Helper;
 
-use App\Database\Model\User as UserModel;
+use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
 use App\Exception\UserException\NotFoundException;
 use App\Utility\Registry;
@@ -21,7 +21,7 @@ class UserHelper
     /**
      * Get all registered users from the database
      *
-     * @return UserModel[]
+     * @return User[]
      */
     public function getAllUsers(): array
     {
@@ -31,14 +31,14 @@ class UserHelper
     /**
      * Finds a user based on a provided user id
      *
-     * @return UserModel
+     * @return User
      */
-    public function getUserById(int $userId): UserModel
+    public function getUserById(int $userId): User
     {
-        /** @var UserModel $user */
+        /** @var User $user */
         $user = $this->repository->getById($userId);
         if ($user === null) {
-            throw NotFoundException::entityIdNotFound('User', $userId);
+            throw NotFoundException::entityIdNotFound(User::getClassName(), $userId);
         }
 
         return $user;

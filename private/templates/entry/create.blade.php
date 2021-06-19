@@ -9,6 +9,17 @@
             <div class="col s12 m10 l7 offset-m1 offset-l2">
                 <form method="post" action="{{ $create_entry_post_url }}">
                     <div class="input-field">
+                        <select id="template_id_d" name="template_id">
+                            @foreach ($templates as $template)
+                                <option value="{{ $template->getId() }}">{{ $template->getTitle() }}</option>
+                            @endforeach
+                        </select>
+                        <label for="template_id">Template</label>
+                    </div>
+                    <div>
+                        <button id="load-template" class="btn btn-primary" type="button"><i class="material-icons">update</i> Load</button>
+                    </div>
+                    <div class="input-field">
                         <select id="category_id_d" name="category_id">
                             @foreach ($categories as $category)
                             <option value="{{ $category->getId() }}">{{ $category->getName() }}</option>
@@ -37,4 +48,5 @@
 
 @section('jquery-scripts')
     @include('components/confirm-reload')
+    <script src="{{ $assets_url }}/js/entry.js"></script>
 @endsection

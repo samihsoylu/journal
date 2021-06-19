@@ -75,4 +75,9 @@ abstract class AbstractModel implements ModelInterface
 
         return $date->format('d M Y H:i');
     }
+
+    public static function getClassName(): string
+    {
+        return str_replace(__NAMESPACE__ . '\\', '', static::class);
+    }
 }

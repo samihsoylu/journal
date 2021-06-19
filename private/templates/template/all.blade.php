@@ -1,6 +1,6 @@
 @extends('base')
 
-@section('pageTitle', 'Categories')
+@section('pageTitle', 'Templates')
 
 @section('content')
     @include('components/header')
@@ -8,12 +8,11 @@
         @include('components/create-buttons')
         <div class="row row-align">
             <div class="col s12">
-            @foreach ($categories as $category)
-                <a href="{{ $category_url }}/{{ $category->getId() }}/update">
+            @foreach ($templates as $template)
+                <a href="{{ $template_url }}/{{ $template->getId() }}/update">
                     <div class="card">
                         <div class="card-content">
-                            <span class="card-title">{{ $category->getName() }}</span>
-                            <p>{{ $category->getDescription() }}</p>
+                            <span class="card-title">{{ $template->getTitle() }}</span>
                         </div>
                     </div>
                 </a>

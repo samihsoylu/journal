@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Exception\UserException;
 use App\Service\CategoryService;
 use App\Service\EntryService;
+use App\Service\TemplateService;
 use App\Service\WidgetService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
@@ -29,6 +30,7 @@ class Entry extends AbstractController
     private EntryValidator $validator;
     private CategoryService $categoryService;
     private WidgetService $widgetService;
+    private TemplateService $templateService;
 
     public function __construct(array $routeParameters)
     {
@@ -42,6 +44,7 @@ class Entry extends AbstractController
 
         $this->categoryService = new CategoryService();
         $this->widgetService = new WidgetService();
+        $this->templateService = new TemplateService();
     }
 
     /**
@@ -160,8 +163,13 @@ class Entry extends AbstractController
     {
         $this->injectSessionVariableToTemplate();
 
+        $templates = $this->templateService->getAllTemplatesForUser($this->getUserId());
         $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
-        $this->template->setVariable('categories', $categories);
+
+        $this->template->setVariables([
+            'templates' => $templates,
+            'categories' => $categories,
+        ]);
 
         $this->template->render('entry/create');
     }
@@ -212,11 +220,13 @@ class Entry extends AbstractController
         $entryId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
+            $templates = $this->templateService->getAllTemplatesForUser($this->getUserId());
             $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
-            $decorator = $this->service->getEntryForUser($entryId, $this->getUserId(), $this->getUserEncryptionKey());
+            $entryDecorator = $this->service->getEntryForUser($entryId, $this->getUserId(), $this->getUserEncryptionKey());
 
             $this->template->setVariables([
-                'entry' => $decorator,
+                'templates' => $templates,
+                'entry' => $entryDecorator,
                 'categories' => $categories,
             ]);
         } catch (UserException $e) {

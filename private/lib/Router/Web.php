@@ -4,6 +4,7 @@ use App\Controller\Account;
 use App\Controller\Authentication;
 use App\Controller\Category;
 use App\Controller\Entry;
+use App\Controller\Template;
 use App\Controller\User;
 use App\Controller\Welcome;
 
@@ -25,6 +26,15 @@ $route->addRoute(['GET', 'POST'], Entry::CREATE_ENTRY_POST_URL, 'Entry@create');
 $route->addRoute('GET', Entry::UPDATE_ENTRY_URL, 'Entry@updateView');
 $route->addRoute(['GET', 'POST'], Entry::UPDATE_ENTRY_POST_URL, 'Entry@update');
 $route->addRoute('GET', Entry::DELETE_ENTRY_URL, 'Entry@delete');
+
+// Template
+$route->addRoute('GET', Template::TEMPLATES_URL, 'Template@indexView');
+$route->addRoute('GET', Template::CREATE_TEMPLATE_URL, 'Template@createView');
+$route->addRoute(['GET', 'POST'], Template::CREATE_TEMPLATE_POST_URL, 'Template@create');
+$route->addRoute('GET', Template::UPDATE_TEMPLATE_URL, 'Template@updateView');
+$route->addRoute(['GET', 'POST'], Template::UPDATE_TEMPLATE_POST_URL, 'Template@update');
+$route->addRoute('GET', Template::DELETE_TEMPLATE_URL, 'Template@delete');
+$route->addRoute('GET', Template::GET_TEMPLATE_DATA_AS_JSON_URL, 'Template@getTemplateAsJsonView');
 
 // Categories
 $route->addRoute('GET', Category::CATEGORIES_URL, 'Category@indexView');
