@@ -37,7 +37,7 @@
                         <p class="small-text">Last updated: {{ $user->getLastUpdatedTimestamp() }}</p>
 
                         <p class="small-text title"><b>Usage Statistics</b></p>
-                        <p class="small-text context">Entries: {{ $user->getTotalEntries() }} <br />Categories: {{ $user->getTotalCategories() }}</p>
+                        <p class="small-text context">Entries: {{ $user->getTotalEntries() }} <br />Categories: {{ $user->getTotalCategories() }} <br />Templates: {{ $user->getTotalTemplates() }}</p>
 
                         <!-- javascript in the back button ensures that the filters are not lost when you go back to the users page -->
                         <button class="btn btn-default" type="button" onclick="window.location.href='{{ $users_url }}'"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
