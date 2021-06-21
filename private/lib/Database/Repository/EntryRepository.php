@@ -53,7 +53,7 @@ class EntryRepository extends AbstractRepository
     ): array {
         $qb = $this->db->createQueryBuilder();
 
-        $qb->select('e');
+        $qb->select('e')->distinct();
 
         $this->addParametersToQueryBuilderSearchCategoryStartEndDate(
             $qb,
@@ -83,7 +83,7 @@ class EntryRepository extends AbstractRepository
     ): int {
         $qb = $this->db->createQueryBuilder();
 
-        $qb->select('count(e.id)');
+        $qb->select('count(distinct e.id)');
 
         $this->addParametersToQueryBuilderSearchCategoryStartEndDate(
             $qb,
