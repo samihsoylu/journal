@@ -43,7 +43,7 @@
                             <p class="checkbox">
                                 <label>
                                     <input type="checkbox" name="quickAddEntriesBoxEntriesOverview" class="filled-in" @isset($enabledWidgets['quickAddEntriesBoxEntriesOverview']) checked="checked" @endisset />
-                                    <span>Enable quick add box in entries overview page (not available on mobile view)</span>
+                                    <span>Enable quick add box in <a href="{{ $entries_url }}">entries overview page</a> (not available on mobile view)</span>
                                 </label>
                             </p>
                             <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />

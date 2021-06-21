@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Database\Model\Category;
+use App\Database\Model\Template;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
 use App\Service\Helper\TemplateHelper;
@@ -220,7 +221,7 @@ class UserService
         $this->repository->queue($personal);
 
         $diet = new Category();
-        $diet->setName('Diet');
+        $diet->setName('Food');
         $diet->setDescription('Food journaling for reaching healthy eating goals');
         $diet->setReferencedUser($user);
         $this->repository->queue($diet);

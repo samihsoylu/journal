@@ -23,7 +23,7 @@
                                     <span class="card-title">Log In</span>
                                     <form action="{{ $login_post_url }}" method="post">
                                         <div class="input-field ">
-                                            <input id="username" type="text" class="validate" name="username" required />
+                                            <input id="username" type="text" class="validate" name="username" @isset($post['username']) value="{{ $post['username'] }}" @endisset required />
                                             <label for="username">Username</label>
                                         </div>
                                         <div class="input-field">
