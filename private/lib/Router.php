@@ -89,6 +89,7 @@ class Router
 
         if ($exception instanceof UserException) {
             $handleException->userException($controller, $methodName);
+            return;
         }
 
         $handleException->genericException();

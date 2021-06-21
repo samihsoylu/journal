@@ -85,7 +85,7 @@ class ExceptionHandler
         $timestamp = date('d-m-Y H:i:s');
 
         $contents = file_get_contents($exceptionsFile);
-        $contents .= "\n[{$timestamp}] {$this->getException()->getTraceAsString()}\n";
+        $contents .= "\n[{$timestamp}] {$this->getException()} \n";
 
         file_put_contents($exceptionsFile, $contents);
 
