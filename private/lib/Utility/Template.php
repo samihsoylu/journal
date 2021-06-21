@@ -153,6 +153,7 @@ class Template
     {
         $struct = [
             'site_title'  => SITE_TITLE,
+            'base_url'    => BASE_URL,
             'assets_url'  => ASSETS_URL,
             'active_page' => $this->getActivePage(),
         ];
