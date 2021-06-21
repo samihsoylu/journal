@@ -85,6 +85,12 @@ class Template
             $this->setVariable($type, $message);
         }
 
+        if (count($_POST) > 0) {
+            // This condition is likely true when there is a validation error on the website.
+            // Form is submitted -> UserException is caught -> then the same form page is rendered with a error notification
+            $this->setVariable('post', $_POST);
+        }
+
         echo $this->blade->render($templateName, $this->variables);
     }
 

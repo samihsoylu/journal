@@ -2,8 +2,9 @@
 
 namespace App;
 
-use App\Controller\ErrorPage;
+use App\Controller\Error;
 use App\Exception\UserException;
+use App\Exception\UserException\NotFoundException;
 use App\Utility\ExceptionHandler;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
@@ -37,7 +38,7 @@ class Router
 
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
-        $errorController = new ErrorPage([]);
+        $errorController = new Error([]);
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
                 // ... 404 Not Found, route does not exist
@@ -74,18 +75,22 @@ class Router
 
                 try {
                     $controller->{$methodName}();
-                } catch (UserException $e) {
-                    ExceptionHandler::userException($e->getMessage(), $controller, $methodName);
-                } catch (\Throwable|\Exception $e) {
-                    if (!DEBUG_MODE) {
-                        http_response_code(500);
-                        $errorController->internalError();
-                    }
-
-                    ExceptionHandler::genericException($e);
+                } catch (\Throwable|\Exception $exception) {
+                    self::handleException($exception, $controller, $methodName);
                 }
 
                 break;
         } // end of switch
+    }
+
+    private static function handleException(\Throwable $exception, object $controller, string $methodName): void
+    {
+        $handleException = new ExceptionHandler($exception);
+
+        if ($exception instanceof UserException) {
+            $handleException->userException($controller, $methodName);
+        }
+
+        $handleException->genericException();
     }
 }

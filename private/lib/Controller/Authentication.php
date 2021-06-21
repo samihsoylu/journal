@@ -65,7 +65,7 @@ class Authentication extends AbstractController
     {
         $this->redirectLoggedInUsersToDashboard();
 
-        $this->template->render('authenticate/login');
+        $this->renderTemplate('authenticate/login');
     }
 
     /**

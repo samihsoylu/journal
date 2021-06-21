@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-class ErrorPage extends AbstractController
+class Error extends AbstractController
 {
     public function __construct(array $routeParameters)
     {
@@ -11,16 +11,11 @@ class ErrorPage extends AbstractController
 
     public function notFound(): void
     {
-        $this->template->render('errors/404');
+        $this->renderTemplate('errors/404');
     }
 
     public function methodNotAllowed(): void
     {
-        $this->template->render('errors/405');
-    }
-
-    public function internalError(): void
-    {
-        $this->template->render('errors/500');
+        $this->renderTemplate('errors/405');
     }
 }

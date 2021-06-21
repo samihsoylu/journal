@@ -40,15 +40,13 @@ class Account extends AbstractController
      */
     public function indexView(): void
     {
-        $this->injectSessionVariableToTemplate();
-
         $user = $this->userService->getUser($this->getUserId());
         $this->template->setVariable('user', $user);
 
         $enabledWidgets = $this->widgetService->getEnabledWidgetsForUser($this->getUserId());
         $this->template->setVariable('enabledWidgets', $enabledWidgets);
 
-        $this->template->render('account/index');
+        $this->renderTemplate('account/index');
     }
 
     /**
