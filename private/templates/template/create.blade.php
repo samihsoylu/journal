@@ -14,7 +14,7 @@
                             <option value="{{ $category->getId() }}">{{ $category->getName() }}</option>
                             @endforeach
                         </select>
-                        <label for="category_id">Category</label>
+                        <label for="category_id">Default entry category</label>
                     </div>
                     <div class="input-field">
                         <input id="template_title" name="template_title" type="text" class="validate" @isset($post['template_title']) value="{{ $post['template_title'] }}" @endisset  required />
@@ -22,7 +22,7 @@
                     </div>
                     <div class="input-field">
                         <textarea id="template_content" name="template_content" style="min-height:250px;" class="materialize-textarea validate" required>@isset($post['template_content']) {{ $post['template_content'] }} @endisset</textarea>
-                        <label for="template_content">Template content</label>
+                        <label for="template_content">Default entry content</label>
                     </div>
                     <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
                     <div>

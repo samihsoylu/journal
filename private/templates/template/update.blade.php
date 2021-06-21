@@ -15,7 +15,7 @@
                                 <option value="{{ $category->getId() }}" @if(isset($post['category_id']) && (int)$post['category_id'] === $category->getId()) selected @elseif($template->getCategoryId() === $category->getId()) selected @endif>{{ $category->getName() }}</option>
                             @endforeach
                         </select>
-                        <label for="category_id">Category</label>
+                        <label for="category_id">Default entry category</label>
                     </div>
                     <div class="input-field">
                         <input id="template_title" name="template_title" type="text" class="validate" @if(isset($post['template_title'])) value="{{ $post['template_title'] }}" @else value="{{ $template->getTitle() }}" @endif  required />
@@ -23,7 +23,7 @@
                     </div>
                     <div class="input-field">
                         <textarea id="template_content" name="template_content" style="min-height:250px;" class="materialize-textarea validate" required>@if(isset($post['template_content'])){{ $post['template_content'] }}@else{{ $template->getContent() }}@endif</textarea>
-                        <label for="template_content">Template content</label>
+                        <label for="template_content">Default entry content</label>
                     </div>
                     <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
                     <div>

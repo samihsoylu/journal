@@ -12,8 +12,6 @@ $('#load-template').on('click', function(){
             select.formSelect();
 
             // Update values in fields
-            $('#entry_title').val(data.title);
-            $(".input-field label[for='entry_title']").attr("class", "active");
             $('#entry_content').val(data.content);
             $(".input-field label[for='entry_content']").attr("class", "active");
         },
