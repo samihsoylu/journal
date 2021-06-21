@@ -15,7 +15,7 @@
                                     <option value="{{ $template->getId() }}">{{ $template->getTitle() }}</option>
                                 @endforeach
                             </select>
-                            <label for="template_id">Template</label>
+                            <label for="template_id">Load a template</label>
                         </div>
                         <div class="col s3">
                             <button id="load-template" class="btn btn-primary mt-30" type="button"><i class="material-icons">update</i> Load</button>
