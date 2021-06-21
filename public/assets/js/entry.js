@@ -1,6 +1,6 @@
 $('#load-template').on('click', function(){
     var $template_id = $('#template_id_d option:selected').val();
-    var $ajax_url = '/template/' + $template_id + '/ajax';
+    var $ajax_url = BASE_URL + '/template/' + $template_id + '/ajax';
     var select = $('#category_id_d');
 
     $.ajax({

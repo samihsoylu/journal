@@ -15,6 +15,9 @@
 
         <script src="{{ $assets_url }}/js/jquery.js"></script>
         <script src="{{ $assets_url }}/js/materialize.min.js"></script>
+        <script type="text/javascript">
+            const BASE_URL = '{{ $base_url }}';
+        </script>
         <script src="{{ $assets_url }}/js/script.js"></script>
 @yield('jquery-scripts')
     </body>
