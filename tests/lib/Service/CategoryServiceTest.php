@@ -204,13 +204,11 @@ class CategoryServiceTest extends AbstractTest
                 [$this->identicalTo($mockEntries[2])],
                 [$this->identicalTo($mockEntries[3])],
                 [$this->identicalTo($mockEntries[4])],
-
                 [$this->identicalTo($mockTemplates[0])],
                 [$this->identicalTo($mockTemplates[1])],
                 [$this->identicalTo($mockTemplates[2])],
                 [$this->identicalTo($mockTemplates[3])],
                 [$this->identicalTo($mockTemplates[4])],
-
                 [$this->identicalTo($mockCategory)],
             );
 
