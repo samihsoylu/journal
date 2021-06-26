@@ -3,98 +3,16 @@
 namespace Tests\Service;
 
 use App\Database\Model\Category;
-use App\Database\Model\Entry;
 use App\Database\Model\User;
-use App\Database\Repository\CategoryRepository;
-use App\Database\Repository\EntryRepository;
-use App\Database\Repository\UserRepository;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\NotFoundException;
 use App\Service\CategoryService;
-use App\Utility\Registry;
-use Doctrine\DBAL\Driver\PDOException;
+use Doctrine\DBAL\Driver\PDO\Exception;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
+use Tests\AbstractTest;
 
-class CategoryServiceTest extends TestCase
+class CategoryServiceTest extends AbstractTest
 {
-    private $categoryRepository;
-    private $entryRepository;
-    private $userRepository;
-
-    public function setUp(): void
-    {
-        $this->categoryRepository = $this->createMock(CategoryRepository::class);
-        $this->entryRepository    = $this->createMock(EntryRepository::class);
-        $this->userRepository     = $this->createMock(UserRepository::class);
-
-        Registry::set(CategoryRepository::class, $this->categoryRepository);
-        Registry::set(EntryRepository::class, $this->entryRepository);
-        Registry::set(UserRepository::class, $this->userRepository);
-    }
-
-    /**
-     * @return Category|MockObject
-     */
-    private function getMockCategory(User $user, ?int $categoryId): Category
-    {
-        $mock = $this->createMock(Category::class);
-        $mock->method('getReferencedUser')
-            ->willReturn($user);
-
-        if ($categoryId !== null) {
-            $mock->method('getId')
-                ->willReturn($categoryId);
-        }
-
-        return $mock;
-    }
-
-    /**
-     * @return Category[]|MockObject[]
-     */
-    private function getMockCategories(User $user): array
-    {
-        $mockCategories = [];
-
-        for ($i = 0; $i < 5; $i++) {
-            $mock = $this->createMock(Category::class);
-            $mock->method('getReferencedUser')
-                ->willReturn($user);
-
-            $mockCategories[] = $mock;
-        }
-
-        return $mockCategories;
-    }
-
-    /**
-     * @return User|MockObject
-     */
-    private function getMockUser(int $userId): User
-    {
-        $mockUser = $this->createMock(User::class);
-        $mockUser->method('getId')->willReturn($userId);
-
-        return $mockUser;
-    }
-
-    private function getMockEntries(User $user, Category $category): array
-    {
-        $mockEntries = [];
-        for ($i = 0; $i < 5; $i++) {
-            $mock = $this->createMock(Entry::class);
-            $mock->method('getReferencedCategory')
-                ->willReturn($category);
-            $mock->method('getReferencedUser')
-                ->willReturn($user);
-
-            $mockEntries[] = $mock;
-        }
-        return $mockEntries;
-    }
-
     /**
      * Tests that all categories are returned in an array.
      *
@@ -201,7 +119,8 @@ class CategoryServiceTest extends TestCase
     }
 
     /**
-     * Tests that the unique constraint exception is catched and handled properly
+     * Tests that the unique constraint exception is caught and handled properly, this exception occurs when a category
+     * with the name exists already in the database.
      *
      * @return void
      */
@@ -222,7 +141,7 @@ class CategoryServiceTest extends TestCase
             ->willThrowException(
                 new UniqueConstraintViolationException(
                     'Category',
-                    new PDOException(
+                    new Exception(
                         new \PDOException('')
                     )
                 )
@@ -268,26 +187,16 @@ class CategoryServiceTest extends TestCase
         $service->updateCategory($userId, $categoryId, 'New Category Name', 'New Category Description');
     }
 
-    public function testDeleteCategoryAndAssociatedEntries(): void
+    public function testDeleteCategoryAndAssociatedEntriesAndTemplates(): void
     {
         $userId = 5;
         $categoryId = 10;
-        $mockUser = $this->getMockUser($userId);
-        $mockCategory = $this->getMockCategory($mockUser, $categoryId);
-        $mockEntries = $this->getMockEntries($mockUser, $mockCategory);
-        $entriesCount = count($mockEntries);
+        $mockUser = $this->setMockUser($userId);
+        $mockCategory = $this->setMockCategory($mockUser, $categoryId);
+        $mockEntries = $this->setMockEntries($mockUser, $mockCategory);
+        $mockTemplates = $this->setMockTemplates($mockUser, $mockCategory);
 
-        $this->categoryRepository
-            ->method('getById')
-            ->with($categoryId)
-            ->willReturn($mockCategory);
-
-        $this->entryRepository
-            ->method('findByUserIdAndCategoryId')
-            ->willReturn($mockEntries);
-
-        // + 1 for removing category
-        $this->categoryRepository->expects(self::exactly($entriesCount + 1))
+        $this->categoryRepository->expects(self::exactly(11))
             ->method('remove')
             ->withConsecutive(
                 [$this->identicalTo($mockEntries[0])],
@@ -295,7 +204,14 @@ class CategoryServiceTest extends TestCase
                 [$this->identicalTo($mockEntries[2])],
                 [$this->identicalTo($mockEntries[3])],
                 [$this->identicalTo($mockEntries[4])],
-                [$this->identicalTo($mockCategory)]
+
+                [$this->identicalTo($mockTemplates[0])],
+                [$this->identicalTo($mockTemplates[1])],
+                [$this->identicalTo($mockTemplates[2])],
+                [$this->identicalTo($mockTemplates[3])],
+                [$this->identicalTo($mockTemplates[4])],
+
+                [$this->identicalTo($mockCategory)],
             );
 
         $this->categoryRepository->expects(self::once())
