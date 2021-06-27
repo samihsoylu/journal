@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Database\Migration;
 
+use App\Database\Database;
 use App\Database\Model\Category;
 use App\Database\Repository\CategoryRepository;
 use App\Database\Repository\UserRepository;
@@ -29,6 +30,12 @@ final class Version20210627094934 extends AbstractMigration
 
     public function postUp(Schema $schema): void
     {
+        $database = Database::getInstance();
+        $cache = $database->getEntityManager()->getConfiguration()->getMetadataCache();
+        if ($cache !== null) {
+            $cache->clear();
+        }
+
         $this->setOrderForExistingCategories();
     }
 
