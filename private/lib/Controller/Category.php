@@ -182,7 +182,7 @@ class Category extends AbstractController
              *     5 => 2,
              * )
              */
-            foreach ($sortOrders as $sortOrder => $categoryId){
+            foreach ($sortOrders as $sortOrder => $categoryId) {
                 $categoryId = Sanitize::int($categoryId);
 
                 $this->service->updateCategoryOrder($this->getUserId(), $categoryId, $sortOrder + 1);
