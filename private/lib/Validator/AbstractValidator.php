@@ -56,6 +56,13 @@ abstract class AbstractValidator
         return (int)$value;
     }
 
+    protected function ensureValueIsArray($values, string $fieldName)
+    {
+        if (!is_array($values)) {
+            throw InvalidParameterException::notArray($fieldName);
+        }
+    }
+
     protected function ensureOptionalValueIsNumeric(array $values, string $fieldName): void
     {
         $value = $values[$fieldName] ?? null;

@@ -21,6 +21,9 @@ class CategoryRepository extends AbstractRepository
     public function findByUser(User $user): array
     {
         return $this->db->getRepository(self::RESOURCE_NAME)
-            ->findBy(['referencedUser' => $user]);
+            ->findBy(
+                ['referencedUser' => $user],
+                ['sortOrder' => 'ASC'],
+            );
     }
 }

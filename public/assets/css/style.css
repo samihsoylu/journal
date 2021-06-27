@@ -12,6 +12,7 @@
     #Dashboard card content
     #Nav bar
     #Cards
+    #Sortable cards
     #Modals
     #Entry content
  */
@@ -347,6 +348,25 @@ a .card:hover {
 }
 .card .card-content p.checkbox label span {
 	line-height:20px;
+}
+/* #Sortable cards
+  ================================================== */
+.ui-sortable {
+	position:relative;
+}
+.sortable-card .card-icon {
+	transform: translate(-50%,-50%);
+	position: absolute;
+	top: 50%;
+	left: 50px;
+	padding:24px;
+	cursor:move;
+}
+.sortable-card a {
+	color:#000;
+}
+.sortable-card a .card-content {
+	padding:24px 24px 24px 100px;
 }
 
 /* #Modals

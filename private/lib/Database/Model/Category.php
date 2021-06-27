@@ -43,6 +43,11 @@ class Category extends AbstractModel
     /**
      * @ORM\Column(type="integer", nullable=false)
      */
+    protected int $sortOrder;
+
+    /**
+     * @ORM\Column(type="integer", nullable=false)
+     */
     protected int $createdTimestamp;
 
     /**
@@ -80,5 +85,15 @@ class Category extends AbstractModel
     public function setDescription(string $description): void
     {
         $this->description = $description;
+    }
+
+    public function getSortOrder(): int
+    {
+        return $this->sortOrder;
+    }
+
+    public function setSortOrder(int $sortOrder): void
+    {
+        $this->sortOrder = $sortOrder;
     }
 }

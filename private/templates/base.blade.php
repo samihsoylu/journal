@@ -24,6 +24,7 @@
         <meta name="theme-color" content="#ffffff">
 
         <link href="{{ $assets_url }}/css/materialize/materialize.min.css" rel="stylesheet" />
+        <link href="{{ $assets_url }}/css/jquery-ui/jquery-ui.css" rel="stylesheet" />
         <link href="{{ $assets_url }}/css/style.css" rel="stylesheet" />
     </head>
     <body>
@@ -32,6 +33,8 @@
         </main>
 
         <script src="{{ $assets_url }}/js/jquery.js"></script>
+        <script src="{{ $assets_url }}/js/jquery-ui.min.js"></script>
+        <script src="{{ $assets_url }}/js/jquery.ui.touch-punch.min.js"></script>
         <script src="{{ $assets_url }}/js/materialize.min.js"></script>
         <script type="text/javascript">
             const BASE_URL = '{{ $base_url }}';

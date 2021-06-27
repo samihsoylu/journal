@@ -43,6 +43,7 @@ $route->addRoute(['GET', 'POST'], Category::CREATE_CATEGORY_POST_URL, 'Category@
 $route->addRoute('GET', Category::UPDATE_CATEGORY_URL, 'Category@updateView');
 $route->addRoute(['GET', 'POST'], Category::UPDATE_CATEGORY_POST_URL, 'Category@update');
 $route->addRoute('GET', Category::DELETE_CATEGORY_URL, 'Category@delete');
+$route->addRoute('POST', Category::SET_CATEGORY_ORDER_URL, 'Category@setCategoryOrder');
 
 // Users
 $route->addRoute('GET', User::USERS_URL, 'User@indexView');

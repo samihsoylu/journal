@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Database\Model\Category as CategoryModel;
 use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException\InvalidArgumentException;
+use App\Exception\UserException\NotFoundException;
 use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\EntryHelper;
 use App\Service\Helper\TemplateHelper;
@@ -48,16 +49,18 @@ class CategoryService
     }
 
     /**
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException|NotFoundException
      */
     public function createCategory(int $userId, string $categoryName, string $categoryDescription): void
     {
         $user = $this->userHelper->getUserById($userId);
+        $categoryCount = $this->categoryHelper->getCategoryCountForUser($user);
 
         $category = new CategoryModel();
         $category->setReferencedUser($user);
         $category->setName($categoryName);
         $category->setDescription($categoryDescription);
+        $category->setSortOrder($categoryCount + 1);
 
         $this->repository->queue($category);
 
@@ -99,6 +102,16 @@ class CategoryService
         $this->repository->remove($category);
 
         // delete queued entries and categories
+        $this->repository->save();
+    }
+
+    public function updateCategoryOrder(int $userId, int $categoryId, int $order): void
+    {
+        $category = $this->getCategoryForUser($categoryId, $userId);
+
+        $category->setSortOrder($order);
+
+        $this->repository->queue($category);
         $this->repository->save();
     }
 }

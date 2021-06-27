@@ -10,6 +10,7 @@ Journal is a privacy first, self hosted digital log book. It is designed to be a
 * Organise entries using categories
 * Quickly add entries by enabling the quick-add widget
 * Create predefined sets of templates for entries
+* Order your favorite categories to appear on the top
 * Advanced search 
 * Unlimited users
 
@@ -39,9 +40,27 @@ Download the zip package from the [releases page](https://github.com/samihsoylu/
 
 Extract the downloaded zip file and upload it to your web server.
 
-**To install via composer (skip step 3):**
+**Or to install via composer (skip step 3):**
 ```
 composer create-project samihsoylu/journal --no-dev
+```
+
+**Or clone this repository (recommended):**
+```
+# Download the project
+git clone git@github.com:samihsoylu/journal.git
+
+# Enter directory
+cd journal
+
+# Get new tags from remote
+git fetch --tags
+
+# Get latest tag name
+latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
+
+# Checkout to the latest tag
+git checkout $latestTag
 ```
 
 ### 2. Edit .env file
@@ -86,4 +105,39 @@ vendor/bin/doctrine-migrations migrate --no-interaction
 chmod +x bin/*
 
 php bin/journalctl user:create
+```
+
+## Upgrading
+
+Journal uses the concept of releases and tries to follow [Semantic Versioning](https://semver.org/) as much as possible. You are **advised** to make a back up of your database before following the instructions below.
+
+### 1. Update the files in your instance
+
+For installations that have used composer/file-upload to get started during installation, to upgrade: Download the new zip package from the [releases page](https://github.com/samihsoylu/journal/releases/latest).
+
+Extract the downloaded zip file and upload it to your web server.
+
+**If you cloned the repository in your initial installation, follow these steps:**
+``` 
+# Get latest tag information for GitHub
+git fetch --tags
+
+# Get latest tag name
+latestTag=$(git describe --tags `git rev-list --tags --max-count=1`)
+
+# Checkout to the latest tag
+git checkout $latestTag
+```
+
+### 2. Run composer
+
+Run the following command to install the required composer libraries for your Journal application.
+
+``` 
+composer install --no-dev
+```
+
+### 3. Run the database migration
+```
+vendor/bin/doctrine-migrations migrate --no-interaction
 ```
