@@ -45,4 +45,9 @@ class InvalidParameterException extends UserException
     {
         return new self("Invalid Form Key. Please try again.");
     }
+
+    public static function notArray(string $fieldName): self
+    {
+        return new self("Field {$fieldName} must be an array", 406);
+    }
 }

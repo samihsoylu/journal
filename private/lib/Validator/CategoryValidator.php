@@ -32,4 +32,15 @@ class CategoryValidator extends AbstractValidator
     {
         $this->ensureUserHasProvidedValidAntiCSRFToken($_GET['form_key']);
     }
+
+    public function setCategoryOrder(): void
+    {
+        $fieldName = 'orderedCategoryIds';
+
+        $requiredFields = [$fieldName];
+        $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
+
+        $ids = $this->post[$fieldName] ?? null;
+        $this->ensureValueIsArray($ids, $fieldName);
+    }
 }

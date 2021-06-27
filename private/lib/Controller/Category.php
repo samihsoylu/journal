@@ -24,6 +24,8 @@ class Category extends AbstractController
 
     public const DELETE_CATEGORY_URL       = self::READ_CATEGORY_URL . '/delete/{antiCsrfToken}';
 
+    public const SET_CATEGORY_ORDER_URL    = self::CATEGORIES_URL . '/ajax/sort-order';
+
     protected CategoryService $service;
     protected CategoryValidator $validator;
 
@@ -159,5 +161,35 @@ class Category extends AbstractController
     {
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::CATEGORIES_URL);
+    }
+
+    public function setCategoryOrder(): void
+    {
+        /** @see CategoryValidator::setCategoryOrder() */
+        $this->validator->validate(__FUNCTION__);
+
+        $sortOrders = $_POST['orderedCategoryIds'];
+        try {
+            /**
+             * Received from ajax post request
+             * array (
+             *     // SORT ORDER => ID
+             *     0 => 5,
+             *     1 => 6,
+             *     2 => 3,
+             *     3 => 4,
+             *     4 => 1,
+             *     5 => 2,
+             * )
+             */
+            foreach ($sortOrders as $sortOrder => $categoryId){
+                $categoryId = Sanitize::int($categoryId);
+
+                $this->service->updateCategoryOrder($this->getUserId(), $categoryId, $sortOrder + 1);
+            }
+        } catch (UserException $e) {
+            http_response_code(404);
+            echo $e->getMessage();
+        }
     }
 }
