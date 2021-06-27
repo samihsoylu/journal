@@ -118,7 +118,7 @@
                             <div class="card">
                                 <div class="card-content">
                                     <span class="card-title">{{ $entry->getTitle() }}</span>
-                                    <p>{{ $entry->getCreatedTimestampFormatted() }} <span title="Category" class="individual-entry-category">{{ $entry->getReferencedCategory()->getName() }}</span></p>
+                                    <p>{{ $entry->getCreatedTimestampFormatted() }} <span title="Category" class="card-text-right">{{ $entry->getReferencedCategory()->getName() }}</span></p>
                                 </div>
                             </div>
                         </a>

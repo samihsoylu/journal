@@ -4,12 +4,14 @@ Journal is a privacy first, self hosted digital log book. It is designed to be a
 <img src="https://samihsoylu.nl/downloads/dashboard-journal.png">
 
 ## Feature highlights
-* Basic text formatting with markdown
-* Organise entries with the help of categories
-* Search system that includes filtering on date and category
-* AES 256 Encryption
-* Multi-user support
-* Quick add widget for entries page (optionally can be enabled in settings)
+* Mobile friendly
+* Entries and Templates have AES-256 Encryption
+* Format entry content using markdown
+* Organise entries using categories
+* Quickly add entries by enabling the quick-add widget
+* Create predefined sets of templates for entries
+* Advanced search 
+* Unlimited users
 
 ## Requirements
 * A Linux-based server with shell access
