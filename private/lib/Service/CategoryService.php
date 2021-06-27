@@ -7,6 +7,7 @@ use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\EntryHelper;
+use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserHelper;
 use App\Utility\Registry;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -17,6 +18,7 @@ class CategoryService
     private CategoryHelper $categoryHelper;
     private UserHelper $userHelper;
     private EntryHelper $entryHelper;
+    private TemplateHelper $templateHelper;
 
     public function __construct()
     {
@@ -27,6 +29,7 @@ class CategoryService
         $this->categoryHelper = new CategoryHelper();
         $this->userHelper     = new UserHelper();
         $this->entryHelper    = new EntryHelper();
+        $this->templateHelper = new TemplateHelper();
     }
 
     /**
@@ -79,11 +82,17 @@ class CategoryService
     public function deleteCategoryAndAssociatedEntries(int $categoryId, int $userId): void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
+        $user = $this->userHelper->getUserById($userId);
 
         // get associated entries and queue for deleting
         $entries = $this->entryHelper->getEntriesForUserByCategoryId($userId, $categoryId);
         foreach ($entries as $entry) {
             $this->repository->remove($entry);
+        }
+
+        $templates = $this->templateHelper->getTemplatesForUserByCategory($user, $category);
+        foreach ($templates as $template) {
+            $this->repository->remove($template);
         }
 
         // queue category for deleting

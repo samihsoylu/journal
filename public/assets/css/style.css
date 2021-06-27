@@ -357,7 +357,7 @@ a .card:hover {
 .danger-modal .modal-footer {
 	padding:0px 24px;
 }
-.individual-entry-category {
+.card-text-right {
 	float:right;
 	font-style:italic;
 	opacity:0.3;

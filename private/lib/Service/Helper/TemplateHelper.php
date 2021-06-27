@@ -2,6 +2,7 @@
 
 namespace App\Service\Helper;
 
+use App\Database\Model\Category;
 use App\Database\Model\Template;
 use App\Database\Model\User;
 use App\Database\Repository\TemplateRepository;
@@ -43,6 +44,11 @@ class TemplateHelper
         $templates = $this->repository->findByUser($user);
 
         return count($templates);
+    }
+
+    public function getTemplatesForUserByCategory(User $user, Category $category): array
+    {
+        return $this->repository->findByCategoryAndUser($user, $category);
     }
 
     private function ensureTemplateIsNotNull(?Template $template, int $templateId): void
