@@ -2,7 +2,6 @@
 
 namespace App\Service\Helper;
 
-use App\Database\Model\Category;
 use App\Database\Model\Template;
 use App\Database\Model\User;
 use App\Database\Repository\TemplateRepository;
@@ -46,9 +45,16 @@ class TemplateHelper
         return count($templates);
     }
 
-    public function getTemplatesForUserByCategory(User $user, Category $category): array
+    public function getTemplateCountForCategory(int $userId, int $categoryId): int
     {
-        return $this->repository->findByCategoryAndUser($user, $category);
+        $templates = $this->getTemplatesForUserByCategory($userId, $categoryId);
+
+        return count($templates);
+    }
+
+    public function getTemplatesForUserByCategory(int $userId, int $categoryId): array
+    {
+        return $this->repository->findByUserIdAndCategoryId($userId, $categoryId);
     }
 
     private function ensureTemplateIsNotNull(?Template $template, int $templateId): void

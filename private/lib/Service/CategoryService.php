@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Database\Model\Category as CategoryModel;
+use App\Database\Model\Category;
 use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\NotFoundException;
@@ -10,6 +10,7 @@ use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\EntryHelper;
 use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserHelper;
+use App\Service\Model\CategoryDecorator;
 use App\Utility\Registry;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
@@ -34,7 +35,7 @@ class CategoryService
     }
 
     /**
-     * @return CategoryModel[]
+     * @return Category[]
      */
     public function getAllCategoriesForUser(int $userId): array
     {
@@ -43,9 +44,20 @@ class CategoryService
         return $this->categoryHelper->getAllCategoriesForUser($user);
     }
 
-    public function getCategoryForUser(int $categoryId, int $userId): CategoryModel
+    public function getCategoryForUser(int $categoryId, int $userId): CategoryDecorator
     {
-        return $this->categoryHelper->getCategoryForUser($categoryId, $userId);
+        $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
+
+        $entryCount = $this->entryHelper->getEntryCountForCategory($userId, $categoryId);
+        $templateCount = $this->templateHelper->getTemplateCountForCategory($userId, $categoryId);
+
+        return new CategoryDecorator(
+            $category->getId(),
+            $category->getName(),
+            $category->getDescription(),
+            $category->$entryCount,
+            $category->$templateCount,
+        );
     }
 
     /**
@@ -56,11 +68,11 @@ class CategoryService
         $user = $this->userHelper->getUserById($userId);
         $categoryCount = $this->categoryHelper->getCategoryCountForUser($user);
 
-        $category = new CategoryModel();
-        $category->setReferencedUser($user);
-        $category->setName($categoryName);
-        $category->setDescription($categoryDescription);
-        $category->setSortOrder($categoryCount + 1);
+        $category = new Category();
+        $category->setReferencedUser($user)
+                 ->setName($categoryName)
+                 ->setDescription($categoryDescription)
+                 ->setSortOrder($categoryCount + 1);
 
         $this->repository->queue($category);
 
@@ -73,7 +85,7 @@ class CategoryService
 
     public function updateCategory(int $userId, int $categoryId, string $categoryName, string $categoryDescription): void
     {
-        $category = $this->getCategoryForUser($categoryId, $userId);
+        $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
         $category->setName($categoryName);
         $category->setDescription($categoryDescription);
@@ -85,15 +97,15 @@ class CategoryService
     public function deleteCategoryAndAssociatedEntries(int $categoryId, int $userId): void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
-        $user = $this->userHelper->getUserById($userId);
 
         // get associated entries and queue for deleting
-        $entries = $this->entryHelper->getEntriesForUserByCategoryId($userId, $categoryId);
+        $entries = $this->entryHelper->getEntriesForUserByCategory($userId, $categoryId);
         foreach ($entries as $entry) {
             $this->repository->remove($entry);
         }
 
-        $templates = $this->templateHelper->getTemplatesForUserByCategory($user, $category);
+        // get associated templates and queue for deleting
+        $templates = $this->templateHelper->getTemplatesForUserByCategory($userId, $categoryId);
         foreach ($templates as $template) {
             $this->repository->remove($template);
         }
@@ -101,13 +113,13 @@ class CategoryService
         // queue category for deleting
         $this->repository->remove($category);
 
-        // delete queued entries and categories
+        // delete queued entries, templates and categories
         $this->repository->save();
     }
 
     public function updateCategoryOrder(int $userId, int $categoryId, int $order): void
     {
-        $category = $this->getCategoryForUser($categoryId, $userId);
+        $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
         $category->setSortOrder($order);
 
