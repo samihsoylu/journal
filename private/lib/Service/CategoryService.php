@@ -55,8 +55,8 @@ class CategoryService
             $category->getId(),
             $category->getName(),
             $category->getDescription(),
-            $category->$entryCount,
-            $category->$templateCount,
+            $entryCount,
+            $templateCount,
         );
     }
 

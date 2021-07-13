@@ -20,7 +20,7 @@
                     <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
 
                     <p class="small-text title"><b>Usage Statistics</b></p>
-                    <p class="small-text context">Entries: {{ $user->getTotalEntries() }} <br /> Templates: {{ $user->getTotalTemplates() }}</p>
+                    <p class="small-text context">Entries: {{ $category->getTotalEntries() }} <br /> Templates: {{ $category->getTotalTemplates() }}</p>
 
                     <div>
                         <button class="btn btn-default" type="button" onclick="@if(isset($success)) window.location.href='{{ $categories_url }}' @else window.history.go(-1); return false; @endif"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
