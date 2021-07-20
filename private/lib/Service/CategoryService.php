@@ -146,8 +146,6 @@ class CategoryService
             $entry->setReferencedCategory($uncategorizedCategory);
             $this->repository->queue($entry);
         }
-
-        $this->repository->save();
     }
 
     public function updateCategoryOrder(int $userId, int $categoryId, int $order): void

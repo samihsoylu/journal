@@ -7,6 +7,7 @@ use App\Database\Model\User;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\NotFoundException;
 use App\Service\CategoryService;
+use App\Service\Helper\CategoryHelper;
 use Doctrine\DBAL\Driver\PDO\Exception;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Tests\AbstractTest;
@@ -78,8 +79,8 @@ class CategoryServiceTest extends AbstractTest
             ->with($categoryId)
             ->willReturn($mockCategory);
 
-        $service = new CategoryService();
-        $category = $service->getCategoryForUser($categoryId, $userId);
+        $helper = new CategoryHelper();
+        $category = $helper->getCategoryForUser($categoryId, $userId);
 
         $this->assertEquals($category->getId(), $categoryId);
         $this->assertEquals($category->getReferencedUser()->getId(), $userId);
@@ -187,7 +188,7 @@ class CategoryServiceTest extends AbstractTest
         $service->updateCategory($userId, $categoryId, 'New Category Name', 'New Category Description');
     }
 
-    public function testDeleteCategoryAndAssociatedEntriesAndTemplates(): void
+    public function testDeleteCategory(): void
     {
         $userId = 5;
         $categoryId = 10;
@@ -216,6 +217,6 @@ class CategoryServiceTest extends AbstractTest
             ->method('save');
 
         $service = new CategoryService();
-        $service->deleteCategoryAndAssociatedEntries($categoryId, $userId);
+        $service->deleteCategory($userId, $categoryId);
     }
 }
