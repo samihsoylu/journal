@@ -145,7 +145,7 @@ class Category extends AbstractController
         /** @see CategoryValidator::delete() */
         $this->validator->validate(__FUNCTION__);
 
-        $this->service->deleteCategoryAndAssociatedEntries($categoryId, $this->getUserId());
+        $this->service->deleteCategory($this->getUserId(), $categoryId);
 
         $this->setNotification(Notification::TYPE_SUCCESS, 'Category was removed');
 
@@ -185,6 +185,7 @@ class Category extends AbstractController
             foreach ($sortOrders as $sortOrder => $categoryId) {
                 $categoryId = Sanitize::int($categoryId);
 
+                // sortOrder + 1  this way order starts from  1
                 $this->service->updateCategoryOrder($this->getUserId(), $categoryId, $sortOrder + 1);
             }
         } catch (UserException $e) {

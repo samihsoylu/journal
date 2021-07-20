@@ -20,7 +20,7 @@ class CategoryHelper
         $this->repository = $categoryRepository;
     }
 
-    public function getCategoryForUser(int $categoryId, $userId): Category
+    public function getCategoryForUser(int $categoryId, int $userId): Category
     {
         /** @var Category $category */
         $category = $this->repository->getById($categoryId);
@@ -40,9 +40,22 @@ class CategoryHelper
 
     public function getCategoryCountForUser(User $user): int
     {
-        $categories = $this->repository->findByUser($user);
+        $categories = $this->getAllCategoriesForUser($user);
 
         return count($categories);
+    }
+
+    public function hasUncategorizedCategory(User $user): bool
+    {
+        $categories = $this->getAllCategoriesForUser($user);
+
+        foreach ($categories as $category) {
+            if ($category->getName() === '<uncategorized>'){
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function ensureCategoryIsNotNull(?Category $category, int $categoryId): void

@@ -52,6 +52,9 @@ class TemplateHelper
         return count($templates);
     }
 
+    /**
+     * @return Template[]
+     */
     public function getTemplatesForUserByCategory(int $userId, int $categoryId): array
     {
         return $this->repository->findByUserIdAndCategoryId($userId, $categoryId);

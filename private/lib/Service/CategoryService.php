@@ -13,6 +13,7 @@ use App\Service\Helper\UserHelper;
 use App\Service\Model\CategoryDecorator;
 use App\Utility\Registry;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\ORMException;
 
 class CategoryService
 {
@@ -94,26 +95,58 @@ class CategoryService
         $this->repository->save();
     }
 
-    public function deleteCategoryAndAssociatedEntries(int $categoryId, int $userId): void
+    /**
+     * @throws InvalidArgumentException
+     * @throws ORMException
+     * @throws NotFoundException
+     */
+    public function deleteCategory(int $userId, int $categoryId): void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
-        // get associated entries and queue for deleting
-        $entries = $this->entryHelper->getEntriesForUserByCategory($userId, $categoryId);
-        foreach ($entries as $entry) {
-            $this->repository->remove($entry);
-        }
-
-        // get associated templates and queue for deleting
-        $templates = $this->templateHelper->getTemplatesForUserByCategory($userId, $categoryId);
-        foreach ($templates as $template) {
-            $this->repository->remove($template);
-        }
+        $this->setUncategorizedEntriesAndTemplates($userId, $category);
 
         // queue category for deleting
         $this->repository->remove($category);
 
         // delete queued entries, templates and categories
+        $this->repository->save();
+    }
+
+    /**
+     * @throws NotFoundException
+     * @throws InvalidArgumentException
+     */
+    public function setUncategorizedEntriesAndTemplates(int $userId, Category $category)
+    {
+        $categoryId = $category->getId();
+        $uncategorizedCategoryName = '<uncategorized>';
+
+        // Creates uncategorized category if user doesn't have one
+        $user = $this->userHelper->getUserById($userId);
+        if (!$this->categoryHelper->hasUncategorizedCategory($user)){
+            $this->createCategory($userId, $uncategorizedCategoryName, 'Placeholder for uncategorized entries and templates');
+        }
+
+        $uncategorizedCategory = $this->repository->findByCategoryName($user, $uncategorizedCategoryName);
+        // setSortOrder to 0, this way <uncategorized> category will always be at top
+        if ($uncategorizedCategory->getSortOrder() !== 0){
+            $uncategorizedCategory->setSortOrder(0);
+            $this->repository->queue($uncategorizedCategory);
+        }
+
+        $templates = $this->templateHelper->getTemplatesForUserByCategory($userId, $categoryId);
+        foreach ($templates as $template){
+            $template->setReferencedCategory($uncategorizedCategory);
+            $this->repository->queue($template);
+        }
+
+        $entries = $this->entryHelper->getEntriesForUserByCategory($userId, $categoryId);
+        foreach ($entries as $entry){
+            $entry->setReferencedCategory($uncategorizedCategory);
+            $this->repository->queue($entry);
+        }
+
         $this->repository->save();
     }
 
