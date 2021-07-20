@@ -1,8 +1,6 @@
 <?php declare(strict_types=1);
 
-
 namespace App\Service\Model;
-
 
 class CategoryDecorator
 {
@@ -17,7 +15,6 @@ class CategoryDecorator
         int $id,
         string $name,
         string $description,
-
         int $totalEntries,
         int $totalTemplates
     ) {

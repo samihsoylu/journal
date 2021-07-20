@@ -50,7 +50,7 @@ class CategoryHelper
         $categories = $this->getAllCategoriesForUser($user);
 
         foreach ($categories as $category) {
-            if ($category->getName() === '<uncategorized>'){
+            if ($category->getName() === '<uncategorized>') {
                 return true;
             }
         }

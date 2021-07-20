@@ -124,25 +124,25 @@ class CategoryService
 
         // Creates uncategorized category if user doesn't have one
         $user = $this->userHelper->getUserById($userId);
-        if (!$this->categoryHelper->hasUncategorizedCategory($user)){
+        if (!$this->categoryHelper->hasUncategorizedCategory($user)) {
             $this->createCategory($userId, $uncategorizedCategoryName, 'Placeholder for uncategorized entries and templates');
         }
 
         $uncategorizedCategory = $this->repository->findByCategoryName($user, $uncategorizedCategoryName);
         // setSortOrder to 0, this way <uncategorized> category will always be at top
-        if ($uncategorizedCategory->getSortOrder() !== 0){
+        if ($uncategorizedCategory->getSortOrder() !== 0) {
             $uncategorizedCategory->setSortOrder(0);
             $this->repository->queue($uncategorizedCategory);
         }
 
         $templates = $this->templateHelper->getTemplatesForUserByCategory($userId, $categoryId);
-        foreach ($templates as $template){
+        foreach ($templates as $template) {
             $template->setReferencedCategory($uncategorizedCategory);
             $this->repository->queue($template);
         }
 
         $entries = $this->entryHelper->getEntriesForUserByCategory($userId, $categoryId);
-        foreach ($entries as $entry){
+        foreach ($entries as $entry) {
             $entry->setReferencedCategory($uncategorizedCategory);
             $this->repository->queue($entry);
         }
