@@ -37,12 +37,38 @@ class CategoryService
 
     /**
      * @return Category[]
+     * @throws NotFoundException
      */
     public function getAllCategoriesForUser(int $userId): array
     {
         $user = $this->userHelper->getUserById($userId);
 
         return $this->categoryHelper->getAllCategoriesForUser($user);
+    }
+
+    public function getAllCategoriesExceptUncategorizedCategory(int $userId): array
+    {
+        $user = $this->userHelper->getUserById($userId);
+        $categories = $this->categoryHelper->getAllCategoriesForUser($user);
+
+        foreach ($categories as $categoryName => $category) {
+            if ($category->getName() === Category::UNCATEGORIZED_CATEGORY_NAME) {
+                unset($categories[$categoryName]);
+            }
+        }
+        // using unset() broke array indexes
+        /**
+         *  Array
+         *          [0] => 'a'
+         *          [1] => 'b' <== unset this
+         *          [2] => 'c'
+         *
+         * New Array
+         *          [0] => 'a'
+         *          [2] => 'c'
+         */
+        // we are using array_values to reindex array
+        return array_values($categories);
     }
 
     public function getCategoryForUser(int $categoryId, int $userId): CategoryDecorator
@@ -64,7 +90,7 @@ class CategoryService
     /**
      * @throws InvalidArgumentException|NotFoundException
      */
-    public function createCategory(int $userId, string $categoryName, string $categoryDescription): void
+    public function createCategory(int $userId, string $categoryName, string $categoryDescription): Category
     {
         $user = $this->userHelper->getUserById($userId);
         $categoryCount = $this->categoryHelper->getCategoryCountForUser($user);
@@ -82,6 +108,7 @@ class CategoryService
         } catch (UniqueConstraintViolationException $e) {
             throw InvalidArgumentException::categoryAlreadyExists($categoryName);
         }
+        return $category;
     }
 
     public function updateCategory(int $userId, int $categoryId, string $categoryName, string $categoryDescription): void
@@ -120,17 +147,14 @@ class CategoryService
     public function setUncategorizedEntriesAndTemplates(int $userId, Category $category)
     {
         $categoryId = $category->getId();
-        $uncategorizedCategoryName = '<uncategorized>';
+        $user = $this->userHelper->getUserById($userId);
 
         // Creates uncategorized category if user doesn't have one
-        $user = $this->userHelper->getUserById($userId);
-        if (!$this->categoryHelper->hasUncategorizedCategory($user)) {
-            $this->createCategory($userId, $uncategorizedCategoryName, 'Placeholder for uncategorized entries and templates');
-        }
+        $uncategorizedCategory = $this->categoryHelper->getCategoryByUserAndCategoryName($user, Category::UNCATEGORIZED_CATEGORY_NAME);
+        if ($uncategorizedCategory === null) {
+            $uncategorizedCategory = $this->createCategory($userId, Category::UNCATEGORIZED_CATEGORY_NAME, Category::UNCATEGORIZED_CATEGORY_DESCRIPTION);
 
-        $uncategorizedCategory = $this->repository->findByCategoryName($user, $uncategorizedCategoryName);
-        // setSortOrder to 0, this way <uncategorized> category will always be at top
-        if ($uncategorizedCategory->getSortOrder() !== 0) {
+            // Set default sort order to 0
             $uncategorizedCategory->setSortOrder(0);
             $this->repository->queue($uncategorizedCategory);
         }

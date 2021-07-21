@@ -30,6 +30,11 @@ class CategoryHelper
         return $category;
     }
 
+    public function getCategoryByUserAndCategoryName(User $user, string $categoryName): ?Category
+    {
+        return $this->repository->findByCategoryName($user, $categoryName);
+    }
+
     /**
      * @return Category[]
      */
@@ -42,20 +47,8 @@ class CategoryHelper
     {
         $categories = $this->getAllCategoriesForUser($user);
 
-        return count($categories);
-    }
-
-    public function hasUncategorizedCategory(User $user): bool
-    {
-        $categories = $this->getAllCategoriesForUser($user);
-
-        foreach ($categories as $category) {
-            if ($category->getName() === '<uncategorized>') {
-                return true;
-            }
-        }
-
-        return false;
+        // <uncategorized> category doesn't count as a category
+        return count($categories) - 1;
     }
 
     private function ensureCategoryIsNotNull(?Category $category, int $categoryId): void

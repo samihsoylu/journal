@@ -10,10 +10,6 @@
             <div class="col s12">
                 <div id="sortable" class="ui-sortable">
                 @foreach ($categories as $category)
-                    {{-- Don't show <uncategorized> category in Categories page --}}
-                    @if ($category->getName() == '<uncategorized>')
-                        @continue
-                    @endif
                     <div id="{{ $category->getId() }}" class="card sortable-card">
                         <div class="card-icon ui-sortable-handle">
                             <i class="material-icons">reorder</i>

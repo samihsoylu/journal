@@ -17,6 +17,9 @@ use Doctrine\ORM\Mapping\ManyToOne;
  */
 class Category extends AbstractModel
 {
+    public const UNCATEGORIZED_CATEGORY_NAME = '<uncategorized>';
+    public const UNCATEGORIZED_CATEGORY_DESCRIPTION = 'Placeholder for uncategorized entries and templates';
+
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")

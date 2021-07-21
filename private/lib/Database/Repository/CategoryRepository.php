@@ -27,7 +27,7 @@ class CategoryRepository extends AbstractRepository
             );
     }
 
-    public function findByCategoryName(User $user, string $categoryName): Category
+    public function findByCategoryName(User $user, string $categoryName): ?Category
     {
         return $this->db->getRepository(self::RESOURCE_NAME)
             ->findOneBy([

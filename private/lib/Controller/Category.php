@@ -41,13 +41,13 @@ class Category extends AbstractController
     }
 
     /**
-     * Display all categories that belong to the logged in user
+     * Display all categories except <uncategorized> category that belong to the logged in user
      *
      * @return void
      */
     public function indexView(): void
     {
-        $categories = $this->service->getAllCategoriesForUser($this->getUserId());
+        $categories = $this->service->getAllCategoriesExceptUncategorizedCategory($this->getUserId());
 
         $this->template->setVariable('categories', $categories);
         $this->renderTemplate('category/all');
@@ -185,8 +185,8 @@ class Category extends AbstractController
             foreach ($sortOrders as $sortOrder => $categoryId) {
                 $categoryId = Sanitize::int($categoryId);
 
-                // sortOrder + 1  this way order starts from  1
-                $this->service->updateCategoryOrder($this->getUserId(), $categoryId, $sortOrder + 1);
+                // $sortOrder is incremented by one because we do not want sort order 0 to be used (reserved for uncategorized category)
+                $this->service->updateCategoryOrder($this->getUserId(), $categoryId, ++$sortOrder);
             }
         } catch (UserException $e) {
             http_response_code(404);
