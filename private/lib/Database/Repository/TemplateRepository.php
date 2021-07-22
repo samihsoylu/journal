@@ -28,16 +28,18 @@ class TemplateRepository extends AbstractRepository
     /**
      * Queries the database for all templates that are linked to the specified category
      *
-     * @param Category $category
-     * @param User $user
      * @return Template[]
      */
-    public function findByCategoryAndUser(User $user, Category $category): array
+    public function findByUserIdAndCategoryId(int $userId, int $categoryId): array
     {
-        return $this->db->getRepository(self::RESOURCE_NAME)
-            ->findBy([
-                'referencedUser' => $user,
-                'referencedCategory' => $category,
-            ]);
+        $qb = $this->db->createQueryBuilder();
+
+        $qb->select('e')
+            ->from(self::RESOURCE_NAME, 'e')
+            ->where('e.referencedCategory = :categoryId AND e.referencedUser = :userId')
+            ->setParameter('categoryId', $categoryId)
+            ->setParameter('userId', $userId);
+
+        return $qb->getQuery()->getResult();
     }
 }

@@ -21,7 +21,7 @@ class EntryHelper
     }
 
     /**
-     * @return EntryModel[]
+     * @return Entry[]
      */
     public function getAllEntriesForUser(User $user): array
     {
@@ -48,10 +48,17 @@ class EntryHelper
         return count($entries);
     }
 
+    public function getEntryCountForCategory(int $userId, int $categoryId): int
+    {
+        $entries = $this->getEntriesForUserByCategory($userId, $categoryId);
+
+        return count($entries);
+    }
+
     /**
      * @return Entry[]
      */
-    public function getEntriesForUserByCategoryId(int $userId, int $categoryId): array
+    public function getEntriesForUserByCategory(int $userId, int $categoryId): array
     {
         return $this->repository->findByUserIdAndCategoryId($userId, $categoryId);
     }

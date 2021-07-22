@@ -7,6 +7,7 @@ use App\Database\Model\User;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\NotFoundException;
 use App\Service\CategoryService;
+use App\Service\Helper\CategoryHelper;
 use Doctrine\DBAL\Driver\PDO\Exception;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Tests\AbstractTest;
@@ -78,8 +79,8 @@ class CategoryServiceTest extends AbstractTest
             ->with($categoryId)
             ->willReturn($mockCategory);
 
-        $service = new CategoryService();
-        $category = $service->getCategoryForUser($categoryId, $userId);
+        $helper = new CategoryHelper();
+        $category = $helper->getCategoryForUser($categoryId, $userId);
 
         $this->assertEquals($category->getId(), $categoryId);
         $this->assertEquals($category->getReferencedUser()->getId(), $userId);
@@ -187,35 +188,23 @@ class CategoryServiceTest extends AbstractTest
         $service->updateCategory($userId, $categoryId, 'New Category Name', 'New Category Description');
     }
 
-    public function testDeleteCategoryAndAssociatedEntriesAndTemplates(): void
+    public function testDeleteCategory(): void
     {
         $userId = 5;
         $categoryId = 10;
         $mockUser = $this->setMockUser($userId);
         $mockCategory = $this->setMockCategory($mockUser, $categoryId);
-        $mockEntries = $this->setMockEntries($mockUser, $mockCategory);
-        $mockTemplates = $this->setMockTemplates($mockUser, $mockCategory);
-
-        $this->categoryRepository->expects(self::exactly(11))
-            ->method('remove')
-            ->withConsecutive(
-                [$this->identicalTo($mockEntries[0])],
-                [$this->identicalTo($mockEntries[1])],
-                [$this->identicalTo($mockEntries[2])],
-                [$this->identicalTo($mockEntries[3])],
-                [$this->identicalTo($mockEntries[4])],
-                [$this->identicalTo($mockTemplates[0])],
-                [$this->identicalTo($mockTemplates[1])],
-                [$this->identicalTo($mockTemplates[2])],
-                [$this->identicalTo($mockTemplates[3])],
-                [$this->identicalTo($mockTemplates[4])],
-                [$this->identicalTo($mockCategory)],
-            );
+        $this->setMockEntries($mockUser, $mockCategory);
+        $this->setMockTemplates($mockUser, $mockCategory);
 
         $this->categoryRepository->expects(self::once())
+            ->method('remove')
+            ->with($mockCategory);
+
+        $this->categoryRepository->expects(self::atLeastOnce())
             ->method('save');
 
         $service = new CategoryService();
-        $service->deleteCategoryAndAssociatedEntries($categoryId, $userId);
+        $service->deleteCategory($userId, $categoryId);
     }
 }

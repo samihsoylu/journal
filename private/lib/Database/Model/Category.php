@@ -17,6 +17,10 @@ use Doctrine\ORM\Mapping\ManyToOne;
  */
 class Category extends AbstractModel
 {
+    public const UNCATEGORIZED_CATEGORY_NAME = '<uncategorized>';
+    public const UNCATEGORIZED_CATEGORY_DESCRIPTION = 'Placeholder for uncategorized entries and templates';
+    public const UNCATEGORIZED_CATEGORY_ORDER = 0;
+
     /**
      * @ORM\Id
      * @ORM\Column(type="integer")
@@ -60,9 +64,11 @@ class Category extends AbstractModel
         return $this->referencedUser;
     }
 
-    public function setReferencedUser(User $user): void
+    public function setReferencedUser(User $user): self
     {
         $this->referencedUser = $user;
+
+        return $this;
     }
 
     public function getName(): string
@@ -82,9 +88,11 @@ class Category extends AbstractModel
         return $this->description;
     }
 
-    public function setDescription(string $description): void
+    public function setDescription(string $description): self
     {
         $this->description = $description;
+
+        return $this;
     }
 
     public function getSortOrder(): int
@@ -92,8 +100,10 @@ class Category extends AbstractModel
         return $this->sortOrder;
     }
 
-    public function setSortOrder(int $sortOrder): void
+    public function setSortOrder(int $sortOrder): self
     {
         $this->sortOrder = $sortOrder;
+
+        return $this;
     }
 }

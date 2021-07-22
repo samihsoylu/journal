@@ -8,6 +8,7 @@ use App\Utility\Redirect;
 use App\Utility\Sanitize;
 use App\Validator\CategoryValidator;
 use App\Service\CategoryService;
+use App\Database\Model\Category as CategoryModel;
 
 class Category extends AbstractController
 {
@@ -41,13 +42,13 @@ class Category extends AbstractController
     }
 
     /**
-     * Display all categories that belong to the logged in user
+     * Display all categories except <uncategorized> category that belong to the logged in user
      *
      * @return void
      */
     public function indexView(): void
     {
-        $categories = $this->service->getAllCategoriesForUser($this->getUserId());
+        $categories = $this->service->getAllCategoriesWithExcludeFilter($this->getUserId(), [CategoryModel::UNCATEGORIZED_CATEGORY_NAME]);
 
         $this->template->setVariable('categories', $categories);
         $this->renderTemplate('category/all');
@@ -145,7 +146,7 @@ class Category extends AbstractController
         /** @see CategoryValidator::delete() */
         $this->validator->validate(__FUNCTION__);
 
-        $this->service->deleteCategoryAndAssociatedEntries($categoryId, $this->getUserId());
+        $this->service->deleteCategory($this->getUserId(), $categoryId);
 
         $this->setNotification(Notification::TYPE_SUCCESS, 'Category was removed');
 
@@ -185,7 +186,8 @@ class Category extends AbstractController
             foreach ($sortOrders as $sortOrder => $categoryId) {
                 $categoryId = Sanitize::int($categoryId);
 
-                $this->service->updateCategoryOrder($this->getUserId(), $categoryId, $sortOrder + 1);
+                // $sortOrder is incremented by one because we do not want sort order 0 to be used (reserved for uncategorized category)
+                $this->service->updateCategoryOrder($this->getUserId(), $categoryId, ++$sortOrder);
             }
         } catch (UserException $e) {
             http_response_code(404);

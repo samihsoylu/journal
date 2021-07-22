@@ -20,7 +20,7 @@ class CategoryHelper
         $this->repository = $categoryRepository;
     }
 
-    public function getCategoryForUser(int $categoryId, $userId): Category
+    public function getCategoryForUser(int $categoryId, int $userId): Category
     {
         /** @var Category $category */
         $category = $this->repository->getById($categoryId);
@@ -28,6 +28,11 @@ class CategoryHelper
         $this->ensureUserOwnsCategory($category, $userId);
 
         return $category;
+    }
+
+    public function getCategoryByUserAndCategoryName(User $user, string $categoryName): ?Category
+    {
+        return $this->repository->findByCategoryName($user, $categoryName);
     }
 
     /**
@@ -40,7 +45,7 @@ class CategoryHelper
 
     public function getCategoryCountForUser(User $user): int
     {
-        $categories = $this->repository->findByUser($user);
+        $categories = $this->getAllCategoriesForUser($user);
 
         return count($categories);
     }

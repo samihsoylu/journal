@@ -18,9 +18,13 @@
                         <label for="category_description">Category description</label>
                     </div>
                     <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
+
+                    <p class="small-text title"><b>Usage Statistics</b></p>
+                    <p class="small-text context">Entries: {{ $category->getTotalEntries() }} <br /> Templates: {{ $category->getTotalTemplates() }}</p>
+
                     <div>
                         <button class="btn btn-default" type="button" onclick="@if(isset($success)) window.location.href='{{ $categories_url }}' @else window.history.go(-1); return false; @endif"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
-                        <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('DANGER: This action will delete the {{ $category->getName() }} category and all existing entries, and templates linked to it!', '{{ $category_url }}/{{ $category->getId() }}/delete/{{ $session->getAntiCSRFToken() }}')"><i class="material-icons">delete_forever</i> Delete</button>
+                        <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('This action will delete the {{ $category->getName() }} category, and set existing entries, templates as uncategorized.', '{{ $category_url }}/{{ $category->getId() }}/delete/{{ $session->getAntiCSRFToken() }}')"><i class="material-icons">delete_forever</i> Delete</button>
                         <button class="btn btn-primary" type="submit"><i class="material-icons">save</i> Save</button>
                     </div>
                 </form>

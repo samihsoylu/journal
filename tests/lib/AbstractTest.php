@@ -156,7 +156,7 @@ abstract class AbstractTest extends TestCase
     {
         $mockTemplates = $this->getMockTemplates($mockUser, $mockCategory);
 
-        $this->templateRepository->method('findByCategoryAndUser')
+        $this->templateRepository->method('findByUserIdAndCategoryId')
             ->willReturn($mockTemplates);
 
         return $mockTemplates;

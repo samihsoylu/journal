@@ -26,4 +26,13 @@ class CategoryRepository extends AbstractRepository
                 ['sortOrder' => 'ASC'],
             );
     }
+
+    public function findByCategoryName(User $user, string $categoryName): ?Category
+    {
+        return $this->db->getRepository(self::RESOURCE_NAME)
+            ->findOneBy([
+                'referencedUser' => $user,
+                 'name' => $categoryName,
+                ]);
+    }
 }
