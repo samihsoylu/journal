@@ -194,26 +194,14 @@ class CategoryServiceTest extends AbstractTest
         $categoryId = 10;
         $mockUser = $this->setMockUser($userId);
         $mockCategory = $this->setMockCategory($mockUser, $categoryId);
-        $mockEntries = $this->setMockEntries($mockUser, $mockCategory);
-        $mockTemplates = $this->setMockTemplates($mockUser, $mockCategory);
-
-        $this->categoryRepository->expects(self::exactly(11))
-            ->method('remove')
-            ->withConsecutive(
-                [$this->identicalTo($mockEntries[0])],
-                [$this->identicalTo($mockEntries[1])],
-                [$this->identicalTo($mockEntries[2])],
-                [$this->identicalTo($mockEntries[3])],
-                [$this->identicalTo($mockEntries[4])],
-                [$this->identicalTo($mockTemplates[0])],
-                [$this->identicalTo($mockTemplates[1])],
-                [$this->identicalTo($mockTemplates[2])],
-                [$this->identicalTo($mockTemplates[3])],
-                [$this->identicalTo($mockTemplates[4])],
-                [$this->identicalTo($mockCategory)],
-            );
+        $this->setMockEntries($mockUser, $mockCategory);
+        $this->setMockTemplates($mockUser, $mockCategory);
 
         $this->categoryRepository->expects(self::once())
+            ->method('remove')
+            ->with($mockCategory);
+
+        $this->categoryRepository->expects(self::atLeastOnce())
             ->method('save');
 
         $service = new CategoryService();
