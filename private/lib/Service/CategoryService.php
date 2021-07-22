@@ -85,7 +85,7 @@ class CategoryService
         $user = $this->userHelper->getUserById($userId);
 
         // default order, add newly created category to the bottom of the category list
-        if (!isset($order)) {
+        if ($order === null) {
             $categoryCount = $this->categoryHelper->getCategoryCountForUser($user);
             $order = ++$categoryCount;
         }
@@ -149,8 +149,6 @@ class CategoryService
         if ($uncategorizedCategory === null) {
             $uncategorizedCategory = $this->createCategory($userId, Category::UNCATEGORIZED_CATEGORY_NAME, Category::UNCATEGORIZED_CATEGORY_DESCRIPTION, Category::UNCATEGORIZED_CATEGORY_ORDER);
 
-            // Set default sort order to 0
-            $uncategorizedCategory->setSortOrder(0);
             $this->repository->queue($uncategorizedCategory);
         }
 
