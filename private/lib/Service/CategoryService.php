@@ -46,29 +46,19 @@ class CategoryService
         return $this->categoryHelper->getAllCategoriesForUser($user);
     }
 
-    public function getAllCategoriesExceptUncategorizedCategory(int $userId): array
+    public function getAllCategoriesWithExcludeFilter(int $userId, array $excludeCategoryNames): array
     {
         $user = $this->userHelper->getUserById($userId);
         $categories = $this->categoryHelper->getAllCategoriesForUser($user);
 
-        foreach ($categories as $categoryName => $category) {
-            if ($category->getName() === Category::UNCATEGORIZED_CATEGORY_NAME) {
-                unset($categories[$categoryName]);
+        $filteredCategories = [];
+        foreach ($categories as $category) {
+            if (!in_array($category->getName(), $excludeCategoryNames, true)) {
+                $filteredCategories[] = $category;
             }
         }
-        // using unset() broke array indexes
-        /**
-         *  Array
-         *          [0] => 'a'
-         *          [1] => 'b' <== unset this
-         *          [2] => 'c'
-         *
-         * New Array
-         *          [0] => 'a'
-         *          [2] => 'c'
-         */
-        // we are using array_values to reindex array
-        return array_values($categories);
+
+        return $filteredCategories;
     }
 
     public function getCategoryForUser(int $categoryId, int $userId): CategoryDecorator
@@ -90,16 +80,21 @@ class CategoryService
     /**
      * @throws InvalidArgumentException|NotFoundException
      */
-    public function createCategory(int $userId, string $categoryName, string $categoryDescription): Category
+    public function createCategory(int $userId, string $categoryName, string $categoryDescription, int $order = null): Category
     {
         $user = $this->userHelper->getUserById($userId);
-        $categoryCount = $this->categoryHelper->getCategoryCountForUser($user);
+
+        // default order, add newly created category to the bottom of the category list
+        if (!isset($order)) {
+            $categoryCount = $this->categoryHelper->getCategoryCountForUser($user);
+            $order = ++$categoryCount;
+        }
 
         $category = new Category();
         $category->setReferencedUser($user)
                  ->setName($categoryName)
                  ->setDescription($categoryDescription)
-                 ->setSortOrder($categoryCount + 1);
+                 ->setSortOrder($order);
 
         $this->repository->queue($category);
 
@@ -152,7 +147,7 @@ class CategoryService
         // Creates uncategorized category if user doesn't have one
         $uncategorizedCategory = $this->categoryHelper->getCategoryByUserAndCategoryName($user, Category::UNCATEGORIZED_CATEGORY_NAME);
         if ($uncategorizedCategory === null) {
-            $uncategorizedCategory = $this->createCategory($userId, Category::UNCATEGORIZED_CATEGORY_NAME, Category::UNCATEGORIZED_CATEGORY_DESCRIPTION);
+            $uncategorizedCategory = $this->createCategory($userId, Category::UNCATEGORIZED_CATEGORY_NAME, Category::UNCATEGORIZED_CATEGORY_DESCRIPTION, Category::UNCATEGORIZED_CATEGORY_ORDER);
 
             // Set default sort order to 0
             $uncategorizedCategory->setSortOrder(0);

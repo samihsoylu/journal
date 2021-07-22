@@ -47,8 +47,7 @@ class CategoryHelper
     {
         $categories = $this->getAllCategoriesForUser($user);
 
-        // <uncategorized> category doesn't count as a category
-        return count($categories) - 1;
+        return count($categories);
     }
 
     private function ensureCategoryIsNotNull(?Category $category, int $categoryId): void

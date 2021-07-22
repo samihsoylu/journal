@@ -8,6 +8,7 @@ use App\Utility\Redirect;
 use App\Utility\Sanitize;
 use App\Validator\CategoryValidator;
 use App\Service\CategoryService;
+use App\Database\Model\Category as CategoryModel;
 
 class Category extends AbstractController
 {
@@ -47,7 +48,7 @@ class Category extends AbstractController
      */
     public function indexView(): void
     {
-        $categories = $this->service->getAllCategoriesExceptUncategorizedCategory($this->getUserId());
+        $categories = $this->service->getAllCategoriesWithExcludeFilter($this->getUserId(), [CategoryModel::UNCATEGORIZED_CATEGORY_NAME]);
 
         $this->template->setVariable('categories', $categories);
         $this->renderTemplate('category/all');
