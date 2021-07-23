@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * This model class represents a single database record from the `entries` table.
  *
  * @ORM\Entity
- * @ORM\Table(name="entries",indexes={@Index(name="search_by_userid_categoryid_createdtimestamp", columns={"userId", "categoryId", "createdTimestamp"})})
+ * @ORM\Table(name="entries",indexes={@Index(name="SearchBy_UserId_CategoryId_CreatedTimestamp_Title", columns={"userId", "categoryId", "createdTimestamp", "title"})})
  */
 class Entry extends AbstractModel
 {
