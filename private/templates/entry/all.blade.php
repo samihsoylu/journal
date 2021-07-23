@@ -6,7 +6,12 @@
     @include('components/header')
 
     <div class="container">
-        @include('components/create-buttons')
+        <div class="row row-align button-row">
+            <div class="col s12">
+                <button class="btn btn-primary fullwidth hide-on-med-and-up" onclick="window.location.href='{{ $create_entry_url }}'"><i class="material-icons">add_box</i> Create Entry</button>
+                <button class="btn btn-primary right hide-on-small-only" onclick="window.location.href='{{ $create_entry_url }}'"><i class="material-icons">add_box</i> Create Entry</button>
+            </div>
+        </div>
         <div class="row row-align">
             <!-- Mobile Filter Menu -->
             <div class="col s12 hide-on-med-and-up">
@@ -118,7 +123,7 @@
                             <div class="card">
                                 <div class="card-content">
                                     <span class="card-title">{{ $entry->getTitle() }}</span>
-                                    <p>{{ $entry->getCreatedTimestampFormatted() }} <span title="Category" class="card-text-right">{{ $entry->getReferencedCategory()->getName() }}</span></p>
+                                    <p>{{ $entry->getCreatedTimestampFormatted() }} <span title="Category" class="card-text-right light-grey-text italic">{{ $entry->getReferencedCategory()->getName() }}</span></p>
                                 </div>
                             </div>
                         </a>

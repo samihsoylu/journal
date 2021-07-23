@@ -1,6 +1,6 @@
 @extends('base')
 
-@section('pageTitle', 'Account')
+@section('pageTitle', 'Account settings')
 
 @section('content')
     @include('components/header')
