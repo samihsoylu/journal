@@ -58,4 +58,9 @@ const DEFAULT_SESSION_EXPIRY_TIME = 86400; // 24 hours
 
 const PROJECT_VERSION = '1.2.0';
 
-session_start();
+// Prevents warnings from popping up when using this init file through the CLI
+if (headers_sent()) {
+    echo "Headers were sent, session_start() was not invoked.\n";
+} else {
+    session_start();
+}
