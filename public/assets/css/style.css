@@ -103,7 +103,7 @@ footer {
 		width:100%;
 	}
 }
-
+.no-margin { margin:0!important; }
 .mr-30 { margin-right:30px; }
 .mr-20 { margin-right:20px; }
 .mr-10 { margin-right:10px; }
@@ -111,6 +111,9 @@ footer {
 .mt-30 { margin-top:30px; }
 .mt-20 { margin-top:20px; }
 .mt-10 { margin-top:10px; }
+
+.light-grey-text { color: #bdbdbd; }
+.italic { font-style:italic; }
 
 /* #Header
 ================================================== */
@@ -379,8 +382,6 @@ a .card:hover {
 }
 .card-text-right {
 	float:right;
-	font-style:italic;
-	opacity:0.3;
 }
 
 /* #Entry content
