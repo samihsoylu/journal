@@ -14,8 +14,24 @@ Journal is a privacy first, self hosted digital log book. It is designed to be a
 * Advanced search 
 * Unlimited users
 
+## Requirements
+- A Linux-based server with shell access
+- PHP 7.4 or later.
+- MySQL 5.6+
+
+### PHP Extensions
+
+The listed extensions are usually installed and enabled by default in most PHP 7 installations
+
+- [json](https://www.php.net/manual/en/book.json.php)
+- [pdo](https://www.php.net/manual/en/book.pdo.php)
+- [openssl](https://www.php.net/manual/en/book.openssl.php)
+- [tokenizer](https://www.php.net/manual/en/book.tokenizer.php)
+- [mbstring](https://www.php.net/manual/en/book.mbstring.php)
+- [ctype](https://www.php.net/manual/en/book.ctype)
+- [pcre](https://www.php.net/manual/en/book.pcre)
+- [session](https://www.php.net/manual/en/book.session)
+
 ## Documentation
 
-* [Requirements](https://www.notion.so/Requirements-fb5056061538491aa614799a422a96d3)
-* [Installation](https://www.notion.so/Installation-fb156297be1f421c8540a41fe34314ec)
-* [Upgrading](https://www.notion.so/Upgrading-04fcbde744c244bcacad577604c43b41)
+* [Visit my Notion Docs page](https://www.notion.so/Journal-cc104d4234b448e499078c904be72420)

@@ -1,7 +1,9 @@
 $( document ).ready(function() {
     // Navigation
     $('.sidenav').sidenav();
-    $(".dropdown-trigger").dropdown();
+    $(".dropdown-trigger").dropdown({
+        'constrainWidth': false
+    });
 
     // Forms: select field
     $('form select').formSelect();

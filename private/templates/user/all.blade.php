@@ -20,7 +20,7 @@
                             <div class="card">
                                 <div class="card-content">
                                     <span class="card-title">{{ $user->getUsername() }}</span>
-                                    <p>Created: {{ $user->getCreatedTimestampFormatted() }} <span title="Privilege" class="card-text-right">{{ $user->getPrivilegeLevelAsString() }}</span></p>
+                                    <p>Created: {{ $user->getCreatedTimestampFormatted() }} <span title="Privilege" class="card-text-right light-grey-text italic">{{ $user->getPrivilegeLevelAsString() }}</span></p>
                                 </div>
                             </div>
                         </a>
