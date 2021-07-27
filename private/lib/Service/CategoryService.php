@@ -83,10 +83,18 @@ class CategoryService
     public function createCategory(int $userId, string $categoryName, string $categoryDescription, int $order = null): Category
     {
         $user = $this->userHelper->getUserById($userId);
+        $categoryCount = $this->categoryHelper->getCategoryCountForUser($user);
+        $uncategorizedCategory = $this->categoryHelper->getCategoryByUserAndCategoryName($user, Category::UNCATEGORIZED_CATEGORY_NAME);
+
+        //uncategorized category should always be at bottom, increment order by 2 to make space for the new category
+        if (!$uncategorizedCategory == null) {
+            $uncategorizedCategory->setSortOrder($categoryCount + 2);
+
+            $this->repository->queue($uncategorizedCategory);
+        }
 
         // default order, add newly created category to the bottom of the category list
         if ($order === null) {
-            $categoryCount = $this->categoryHelper->getCategoryCountForUser($user);
             $order = ++$categoryCount;
         }
 
@@ -147,7 +155,7 @@ class CategoryService
         // Creates uncategorized category if user doesn't have one
         $uncategorizedCategory = $this->categoryHelper->getCategoryByUserAndCategoryName($user, Category::UNCATEGORIZED_CATEGORY_NAME);
         if ($uncategorizedCategory === null) {
-            $uncategorizedCategory = $this->createCategory($userId, Category::UNCATEGORIZED_CATEGORY_NAME, Category::UNCATEGORIZED_CATEGORY_DESCRIPTION, Category::UNCATEGORIZED_CATEGORY_ORDER);
+            $uncategorizedCategory = $this->createCategory($userId, Category::UNCATEGORIZED_CATEGORY_NAME, Category::UNCATEGORIZED_CATEGORY_DESCRIPTION);
 
             $this->repository->queue($uncategorizedCategory);
         }
