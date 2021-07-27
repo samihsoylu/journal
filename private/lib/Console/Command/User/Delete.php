@@ -29,7 +29,7 @@ class Delete extends Command
 
         $service = new UserService();
         $user = $service->getUser($userId);
-        $service->deleteUserFromDatabase($user);
+        $service->deleteUser($user);
 
         $output->writeln("User {$user->getUsername()} deleted successfully");
 

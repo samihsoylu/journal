@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Database\Model\Category;
+use App\Database\Model\User;
 use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\NotFoundException;
@@ -13,7 +14,6 @@ use App\Service\Helper\UserHelper;
 use App\Service\Model\CategoryDecorator;
 use App\Utility\Registry;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Doctrine\ORM\ORMException;
 
 class CategoryService
 {
@@ -84,7 +84,6 @@ class CategoryService
     {
         $user = $this->userHelper->getUserById($userId);
 
-        // default order, add newly created category to the bottom of the category list
         if ($order === null) {
             $categoryCount = $this->categoryHelper->getCategoryCountForUser($user);
             $order = ++$categoryCount;
@@ -103,6 +102,7 @@ class CategoryService
         } catch (UniqueConstraintViolationException $e) {
             throw InvalidArgumentException::categoryAlreadyExists($categoryName);
         }
+
         return $category;
     }
 
@@ -117,61 +117,55 @@ class CategoryService
         $this->repository->save();
     }
 
-    /**
-     * @throws InvalidArgumentException
-     * @throws ORMException
-     * @throws NotFoundException
-     */
     public function deleteCategory(int $userId, int $categoryId): void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
-        $this->setUncategorizedEntriesAndTemplates($userId, $category);
+        $this->moveEntriesAndTemplatesAwayFromCategory($category);
 
-        // queue category for deleting
         $this->repository->remove($category);
-
-        // delete queued entries, templates and categories
         $this->repository->save();
     }
 
-    /**
-     * @throws NotFoundException
-     * @throws InvalidArgumentException
-     */
-    public function setUncategorizedEntriesAndTemplates(int $userId, Category $category)
+    public function moveEntriesAndTemplatesAwayFromCategory(Category $category)
     {
-        $categoryId = $category->getId();
-        $user = $this->userHelper->getUserById($userId);
+        $user = $category->getReferencedUser();
+        $uncategorizedCategory = $this->ensureUnCategorizedCategoryExists($user);
 
-        // Creates uncategorized category if user doesn't have one
-        $uncategorizedCategory = $this->categoryHelper->getCategoryByUserAndCategoryName($user, Category::UNCATEGORIZED_CATEGORY_NAME);
-        if ($uncategorizedCategory === null) {
-            $uncategorizedCategory = $this->createCategory($userId, Category::UNCATEGORIZED_CATEGORY_NAME, Category::UNCATEGORIZED_CATEGORY_DESCRIPTION, Category::UNCATEGORIZED_CATEGORY_ORDER);
-
-            $this->repository->queue($uncategorizedCategory);
-        }
-
-        $templates = $this->templateHelper->getTemplatesForUserByCategory($userId, $categoryId);
+        $templates = $this->templateHelper->getTemplatesForUserByCategory($user->getId(), $category->getId());
         foreach ($templates as $template) {
             $template->setReferencedCategory($uncategorizedCategory);
             $this->repository->queue($template);
         }
 
-        $entries = $this->entryHelper->getEntriesForUserByCategory($userId, $categoryId);
+        $entries = $this->entryHelper->getEntriesForUserByCategory($user->getId(), $category->getId());
         foreach ($entries as $entry) {
             $entry->setReferencedCategory($uncategorizedCategory);
             $this->repository->queue($entry);
         }
+
+        $this->repository->save();
     }
 
     public function updateCategoryOrder(int $userId, int $categoryId, int $order): void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
-
         $category->setSortOrder($order);
+        $category->save();
+    }
 
-        $this->repository->queue($category);
-        $this->repository->save();
+    private function ensureUnCategorizedCategoryExists(User $user): Category
+    {
+        $category = $this->repository->findByCategoryName($user, Category::UNCATEGORIZED_CATEGORY_NAME);
+        if ($category === null) {
+            $category = new Category();
+            $category->setName(Category::UNCATEGORIZED_CATEGORY_NAME)
+                ->setDescription(Category::UNCATEGORIZED_CATEGORY_DESCRIPTION)
+                ->setReferencedUser($user)
+                ->setSortOrder(2147483646)
+                ->save();
+        }
+
+        return $category;
     }
 }

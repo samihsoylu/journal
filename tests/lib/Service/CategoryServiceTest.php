@@ -187,24 +187,4 @@ class CategoryServiceTest extends AbstractTest
         $service = new CategoryService();
         $service->updateCategory($userId, $categoryId, 'New Category Name', 'New Category Description');
     }
-
-    public function testDeleteCategory(): void
-    {
-        $userId = 5;
-        $categoryId = 10;
-        $mockUser = $this->setMockUser($userId);
-        $mockCategory = $this->setMockCategory($mockUser, $categoryId);
-        $this->setMockEntries($mockUser, $mockCategory);
-        $this->setMockTemplates($mockUser, $mockCategory);
-
-        $this->categoryRepository->expects(self::once())
-            ->method('remove')
-            ->with($mockCategory);
-
-        $this->categoryRepository->expects(self::atLeastOnce())
-            ->method('save');
-
-        $service = new CategoryService();
-        $service->deleteCategory($userId, $categoryId);
-    }
 }

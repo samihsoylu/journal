@@ -65,8 +65,7 @@ class User extends AbstractController
         $privilegeLevel = Sanitize::int($_POST['privilegeLevel']);
         $password       = $_POST['password'];
 
-        $userId = $this->service->registerNewUserForLoggedInUser($this->getUserId(), $username, $password, $email, $privilegeLevel);
-        $this->service->createDefaultCategoriesForUser($userId);
+        $userId = $this->service->createUserForAdmin($this->getUserId(), $username, $password, $email, $privilegeLevel);
 
         // Present success message
         $this->setNotification(
@@ -100,7 +99,7 @@ class User extends AbstractController
         $targetUserId = Sanitize::int($this->getRouteParameters()['id']);
         $newPrivilegeLevel = Sanitize::int($_POST['privilegeLevel']);
 
-        $this->service->updateUserPrivileges($this->getUserId(), $targetUserId, $newPrivilegeLevel);
+        $this->service->updateUserPrivilegesForAdmin($this->getUserId(), $targetUserId, $newPrivilegeLevel);
 
         $this->updateView();
     }
@@ -114,7 +113,7 @@ class User extends AbstractController
     {
         $targetUserId = Sanitize::int($this->getRouteParameters()['id']);
 
-        $user = $this->service->getUserForLoggedInUser($this->getUserId(), $targetUserId);
+        $user = $this->service->getUserForAdmin($this->getUserId(), $targetUserId);
 
         $this->template->setVariable('user', $user);
         $this->renderTemplate('user/update');

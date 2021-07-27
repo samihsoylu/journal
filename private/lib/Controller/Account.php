@@ -108,7 +108,7 @@ class Account extends AbstractController
     {
         $this->validator->validate(__FUNCTION__);
 
-        $this->userService->deleteUser($_POST['password'], $this->getUserId());
+        $this->userService->deleteUserForUser($_POST['password'], $this->getUserId());
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,

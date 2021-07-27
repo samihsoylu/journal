@@ -186,8 +186,7 @@ class Category extends AbstractController
             foreach ($sortOrders as $sortOrder => $categoryId) {
                 $categoryId = Sanitize::int($categoryId);
 
-                // $sortOrder is incremented by one because we do not want sort order 0 to be used (reserved for uncategorized category)
-                $this->service->updateCategoryOrder($this->getUserId(), $categoryId, ++$sortOrder);
+                $this->service->updateCategoryOrder($this->getUserId(), $categoryId, $sortOrder);
             }
         } catch (UserException $e) {
             http_response_code(404);

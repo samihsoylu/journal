@@ -19,7 +19,6 @@ class Category extends AbstractModel
 {
     public const UNCATEGORIZED_CATEGORY_NAME = '<uncategorized>';
     public const UNCATEGORIZED_CATEGORY_DESCRIPTION = 'Placeholder for uncategorized entries and templates';
-    public const UNCATEGORIZED_CATEGORY_ORDER = 0;
 
     /**
      * @ORM\Id

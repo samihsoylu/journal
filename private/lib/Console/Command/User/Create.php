@@ -81,8 +81,7 @@ class Create extends Command
         $privilegeLevels = array_flip(User::ALLOWED_PRIVILEGE_LEVELS);
 
         $service = new UserService();
-        $userId = $service->registerNewUser($username, $password, $email, $privilegeLevels[$privilegeLevel]);
-        $service->createDefaultCategoriesForUser($userId);
+        $service->createUser($username, $password, $email, $privilegeLevels[$privilegeLevel]);
 
         $output->writeln("User {$username} registered successfully");
 

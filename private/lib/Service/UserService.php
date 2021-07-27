@@ -2,11 +2,10 @@
 
 namespace App\Service;
 
-use App\Database\Model\Category;
-use App\Database\Model\Template;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
 use App\Service\Helper\TemplateHelper;
+use App\Service\Helper\UserSetupHelper;
 use App\Service\Helper\WidgetHelper;
 use App\Service\Model\UserDecorator;
 use App\Exception\UserException\InvalidArgumentException;
@@ -57,7 +56,7 @@ class UserService
      *
      * @return int User id
      */
-    public function registerNewUserForLoggedInUser(int $loggedInUserId, string $username, string $password, string $email, int $privilegeLevel): int
+    public function createUserForAdmin(int $loggedInUserId, string $username, string $password, string $email, int $privilegeLevel): int
     {
         $loggedInUser = $this->userHelper->getUserById($loggedInUserId);
 
@@ -66,7 +65,7 @@ class UserService
             throw InvalidOperationException::insufficientPrivileges($loggedInUser->getPrivilegeLevelAsString());
         }
 
-        return $this->registerNewUser($username, $password, $email, $privilegeLevel);
+        return $this->createUser($username, $password, $email, $privilegeLevel);
     }
 
     /**
@@ -74,7 +73,7 @@ class UserService
      *
      * @return int
      */
-    public function registerNewUser(string $username, string $password, string $email, int $privilegeLevel): int
+    public function createUser(string $username, string $password, string $email, int $privilegeLevel): int
     {
         $user = $this->repository->findByUsername($username);
         if ($user !== null) {
@@ -96,15 +95,20 @@ class UserService
             ->setPassword($encryptedPassword)
             ->setEmailAddress($email)
             ->setPrivilegeLevel($privilegeLevel)
-            ->setEncryptionKey($protectedEncryptionKey);
+            ->setEncryptionKey($protectedEncryptionKey)
+            ->save();
 
-        $this->repository->queue($user);
-        $this->repository->save();
+        $encodedKey = $encryptor->getEncodedKeyFromProtectedKey($protectedEncryptionKey, $password);
+        $key = $encryptor->getKeyObjectFromEncodedKey($encodedKey);
+
+        $setup = new UserSetupHelper($user);
+        $setup->createDefaultCategories();
+        $setup->createDefaultTemplates($key);
 
         return $user->getId();
     }
 
-    public function getUserForLoggedInUser(int $loggedInUserId, int $targetUserId): UserDecorator
+    public function getUserForAdmin(int $loggedInUserId, int $targetUserId): UserDecorator
     {
         $user       = $this->userHelper->getUserById($loggedInUserId);
         $targetUser = $this->userHelper->getUserById($targetUserId);
@@ -124,7 +128,7 @@ class UserService
         );
     }
 
-    public function updateUserPrivileges(int $loggedInUserId, int $targetUserId, int $newPrivilegeLevel): void
+    public function updateUserPrivilegesForAdmin(int $loggedInUserId, int $targetUserId, int $newPrivilegeLevel): void
     {
         $loggedInUser = $this->userHelper->getUserById($loggedInUserId);
         $targetUser = $this->userHelper->getUserById($targetUserId);
@@ -149,10 +153,15 @@ class UserService
 
         $this->ensureUserHasUpdatePrivileges($loggedInUser, $targetUser);
 
-        $this->deleteUserFromDatabase($targetUser);
+        $this->deleteUser($targetUser);
     }
 
-    public function deleteUser(string $currentPassword, int $userId): void
+    /**
+     * Deletes user for logged in user (account page)
+     *
+     * @return void
+     */
+    public function deleteUserForUser(string $currentPassword, int $userId): void
     {
         $user = $this->userHelper->getUserById($userId);
 
@@ -164,26 +173,26 @@ class UserService
             throw InvalidArgumentException::incorrectPassword();
         }
 
-        $this->deleteUserFromDatabase($user);
+        $this->deleteUser($user);
 
         UserSession::destroy();
     }
 
-    public function deleteUserFromDatabase(User $targetUser): void
+    public function deleteUser(User $targetUser): void
     {
         $entries = $this->entryHelper->getAllEntriesForUser($targetUser);
         foreach ($entries as $entry) {
             $this->repository->remove($entry);
         }
 
-        $categories = $this->categoryHelper->getAllCategoriesForUser($targetUser);
-        foreach ($categories as $category) {
-            $this->repository->remove($category);
-        }
-
         $templates = $this->templateHelper->getAllTemplatesForUser($targetUser);
         foreach ($templates as $template) {
             $this->repository->remove($template);
+        }
+
+        $categories = $this->categoryHelper->getAllCategoriesForUser($targetUser);
+        foreach ($categories as $category) {
+            $this->repository->remove($category);
         }
 
         $widgets = $this->widgetHelper->getAllWidgetsForUser($targetUser);
@@ -210,31 +219,6 @@ class UserService
         return ($user->getPrivilegeLevel() < $targetUser->getPrivilegeLevel());
     }
 
-    public function createDefaultCategoriesForUser(int $userId): void
-    {
-        $user = $this->userHelper->getUserById($userId);
-
-        $personal = new Category();
-        $personal->setName('Personal');
-        $personal->setDescription('Stories about your experiences, passions and ambitions');
-        $personal->setReferencedUser($user);
-        $this->repository->queue($personal);
-
-        $diet = new Category();
-        $diet->setName('Food');
-        $diet->setDescription('Food journaling for reaching healthy eating goals');
-        $diet->setReferencedUser($user);
-        $this->repository->queue($diet);
-
-        $work = new Category();
-        $work->setName('Work');
-        $work->setDescription('Meeting notes, deadlines, countless other bits of information that are best stored here instead of your brain');
-        $work->setReferencedUser($user);
-        $this->repository->queue($work);
-
-        $this->repository->save();
-    }
-
     public function changePassword(int $userId, string $currentPassword, string $newPassword): void
     {
         $user = $this->userHelper->getUserById($userId);
@@ -248,9 +232,7 @@ class UserService
         $encryptor = new Encryptor();
         $newEncryptedKey = $encryptor->changePassword($user->getEncryptionKey(), $currentPassword, $newPassword);
         $user->setEncryptionKey($newEncryptedKey);
-
-        $this->repository->queue($user);
-        $this->repository->save();
+        $user->save();
     }
 
     public function getUser(int $loggedInUserId): User
@@ -262,8 +244,6 @@ class UserService
     {
         $user = $this->userHelper->getUserById($userId);
         $user->setEmailAddress($newEmailAddress);
-
-        $this->repository->queue($user);
-        $this->repository->save();
+        $user->save();
     }
 }
