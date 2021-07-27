@@ -56,7 +56,7 @@ const ASSETS_URL                  = BASE_URL  . '/assets';
 const DEFAULT_CACHE_EXPIRY_TIME   = 3600;  // 1 hour
 const DEFAULT_SESSION_EXPIRY_TIME = 86400; // 24 hours
 
-const PROJECT_VERSION = '1.2.1';
+const PROJECT_VERSION = '1.2.2';
 
 // Prevents warnings from popping up when using this init file through the CLI
 if (headers_sent()) {

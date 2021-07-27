@@ -135,8 +135,10 @@ class User extends AbstractModel
         return $this->encryptionKey;
     }
 
-    public function setEncryptionKey(string $encryptionKey): void
+    public function setEncryptionKey(string $encryptionKey): self
     {
         $this->encryptionKey = $encryptionKey;
+
+        return $this;
     }
 }
