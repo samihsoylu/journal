@@ -25,15 +25,22 @@ class Encryptor
     public function getEncodedKeyFromProtectedKey(string $protectedKey, string $password): string
     {
         $protectedKeyObject = KeyProtectedByPassword::loadFromAsciiSafeString($protectedKey);
-        $keyObject = $protectedKeyObject->unlockKey($password);
+        $key = $protectedKeyObject->unlockKey($password);
 
-        return $keyObject->saveToAsciiSafeString();
+        return $key->saveToAsciiSafeString();
+    }
+
+    public function getKeyFromProtectedKey(string $protectedKey, string $password): Key
+    {
+        $protectedKeyObject = KeyProtectedByPassword::loadFromAsciiSafeString($protectedKey);
+
+        return $protectedKeyObject->unlockKey($password);
     }
 
     /**
      * @return Key object that you must provide for $this->encrypt() and $this->decrypt()
      */
-    public function getKeyObjectFromEncodedKey(string $encodedKey): Key
+    public function getKeyFromEncodedKey(string $encodedKey): Key
     {
         return Key::loadFromAsciiSafeString($encodedKey);
     }

@@ -98,12 +98,9 @@ class UserService
             ->setEncryptionKey($protectedEncryptionKey)
             ->save();
 
-        $encodedKey = $encryptor->getEncodedKeyFromProtectedKey($protectedEncryptionKey, $password);
-        $key = $encryptor->getKeyObjectFromEncodedKey($encodedKey);
-
-        $setup = new UserSetupHelper($user);
-        $setup->createDefaultCategories();
-        $setup->createDefaultTemplates($key);
+        $key = $encryptor->getKeyFromProtectedKey($protectedEncryptionKey, $password);
+        $setup = new UserSetupHelper($user, $key);
+        $setup->setDefaults();
 
         return $user->getId();
     }
