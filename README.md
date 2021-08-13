@@ -5,14 +5,14 @@ Journal is a privacy first, self hosted digital log book. It is designed to be a
 
 ## Feature highlights
 * Mobile friendly
-* Entries and Templates have AES-256 Encryption
+* Create predefined sets of templates for entries
 * Format entry content using markdown
 * Organise entries using categories
+* Entries and Templates have AES-256 Encryption
 * Quickly add entries by enabling the quick-add widget
-* Create predefined sets of templates for entries
 * Order your favorite categories to appear on the top
 * Advanced search 
-* Unlimited users
+* Create accounts for users
 
 ## Requirements
 - A Linux-based server with shell access
@@ -34,4 +34,5 @@ The listed extensions are usually installed and enabled by default in most PHP 7
 
 ## Documentation
 
-* [Visit my Notion Docs page](https://www.notion.so/Journal-cc104d4234b448e499078c904be72420)
+* [Installation](https://www.notion.so/Installation-fb156297be1f421c8540a41fe34314ec)
+* [Upgrading](https://www.notion.so/Upgrading-04fcbde744c244bcacad577604c43b41)
