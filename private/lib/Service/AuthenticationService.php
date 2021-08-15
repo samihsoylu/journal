@@ -94,7 +94,7 @@ class AuthenticationService
         $encodedEncryptionKey = $session->getEncodedEncryptionKey();
 
         $encryptor = new Encryptor();
-        return $encryptor->getKeyObjectFromEncodedKey($encodedEncryptionKey);
+        return $encryptor->getKeyFromEncodedKey($encodedEncryptionKey);
     }
 
     public function getUserId(): int

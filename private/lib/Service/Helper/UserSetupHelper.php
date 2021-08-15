@@ -15,14 +15,16 @@ class UserSetupHelper
     private UserRepository $repository;
     private CategoryRepository $categoryRepository;
     private User $user;
+    private Key $userEncryptionKey;
 
     private const PERSONAL_CATEGORY = 'Personal';
     private const FOOD_CATEGORY = 'Food';
     private const WORK_CATEGORY = 'Work';
 
-    public function __construct(User $user)
+    public function __construct(User $user, Key $userEncryptionKey)
     {
         $this->user = $user;
+        $this->userEncryptionKey = $userEncryptionKey;
 
         /** @var UserRepository $repository */
         $repository = Registry::get(UserRepository::class);
@@ -33,7 +35,13 @@ class UserSetupHelper
         $this->categoryRepository = $categoryRepository;
     }
 
-    public function createDefaultCategories()
+    public function setDefaults(): void
+    {
+        $this->createDefaultCategories();
+        $this->createDefaultTemplates();
+    }
+
+    private function createDefaultCategories()
     {
         $personal = new Category();
         $personal->setName(self::PERSONAL_CATEGORY);
@@ -59,7 +67,7 @@ class UserSetupHelper
         $this->repository->save();
     }
 
-    public function createDefaultTemplates(Key $key)
+    public function createDefaultTemplates()
     {
         $foodCategory = $this->categoryRepository->findByCategoryName($this->user, self::FOOD_CATEGORY);
         if ($foodCategory === null) {
@@ -70,7 +78,10 @@ class UserSetupHelper
 
         $food = new Template();
         $food->setTitle('Food tracking')
-            ->setContentAndEncrypt("# Breakfast\n\n* ...\n* ...\n* ...\n\n# Lunch\n\n* ...\n* ...\n* ...\n\n# Dinner\n\n* ...\n* ...\n* ...\n\n", $key)
+            ->setContentAndEncrypt(
+                "# Breakfast\n\n* ...\n* ...\n* ...\n\n# Lunch\n\n* ...\n* ...\n* ...\n\n# Dinner\n\n* ...\n* ...\n* ...\n\n",
+                $this->userEncryptionKey
+            )
             ->setReferencedCategory($foodCategory)
             ->setReferencedUser($this->user)
             ->save();
