@@ -1,7 +1,7 @@
 # Journal
 Journal is a privacy first, self hosted digital log book. It is designed to be accessible anywhere you go, allowing you to organize your thoughts, feelings and opinions in one place. Your Journals are stored with AES 256 encryption using your own password as the encryption key, resulting in a protected and inaccessible log book from outsiders.
 
-<img src="https://samihsoylu.nl/downloads/dashboard-journal.png">
+<img src="https://samihsoylu.nl/downloads/dashboard-journalv1.2.3.png">
 
 ## Feature highlights
 * Mobile friendly
@@ -34,5 +34,5 @@ The listed extensions are usually installed and enabled by default in most PHP 7
 
 ## Documentation
 
-* [Installation](https://www.notion.so/Installation-fb156297be1f421c8540a41fe34314ec)
-* [Upgrading](https://www.notion.so/Upgrading-04fcbde744c244bcacad577604c43b41)
+* [Installation](https://samihsoylu.notion.site/Installation-fb156297be1f421c8540a41fe34314ec)
+* [Upgrading](https://samihsoylu.notion.site/Upgrading-04fcbde744c244bcacad577604c43b41)
