@@ -11,6 +11,10 @@
 /private/cache/templates/*
 !/private/cache/templates/.gitkeep
 
+!/private/cache/export/
+/private/cache/export/*
+!/private/cache/export/.gitkeep
+
 !/private/cache/sessions/
 /private/cache/sessions/*
 !/private/cache/sessions/.gitkeep

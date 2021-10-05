@@ -39,11 +39,11 @@ class Command
 
     public function toString(): string
     {
-        $commands  = $this->escapeCommands($this->commands);
+        $commands = $this->escapeCommands($this->commands);
         $arguments = $this->escapeArguments($this->arguments);
 
-        $command   = implode(' ', $commands);
-        $argument  = implode(' ', $arguments);
+        $command = implode(' ', $commands);
+        $argument = implode(' ', $arguments);
 
         return "{$command} {$argument}";
     }

@@ -127,4 +127,30 @@ class EntryRepository extends AbstractRepository
                 ->setParameter('search', "%{$search}%");
         }
     }
+
+    public function getTotalCountByUserId($userId): int
+    {
+        $qb = $this->db->createQueryBuilder();
+
+        $qb->select('count(distinct e.id)')
+            ->from(self::RESOURCE_NAME, 'e')
+            ->where('e.referencedUser = :userId')
+            ->setParameter('userId', $userId);
+
+        return (int)$qb->getQuery()->getSingleScalarResult();
+    }
+
+    public function getSelectionByUserId(int $userId, int $offset, int $limit): array
+    {
+        $qb = $this->db->createQueryBuilder();
+
+        $qb->select('e')->distinct()
+            ->from(self::RESOURCE_NAME, 'e')
+            ->where('e.referencedUser = :userId')
+            ->setParameter('userId', $userId)
+            ->setFirstResult($offset)
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getResult();
+    }
 }

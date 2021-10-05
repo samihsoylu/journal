@@ -52,6 +52,7 @@ const TEMPLATE_PATH               = BASE_PATH . '/private/templates/';
 const TEMPLATE_CACHE_PATH         = BASE_PATH . '/private/cache/templates/';
 const SESSION_CACHE_PATH          = BASE_PATH . '/private/cache/sessions/';
 const DATABASE_CACHE_PATH         = BASE_PATH . '/private/cache/database';
+const EXPORT_CACHE_PATH           = BASE_PATH . '/private/cache/export';
 const ASSETS_URL                  = BASE_URL  . '/assets';
 const DEFAULT_CACHE_EXPIRY_TIME   = 3600;  // 1 hour
 const DEFAULT_SESSION_EXPIRY_TIME = 86400; // 24 hours
