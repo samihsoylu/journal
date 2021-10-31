@@ -28,7 +28,7 @@ interface ModelInterface
     /**
      * This method must return the `createdTimestamp` column from a table row.
      *
-     * @return void
+     * @return int
      */
     public function getCreatedTimestamp(): int;
 }

@@ -36,9 +36,9 @@ abstract class AbstractRepository
      *
      * @param int $id
      *
-     * @return object
+     * @return object|null
      */
-    public function getById(int $id): ?object
+    public function getById(int $id): ?static
     {
         return $this->db->find(static::RESOURCE_NAME, $id);
     }

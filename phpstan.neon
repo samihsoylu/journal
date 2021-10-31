@@ -1,0 +1,12 @@
+parameters:
+    bootstrapFiles:
+        - .phpstan-bootstrap.php
+    level: 3
+    paths:
+        - private/lib
+        - private/scripts
+    excludes_analyse:
+        - private/cache
+        - private/templates
+        - tests
+        - vendor

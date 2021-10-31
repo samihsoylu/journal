@@ -63,7 +63,7 @@ class Template
      * Set a variable name that will be passed on to the blade templating engine
      *
      * @param string $key variable name
-     * @param $value
+     * @param string|int $value
      */
     public function setVariable(string $key, $value): void
     {

@@ -23,6 +23,9 @@ jobs:
 
       - name: Validate PHP code style
         run: ./vendor/bin/php-cs-fixer fix -v --dry-run --using-cache=no .
+
+      - name: PHP static code analysis
+        run: php -d memory_limit=1G ./vendor/bin/phpstan -vvv analyse -c phpstan.neon
   test74:
     name: PHP 7.4 Code test
     runs-on: ubuntu-latest
@@ -53,6 +56,9 @@ jobs:
 
       - name: Validate PHP code style
         run: ./vendor/bin/php-cs-fixer fix -v --dry-run --using-cache=no .
+
+      - name: PHP static code analysis
+        run: php -d memory_limit=1G ./vendor/bin/phpstan -vvv analyse -c phpstan.neon
   test80:
     name: PHP 8.0 Code test
     runs-on: ubuntu-latest

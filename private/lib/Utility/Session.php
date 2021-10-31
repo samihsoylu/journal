@@ -29,10 +29,10 @@ class Session
     /**
      * Reads a Session
      *
-     * @param $name
+     * @param string $name
      * @return null|mixed
      */
-    public static function get($name)
+    public static function get(string $name)
     {
         return $_SESSION[$name] ?? null;
     }

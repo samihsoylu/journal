@@ -28,7 +28,8 @@
         "defuse/php-encryption": "^2.2",
         "doctrine/migrations": "^3.1",
         "psy/psysh": "^0.10.8",
-        "symfony/console": "^5.2"
+        "symfony/console": "^5.2",
+        "phpstan/phpstan": "^0.12.99"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
