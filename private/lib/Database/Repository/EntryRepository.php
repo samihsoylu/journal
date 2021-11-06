@@ -7,6 +7,10 @@ use App\Database\Model\User;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 
+/**
+ * @method Entry[] getAll()
+ * @method Entry|null getById(int $id)
+ */
 class EntryRepository extends AbstractRepository
 {
     /**

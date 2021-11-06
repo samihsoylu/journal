@@ -35,7 +35,6 @@ class UserHelper
      */
     public function getUserById(int $userId): User
     {
-        /** @var User $user */
         $user = $this->repository->getById($userId);
         if ($user === null) {
             throw NotFoundException::entityIdNotFound(User::getClassName(), $userId);

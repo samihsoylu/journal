@@ -1,7 +1,7 @@
 parameters:
     bootstrapFiles:
         - .phpstan-bootstrap.php
-    level: 3
+    level: 5
     paths:
         - private/lib
         - private/scripts

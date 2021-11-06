@@ -5,6 +5,10 @@ namespace App\Database\Repository;
 use App\Database\Model\User;
 use App\Database\Model\Category;
 
+/**
+ * @method Category[] getAll()
+ * @method Category|null getById(int $id)
+ */
 class CategoryRepository extends AbstractRepository
 {
     /**

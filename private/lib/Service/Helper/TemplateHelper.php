@@ -22,7 +22,6 @@ class TemplateHelper
 
     public function getTemplateForUser(int $templateId, $userId): Template
     {
-        /** @var Template $template */
         $template = $this->repository->getById($templateId);
         $this->ensureTemplateIsNotNull($template, $templateId);
         $this->ensureUserOwnsTemplate($template, $userId);

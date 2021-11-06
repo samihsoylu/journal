@@ -21,6 +21,7 @@ class Sanitize
      */
     public static function string(string $value, string $options): string
     {
+        /** @var array|bool $optionList */
         $optionList = explode('|', $options);
         if ($optionList === false) {
             return $value;

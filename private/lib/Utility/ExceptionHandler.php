@@ -73,6 +73,7 @@ class ExceptionHandler
 
     public function genericException(): void
     {
+        /** @phpstan-ignore-next-line */
         if (DEBUG_MODE) {
             throw $this->getException();
         }
