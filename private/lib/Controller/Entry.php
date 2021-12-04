@@ -59,12 +59,12 @@ class Entry extends AbstractController
         /** @see EntryValidator::index() */
         $this->validator->validate(__FUNCTION__);
 
-        $searchQuery     = Sanitize::getVariable($_GET, 'search_by_title', 'string', 'trim|htmlspecialchars');
-        $categoryId      = Sanitize::getVariable($_GET, 'category_id', 'int');
-        $createdDateFrom = Sanitize::getVariable($_GET, 'date_from', 'string', 'trim|htmlspecialchars');
-        $createdDateTo   = Sanitize::getVariable($_GET, 'date_to', 'string', 'trim|htmlspecialchars');
-        $pageSize        = Sanitize::getVariable($_GET, 'page_size', 'int') ?? 25;
-        $page            = Sanitize::getVariable($_GET, 'page', 'int') ?? 1;
+        $searchQuery     = Sanitize::getVariable($_GET, 'search_by_title', Sanitize::TYPE_STRING);
+        $categoryId      = Sanitize::getVariable($_GET, 'category_id', Sanitize::TYPE_INT);
+        $createdDateFrom = Sanitize::getVariable($_GET, 'date_from', Sanitize::TYPE_STRING);
+        $createdDateTo   = Sanitize::getVariable($_GET, 'date_to', Sanitize::TYPE_STRING);
+        $pageSize        = Sanitize::getVariable($_GET, 'page_size', Sanitize::TYPE_INT) ?? 25;
+        $page            = Sanitize::getVariable($_GET, 'page', Sanitize::TYPE_INT) ?? 1;
 
         if ($createdDateFrom !== null) {
             $date = new \DateTime($createdDateFrom);
@@ -137,8 +137,8 @@ class Entry extends AbstractController
         $this->validator->validate(__FUNCTION__);
 
         $categoryId   = Sanitize::int($_POST['category_id']);
-        $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
-        $entryContent = Sanitize::string($_POST['entry_content'], 'trim');
+        $entryTitle   = Sanitize::string($_POST['entry_title']);
+        $entryContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $entryId = $this->service->createEntry($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $entryTitle, $entryContent);
 
@@ -180,8 +180,8 @@ class Entry extends AbstractController
 
         $entryId      = Sanitize::int($this->getRouteParameters()['id']);
         $categoryId   = Sanitize::int($_POST['category_id']);
-        $entryTitle   = Sanitize::string($_POST['entry_title'], 'strip|capitalize');
-        $entryContent = Sanitize::string($_POST['entry_content'], 'trim');
+        $entryTitle   = Sanitize::string($_POST['entry_title']);
+        $entryContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $this->service->updateEntry(
             $this->getUserId(),

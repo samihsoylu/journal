@@ -58,7 +58,7 @@ class Account extends AbstractController
     {
         $this->validator->validate(__FUNCTION__);
 
-        $newEmail = Sanitize::string($_POST['email'], 'lowercase|trim');
+        $newEmail = Sanitize::string($_POST['email'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,

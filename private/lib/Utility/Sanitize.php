@@ -7,6 +7,23 @@ namespace App\Utility;
  */
 class Sanitize
 {
+    public const OPTION_LOWERCASE = 'lowercase';
+    public const OPTION_TRIM = 'trim';
+    public const OPTION_STRIP = 'strip';
+    public const OPTION_CLEAN_SPACES = 'clean-spaces';
+    public const OPTION_CLEAN_SPECIAL_CHARS = 'clean-special-chars';
+
+    public const TYPE_INT = 'int';
+    public const TYPE_STRING = 'string';
+
+    private const OPTIONS_ALLOWED = [
+        self::OPTION_LOWERCASE,
+        self::OPTION_TRIM,
+        self::OPTION_STRIP,
+        self::OPTION_CLEAN_SPACES,
+        self::OPTION_CLEAN_SPECIAL_CHARS,
+    ];
+
     /**
      * Provided value is sanitized based on the order of given options:
      * - trim eliminates spaces that may exist at the start or end of the string.
@@ -16,35 +33,32 @@ class Sanitize
      * - strip combines lowercase, trim and htmlspecialchars at once.
      *
      * @param string $value
-     * @param string $options Sanitizing options separate with '|'. Options: trim, capitalize, lowercase, htmlspecialchars
+     * @param string[] $options
      * @return string
      */
-    public static function string(string $value, string $options): string
+    public static function string(string $value, array $options = [self::OPTION_STRIP]): string
     {
-        /** @var array|bool $optionList */
-        $optionList = explode('|', $options);
-        if ($optionList === false) {
-            return $value;
-        }
+        foreach ($options as $option) {
+            if (!in_array($option, self::OPTIONS_ALLOWED, true)) {
+                throw new \LogicException("Option '{$option}' does not exist");
+            }
 
-        foreach ($optionList as $option) {
             switch ($option) {
-                case 'lowercase':
+                case self::OPTION_LOWERCASE:
                     $value = strtolower($value);
                     break;
-                case 'capitalize':
-                    $value = ucfirst($value);
-                    break;
-                case 'trim':
+                case self::OPTION_TRIM:
                     $value = trim($value);
                     break;
-                case 'htmlspecialchars':
-                    $value = htmlspecialchars($value);
-                    break;
-                case 'strip':
-                    $value = strtolower($value);
+                case self::OPTION_STRIP:
                     $value = trim($value);
                     $value = htmlspecialchars($value);
+                    break;
+                case self::OPTION_CLEAN_SPACES:
+                    $value = str_replace(' ', '-', $value);
+                    break;
+                case self::OPTION_CLEAN_SPECIAL_CHARS:
+                    $value = preg_replace('/[^A-Za-z0-9\-]/', '', $value);
                     break;
             }
         }
@@ -61,28 +75,23 @@ class Sanitize
      * User provided fields through $_GET can be sanitized using this method. This method allows optional variables
      * to be sanitized too by returning null if the provided field name does not exist.
      *
-     * @see Sanitize::string() for possible options for the $options parameter
-     *
      * @param array $getVariable
      * @param string $fieldName
-     * @param string $dataType int|string
-     * @param string|null $options must be provided when using dataType 'string'
+     * @param string $expectedDataType int|string
+     * @param array $options must be provided when using dataType 'string'
      *
      * @return int|string|null
+     * @see Sanitize::string() for possible options for the $options parameter
      */
-    public static function getVariable(array $getVariable, string $fieldName, string $dataType, string $options = null)
+    public static function getVariable(array $getVariable, string $fieldName, string $expectedDataType, array $options = [self::OPTION_STRIP])
     {
         $value = $getVariable[$fieldName] ?? null;
 
-        if ($dataType === 'string' && $options === null) {
-            throw new \RuntimeException('The options parameter cannot be null when you provide string data types');
-        }
-
         if ($value !== null && $value !== '') {
-            switch ($dataType) {
-                case 'int':
+            switch ($expectedDataType) {
+                case self::TYPE_INT:
                     return self::int($value);
-                case 'string':
+                case self::TYPE_STRING:
                     return self::string($value, $options);
             }
         }

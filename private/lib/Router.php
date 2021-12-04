@@ -38,7 +38,7 @@ class Router
 
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
-        $errorController = new Error([]);
+        $errorController = new Error();
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
                 // ... 404 Not Found, route does not exist

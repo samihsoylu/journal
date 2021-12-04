@@ -10,3 +10,5 @@ parameters:
         - private/templates
         - tests
         - vendor
+    ignoreErrors:
+        - '#Parameter \#1 \$to of function mail expects string, null given\.#'
