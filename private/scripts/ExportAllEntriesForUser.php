@@ -4,25 +4,24 @@ use App\Database\Model\Entry;
 use App\Database\Repository\EntryRepository;
 use App\Utility\Command\Command;
 use App\Utility\Encryptor;
+use App\Utility\Lock\Lock;
+use App\Utility\Sanitize;
 use Defuse\Crypto\Key;
 
 require_once(dirname(__DIR__) . '/init.php');
 
 $userId = (int)$argv[1];
 $username = $argv[2];
-$userEncodedKey = $argv[3];
+$encodedEncryptionKey = $argv[3];
 
-define('LOG_FILE_PATH', EXPORT_CACHE_PATH . "/{$username}.log");
-define('LOCK_FILE_PATH', EXPORT_CACHE_PATH . "/{$username}.lock");
-
+$lock = Lock::acquire("{$userId}_{$username}_export_all_entries_for_user");
 try {
-    $encryptor = new Encryptor();
-    $key = $encryptor->getKeyFromEncodedKey($userEncodedKey);
+    $encryptionKey = (new Encryptor())->getKeyFromEncodedKey($encodedEncryptionKey);
 
-    $export = new EntryExporter($userId, $username, $key);
+    $export = new EntryExporter($userId, $username, $encryptionKey);
     $export->execute();
-} catch (\Exception $e) {
-    file_put_contents(LOG_FILE_PATH, $e, FILE_APPEND);
+} finally {
+    $lock->unlock();
 }
 
 class EntryExporter {
@@ -41,7 +40,7 @@ class EntryExporter {
 
     public function execute(): void
     {
-        $this->ensureLockIsNotSet();
+        $entityManager = (App\Database\Database::getInstance())->getEntityManager();
         $repository = new EntryRepository();
 
         $totalEntryCount = $repository->getTotalCountByUserId($this->userId);
@@ -49,21 +48,12 @@ class EntryExporter {
             return;
         }
 
-        $totalPages = $this->calculateTotalBatches($totalEntryCount);
-        for ($page = 0; $page < $totalPages; $page++) {
-            $this->ensureLockFile($page, $totalPages);
-
-            $entries = $repository->getSelectionByUserId($this->userId, $page, self::MAX_BATCH_SIZE);
-            foreach ($entries as $entry) {
-                $this->saveEntryToFile($entry);
-            }
-
-            $entries = null;
-            $this->log('info', "Processed pages: {$page}/{$totalPages}");
+        foreach ($repository->getAllEntriesForUser($this->userId) as $entry) {
+            $this->saveEntryToFile($entry);
+            $entityManager->clear($entry[0]);
         }
 
         $this->zipAllEntries();
-        $this->removeLockFile();
     }
 
     private function zipAllEntries(): void
@@ -80,11 +70,10 @@ class EntryExporter {
 
     private function saveEntryToFile(Entry $entry): void
     {
-        // Replace all spaces with hyphens
-        $title = str_replace(' ', '-', $entry->getTitle());
+        $title = Sanitize::string($entry->getTitle(), [Sanitize::OPTION_CLEAN_SPACES, Sanitize::OPTION_CLEAN_SPECIAL_CHARS]);
 
         // Remove special characters
-        $fileName = preg_replace('/[^A-Za-z0-9\-]/', '', $title);
+        $fileName = preg_replace('/\W/', '', $title);
 
         $this->ensureDirExists("{$this->getUserExportPath()}/");
         file_put_contents(
@@ -103,54 +92,5 @@ class EntryExporter {
     private function getUserExportPath(): string
     {
         return EXPORT_CACHE_PATH . "/{$this->username}";
-    }
-
-    private function log(string $type, string $message): void
-    {
-        $dateTime = (new DateTime())->format("d-m-Y h:i:s");
-
-        file_put_contents(LOG_FILE_PATH, "[{$dateTime}][{$type}] {$message}\n", FILE_APPEND);
-    }
-
-    private function ensureLockIsNotSet(): void
-    {
-        if (file_exists(LOCK_FILE_PATH)) {
-            $this->throwException("Lock file exists when it shouldn't");
-        }
-    }
-
-    private function ensureLockFile(int $currentPage, int $totalPages): void
-    {
-        $encodedJson = json_encode([
-            'progress' => $this->calculateProgress($currentPage, $totalPages),
-        ], JSON_PRETTY_PRINT);
-
-        file_put_contents(LOCK_FILE_PATH, $encodedJson);
-    }
-
-    private function removeLockFile(): void
-    {
-        unlink(LOCK_FILE_PATH);
-    }
-
-    private function calculateTotalBatches(int $totalItemCount): int
-    {
-        $totalBatches = ceil($totalItemCount / self::MAX_BATCH_SIZE);
-
-        return (int)$totalBatches;
-    }
-
-    private function calculateProgress(int $currentPage, int $totalPages): int
-    {
-        $percentage = round(($currentPage / $totalPages) * 100);
-
-        return (int)$percentage;
-    }
-
-    private function throwException(string $errorMessage): void
-    {
-        $this->log('error', $errorMessage);
-
-        throw new \RuntimeException($errorMessage);
     }
 }

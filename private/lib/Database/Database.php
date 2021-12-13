@@ -2,12 +2,13 @@
 
 namespace App\Database;
 
-use Doctrine\Common\Cache\PhpFileCache;
+use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
 use Doctrine\Migrations\Configuration\Migration\JsonFile;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
+use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 
 final class Database
 {
@@ -25,11 +26,14 @@ final class Database
             'dbname'   => $_ENV['DB_SCHEMA'],
         ];
 
+        $adapter = new PhpFilesAdapter('doctrine_results', 3600, DATABASE_CACHE_PATH . '/cache/');
+        $cache = DoctrineProvider::wrap($adapter);
+
         $config = Setup::createAnnotationMetadataConfiguration(
             [MODEL_PATH],
             DEBUG_MODE,
             DATABASE_CACHE_PATH . '/proxy/',
-            new PhpFileCache(DATABASE_CACHE_PATH . '/cache/'),
+            $cache,
             false
         );
 
@@ -54,7 +58,12 @@ final class Database
         try {
             $this->dependencyFactory->getEntityManager()->getConnection()->connect();
         } catch (\Exception $e) {
-            echo "<h2>Error establishing a database connection</h2><pre>{$e->getMessage()}</pre>";
+            http_response_code(500);
+            echo "<h2>Error establishing a database connection</h2>";
+            /** @phpstan-ignore-next-line */
+            if (DEBUG_MODE) {
+                echo "<pre>{$e->getMessage()}</pre>";
+            }
             exit();
         }
     }

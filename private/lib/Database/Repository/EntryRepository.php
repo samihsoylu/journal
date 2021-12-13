@@ -144,17 +144,15 @@ class EntryRepository extends AbstractRepository
         return (int)$qb->getQuery()->getSingleScalarResult();
     }
 
-    public function getSelectionByUserId(int $userId, int $offset, int $limit): array
+    public function getAllEntriesForUser(int $userId): iterable
     {
         $qb = $this->db->createQueryBuilder();
 
         $qb->select('e')->distinct()
             ->from(self::RESOURCE_NAME, 'e')
             ->where('e.referencedUser = :userId')
-            ->setParameter('userId', $userId)
-            ->setFirstResult($offset)
-            ->setMaxResults($limit);
+            ->setParameter('userId', $userId);
 
-        return $qb->getQuery()->getResult();
+        return $qb->getQuery()->toIterable();
     }
 }

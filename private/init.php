@@ -49,6 +49,7 @@ if (SSL_IS_ENABLED) {
 // Project constants
 const MODEL_PATH                  = BASE_PATH . '/private/lib/Database/Model/';
 const TEMPLATE_PATH               = BASE_PATH . '/private/templates/';
+const CACHE_PATH                  = BASE_PATH . '/private/cache/';
 const TEMPLATE_CACHE_PATH         = BASE_PATH . '/private/cache/templates/';
 const SESSION_CACHE_PATH          = BASE_PATH . '/private/cache/sessions/';
 const DATABASE_CACHE_PATH         = BASE_PATH . '/private/cache/database';
