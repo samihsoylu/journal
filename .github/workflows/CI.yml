@@ -9,22 +9,27 @@ jobs:
     name: PHP 7.4 Code quality check
     runs-on: ubuntu-latest
     steps:
-      - uses: MilesChou/composer-action/7.4@master
       - uses: actions/checkout@v2
 
       - name: Validate composer.json and composer.lock
+        uses: MilesChou/composer-action/7.4@master
         run: composer validate --no-interaction --strict
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-suggest
+        uses: MilesChou/composer-action/7.4@master
+        with:
+          args: composer install --prefer-dist --no-progress --no-suggest
 
       - name: Check for PHP syntax errors
+        uses: MilesChou/composer-action/7.4@master
         run: ./vendor/bin/parallel-lint --exclude vendor/ .
 
       - name: Validate PHP code style
+        uses: MilesChou/composer-action/7.4@master
         run: ./vendor/bin/php-cs-fixer fix -v --dry-run --using-cache=no .
 
       - name: PHP static code analysis
+        uses: MilesChou/composer-action/7.4@master
         run: php -d memory_limit=1G ./vendor/bin/phpstan -vvv analyse -c phpstan.neon
   test74:
     name: PHP 7.4 Code test
