@@ -3,6 +3,7 @@
 namespace App\Database;
 
 use Doctrine\Common\Cache\Psr6\DoctrineProvider;
+use Doctrine\Common\Proxy\AbstractProxyFactory;
 use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
 use Doctrine\Migrations\Configuration\Migration\JsonFile;
 use Doctrine\Migrations\DependencyFactory;
@@ -36,6 +37,7 @@ final class Database
             $cache,
             false
         );
+        $config->setAutoGenerateProxyClasses(AbstractProxyFactory::AUTOGENERATE_FILE_NOT_EXISTS_OR_CHANGED);
 
         $entityManager = EntityManager::create($dbParams, $config);
 
