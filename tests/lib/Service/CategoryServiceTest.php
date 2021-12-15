@@ -8,6 +8,7 @@ use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\NotFoundException;
 use App\Service\CategoryService;
 use App\Service\Helper\CategoryHelper;
+use Doctrine\DBAL\Driver\AbstractException;
 use Doctrine\DBAL\Driver\PDO\Exception;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Tests\AbstractTest;
@@ -141,10 +142,8 @@ class CategoryServiceTest extends AbstractTest
             ->method('save')
             ->willThrowException(
                 new UniqueConstraintViolationException(
-                    'Category',
-                    new Exception(
-                        new \PDOException('')
-                    )
+                    new Exception('Category'),
+                    null,
                 )
             );
 

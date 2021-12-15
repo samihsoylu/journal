@@ -24,7 +24,8 @@ try {
     $lock->unlock();
 }
 
-class EntryExporter {
+class EntryExporter
+{
     private const MAX_BATCH_SIZE = 5000;
 
     private int $userId;
