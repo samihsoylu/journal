@@ -31,3 +31,4 @@
 
 # Media files
 *.psd
+.php-cs-fixer.cache

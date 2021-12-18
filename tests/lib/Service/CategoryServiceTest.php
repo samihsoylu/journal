@@ -8,7 +8,6 @@ use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\NotFoundException;
 use App\Service\CategoryService;
 use App\Service\Helper\CategoryHelper;
-use Doctrine\DBAL\Driver\AbstractException;
 use Doctrine\DBAL\Driver\PDO\Exception;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Tests\AbstractTest;
