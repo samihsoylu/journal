@@ -2,7 +2,6 @@
 
 namespace App\Exception\UserException;
 
-use App\Database\Model\User;
 use App\Exception\UserException;
 
 class InvalidOperationException extends UserException

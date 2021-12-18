@@ -4,7 +4,6 @@ namespace App;
 
 use App\Controller\Error;
 use App\Exception\UserException;
-use App\Exception\UserException\NotFoundException;
 use App\Utility\ExceptionHandler;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
