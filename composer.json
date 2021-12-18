@@ -35,6 +35,6 @@
         "roave/security-advisories": "dev-master",
         "phpunit/phpunit": "^9",
         "php-parallel-lint/php-parallel-lint": "dev-master",
-        "friendsofphp/php-cs-fixer": "^2.16"
+        "friendsofphp/php-cs-fixer": "^3.4"
     }
 }
