@@ -19,7 +19,7 @@ require($pathToAutoLoader);
 // Load .env file
 $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
 $dotenv->load();
-$dotenv->required(['SITE_TITLE', 'DB_HOST', 'DB_SCHEMA', 'DB_USERNAME', 'DB_PASSWORD', 'BASE_URL', 'DEBUG_MODE', 'ADMIN_EMAIL_ADDRESS']);
+$dotenv->required(['SITE_TITLE', 'DB_HOST', 'DB_SCHEMA', 'DB_USERNAME', 'DB_PASSWORD', 'BASE_URL', 'DEBUG_MODE', 'ADMIN_EMAIL_ADDRESS', 'USE_SSL']);
 $dotenv->required('DEBUG_MODE')->isBoolean();
 
 define('BASE_URL', rtrim($_ENV['BASE_URL'], '/'));
@@ -55,6 +55,7 @@ const SESSION_CACHE_PATH          = BASE_PATH . '/private/cache/sessions/';
 const DATABASE_CACHE_PATH         = BASE_PATH . '/private/cache/database';
 const EXPORT_CACHE_PATH           = BASE_PATH . '/private/cache/export';
 const ASSETS_URL                  = BASE_URL  . '/assets';
+const SCRIPTS_PATH                = BASE_PATH . '/private/scripts';
 const DEFAULT_CACHE_EXPIRY_TIME   = 3600;  // 1 hour
 const DEFAULT_SESSION_EXPIRY_TIME = 86400; // 24 hours
 

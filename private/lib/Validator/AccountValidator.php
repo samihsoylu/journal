@@ -54,4 +54,10 @@ class AccountValidator extends AbstractValidator
             throw InvalidArgumentException::passwordsDoNotMatch();
         }
     }
+
+    public function exportEntries(): void
+    {
+        $this->ensureRequiredFieldsAreProvided($this->post, ['form_key']);
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
+    }
 }

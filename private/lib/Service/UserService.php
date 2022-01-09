@@ -13,9 +13,14 @@ use App\Exception\UserException\InvalidOperationException;
 use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\EntryHelper;
 use App\Service\Helper\UserHelper;
+use App\Utility\Command\Command;
+use App\Utility\Command\Process;
 use App\Utility\Encryptor;
+use App\Utility\Lock\Lock;
+use App\Utility\Lock\LockName;
 use App\Utility\Registry;
 use App\Utility\UserSession;
+use Defuse\Crypto\Key;
 
 class UserService
 {
@@ -242,5 +247,35 @@ class UserService
         $user = $this->userHelper->getUserById($userId);
         $user->setEmailAddress($newEmailAddress);
         $user->save();
+    }
+
+    /**
+     * @param int $userId
+     * @param Key $encryptionKey used for decrypting entry contents
+     */
+    public function exportUserEntriesToMarkdown(int $userId, Key $encryptionKey): int
+    {
+        $user = $this->userHelper->getUserById($userId);
+
+        $lockName = LockName::create($userId, $user->getUsername(), LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
+        if (Lock::exists($lockName)) {
+            throw InvalidOperationException::actionIsAlreadyRunning('exporting entries');
+        }
+
+        $exportScriptFilePath = SCRIPTS_PATH . '/ExportAllEntriesForUser.php';
+        if (!file_exists($exportScriptFilePath)) {
+            throw new \LogicException("Script in path: {$exportScriptFilePath} does not exist");
+        }
+
+        $command = new Command([
+            '/usr/bin/php', $exportScriptFilePath, $userId, $user->getUsername(), $encryptionKey->saveToAsciiSafeString()
+        ]);
+
+        $process = Process::start(
+            $command,
+            BASE_PATH . "/private/cache/export/log/{$user->getUsername()}.log"
+        );
+
+        return $process->getId();
     }
 }

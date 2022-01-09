@@ -90,6 +90,18 @@
                     </div>
                 </div>
 
+                <!-- Export data from account -->
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Export all your entries</span>
+                        <p class="small-text">Your entries will be exported into markdown(.md) files, and later zipped into an archive(.zip) file. You can open markdown files with any text editor, but for a nice editing experience, you can use <a href="https://typora.io/" target="_blank">Typora</a>.</p><br />
+                        <form method="post" action="{{ $export_entries_post_url }}">
+                            <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
+
+                            <button class="btn btn-primary" id="export" type="submit"><i class="material-icons">file_download</i> Export</button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

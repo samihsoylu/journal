@@ -31,7 +31,7 @@ jobs:
         uses: MilesChou/composer-action/7.4@master
         with:
           entrypoint: ./vendor/bin/php-cs-fixer
-          args: fix -v --dry-run --config=.php_cs.dist.php --using-cache=no .
+          args: fix -v --dry-run --config=.php_cs.dist.php --using-cache=no
 
       - name: Static code analysis
         uses: MilesChou/composer-action/7.4@master

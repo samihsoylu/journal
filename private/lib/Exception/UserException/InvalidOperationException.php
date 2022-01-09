@@ -20,4 +20,9 @@ class InvalidOperationException extends UserException
     {
         return new self("Your privilege level is {$userPrivilegeLevelAsString} which is not enough to perform this operation");
     }
+
+    public static function actionIsAlreadyRunning(string $actionDescription): self
+    {
+        return new self("An action for {$actionDescription} is already running");
+    }
 }

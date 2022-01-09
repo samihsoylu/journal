@@ -5,16 +5,18 @@ use App\Database\Repository\EntryRepository;
 use App\Utility\Command\Command;
 use App\Utility\Encryptor;
 use App\Utility\Lock\Lock;
+use App\Utility\Lock\LockName;
 use App\Utility\Sanitize;
 use Defuse\Crypto\Key;
 
-require_once(dirname(__DIR__) . '/init.php');
+require(dirname(__DIR__) . '/init.php');
 
 $userId = (int)$argv[1];
 $username = $argv[2];
 $encodedEncryptionKey = $argv[3];
 
-$lock = Lock::acquire("{$userId}_{$username}_export_all_entries_for_user");
+$lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
+$lock = Lock::acquire($lockName);
 try {
     $encryptionKey = (new Encryptor())->getKeyFromEncodedKey($encodedEncryptionKey);
 
@@ -26,8 +28,6 @@ try {
 
 class EntryExporter
 {
-    private const MAX_BATCH_SIZE = 5000;
-
     private int $userId;
     private string $username;
     private Key $key;
@@ -41,7 +41,6 @@ class EntryExporter
 
     public function execute(): void
     {
-        $entityManager = (App\Database\Database::getInstance())->getEntityManager();
         $repository = new EntryRepository();
 
         $totalEntryCount = $repository->getTotalCountByUserId($this->userId);
@@ -51,7 +50,6 @@ class EntryExporter
 
         foreach ($repository->getAllEntriesForUser($this->userId) as $entry) {
             $this->saveEntryToFile($entry);
-            $entityManager->clear($entry[0]);
         }
 
         $this->zipAllEntries();
@@ -63,7 +61,7 @@ class EntryExporter
 
         $command = new Command([
             'cd', EXPORT_CACHE_PATH, '&&',
-            'zip', '-r', "{$this->username}__{$dateString}.zip", "{$this->username}/"
+            '/usr/bin/zip', '-r', "{$this->username}__{$dateString}.zip", "{$this->username}/"
         ]);
 
         shell_exec($command->toString());
@@ -79,7 +77,7 @@ class EntryExporter
         $this->ensureDirExists("{$this->getUserExportPath()}/");
         file_put_contents(
             "{$this->getUserExportPath()}/{$fileName}.md",
-            $entry->getContentAsMarkup($this->key)
+            $entry->getContentDecrypted($this->key)
         );
     }
 

@@ -4,6 +4,7 @@ namespace App\Database\Repository;
 
 use App\Database\Model\Entry;
 use App\Database\Model\User;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 
@@ -141,7 +142,11 @@ class EntryRepository extends AbstractRepository
             ->where('e.referencedUser = :userId')
             ->setParameter('userId', $userId);
 
-        return (int)$qb->getQuery()->getSingleScalarResult();
+        try {
+            return (int)$qb->getQuery()->getSingleScalarResult();
+        } catch (NoResultException $exception) {
+            return 0;
+        }
     }
 
     public function getAllEntriesForUser(int $userId): iterable

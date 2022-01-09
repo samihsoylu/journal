@@ -16,6 +16,7 @@ class Account extends AbstractController
     public const CHANGE_PASSWORD_POST_URL = self::ACCOUNT_URL . '/change-password';
     public const DELETE_ACCOUNT_POST_URL = self::ACCOUNT_URL . '/delete';
     public const UPDATE_WIDGETS_POST_URL = self::ACCOUNT_URL . '/widgets/update';
+    public const EXPORT_ENTRIES_POST_URL = self::ACCOUNT_URL . '/export-entries';
 
     private UserService $userService;
     private WidgetService $widgetService;
@@ -148,6 +149,25 @@ class Account extends AbstractController
     }
 
     public function updateWidgetsView(): void
+    {
+        Redirect::to(self::ACCOUNT_URL);
+    }
+
+    public function exportEntries(): void
+    {
+        $this->validator->validate(__FUNCTION__);
+
+        $processId = $this->userService->exportUserEntriesToMarkdown($this->getUserId(), $this->getUserEncryptionKey());
+
+        $this->setNotification(
+            Notification::TYPE_SUCCESS,
+            "Export started({$processId}), please refresh the page in a few seconds"
+        );
+
+        Redirect::to(self::ACCOUNT_URL);
+    }
+
+    public function exportEntriesView(): void
     {
         Redirect::to(self::ACCOUNT_URL);
     }

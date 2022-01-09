@@ -5,7 +5,7 @@ parameters:
     paths:
         - private/lib
         - private/scripts
-    excludes_analyse:
+    excludePaths:
         - private/cache
         - private/templates
         - tests

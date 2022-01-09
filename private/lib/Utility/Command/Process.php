@@ -23,9 +23,9 @@ class Process implements ProcessInterface
      *
      * @return self
      */
-    public static function start(Command $command): self
+    public static function start(Command $command, string $logPath = '/dev/null'): self
     {
-        $processId = shell_exec('/usr/bin/setsid ' . $command->toString() . ' > /dev/null 2>&1 & echo $!');
+        $processId = shell_exec('/usr/bin/setsid ' . $command->toString() . " > {$logPath} 2>&1 & echo $!");
         $id        = filter_var($processId, FILTER_VALIDATE_INT);
 
         return new self($id);

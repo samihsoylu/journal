@@ -59,3 +59,4 @@ $route->addRoute('POST', Account::CHANGE_PASSWORD_POST_URL, 'Account@changePassw
 $route->addRoute('POST', Account::UPDATE_EMAIL_POST_URL, 'Account@changeEmail');
 $route->addRoute('POST', Account::DELETE_ACCOUNT_POST_URL, 'Account@deleteAccount');
 $route->addRoute('POST', Account::UPDATE_WIDGETS_POST_URL, 'Account@updateWidgets');
+$route->addRoute('POST', Account::EXPORT_ENTRIES_POST_URL, 'Account@exportEntries');
