@@ -33,7 +33,8 @@
         "defuse/php-encryption": "^2.2",
         "doctrine/migrations": "^3.1",
         "psy/psysh": "^0.10.8",
-        "symfony/console": "^5.2"
+        "symfony/console": "^5.2",
+        "sentry/sdk": "^3.1"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",

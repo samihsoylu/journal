@@ -4,6 +4,9 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
+// Stop exceptions from rendering twice
+ini_set("log_errors", 0);
+
 // BASE_PATH = Parent directory
 define('BASE_PATH', dirname(__DIR__));
 
@@ -15,6 +18,7 @@ if (!file_exists($pathToAutoLoader)) {
 
 // Composer autoloader
 require($pathToAutoLoader);
+require(__DIR__ . '/functions.php');
 
 // Load .env file
 $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
@@ -66,4 +70,13 @@ if (headers_sent()) {
     echo "Headers were sent, session_start() was not invoked.\n";
 } else {
     session_start();
+}
+
+if (isset($_ENV['SENTRY_DSN']) && $_ENV['SENTRY_DSN'] !== '') {
+    if (!str_contains($_ENV['SENTRY_DSN'], 'https://')) {
+        echo "Please provide a valid SENTRY_DSN url in your .env file\n";
+        exit(1);
+    }
+
+    \Sentry\init(['dsn' => $_ENV['SENTRY_DSN']]);
 }
