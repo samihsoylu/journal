@@ -31,6 +31,7 @@ define('DEBUG_MODE', ($_ENV['DEBUG_MODE'] === 'true'));
 define('SSL_IS_ENABLED', ($_ENV['USE_SSL'] === 'true'));
 define('SITE_TITLE', $_ENV['SITE_TITLE']);
 define('ADMIN_EMAIL_ADDRESS', $_ENV['ADMIN_EMAIL_ADDRESS']);
+define('SENTRY_ENABLED', (isset($_ENV['SENTRY_DSN'])) && (strlen($_ENV['SENTRY_DSN']) > 0));
 
 if (!DEBUG_MODE) {
     ini_set('display_errors', 0);
@@ -72,7 +73,7 @@ if (headers_sent()) {
     session_start();
 }
 
-if (isset($_ENV['SENTRY_DSN']) && $_ENV['SENTRY_DSN'] !== '') {
+if (SENTRY_ENABLED) {
     if (!str_contains($_ENV['SENTRY_DSN'], 'https://')) {
         echo "Please provide a valid SENTRY_DSN url in your .env file\n";
         exit(1);

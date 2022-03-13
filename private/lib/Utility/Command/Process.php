@@ -25,7 +25,7 @@ class Process implements ProcessInterface
      */
     public static function start(Command $command, string $logPath = '/dev/null'): self
     {
-        $processId = shell_exec('/usr/bin/setsid ' . $command->toString() . " > {$logPath} 2>&1 & echo $!");
+        $processId = shell_exec("/usr/bin/setsid {$command} > {$logPath} 2>&1 & echo $!");
         $id        = filter_var($processId, FILTER_VALIDATE_INT);
 
         return new self($id);
@@ -39,7 +39,7 @@ class Process implements ProcessInterface
     public function isRunning(): bool
     {
         $command = new Command(['ps', '-p', $this->id]);
-        exec($command->toString(), $output);
+        exec((string)$command, $output);
 
         return isset($output[1]);
     }
@@ -52,8 +52,7 @@ class Process implements ProcessInterface
     public function stop(): void
     {
         $command = new Command(['kill', $this->id]);
-
-        exec($command->toString());
+        $command->execute();
     }
 
     public static function getById(int $id): ?self

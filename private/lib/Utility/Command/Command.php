@@ -23,7 +23,7 @@ class Command
         return $escapedArguments;
     }
 
-    public function toString(): string
+    public function __toString(): string
     {
         $arguments = $this->escapeArguments($this->arguments);
 
@@ -35,5 +35,25 @@ class Command
         }
 
         return $command;
+    }
+
+    public function execute(): array
+    {
+        exec((string)$this, $output, $exitCode);
+
+        if ($exitCode !== 0) {
+            if (SENTRY_ENABLED && $output !== []) {
+                \Sentry\configureScope(function (\Sentry\State\Scope $scope) use ($output): void {
+                    $scope->setContext('Command output', $output);
+                });
+            }
+
+            throw new \LogicException(
+                "Failed to execute command: {$this} ",
+                $exitCode
+            );
+        }
+
+        return $output;
     }
 }

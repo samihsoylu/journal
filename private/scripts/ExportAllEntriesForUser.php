@@ -76,16 +76,22 @@ class EntryExporter
             '/usr/bin/zip', '-r', "{$username}__{$dateString}.zip", "{$username}/"
         ]);
 
-        $this->executeCommand($command);
+        try {
+            $command->execute();
+        } catch (\LogicException $exception) {
+            // Intentionally caught so that removeEntriesFromDisk() is executed for privacy reasons
+            echo "[{$dateString}] {$exception}\n";
+            if (SENTRY_ENABLED) {
+                \Sentry\captureException($exception);
+            }
+        }
     }
 
     private function removeEntriesFromDisk(string $exportDirectoryPath): void
     {
-        $command = new Command([
-            'rm', '-rf', $exportDirectoryPath
-        ]);
+        $command = new Command(['rm', '-rf', $exportDirectoryPath]);
 
-        $this->executeCommand($command);
+        $command->execute();
     }
 
     private function saveEntryToFile(Entry $entry, string $exportDirectoryPath): void
@@ -109,19 +115,6 @@ class EntryExporter
     {
         if (!is_dir($directory)) {
             mkdir($directory, 0777, true);
-        }
-    }
-
-    private function executeCommand(Command $command): void
-    {
-        $output = [];
-        $exitCode = 0;
-        exec($command->toString(), $output, $exitCode);
-
-        if ($exitCode > 0) {
-            $timestamp = (new DateTime)->format('d-m-Y H:i:s');
-            echo "[{$timestamp}] Exit code: {$exitCode}\n";
-            print_r($output);
         }
     }
 }
