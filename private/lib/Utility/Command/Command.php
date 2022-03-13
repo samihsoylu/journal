@@ -13,20 +13,6 @@ class Command
         $this->arguments = $arguments;
     }
 
-    private function escapeCommands(array $commands): array
-    {
-        if ($commands === []) {
-            throw new \RuntimeException("No command was provided");
-        }
-
-        $escapedCommands = [];
-        foreach ($commands as $command) {
-            $escapedCommands[] = escapeshellcmd($command);
-        }
-
-        return $escapedCommands;
-    }
-
     private function escapeArguments(array $arguments): array
     {
         $escapedArguments = [];
@@ -39,12 +25,15 @@ class Command
 
     public function toString(): string
     {
-        $commands = $this->escapeCommands($this->commands);
         $arguments = $this->escapeArguments($this->arguments);
 
-        $command = implode(' ', $commands);
+        $command  = implode(' ', $this->commands);
         $argument = implode(' ', $arguments);
 
-        return "{$command} {$argument}";
+        if (count($arguments) > 0) {
+            $command .= " {$argument}";
+        }
+
+        return $command;
     }
 }

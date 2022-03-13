@@ -256,16 +256,10 @@ class UserService
     public function exportUserEntriesToMarkdown(int $userId, Key $encryptionKey): int
     {
         $user = $this->userHelper->getUserById($userId);
-
-        $lockName = LockName::create($userId, $user->getUsername(), LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
-        if (Lock::exists($lockName)) {
-            throw InvalidOperationException::actionIsAlreadyRunning('exporting entries');
-        }
-
         $exportScriptFilePath = SCRIPTS_PATH . '/ExportAllEntriesForUser.php';
-        if (!file_exists($exportScriptFilePath)) {
-            throw new \LogicException("Script in path: {$exportScriptFilePath} does not exist");
-        }
+
+        $this->ensureExportIsNotAlreadyRunning($user->getId(), $user->getUsername());
+        $this->ensureScriptExists($exportScriptFilePath);
 
         $command = new Command([
             '/usr/bin/php', $exportScriptFilePath, $userId, $user->getUsername(), $encryptionKey->saveToAsciiSafeString()
@@ -277,5 +271,20 @@ class UserService
         );
 
         return $process->getId();
+    }
+
+    private function ensureExportIsNotAlreadyRunning(int $userId, string $username): void
+    {
+        $lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
+        if (Lock::exists($lockName)) {
+            throw InvalidOperationException::actionIsAlreadyRunning('exporting entries');
+        }
+    }
+
+    private function ensureScriptExists(string $scriptPath): void
+    {
+        if (!file_exists($scriptPath)) {
+            throw new \LogicException("Script in path: {$scriptPath} does not exist");
+        }
     }
 }

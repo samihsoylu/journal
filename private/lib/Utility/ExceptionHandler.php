@@ -58,7 +58,7 @@ class ExceptionHandler
     {
         $this->setNotification($this->getException()->getMessage());
 
-        if (strpos($methodName, 'View') === false) {
+        if (!str_contains($methodName, 'View')) {
             // Ensures action template is renamed to view, example: login() changes to loginView()
             $methodName .= 'View';
         }

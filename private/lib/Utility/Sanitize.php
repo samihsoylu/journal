@@ -98,4 +98,13 @@ class Sanitize
 
         return null;
     }
+
+    public static function stringForShell(string $input)
+    {
+        $input = self::string($input, [Sanitize::OPTION_LOWERCASE]);
+
+        // Remove spaces and special characters
+        $input = str_replace(' ', '_', $input);
+        return preg_replace('/\W/', '', $input);
+    }
 }
