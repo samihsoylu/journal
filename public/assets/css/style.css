@@ -161,8 +161,9 @@ footer {
 	border-color: rgba(27,31,35,.5);
 	box-shadow: none;
 }
-.btn-primary:focus-within, .btn-primary:focus, .btn-primary:active {
-	background-color:#279f43;
+.btn-primary:focus-within, .btn-primary:focus, .btn-primary:active,
+.badge.btn-primary:focus-within, .badge.btn-primary:focus, .badge.btn-primary:active {
+	background-color:#279f43!important;
 	background-image:none;
 }
 .btn-primary.disabled, .btn-primary:disabled {
@@ -198,15 +199,23 @@ footer {
 	background-image: linear-gradient(-180deg,#fafbfc,#eff3f6 90%);
 	border:1px solid rgba(27,31,35,.2);
 }
+.badge.btn-danger {
+	background-color: #9f2727;
+	background-image: linear-gradient(-180deg, #d03434, #a72828 95%);
+	border: 1px solid rgba(140, 37, 37, 0.8);
+
+	color: #fff;
+}
 .btn-danger:hover {
 	color: #fff;
 	background-color: #cb2431;
 	background-image: linear-gradient(-180deg,#de4450,#cb2431 90%);
 	border-color: rgba(27,31,35,.5);
 }
-.btn-danger:focus-within, .btn-danger:focus, .btn-danger:active {
+.btn-danger:focus-within, .btn-danger:focus, .btn-danger:active,
+.badge.btn-danger:focus-within, .badge.btn-danger:focus, .badge.btn-danger:active {
 	color: #fff;
-	background-color: #b5202c;
+	background-color: #b5202c!important;
 	background-image: none;
 	border-color: rgba(27,31,35,.5);
 	box-shadow: inset 0 .15em .3em rgba(27,31,35,.15);
@@ -414,35 +423,51 @@ a .card:hover {
 	font-size:14px;
 }
 
-
+/* #Account settings export
+================================================== */
 .account-downloads .collection-item .badge .material-icons {
 	font-size: 13pt;
 	line-height: inherit;
 }
 
-a .badge:hover
+.account-downloads .collection-item .badge
 {
-	opacity:0.8;
-	cursor:pointer;
+	line-height: 32px;
+	height: 32px;
+	margin-top: calc(0.45rem - 11px);
+	border-radius:32px;
+}
+
+a .badge:hover {
+	opacity: 0.8;
+	cursor: pointer;
 }
 
 .account-downloads
 {
-	margin: 0.5rem 0 1rem 0;
-	border: 1px solid #e0e0e0;
+	margin: 1rem 0;
+	border: none;
 	border-radius: 2px;
 	overflow: hidden;
 	position: relative;
 }
 
-.account-downloads .collection-item:last-child {
-	border-bottom: none;
-}
-
 .account-downloads .collection-item {
 	background-color: #fff;
 	line-height: 1.5rem;
-	padding: 10px 20px;
+	padding: 5px 0px;
 	margin: 0;
-	border-bottom: 1px solid #e0e0e0;
+}
+
+/** Screens smaller than 1300px */
+@media only screen and (max-width: 1300px) {
+	.account-downloads .collection-item .badge
+	{
+		margin-top: calc(0.45rem - 2px);
+	}
+
+	.account-downloads .collection-item p {
+		inline-size:60%;
+		overflow-wrap: break-word;
+	}
 }

@@ -98,9 +98,9 @@
                             @foreach($exportedFiles as $file)
                                 <div class="account-downloads">
                                         <div class="collection-item">
-                                            <a href="{{ $export_delete_url }}/{{ $file }}"><span title="delete" class="new badge red" data-badge-caption=""><i class="material-icons">delete</i></span></a>
-                                            <a href="{{ $export_download_url }}/{{ $file }}"><span title="download" class="new badge green" data-badge-caption=""><i class="material-icons">file_download</i></span></a>
-                                            {{ $file }}
+                                            <a href="{{ $export_delete_url }}/{{ $file }}"><span title="Delete" class="new badge btn-danger" data-badge-caption=""><i class="material-icons">delete</i></span></a>
+                                            <a href="{{ $export_download_url }}/{{ $file }}"><span title="Download" class="new badge btn-primary" data-badge-caption=""><i class="material-icons">file_download</i></span></a>
+                                            <p>{{ $file }}</p>
                                         </div>
                                 </div>
                             @endforeach
