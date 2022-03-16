@@ -287,4 +287,16 @@ class UserService
             throw new \LogicException("Script in path: {$scriptPath} does not exist");
         }
     }
+
+    public function getZipFileNamesForExportedEntriesByUser(int $userId): array
+    {
+        $user = $this->userHelper->getUserById($userId);
+
+        /** @see EntryExporter::zipAllEntries() */
+        $exportedFiles = glob(EXPORT_CACHE_PATH . "/{$user->getUsername()}__*.zip");
+
+        return array_map(static function(string $file) {
+            return basename($file);
+        }, $exportedFiles);
+    }
 }

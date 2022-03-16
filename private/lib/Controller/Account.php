@@ -17,6 +17,8 @@ class Account extends AbstractController
     public const DELETE_ACCOUNT_POST_URL = self::ACCOUNT_URL . '/delete';
     public const UPDATE_WIDGETS_POST_URL = self::ACCOUNT_URL . '/widgets/update';
     public const EXPORT_ENTRIES_POST_URL = self::ACCOUNT_URL . '/export-entries';
+    public const EXPORT_DOWNLOAD_URL = self::EXPORT_ENTRIES_POST_URL . '/download';
+    public const EXPORT_DELETE_URL = self::EXPORT_ENTRIES_POST_URL . '/delete';
 
     private UserService $userService;
     private WidgetService $widgetService;
@@ -46,6 +48,9 @@ class Account extends AbstractController
 
         $enabledWidgets = $this->widgetService->getEnabledWidgetsForUser($this->getUserId());
         $this->template->setVariable('enabledWidgets', $enabledWidgets);
+
+        $exportedFiles = $this->userService->getZipFileNamesForExportedEntriesByUser($this->getUserId());
+        $this->template->setVariable('exportedFiles', $exportedFiles);
 
         $this->renderTemplate('account/index');
     }
@@ -171,4 +176,10 @@ class Account extends AbstractController
     {
         Redirect::to(self::ACCOUNT_URL);
     }
+
+    public function downloadEntryExport(): void
+    {}
+
+    public function deleteEntryExport(): void
+    {}
 }

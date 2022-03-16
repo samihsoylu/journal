@@ -413,3 +413,36 @@ a .card:hover {
 	padding-top:20px;
 	font-size:14px;
 }
+
+
+.account-downloads .collection-item .badge .material-icons {
+	font-size: 13pt;
+	line-height: inherit;
+}
+
+a .badge:hover
+{
+	opacity:0.8;
+	cursor:pointer;
+}
+
+.account-downloads
+{
+	margin: 0.5rem 0 1rem 0;
+	border: 1px solid #e0e0e0;
+	border-radius: 2px;
+	overflow: hidden;
+	position: relative;
+}
+
+.account-downloads .collection-item:last-child {
+	border-bottom: none;
+}
+
+.account-downloads .collection-item {
+	background-color: #fff;
+	line-height: 1.5rem;
+	padding: 10px 20px;
+	margin: 0;
+	border-bottom: 1px solid #e0e0e0;
+}
