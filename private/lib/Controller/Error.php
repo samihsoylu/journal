@@ -9,9 +9,10 @@ class Error extends AbstractController
         parent::__construct($routeParameters);
     }
 
-    public function notFound(): void
+    public function renderNotFoundPage(): void
     {
         $this->renderTemplate('errors/404');
+        exit();
     }
 
     public function methodNotAllowed(): void

@@ -60,4 +60,10 @@ class AccountValidator extends AbstractValidator
         $this->ensureRequiredFieldsAreProvided($this->post, ['form_key']);
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
     }
+
+    public function deleteEntryExport(): void
+    {
+        $this->ensureRequiredFieldsAreProvided($this->post, ['form_key', 'fileName']);
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
+    }
 }

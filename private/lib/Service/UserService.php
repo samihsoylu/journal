@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Exception\UserException\NotFoundException;
 use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserSetupHelper;
 use App\Service\Helper\WidgetHelper;
@@ -275,8 +276,7 @@ class UserService
 
     private function ensureExportIsNotAlreadyRunning(int $userId, string $username): void
     {
-        $lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
-        if (Lock::exists($lockName)) {
+        if ($this->getHasExportEntriesActionRunning($userId, $username)) {
             throw InvalidOperationException::actionIsAlreadyRunning('exporting entries');
         }
     }
@@ -298,5 +298,45 @@ class UserService
         return array_map(static function(string $file) {
             return basename($file);
         }, $exportedFiles);
+    }
+
+    public function getZipFilePathForExportedEntriesByUser(int $userId, string $fileName): ?string
+    {
+        $user = $this->userHelper->getUserById($userId);
+
+        // must be similar to samih__14-03-2022_00-19-32.zip
+        $this->ensureValidExportEntriesZipFileName($fileName);
+
+        // Results in: 14-03-2022_00-19-32.zip
+        $fileNameSuffix = explode('__', $fileName)[1];
+
+        // Here we reconstruct the file name in-case it was tampered
+        $filePath = EXPORT_CACHE_PATH . "/{$user->getUsername()}__{$fileNameSuffix}";
+
+        return (file_exists($filePath)) ? $filePath : null;
+    }
+
+    public function deleteExportedEntriesZipFile(int $userId, string $fileName): void
+    {
+        $filePath = $this->getZipFilePathForExportedEntriesByUser($userId, $fileName);
+        if ($filePath === null) {
+            throw NotFoundException::entityNameNotFound('Zip', $fileName);
+        }
+
+        unlink($filePath);
+    }
+
+    private function ensureValidExportEntriesZipFileName(string $fileName)
+    {
+        // expected file must adhere to samih__14-03-2022_00-19-32.zip
+        if (!preg_match('/\S+_{2}\d{2}-\d{2}-\d{4}_\d{2}-\d{2}-\d{2}\S+/', $fileName)) {
+            throw InvalidArgumentException::invalidFileNameProvided();
+        }
+    }
+
+    public function getHasExportEntriesActionRunning(int $userId, string $username): bool
+    {
+        $lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
+        return Lock::exists($lockName);
     }
 }
