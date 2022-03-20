@@ -2,10 +2,13 @@
 
 namespace App\Database\Repository;
 
-use App\Database\Model\Category;
 use App\Database\Model\Template;
 use App\Database\Model\User;
 
+/**
+ * @method Template[] getAll()
+ * @method Template|null getById(int $id)
+ */
 class TemplateRepository extends AbstractRepository
 {
     /**

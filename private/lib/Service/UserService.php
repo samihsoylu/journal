@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Exception\UserException\NotFoundException;
 use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserSetupHelper;
 use App\Service\Helper\WidgetHelper;
@@ -13,9 +14,14 @@ use App\Exception\UserException\InvalidOperationException;
 use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\EntryHelper;
 use App\Service\Helper\UserHelper;
+use App\Utility\Command\Command;
+use App\Utility\Command\Process;
 use App\Utility\Encryptor;
+use App\Utility\Lock\Lock;
+use App\Utility\Lock\LockName;
 use App\Utility\Registry;
 use App\Utility\UserSession;
+use Defuse\Crypto\Key;
 
 class UserService
 {
@@ -242,5 +248,95 @@ class UserService
         $user = $this->userHelper->getUserById($userId);
         $user->setEmailAddress($newEmailAddress);
         $user->save();
+    }
+
+    /**
+     * @param int $userId
+     * @param Key $encryptionKey used for decrypting entry contents
+     */
+    public function exportUserEntriesToMarkdown(int $userId, Key $encryptionKey): int
+    {
+        $user = $this->userHelper->getUserById($userId);
+        $exportScriptFilePath = SCRIPTS_PATH . '/ExportAllEntriesForUser.php';
+
+        $this->ensureExportIsNotAlreadyRunning($user->getId(), $user->getUsername());
+        $this->ensureScriptExists($exportScriptFilePath);
+
+        $command = new Command([
+            '/usr/bin/php', $exportScriptFilePath, $userId, $user->getUsername(), $encryptionKey->saveToAsciiSafeString()
+        ]);
+
+        $process = Process::start(
+            $command,
+            BASE_PATH . "/private/cache/export/log/{$user->getUsername()}.log"
+        );
+
+        return $process->getId();
+    }
+
+    private function ensureExportIsNotAlreadyRunning(int $userId, string $username): void
+    {
+        if ($this->getHasExportEntriesActionRunning($userId, $username)) {
+            throw InvalidOperationException::actionIsAlreadyRunning('exporting entries');
+        }
+    }
+
+    private function ensureScriptExists(string $scriptPath): void
+    {
+        if (!file_exists($scriptPath)) {
+            throw new \LogicException("Script in path: {$scriptPath} does not exist");
+        }
+    }
+
+    public function getZipFileNamesForExportedEntriesByUser(int $userId): array
+    {
+        $user = $this->userHelper->getUserById($userId);
+
+        /** @see EntryExporter::zipAllEntries() */
+        $exportedFiles = glob(EXPORT_CACHE_PATH . "/{$user->getUsername()}__*.zip");
+
+        return array_map(static function(string $file) {
+            return basename($file);
+        }, $exportedFiles);
+    }
+
+    public function getZipFilePathForExportedEntriesByUser(int $userId, string $fileName): ?string
+    {
+        $user = $this->userHelper->getUserById($userId);
+
+        // must be similar to samih__14-03-2022_00-19-32.zip
+        $this->ensureValidExportEntriesZipFileName($fileName);
+
+        // Results in: 14-03-2022_00-19-32.zip
+        $fileNameSuffix = explode('__', $fileName)[1];
+
+        // Here we reconstruct the file name in-case it was tampered
+        $filePath = EXPORT_CACHE_PATH . "/{$user->getUsername()}__{$fileNameSuffix}";
+
+        return (file_exists($filePath)) ? $filePath : null;
+    }
+
+    public function deleteExportedEntriesZipFile(int $userId, string $fileName): void
+    {
+        $filePath = $this->getZipFilePathForExportedEntriesByUser($userId, $fileName);
+        if ($filePath === null) {
+            throw NotFoundException::entityNameNotFound('Zip', $fileName);
+        }
+
+        unlink($filePath);
+    }
+
+    private function ensureValidExportEntriesZipFileName(string $fileName)
+    {
+        // expected file must adhere to samih__14-03-2022_00-19-32.zip
+        if (!preg_match('/\S+_{2}\d{2}-\d{2}-\d{4}_\d{2}-\d{2}-\d{2}\S+/', $fileName)) {
+            throw InvalidArgumentException::invalidFileNameProvided();
+        }
+    }
+
+    public function getHasExportEntriesActionRunning(int $userId, string $username): bool
+    {
+        $lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
+        return Lock::exists($lockName);
     }
 }

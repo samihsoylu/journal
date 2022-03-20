@@ -4,9 +4,14 @@ namespace App\Database\Repository;
 
 use App\Database\Model\Entry;
 use App\Database\Model\User;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 
+/**
+ * @method Entry[] getAll()
+ * @method Entry|null getById(int $id)
+ */
 class EntryRepository extends AbstractRepository
 {
     /**
@@ -126,5 +131,33 @@ class EntryRepository extends AbstractRepository
             $qb->andWhere($qb->expr()->like('e.title', ':search'))
                 ->setParameter('search', "%{$search}%");
         }
+    }
+
+    public function getTotalCountByUserId($userId): int
+    {
+        $qb = $this->db->createQueryBuilder();
+
+        $qb->select('count(distinct e.id)')
+            ->from(self::RESOURCE_NAME, 'e')
+            ->where('e.referencedUser = :userId')
+            ->setParameter('userId', $userId);
+
+        try {
+            return (int)$qb->getQuery()->getSingleScalarResult();
+        } catch (NoResultException $exception) {
+            return 0;
+        }
+    }
+
+    public function getAllEntriesForUser(int $userId): iterable
+    {
+        $qb = $this->db->createQueryBuilder();
+
+        $qb->select('e')->distinct()
+            ->from(self::RESOURCE_NAME, 'e')
+            ->where('e.referencedUser = :userId')
+            ->setParameter('userId', $userId);
+
+        return $qb->getQuery()->toIterable();
     }
 }

@@ -2,7 +2,6 @@
 
 namespace App\Exception\UserException;
 
-use App\Database\Model\User;
 use App\Exception\UserException;
 
 class InvalidOperationException extends UserException
@@ -20,5 +19,10 @@ class InvalidOperationException extends UserException
     public static function insufficientPrivileges(string $userPrivilegeLevelAsString): self
     {
         return new self("Your privilege level is {$userPrivilegeLevelAsString} which is not enough to perform this operation");
+    }
+
+    public static function actionIsAlreadyRunning(string $actionDescription): self
+    {
+        return new self("An action for {$actionDescription} is already running");
     }
 }

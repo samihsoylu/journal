@@ -4,7 +4,6 @@ namespace App;
 
 use App\Controller\Error;
 use App\Exception\UserException;
-use App\Exception\UserException\NotFoundException;
 use App\Utility\ExceptionHandler;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
@@ -38,12 +37,12 @@ class Router
 
         $routeInfo = $dispatcher->dispatch($httpMethod, $uri);
 
-        $errorController = new Error([]);
+        $errorController = new Error();
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
                 // ... 404 Not Found, route does not exist
                 http_response_code(404);
-                $errorController->notFound();
+                $errorController->renderNotFoundPage();
                 break;
             case Dispatcher::METHOD_NOT_ALLOWED:
                 //$allowedMethods = $routeInfo[1];

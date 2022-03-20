@@ -50,8 +50,9 @@ final class Version20210627094934 extends AbstractMigration
             $categories = $categoryRepository->findByUser($user);
 
             // Sort categories by id in ASC order
-            usort($categories, function (Category $a, Category $b) {
-                return ($a->getId() > $b->getId());
+            usort($categories, static function (Category $a, Category $b) {
+                // callable expects return of int, either 1 for true or 0 for false
+                return (int)($a->getId() > $b->getId());
             });
 
             for ($i = 0; $i < count($categories); $i++) {

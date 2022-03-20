@@ -39,7 +39,7 @@ class Authentication extends AbstractController
         /** @see AuthenticationValidator::login() */
         $this->validator->validate(__FUNCTION__);
 
-        $username = Sanitize::string($_POST['username'], 'strip');
+        $username = Sanitize::string($_POST['username'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
         $password = $_POST['password'];
 
         // Log the user in

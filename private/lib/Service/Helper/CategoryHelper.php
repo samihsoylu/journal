@@ -22,7 +22,6 @@ class CategoryHelper
 
     public function getCategoryForUser(int $categoryId, int $userId): Category
     {
-        /** @var Category $category */
         $category = $this->repository->getById($categoryId);
         $this->ensureCategoryIsNotNull($category, $categoryId);
         $this->ensureUserOwnsCategory($category, $userId);

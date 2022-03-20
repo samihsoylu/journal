@@ -60,8 +60,8 @@ class User extends AbstractController
         /** @see UserValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $username       = Sanitize::string($_POST['username'], 'strip');
-        $email          = Sanitize::string($_POST['email'], 'strip');
+        $username       = Sanitize::string($_POST['username'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
+        $email          = Sanitize::string($_POST['email'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
         $privilegeLevel = Sanitize::int($_POST['privilegeLevel']);
         $password       = $_POST['password'];
 

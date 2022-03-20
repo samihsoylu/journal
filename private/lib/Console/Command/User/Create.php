@@ -19,7 +19,7 @@ class Create extends Command
     private const FIELD_EMAIL_ADDRESS = 'EmailAddress';
     private const FIELD_PRIVILEGE_LEVEL = 'PrivilegeLevel';
 
-    public function configure()
+    public function configure(): void
     {
         $allowedPrivilegeLevels = implode(', ', User::ALLOWED_PRIVILEGE_LEVELS);
 
@@ -33,7 +33,7 @@ class Create extends Command
             ->setHelp("This command creates a new user account ");
     }
 
-    protected function interact(InputInterface $input, OutputInterface $output)
+    protected function interact(InputInterface $input, OutputInterface $output): void
     {
         /** @var QuestionHelper $helper */
         $helper = $this->getHelper('question');
@@ -62,7 +62,7 @@ class Create extends Command
         $input->setOption(self::FIELD_PRIVILEGE_LEVEL, $privilegeLevel);
     }
 
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $username = $input->getOption(self::FIELD_USERNAME);
         $password = $input->getOption(self::FIELD_PASSWORD);

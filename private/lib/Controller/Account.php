@@ -16,6 +16,10 @@ class Account extends AbstractController
     public const CHANGE_PASSWORD_POST_URL = self::ACCOUNT_URL . '/change-password';
     public const DELETE_ACCOUNT_POST_URL = self::ACCOUNT_URL . '/delete';
     public const UPDATE_WIDGETS_POST_URL = self::ACCOUNT_URL . '/widgets/update';
+    public const EXPORT_ENTRIES_POST_URL = self::ACCOUNT_URL . '/export-entries';
+    public const EXPORT_DOWNLOAD_URL = self::EXPORT_ENTRIES_POST_URL . '/download';
+    public const EXPORT_DELETE_POST_URL = self::EXPORT_ENTRIES_POST_URL . '/delete';
+    public const EXPORT_DOWNLOAD_GET_URL = self::EXPORT_DOWNLOAD_URL . '/{fileName}';
 
     private UserService $userService;
     private WidgetService $widgetService;
@@ -46,6 +50,9 @@ class Account extends AbstractController
         $enabledWidgets = $this->widgetService->getEnabledWidgetsForUser($this->getUserId());
         $this->template->setVariable('enabledWidgets', $enabledWidgets);
 
+        $exportedFiles = $this->userService->getZipFileNamesForExportedEntriesByUser($this->getUserId());
+        $this->template->setVariable('exportedFiles', $exportedFiles);
+
         $this->renderTemplate('account/index');
     }
 
@@ -58,7 +65,7 @@ class Account extends AbstractController
     {
         $this->validator->validate(__FUNCTION__);
 
-        $newEmail = Sanitize::string($_POST['email'], 'lowercase|trim');
+        $newEmail = Sanitize::string($_POST['email'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
@@ -148,6 +155,68 @@ class Account extends AbstractController
     }
 
     public function updateWidgetsView(): void
+    {
+        Redirect::to(self::ACCOUNT_URL);
+    }
+
+    public function exportEntries(): void
+    {
+        $this->validator->validate(__FUNCTION__);
+
+        $processId = $this->userService->exportUserEntriesToMarkdown($this->getUserId(), $this->getUserEncryptionKey());
+
+        $this->setNotification(
+            Notification::TYPE_SUCCESS,
+            "Export triggered, process id: {$processId}"
+        );
+
+        Redirect::to(self::ACCOUNT_URL);
+    }
+
+    public function exportEntriesView(): void
+    {
+        Redirect::to(self::ACCOUNT_URL);
+    }
+
+    public function downloadEntryExport(): void
+    {
+        $targetFileName = $this->getRouteParameters()['fileName'];
+
+        $filePath = $this->userService->getZipFilePathForExportedEntriesByUser($this->getUserId(), $targetFileName);
+        if ($filePath === null) {
+            http_response_code(404);
+            (new Error())->renderNotFoundPage();
+        }
+
+        $fileName = urlencode(basename($filePath));
+        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
+        header("Cache-Control: private", false);
+        header('Content-Type: application/zip');
+        header("Content-Disposition: attachment; filename={$fileName}");
+        header('Content-Transfer-Encoding: binary');
+
+        readfile($filePath);
+    }
+
+    public function deleteEntryExport(): void
+    {
+        $this->validator->validate(__FUNCTION__);
+        unset($_POST['form_key']);
+
+        $targetFileName = $_POST['fileName'];
+
+        $this->userService->deleteExportedEntriesZipFile($this->getUserId(), $targetFileName);
+
+        $this->setNotification(Notification::TYPE_SUCCESS, "Removed {$targetFileName} successfully");
+        $this->deleteEntryExportView();
+    }
+
+    public function deleteEntryExportView(): void
+    {
+        Redirect::to(self::ACCOUNT_URL);
+    }
+
+    public function downloadEntryExportView(): void
     {
         Redirect::to(self::ACCOUNT_URL);
     }

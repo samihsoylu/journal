@@ -4,6 +4,10 @@ namespace App\Database\Repository;
 
 use App\Database\Model\User;
 
+/**
+ * @method User[] getAll()
+ * @method User|null getById(int $id)
+ */
 class UserRepository extends AbstractRepository
 {
     /**

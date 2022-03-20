@@ -11,6 +11,14 @@
 /private/cache/templates/*
 !/private/cache/templates/.gitkeep
 
+!/private/cache/export/
+/private/cache/export/*
+!/private/cache/export/.gitkeep
+
+!/private/cache/export/log/
+/private/cache/export/log/*
+!/private/cache/export/log/.gitkeep
+
 !/private/cache/sessions/
 /private/cache/sessions/*
 !/private/cache/sessions/.gitkeep
@@ -27,3 +35,4 @@
 
 # Media files
 *.psd
+.php-cs-fixer.cache

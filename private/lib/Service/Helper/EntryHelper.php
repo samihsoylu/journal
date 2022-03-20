@@ -30,7 +30,6 @@ class EntryHelper
 
     public function getEntryForUser(int $entryId, int $userId): Entry
     {
-        /** @var Entry $entry */
         $entry = $this->repository->getById($entryId);
         $this->ensureEntryIsNotNull($entry, $entryId);
         $this->ensureUserOwnsEntry($entry, $userId);

@@ -141,10 +141,8 @@ class CategoryServiceTest extends AbstractTest
             ->method('save')
             ->willThrowException(
                 new UniqueConstraintViolationException(
-                    'Category',
-                    new Exception(
-                        new \PDOException('')
-                    )
+                    new Exception('Category'),
+                    null,
                 )
             );
 

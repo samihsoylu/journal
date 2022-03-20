@@ -40,4 +40,9 @@ class InvalidArgumentException extends UserException
     {
         return new self("The two passwords provided do not match", $code);
     }
+
+    public static function invalidFileNameProvided(int $code = 406)
+    {
+        return new self("Invalid file name provided", $code);
+    }
 }

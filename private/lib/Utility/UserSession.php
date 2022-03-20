@@ -185,8 +185,9 @@ class UserSession
             return null;
         }
 
-        /** @var CacheItem $item */
         $cache = Cache::getInstance();
+
+        /** @var CacheItem $item */
         $item = $cache->getItem($sessionId);
         if (!$item->isHit()) {
             // Cache item has expired, user is no longer considered to be logged in

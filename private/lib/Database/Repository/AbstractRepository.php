@@ -36,7 +36,7 @@ abstract class AbstractRepository
      *
      * @param int $id
      *
-     * @return object
+     * @return object|null
      */
     public function getById(int $id): ?object
     {

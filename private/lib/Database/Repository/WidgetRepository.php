@@ -5,6 +5,10 @@ namespace App\Database\Repository;
 use App\Database\Model\User;
 use App\Database\Model\Widget;
 
+/**
+ * @method Widget[] getAll()
+ * @method Widget|null getById(int $id)
+ */
 class WidgetRepository extends AbstractRepository
 {
     /**

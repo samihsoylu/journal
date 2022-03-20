@@ -64,8 +64,8 @@ class Category extends AbstractController
         /** @see CategoryValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $title       = Sanitize::string($_POST['category_name'], 'strip|capitalize');
-        $description = Sanitize::string($_POST['category_description'], 'htmlspecialchars');
+        $title       = Sanitize::string($_POST['category_name']);
+        $description = Sanitize::string($_POST['category_description']);
 
         $this->service->createCategory($this->getUserId(), $title, $description);
 
@@ -98,8 +98,8 @@ class Category extends AbstractController
         $this->validator->validate(__FUNCTION__);
 
         $categoryId  = Sanitize::int($this->getRouteParameters()['id']);
-        $title       = Sanitize::string($_POST['category_name'], 'strip|capitalize');
-        $description = Sanitize::string($_POST['category_description'], 'htmlspecialchars');
+        $title       = Sanitize::string($_POST['category_name']);
+        $description = Sanitize::string($_POST['category_description']);
 
         $this->service->updateCategory($this->getUserId(), $categoryId, $title, $description);
 
