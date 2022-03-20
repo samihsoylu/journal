@@ -20,7 +20,7 @@ final class Database
     private function __construct()
     {
         $dbParams = [
-            'driver'   => $_ENV['DB_DRIVER'] ?? 'pdo_mysql',
+            'driver'   => 'pdo_mysql',
             'host'     => $_ENV['DB_HOST'],
             'user'     => $_ENV['DB_USERNAME'],
             'password' => $_ENV['DB_PASSWORD'],
