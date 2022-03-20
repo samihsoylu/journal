@@ -62,7 +62,6 @@ final class Database
         } catch (\Exception $e) {
             http_response_code(500);
             echo "<h2>Error establishing a database connection</h2>";
-            /** @phpstan-ignore-next-line */
             if (DEBUG_MODE) {
                 echo "<pre>{$e->getMessage()}</pre>";
             }

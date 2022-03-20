@@ -10,3 +10,10 @@ parameters:
         - private/templates
         - tests
         - vendor
+    dynamicConstantNames:
+        - BASE_URL
+        - DEBUG_MODE
+        - SSL_IS_ENABLED
+        - SITE_TITLE
+        - ADMIN_EMAIL_ADDRESS
+        - SENTRY_ENABLED
