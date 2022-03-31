@@ -13,6 +13,7 @@ Journal is a privacy first, self hosted digital log book. It is designed to be a
 * Order your favorite categories to appear on the top
 * Advanced search 
 * Create accounts for users
+* Export entries
 
 ## Requirements
 - A Linux-based server with shell access
