@@ -113,16 +113,16 @@ class UserSession
         ];
     }
 
-    private function generateNewAntiCSRFToken(): void
+    public static function generateNewAntiCSRFToken(string $sessionId): string
     {
         $prefix = sha1(random_bytes(5));
 
-        $this->antiCSRFToken = sha1($prefix . $this->sessionId);
+        return sha1($prefix . $sessionId);
     }
 
     public function regenerateNewAntiCSRFToken(): void
     {
-        $this->generateNewAntiCSRFToken();
+        $this->antiCSRFToken = self::generateNewAntiCSRFToken($this->sessionId);
         $this->save();
     }
 
@@ -141,7 +141,7 @@ class UserSession
             $privilegeLevel
         );
 
-        $self->generateNewAntiCSRFToken();
+        $self->antiCSRFToken = self::generateNewAntiCSRFToken($sessionId);
         $self->setEncodedEncryptionKey($encodedEncryptionKey);
         $self->save();
 

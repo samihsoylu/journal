@@ -7,6 +7,7 @@ use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
 use App\Utility\Session;
+use App\Utility\UserSession;
 use App\Validator\AuthenticationValidator;
 
 class Authentication extends AbstractController
@@ -64,6 +65,11 @@ class Authentication extends AbstractController
     public function loginView(): void
     {
         $this->redirectLoggedInUsersToDashboard();
+
+        $token = UserSession::generateNewAntiCSRFToken(uniqid());
+        Session::put('login_form_key', $token);
+
+        $this->template->setVariable('token', $token);
 
         $this->renderTemplate('authenticate/login');
     }

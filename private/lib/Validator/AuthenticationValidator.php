@@ -3,6 +3,7 @@
 namespace App\Validator;
 
 use App\Exception\UserException\InvalidParameterException;
+use App\Utility\Session;
 
 class AuthenticationValidator extends AbstractValidator
 {
@@ -24,8 +25,13 @@ class AuthenticationValidator extends AbstractValidator
      */
     public function login(): void
     {
-        $requiredFields = ['username', 'password'];
+        $requiredFields = ['username', 'password', 'form_key'];
         $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
+
+        $token = $this->post['form_key'];
+        if (hash_equals(Session::get('login_form_key'), $token) === false) {
+            throw InvalidParameterException::invalidFormKey();
+        }
 
         $this->ensureValueIsNotTooShort($this->post, 'username', 4);
         $this->ensureValueIsNotTooLong($this->post, 'username', 64);

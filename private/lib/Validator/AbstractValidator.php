@@ -100,7 +100,7 @@ abstract class AbstractValidator
             throw InvalidOperationException::userIsNotLoggedIn();
         }
 
-        if ($token === null || hash_equals($token, $session->getAntiCSRFToken()) === false) {
+        if ($token === null || hash_equals($session->getAntiCSRFToken(), $token) === false) {
             throw InvalidParameterException::invalidFormKey();
         }
 
