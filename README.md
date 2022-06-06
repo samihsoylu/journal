@@ -15,6 +15,11 @@ Journal is a privacy first, self hosted digital log book. It is designed to be a
 * Create accounts for users
 * Export entries
 
+## Getting started
+
+* You can use [our Hosted version](https://journalapp.nl). This is the simplest way to use Journal.
+* You can [host it yourself](#documentation)
+
 ## Requirements
 - A Linux-based server with shell access
 - PHP 7.4 or later.
