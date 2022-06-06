@@ -31,6 +31,7 @@
                                             <label for="password">Password</label>
                                         </div>
                                         <div>
+                                            <input type="hidden" name="form_key" value="{{ $token }}" />
                                             <input class="btn btn-primary fullwidth" type="submit" value="Sign in" />
                                         </div>
                                     </form>
