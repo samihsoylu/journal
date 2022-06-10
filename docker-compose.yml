@@ -1,7 +1,8 @@
 version: '2.3'
 services:
   journal:
-    build: .
+    image: samihsoylu/journal
+    restart: unless-stopped
     ports:
       - 8080:80
     depends_on:
