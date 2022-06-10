@@ -15,18 +15,18 @@ Journal is a privacy first, self hosted digital log book. It is designed to be a
 * Create accounts for users
 * Export entries
 
-## Getting started
-
-* You can use [our Hosted version](https://journalapp.nl). This is the simplest way to use Journal.
-* You can [host it yourself](#documentation)
-
 ## Quickly try it out using Docker
 ```sh
-wget https://raw.githubusercontent.com/samihsoylu/journal/master/docker-compose.yml
+curl -o docker-compose.yml https://raw.githubusercontent.com/samihsoylu/journal/master/docker-compose.yml
 
 docker compose up -d
 ```
 Visit: `http://localhost:8080/` Username: `demouser` Password: `demopass`
+
+## Getting started
+
+* You can use [our Hosted version](https://journalapp.nl). This is the simplest way to use Journal.
+* You can [host it yourself]([#documentation](https://samihsoylu.notion.site/Installation-fb156297be1f421c8540a41fe34314ec)
 
 ## Requirements
 - A Linux-based server with shell access
