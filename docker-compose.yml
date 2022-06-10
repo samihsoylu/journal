@@ -1,0 +1,29 @@
+version: '2.3'
+services:
+  journal:
+    build: .
+    ports:
+      - 8080:80
+    depends_on:
+      - mariadb
+    environment:
+      - DB_HOST=mariadb
+      - DB_USERNAME=testuser
+      - DB_PASSWORD=test2222
+      - DB_SCHEMA=test
+      - DEBUG_MODE=true
+      - USERNAME=demouser
+      - PASSWORD=demopass
+      - CONFIRM_PASSWORD=demopass
+      - EMAIL_ADDRESS=user@example.com
+  mariadb:
+    image: mariadb
+    environment:
+      - MARIADB_ROOT_PASSWORD=rootpasschangeme
+      - MARIADB_USER=testuser
+      - MARIADB_PASSWORD=test2222
+      - MARIADB_DATABASE=test
+    volumes:
+      - db_data:/var/lib/mysql
+volumes:
+  db_data:
