@@ -263,7 +263,7 @@ class UserService
         $this->ensureScriptExists($exportScriptFilePath);
 
         $command = new Command([
-            '/usr/bin/php', $exportScriptFilePath, $userId, $user->getUsername(), $encryptionKey->saveToAsciiSafeString()
+            PHP_BINDIR . '/php', $exportScriptFilePath, $userId, $user->getUsername(), $encryptionKey->saveToAsciiSafeString()
         ]);
 
         $process = Process::start(
