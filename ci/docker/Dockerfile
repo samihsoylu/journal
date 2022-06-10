@@ -33,7 +33,7 @@ RUN chmod 700 /usr/local/bin/wait-for-it.sh
 
 WORKDIR /var/www/html
 RUN composer install --no-dev --no-cache
-ADD ./ci/docker/docker-entrypoint /usr/local/bin
+ADD ./ci/docker/docker-entrypoint.sh /usr/local/bin
 EXPOSE 80
-ENTRYPOINT [ "docker-entrypoint" ]
+ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD ["apache2-foreground"]
