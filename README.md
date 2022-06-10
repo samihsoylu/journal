@@ -26,6 +26,7 @@ wget https://raw.githubusercontent.com/samihsoylu/journal/master/docker-compose.
 
 docker compose up -d
 ```
+Visit: `http://localhost:8080/` Username: `demouser` Password: `demopass`
 
 ## Requirements
 - A Linux-based server with shell access
