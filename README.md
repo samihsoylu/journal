@@ -20,6 +20,13 @@ Journal is a privacy first, self hosted digital log book. It is designed to be a
 * You can use [our Hosted version](https://journalapp.nl). This is the simplest way to use Journal.
 * You can [host it yourself](#documentation)
 
+## Quickly try it out using Docker
+```sh
+wget https://raw.githubusercontent.com/samihsoylu/journal/master/docker-compose.yml
+
+docker compose up -d
+```
+
 ## Requirements
 - A Linux-based server with shell access
 - PHP 7.4 or later.
