@@ -3,7 +3,7 @@ FROM php:8.0-apache
 # Copy files to /var/www/html as www-data user
 ADD --chown=www-data:www-data . /var/www/html/
 
-# Intall php extension and commposer with docker-php-extension-installer and enable apache rewrite
+# Intall php extension and composer with docker-php-extension-installer and enable apache rewrite
 RUN curl -sSLf \
     -o /usr/local/bin/install-php-extensions \
     https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions && \
