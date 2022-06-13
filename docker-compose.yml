@@ -9,21 +9,20 @@ services:
       - mariadb
     environment:
       - DB_HOST=mariadb
-      - DB_USERNAME=testuser
-      - DB_PASSWORD=test2222
-      - DB_SCHEMA=test
+      - DB_USERNAME=journal
+      - DB_PASSWORD=journal
+      - DB_SCHEMA=journal
       - DEBUG_MODE=true
       - USERNAME=demouser
       - PASSWORD=demopass
-      - CONFIRM_PASSWORD=demopass
       - EMAIL_ADDRESS=user@example.com
   mariadb:
     image: mariadb
     environment:
-      - MARIADB_ROOT_PASSWORD=rootpasschangeme
-      - MARIADB_USER=testuser
-      - MARIADB_PASSWORD=test2222
-      - MARIADB_DATABASE=test
+      - MARIADB_RANDOM_ROOT_PASSWORD=yes
+      - MARIADB_USER=journal
+      - MARIADB_PASSWORD=journal
+      - MARIADB_DATABASE=journal
     volumes:
       - db_data:/var/lib/mysql
 volumes:

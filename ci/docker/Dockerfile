@@ -31,9 +31,13 @@ RUN echo 'variables_order = "EGPCS"' >> $PHP_INI_DIR/conf.d/user.ini
 ADD https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh /usr/local/bin/
 RUN chmod 700 /usr/local/bin/wait-for-it.sh 
 
+# Change workdir and user for "composer install"
 WORKDIR /var/www/html
+USER www-data
 RUN composer install --no-dev --no-cache
+
 ADD ./ci/docker/docker-entrypoint.sh /usr/local/bin
 EXPOSE 80
+USER root
 ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD ["apache2-foreground"]
