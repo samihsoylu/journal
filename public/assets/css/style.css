@@ -411,6 +411,7 @@ a .card:hover {
 .entry-content ul li {
 	list-style-type: disc;
 	list-style-position: inside;
+	margin-left: 20px;
 }
 .entry-content a { text-decoration: underline; }
 .entry-content a:hover { text-decoration: none; }
