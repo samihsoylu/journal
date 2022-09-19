@@ -123,4 +123,10 @@ abstract class AbstractController
 
         $this->template->render($templateName);
     }
+
+    public function renderJsonResponse(array $response): void
+    {
+        header('Content-Type: application/json');
+        echo json_encode($response);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Database\Model;
 
 use App\Utility\Encryptor;
+use App\Utility\Text;
 use Defuse\Crypto\Key;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
@@ -99,14 +100,6 @@ class Template extends AbstractModel
         return $this->content;
     }
 
-    public function getContentAsMarkup(Key $encryptionKey): string
-    {
-        $parser = new \Parsedown();
-        $parser->setSafeMode(true);
-
-        return $parser->text($this->getContentDecrypted($encryptionKey));
-    }
-
     public function setContent(string $content): self
     {
         $this->content = $content;
@@ -117,7 +110,15 @@ class Template extends AbstractModel
     public function getContentDecrypted(Key $encryptionKey): string
     {
         $encryptor = new Encryptor();
-        return $encryptor->decrypt($this->content, $encryptionKey);
+        $content = $encryptor->decrypt($this->content, $encryptionKey);
+        if (!Text::containsHtml($content)) {
+            $parser = new \Parsedown();
+            $parser->setSafeMode(true);
+
+            return $parser->text($content);
+        }
+
+        return $content;
     }
 
     public function setContentAndEncrypt(string $content, Key $encryptionKey): self

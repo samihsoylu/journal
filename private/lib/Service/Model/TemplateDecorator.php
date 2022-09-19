@@ -49,6 +49,7 @@ class TemplateDecorator implements \JsonSerializable
         return $this->content;
     }
 
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return get_object_vars($this);

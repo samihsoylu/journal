@@ -112,23 +112,16 @@ class EntryService
         return new EntriesDecorator($entries, $totalPages, $page);
     }
 
-    public function getEntryForUser(int $entryId, int $userId, Key $key, bool $getEntryContentAsMarkup = false): EntryDecorator
+    public function getEntryForUser(int $entryId, int $userId, Key $key): EntryDecorator
     {
         $entry = $this->entryHelper->getEntryForUser($entryId, $userId);
-
-        // gets the entry content parsed to html
-        $entryContent = $entry->getContentAsMarkup($key);
-        if ($getEntryContentAsMarkup === false) {
-            // gets the entry content as raw
-            $entryContent = $entry->getContentDecrypted($key);
-        }
 
         return new EntryDecorator(
             $entry->getId(),
             $entry->getTitle(),
             $entry->getReferencedCategory()->getId(),
             $entry->getReferencedCategory()->getName(),
-            $entryContent,
+            $entry->getContentDecrypted($key),
             $entry->getLastUpdatedTimestampFormatted(),
         );
     }

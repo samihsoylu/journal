@@ -58,7 +58,7 @@ class Template extends AbstractController
 
         $categoryId      = Sanitize::int($_POST['category_id']);
         $templateTitle   = Sanitize::string($_POST['template_title']);
-        $templateContent = Sanitize::string($_POST['template_content'], [Sanitize::OPTION_TRIM]);
+        $templateContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $this->service->createTemplate($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $templateTitle, $templateContent);
 
@@ -85,7 +85,7 @@ class Template extends AbstractController
         $categoryId      = Sanitize::int($_POST['category_id']);
         $templateId      = Sanitize::int($this->getRouteParameters()['id']);
         $templateTitle   = Sanitize::string($_POST['template_title']);
-        $templateContent = Sanitize::string($_POST['template_content'], [Sanitize::OPTION_TRIM]);
+        $templateContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $this->service->updateTemplate(
             $this->getUserId(),

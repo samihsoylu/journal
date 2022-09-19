@@ -4,6 +4,7 @@ use App\Controller\Account;
 use App\Controller\Authentication;
 use App\Controller\Category;
 use App\Controller\Entry;
+use App\Controller\Media;
 use App\Controller\Template;
 use App\Controller\User;
 use App\Controller\Welcome;
@@ -62,3 +63,7 @@ $route->addRoute('POST', Account::UPDATE_WIDGETS_POST_URL, 'Account@updateWidget
 $route->addRoute('POST', Account::EXPORT_ENTRIES_POST_URL, 'Account@exportEntries');
 $route->addRoute('GET', Account::EXPORT_DOWNLOAD_GET_URL, 'Account@downloadEntryExport');
 $route->addRoute('POST', Account::EXPORT_DELETE_POST_URL, 'Account@deleteEntryExport');
+
+// Media
+$route->addRoute('POST', Media::MEDIA_UPLOAD_POST_URL, 'Media@upload');
+$route->addRoute('GET', Media::MEDIA_GET_URL, 'Media@showImage');

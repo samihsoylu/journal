@@ -23,7 +23,7 @@ require(__DIR__ . '/functions.php');
 // Load .env file
 $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
 $dotenv->load();
-$dotenv->required(['SITE_TITLE', 'DB_HOST', 'DB_SCHEMA', 'DB_USERNAME', 'DB_PASSWORD', 'BASE_URL', 'DEBUG_MODE', 'ADMIN_EMAIL_ADDRESS', 'USE_SSL']);
+$dotenv->required(['SITE_TITLE', 'DB_HOST', 'DB_SCHEMA', 'DB_USERNAME', 'DB_PASSWORD', 'BASE_URL', 'DEBUG_MODE', 'ADMIN_EMAIL_ADDRESS', 'USE_SSL', 'IMAGE_UPLOAD_SIZE_LIMIT']);
 $dotenv->required('DEBUG_MODE')->isBoolean();
 
 define('BASE_URL', rtrim($_ENV['BASE_URL'], '/'));
@@ -32,23 +32,24 @@ define('SSL_IS_ENABLED', ($_ENV['USE_SSL'] === 'true'));
 define('SITE_TITLE', $_ENV['SITE_TITLE']);
 define('ADMIN_EMAIL_ADDRESS', $_ENV['ADMIN_EMAIL_ADDRESS']);
 define('SENTRY_ENABLED', (isset($_ENV['SENTRY_DSN'])) && (strlen($_ENV['SENTRY_DSN']) > 0));
+define('IMAGE_UPLOAD_SIZE_LIMIT', $_ENV['IMAGE_UPLOAD_SIZE_LIMIT']);
 
 if (!DEBUG_MODE) {
-    ini_set('display_errors', 0);
+    ini_set('display_errors', '0');
     error_reporting(0);
 }
 
 if (SSL_IS_ENABLED) {
     // **PREVENTING SESSION HIJACKING**
     // Prevents javascript XSS attacks aimed to steal the session ID
-    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_httponly', '1');
 
     // **PREVENTING SESSION FIXATION**
     // Session ID cannot be passed through URLs
-    ini_set('session.use_only_cookies', 1);
+    ini_set('session.use_only_cookies', '1');
 
     // Uses a secure connection (HTTPS) if possible
-    ini_set('session.cookie_secure', 1);
+    ini_set('session.cookie_secure', '1');
 }
 
 // Project constants
@@ -64,7 +65,7 @@ const SCRIPTS_PATH                = BASE_PATH . '/private/scripts';
 const DEFAULT_CACHE_EXPIRY_TIME   = 3600;  // 1 hour
 const DEFAULT_SESSION_EXPIRY_TIME = 86400; // 24 hours
 
-const PROJECT_VERSION = '1.3.4';
+const PROJECT_VERSION = '1.4.0';
 
 // Prevents warnings from popping up when using this init file through the CLI
 if (headers_sent()) {

@@ -12,11 +12,13 @@ $('#load-template').on('click', function(){
             select.formSelect();
 
             // Update values in fields
-            $('#entry_content').val(data.content);
-            $(".input-field label[for='entry_content']").attr("class", "active");
+            // $('#entry_content').val(data.content);
+            // $(".input-field label[for='entry_content']").attr("class", "active");
+            tinymce.activeEditor.dom.setHTML(tinymce.activeEditor.getBody(), data.content);
+            tinymce.triggerSave();
         },
         error: function(xhr){
-            alert(xhr.responseText + ', please refresh the page and try again.');
+            alert('Internal Error: Unable to retrieve templates at this time.');
         }
     });
 });

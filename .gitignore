@@ -33,6 +33,10 @@
 /private/cache/database/proxy/*
 !/private/cache/database/proxy/.gitkeep
 
+# Uploads
+/uploads/*
+!/uploads/.gitkeep
+
 # Media files
 *.psd
 .php-cs-fixer.cache
