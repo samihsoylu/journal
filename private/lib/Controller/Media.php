@@ -89,7 +89,7 @@ class Media extends AbstractController
         $image = file_get_contents($file['tmp_name']);
         if (!$image) {
             header("HTTP/1.1 500 Server Error");
-            $this->renderJsonResponse(['error' => 'Could not read uploaded file.']);
+            $this->renderJsonResponse(['Could not read uploaded file.']);
             exit;
         }
 
@@ -112,7 +112,7 @@ class Media extends AbstractController
     {
         if (!is_uploaded_file($filePath)) {
             header("HTTP/1.1 500 Server Error");
-            $this->renderJsonResponse(['error' => 'File was not uploaded.']);
+            $this->renderJsonResponse(['File was not uploaded.']);
             exit;
         }
     }
@@ -121,7 +121,7 @@ class Media extends AbstractController
     {
         if (!in_array($fileType, Image::ALLOWED_TYPES)) {
             header('HTTP/1.1 400 Invalid file type.');
-            $this->renderJsonResponse(['error' => 'File type not allowed.']);
+            $this->renderJsonResponse(['File type not allowed.']);
             exit;
         }
     }
@@ -130,7 +130,7 @@ class Media extends AbstractController
     {
         if ($file === null) {
             header('HTTP/1.1 400 Bad Request');
-            $this->renderJsonResponse(['error' => 'No file uploaded']);
+            $this->renderJsonResponse(['No file uploaded']);
             exit;
         }
     }
@@ -141,7 +141,7 @@ class Media extends AbstractController
     private function renderCouldNotUploadFile(): void
     {
         header("HTTP/1.1 500 Server Error");
-        $this->renderJsonResponse(['error' => 'Could not upload file.']);
+        $this->renderJsonResponse(['Could not upload file.']);
         exit;
     }
 }
