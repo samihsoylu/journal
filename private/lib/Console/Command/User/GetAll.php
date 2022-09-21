@@ -28,7 +28,7 @@ class GetAll extends Command
         $table->setHeaders(['ID', 'Username', 'Privilege Level'])
             ->setRows(
                 array_map(
-                    fn(User $row) => [
+                    fn (User $row) => [
                         $row->getId(),
                         $row->getUsername(),
                         $row->getPrivilegeLevelAsString()

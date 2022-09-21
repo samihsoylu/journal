@@ -14,6 +14,6 @@ return $config
     ->setRiskyAllowed(true)
     ->setUsingCache(false)
     ->setFinder(PhpCsFixer\Finder::create()
-        ->exclude('vendor')
+        ->exclude(['vendor', 'private/cache/'])
         ->in(__DIR__)
     );

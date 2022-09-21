@@ -7,6 +7,7 @@ use App\Exception\UserException;
 use App\Utility\ExceptionHandler;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+
 use function FastRoute\simpleDispatcher;
 
 /**

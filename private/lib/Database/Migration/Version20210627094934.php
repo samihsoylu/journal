@@ -51,7 +51,7 @@ final class Version20210627094934 extends AbstractMigration
 
             // Sort categories by id in ASC order
             // callable expects return of int, either 1 for true or 0 for false
-            usort($categories, static fn(Category $a, Category $b) => (int)($a->getId() > $b->getId()));
+            usort($categories, static fn (Category $a, Category $b) => (int)($a->getId() > $b->getId()));
 
             for ($i = 0; $i < count($categories); $i++) {
                 $category = $categories[$i];

@@ -301,7 +301,7 @@ class UserService
         /** @see EntryExporter::zipAllEntries() */
         $exportedFiles = glob(EXPORT_CACHE_PATH . "/{$user->getUsername()}__*.zip");
 
-        return array_map(static fn(string $file) => basename($file), $exportedFiles);
+        return array_map(static fn (string $file) => basename($file), $exportedFiles);
     }
 
     public function getZipFilePathForExportedEntriesByUser(int $userId, string $fileName): ?string
