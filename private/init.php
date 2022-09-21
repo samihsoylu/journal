@@ -1,11 +1,11 @@
-<?php
+<?php declare(strict_types=1);
 
 // Default error settings
-ini_set('display_errors', 1);
+ini_set('display_errors', '1');
 error_reporting(E_ALL);
 
 // Stop exceptions from rendering twice
-ini_set("log_errors", 0);
+ini_set("log_errors", '0');
 
 // BASE_PATH = Parent directory
 define('BASE_PATH', dirname(__DIR__));
