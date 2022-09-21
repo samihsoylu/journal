@@ -22,7 +22,7 @@ require($pathToAutoLoader);
 // Load .env file
 $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
 $dotenv->load();
-$dotenv->required(['SITE_TITLE', 'DB_HOST', 'DB_SCHEMA', 'DB_USERNAME', 'DB_PASSWORD', 'BASE_URL', 'DEBUG_MODE', 'ADMIN_EMAIL_ADDRESS', 'USE_SSL', 'IMAGE_UPLOAD_SIZE_LIMIT']);
+$dotenv->required(['SITE_TITLE', 'DB_HOST', 'DB_SCHEMA', 'DB_USERNAME', 'DB_PASSWORD', 'BASE_URL', 'DEBUG_MODE', 'ADMIN_EMAIL_ADDRESS', 'USE_SSL']);
 $dotenv->required('DEBUG_MODE')->isBoolean();
 
 define('BASE_URL', rtrim($_ENV['BASE_URL'], '/'));
@@ -31,10 +31,10 @@ define('SSL_IS_ENABLED', ($_ENV['USE_SSL'] === 'true'));
 define('SITE_TITLE', $_ENV['SITE_TITLE']);
 define('ADMIN_EMAIL_ADDRESS', $_ENV['ADMIN_EMAIL_ADDRESS']);
 define('SENTRY_ENABLED', (isset($_ENV['SENTRY_DSN'])) && (strlen($_ENV['SENTRY_DSN']) > 0));
-define('IMAGE_UPLOAD_SIZE_LIMIT', $_ENV['IMAGE_UPLOAD_SIZE_LIMIT']);
+define('IMAGE_UPLOAD_SIZE_LIMIT', $_ENV['IMAGE_UPLOAD_SIZE_LIMIT'] ?? 1);
 
-ini_set('upload_max_filesize', "{$_ENV['IMAGE_UPLOAD_SIZE_LIMIT']}M");
-ini_set('post_max_size', "'{$_ENV['IMAGE_UPLOAD_SIZE_LIMIT']}M'");
+ini_set('upload_max_filesize', IMAGE_UPLOAD_SIZE_LIMIT . 'M');
+ini_set('post_max_size', IMAGE_UPLOAD_SIZE_LIMIT . 'M');
 
 if (!DEBUG_MODE) {
     ini_set('display_errors', '0');
