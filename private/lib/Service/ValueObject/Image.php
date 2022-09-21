@@ -61,12 +61,12 @@ class Image implements \JsonSerializable
 
     public function __toString(): string
     {
-        return json_encode($this->jsonSerialize());
+        return json_encode($this->jsonSerialize(), JSON_THROW_ON_ERROR);
     }
 
     public static function fromString(string $image): self
     {
-        $image = json_decode($image, true);
+        $image = json_decode($image, true, 512, JSON_THROW_ON_ERROR);
 
         return new self($image['binary'], $image['name'], $image['type']);
     }

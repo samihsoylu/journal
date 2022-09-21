@@ -28,13 +28,11 @@ class GetAll extends Command
         $table->setHeaders(['ID', 'Username', 'Privilege Level'])
             ->setRows(
                 array_map(
-                    function (User $row) {
-                        return [
-                            $row->getId(),
-                            $row->getUsername(),
-                            $row->getPrivilegeLevelAsString()
-                        ];
-                    },
+                    fn(User $row) => [
+                        $row->getId(),
+                        $row->getUsername(),
+                        $row->getPrivilegeLevelAsString()
+                    ],
                     $users
                 )
             );

@@ -43,7 +43,7 @@ class MediaService
 
         @unlink($tmpPath);
 
-        return file_put_contents($targetPath, $encryptedImage);
+        return (bool) file_put_contents($targetPath, $encryptedImage);
     }
 
     public function getDecryptedImage(int $userId, string $imageName, Key $key): Image
