@@ -52,6 +52,7 @@ class Notification
         ];
 
         $this->flush();
+
         return $notificationData;
     }
 

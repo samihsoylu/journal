@@ -12,7 +12,6 @@ class Media extends AbstractController
     public const MEDIA_URL = BASE_URL . '/media';
     public const MEDIA_UPLOAD_POST_URL = self::MEDIA_URL . '/upload';
     public const MEDIA_GET_URL = self::MEDIA_URL . '/{imageName}';
-
     public MediaService $service;
 
     public function __construct(array $routeParameters)
@@ -96,7 +95,6 @@ class Media extends AbstractController
 
         return base64_encode($image);
     }
-
 
     private function ensureFileSizeIsWithinLimits(int $size): void
     {

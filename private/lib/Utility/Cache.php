@@ -11,7 +11,6 @@ use Symfony\Contracts\Cache\CacheInterface;
 class Cache
 {
     protected static $instance = null;
-
     public CacheInterface $cache;
 
     protected function __construct()

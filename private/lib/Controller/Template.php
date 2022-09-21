@@ -25,7 +25,6 @@ class Template extends AbstractController
     public const DELETE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/delete/{antiCsrfToken}';
 
     public const GET_TEMPLATE_DATA_AS_JSON_URL = self::VIEW_TEMPLATE_URL . '/ajax';
-
     private TemplateService $service;
     private TemplateValidator $validator;
     private CategoryService $categoryService;

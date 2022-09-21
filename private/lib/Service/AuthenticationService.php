@@ -94,6 +94,7 @@ class AuthenticationService
         $encodedEncryptionKey = $session->getEncodedEncryptionKey();
 
         $encryptor = new Encryptor();
+
         return $encryptor->getKeyFromEncodedKey($encodedEncryptionKey);
     }
 

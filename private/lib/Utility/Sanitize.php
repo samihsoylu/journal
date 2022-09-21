@@ -46,19 +46,24 @@ class Sanitize
             switch ($option) {
                 case self::OPTION_LOWERCASE:
                     $value = strtolower($value);
+
                     break;
                 case self::OPTION_TRIM:
                     $value = trim($value);
+
                     break;
                 case self::OPTION_STRIP:
                     $value = trim($value);
                     $value = htmlspecialchars($value);
+
                     break;
                 case self::OPTION_CLEAN_SPACES:
                     $value = str_replace(' ', '-', $value);
+
                     break;
                 case self::OPTION_CLEAN_SPECIAL_CHARS:
                     $value = preg_replace('/[^A-Za-z0-9\-]/', '', $value);
+
                     break;
             }
         }
@@ -105,6 +110,7 @@ class Sanitize
 
         // Remove spaces and special characters
         $input = str_replace(' ', '_', $input);
+
         return preg_replace('/\W/', '', $input);
     }
 }

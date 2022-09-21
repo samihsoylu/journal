@@ -24,6 +24,7 @@ $encodedEncryptionKey = $argv[3];
 
 $lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
 $lock = Lock::acquire($lockName);
+
 try {
     $encryptionKey = (new Encryptor())->getKeyFromEncodedKey($encodedEncryptionKey);
 

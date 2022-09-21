@@ -355,6 +355,7 @@ class UserService
     public function getHasExportEntriesActionRunning(int $userId, string $username): bool
     {
         $lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
+
         return Lock::exists($lockName);
     }
 }

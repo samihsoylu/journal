@@ -17,7 +17,6 @@ class Image implements \JsonSerializable
         self::TYPE_BMP,
         self::TYPE_WEBP,
     ];
-
     private string $binary;
     private string $name;
     private string $type;

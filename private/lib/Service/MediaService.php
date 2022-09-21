@@ -10,7 +10,6 @@ use Defuse\Crypto\Key;
 class MediaService
 {
     public const UPLOAD_DIR = BASE_PATH . '/uploads';
-
     private Encryptor $encryptor;
     private MediaHelper $helper;
 

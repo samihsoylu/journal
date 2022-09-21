@@ -25,7 +25,6 @@ class Entry extends AbstractController
 
     public const CREATE_ENTRY_POST_URL = self::CREATE_ENTRY_URL . '/action';
     public const UPDATE_ENTRY_POST_URL = self::UPDATE_ENTRY_URL . '/action';
-
     private EntryService $service;
     private EntryValidator $validator;
     private CategoryService $categoryService;

@@ -14,7 +14,6 @@ class UserSession
     protected int    $userId;
     protected string $username;
     protected int    $privilegeLevel;
-
     protected string $antiCSRFToken;
     protected string $encodedEncryptionKey;
 

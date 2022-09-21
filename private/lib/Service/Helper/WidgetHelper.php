@@ -13,6 +13,7 @@ class WidgetHelper
     {
         $this->repository = new WidgetRepository();
     }
+
     public function getAllWidgetsForUser(User $user): array
     {
         return $this->repository->findByUser($user);

@@ -16,7 +16,6 @@ class Authentication extends AbstractController
     public const LOGIN_URL         = BASE_URL . '/login';
     public const LOGIN_POST_URL    = self::LOGIN_URL . '/action';
     public const LOGOUT_URL        = BASE_URL . '/logout';
-
     private AuthenticationService $service;
     private AuthenticationValidator $validator;
 
