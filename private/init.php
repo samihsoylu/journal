@@ -33,6 +33,9 @@ define('ADMIN_EMAIL_ADDRESS', $_ENV['ADMIN_EMAIL_ADDRESS']);
 define('SENTRY_ENABLED', (isset($_ENV['SENTRY_DSN'])) && (strlen($_ENV['SENTRY_DSN']) > 0));
 define('IMAGE_UPLOAD_SIZE_LIMIT', $_ENV['IMAGE_UPLOAD_SIZE_LIMIT']);
 
+ini_set('upload_max_filesize', "{$_ENV['IMAGE_UPLOAD_SIZE_LIMIT']}M");
+ini_set('post_max_size', "'{$_ENV['IMAGE_UPLOAD_SIZE_LIMIT']}M'");
+
 if (!DEBUG_MODE) {
     ini_set('display_errors', '0');
     error_reporting(0);

@@ -103,7 +103,7 @@ class Media extends AbstractController
         $sizeLimit = 1024 * 1024 * IMAGE_UPLOAD_SIZE_LIMIT;
         if ($size > $sizeLimit) {
             header('HTTP/1.1 400 File size too large.');
-            $this->renderJsonResponse(['error' => 'File size is too large.']);
+            $this->renderJsonResponse(['File size is too large.']);
             exit;
         }
     }
