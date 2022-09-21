@@ -34,12 +34,16 @@ figure.image {
     background: #f5f2f0;
 }
 
-figure.align-left {
+figure.align-left,
+img.align-left {
     float: left;
+    margin-right:15px;
 }
 
-figure.align-right {
+figure.align-right,
+img.align-right {
     float: right;
+    margin-left:15px;
 }
 
 figure.image img {
@@ -49,17 +53,4 @@ figure.image img {
 figure.image figcaption {
     margin: 6px 8px 6px 8px;
     text-align: center;
-}
-
-/*
- Alignment using classes rather than inline styles
- check out the "formats" option
-*/
-
-img.align-left {
-    float: left;
-}
-
-img.align-right {
-    float: right;
 }

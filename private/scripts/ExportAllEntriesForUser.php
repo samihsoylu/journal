@@ -2,6 +2,7 @@
 
 use App\Database\Model\Entry;
 use App\Database\Repository\EntryRepository;
+use App\Service\Helper\MediaHelper;
 use App\Utility\Command\Command;
 use App\Utility\Encryptor;
 use App\Utility\Lock\Lock;
@@ -142,9 +143,10 @@ class EntryExporter
         $mediaDirectory = "{$exportDirectoryPath}/media";
         $this->ensureDirExists($mediaDirectory);
 
-        $service = new \App\Service\MediaService(new Encryptor());
+        $helper = new MediaHelper();
+        $service = new \App\Service\MediaService(new Encryptor(), $helper);
 
-        $images = $service->getAllImageNamesForUser($this->userId);
+        $images = $helper->getAllImageNamesForUser($this->userId);
         foreach ($images as $imageName) {
             $image = $service->getDecryptedImage($this->userId, $imageName, $this->key);
 

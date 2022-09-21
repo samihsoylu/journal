@@ -6,6 +6,7 @@ use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
 use App\Exception\UserException\ActionNotPermittedException;
 use App\Exception\UserException\NotFoundException;
+use App\Service\Helper\MediaHelper;
 use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserSetupHelper;
 use App\Service\Helper\WidgetHelper;
@@ -32,6 +33,7 @@ class UserService
     private EntryHelper $entryHelper;
     private WidgetHelper $widgetHelper;
     private TemplateHelper $templateHelper;
+    private MediaHelper $mediaHelper;
 
     private const DEFAULT_PASSWORD_HASH_ALGORITHM = PASSWORD_ARGON2ID;
 
@@ -46,6 +48,7 @@ class UserService
         $this->entryHelper    = new EntryHelper();
         $this->templateHelper = new TemplateHelper();
         $this->widgetHelper   = new WidgetHelper();
+        $this->mediaHelper    = new MediaHelper();
     }
 
     /**
@@ -204,6 +207,17 @@ class UserService
             $this->repository->remove($widget);
         }
 
+        $files = $this->getZipFileNamesForExportedEntriesByUser($targetUser->getId());
+        foreach ($files as $file) {
+            try {
+                $this->deleteExportedEntriesZipFile($targetUser->getId(), $file);
+            } catch (NotFoundException $e) {
+                continue;
+            }
+        }
+
+        $this->mediaHelper->removeUserUploadDir($targetUser->getId());
+
         $this->repository->remove($targetUser);
 
         // Execute queued changes
@@ -327,7 +341,7 @@ class UserService
             throw NotFoundException::entityNameNotFound('Zip', $fileName);
         }
 
-        unlink($filePath);
+        @unlink($filePath);
     }
 
     private function ensureValidExportEntriesZipFileName(string $fileName)
