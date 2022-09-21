@@ -1,17 +1,17 @@
 # Journal
-Journal is a privacy first, self hosted digital log book. It is designed to be accessible anywhere you go, allowing you to organize your thoughts, feelings and opinions in one place. Your Journals are stored with AES 256 encryption using your own password as the encryption key, resulting in a protected and inaccessible log book from outsiders.
+Journal is a privacy first, self-hosted digital log book. It is designed to be accessible anywhere you go, allowing you to organize your thoughts, feelings and opinions in one place. Your Journals are stored with AES 256 encryption using your own password as the encryption key, resulting in a protected and inaccessible log book from outsiders.
 
 <img src="https://samihsoylu.nl/downloads/dashboard-journalv1.2.3.png">
 
 ## Feature highlights
 * Mobile friendly
-* Create predefined sets of templates for entries
-* Format entry content using markdown
+* Advanced content editor (supports image upload)
 * Organise entries using categories
-* Entries and Templates have AES-256 Encryption
-* Quickly add entries by enabling the quick-add widget
+* Create predefined sets of templates for entries
+* Entries, Templates and Images have AES-256 Encryption
 * Order your favorite categories to appear on the top
-* Advanced search 
+* Quickly add entries by enabling the quick-add widget
+* Advanced search
 * Create accounts for users
 * Export entries
 
