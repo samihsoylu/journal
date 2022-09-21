@@ -9,6 +9,7 @@ use App\Utility\Template;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use Defuse\Crypto\Key;
+use Sentry\UserDataBag;
 
 abstract class AbstractController
 {
@@ -42,6 +43,18 @@ abstract class AbstractController
         $this->routeParameters = $routeParameters;
         $this->template        = Template::getInstance();
         $this->notification    = new Notification();
+
+        if (SENTRY_ENABLED) {
+            \Sentry\configureScope(function (\Sentry\State\Scope $scope) use ($authenticationService): void {
+                $data = UserDataBag::createFromUserIpAddress($_SERVER['REMOTE_ADDR']);
+                $session = $authenticationService->getUserSession();
+                if ($session !== null) {
+                    $data->setId($session->getUserId());
+                    $data->setUsername($session->getUsername());
+                    ;
+                }
+            });
+        }
     }
 
     protected function getRouteParameters(): array

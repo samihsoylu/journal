@@ -163,7 +163,7 @@ class Account extends AbstractController
     {
         $this->validator->validate(__FUNCTION__);
 
-        $processId = $this->userService->exportUserEntriesToMarkdown($this->getUserId(), $this->getUserEncryptionKey());
+        $processId = $this->userService->exportUserEntries($this->getUserId(), $this->getUserEncryptionKey());
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,

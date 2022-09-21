@@ -24,10 +24,20 @@ class MediaService
         }
     }
 
+    public function getUserUploadDir(int $userId)
+    {
+        return self::UPLOAD_DIR . "/{$userId}";
+    }
+
+    public function getAllImageNamesForUser(int $userId)
+    {
+        return array_values(array_diff(scandir($this->getUserUploadDir($userId)), ['..', '.']));
+    }
+
     public function encryptImage(int $userId, Image $image, Key $key, string $tmpPath): bool
     {
         $this->ensureUserUploadDir($userId);
-        $targetPath = self::UPLOAD_DIR . "/{$userId}/{$image->getName()}";
+        $targetPath = "{$this->getUserUploadDir($userId)}/{$image->getName()}";
 
         $encryptedImage = $this->encryptor->encrypt((string) $image, $key);
 
@@ -38,7 +48,7 @@ class MediaService
 
     public function getDecryptedImage(int $userId, string $imageName, Key $key): Image
     {
-        $targetPath = self::UPLOAD_DIR."/{$userId}/{$imageName}";
+        $targetPath = "{$this->getUserUploadDir($userId)}/{$imageName}";
         $image = @file_get_contents($targetPath);
         if (!$image) {
             throw new \RuntimeException('Could not find image.');

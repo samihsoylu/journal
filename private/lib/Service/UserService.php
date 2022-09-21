@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Exception\UserException\ActionNotPermittedException;
 use App\Exception\UserException\NotFoundException;
 use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserSetupHelper;
@@ -254,8 +255,13 @@ class UserService
      * @param int $userId
      * @param Key $encryptionKey used for decrypting entry contents
      */
-    public function exportUserEntriesToMarkdown(int $userId, Key $encryptionKey): int
+    public function exportUserEntries(int $userId, Key $encryptionKey): int
     {
+        $exports = $this->getZipFileNamesForExportedEntriesByUser($userId);
+        if ($exports !== []) {
+            throw new ActionNotPermittedException('Allowed count of exports reached');
+        }
+
         $user = $this->userHelper->getUserById($userId);
         $exportScriptFilePath = SCRIPTS_PATH . '/ExportAllEntriesForUser.php';
 
@@ -295,7 +301,7 @@ class UserService
         /** @see EntryExporter::zipAllEntries() */
         $exportedFiles = glob(EXPORT_CACHE_PATH . "/{$user->getUsername()}__*.zip");
 
-        return array_map(static function(string $file) {
+        return array_map(static function (string $file) {
             return basename($file);
         }, $exportedFiles);
     }

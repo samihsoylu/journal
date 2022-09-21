@@ -96,7 +96,7 @@
                         <form method="post" action="{{ $export_entries_post_url }}">
                             <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
 
-                            <button class="btn btn-primary mt-10" id="export" type="submit"><i class="material-icons">file_download</i> Export</button>
+                            <button class="btn btn-primary mt-10" id="export" type="submit" @if ($exportedFiles !== []) disabled @endif><i class="material-icons">file_download</i> Export</button>
                         </form>
                     </div>
                 </div>

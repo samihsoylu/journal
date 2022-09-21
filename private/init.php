@@ -18,7 +18,6 @@ if (!file_exists($pathToAutoLoader)) {
 
 // Composer autoloader
 require($pathToAutoLoader);
-require(__DIR__ . '/functions.php');
 
 // Load .env file
 $dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);

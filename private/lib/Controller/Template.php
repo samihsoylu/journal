@@ -39,7 +39,7 @@ class Template extends AbstractController
 
         $this->service   = new TemplateService();
         $this->validator = new TemplateValidator($_POST, $_GET);
-        
+
         $this->categoryService = new CategoryService();
     }
 

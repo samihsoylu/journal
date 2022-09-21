@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Utility;
 
@@ -13,7 +15,7 @@ class Registry
     public static function get(string $className): object
     {
         if (!isset(self::$objects[$className])) {
-            self::$objects[$className] = new $className;
+            self::$objects[$className] = new $className();
         }
 
         return self::$objects[$className];

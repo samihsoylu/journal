@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Service;
 
 use App\Database\Model\Widget;
