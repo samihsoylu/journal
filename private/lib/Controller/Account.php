@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Controller;
 
@@ -20,7 +20,6 @@ class Account extends AbstractController
     public const EXPORT_DOWNLOAD_URL = self::EXPORT_ENTRIES_POST_URL . '/download';
     public const EXPORT_DELETE_POST_URL = self::EXPORT_ENTRIES_POST_URL . '/delete';
     public const EXPORT_DOWNLOAD_GET_URL = self::EXPORT_DOWNLOAD_URL . '/{fileName}';
-
     private UserService $userService;
     private WidgetService $widgetService;
     private AccountValidator $validator;
@@ -163,7 +162,7 @@ class Account extends AbstractController
     {
         $this->validator->validate(__FUNCTION__);
 
-        $processId = $this->userService->exportUserEntriesToMarkdown($this->getUserId(), $this->getUserEncryptionKey());
+        $processId = $this->userService->exportUserEntries($this->getUserId(), $this->getUserEncryptionKey());
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,

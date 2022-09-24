@@ -14,7 +14,6 @@ class UserSession
     protected int    $userId;
     protected string $username;
     protected int    $privilegeLevel;
-
     protected string $antiCSRFToken;
     protected string $encodedEncryptionKey;
 
@@ -23,7 +22,7 @@ class UserSession
     protected const USER_NAME  = 'Username';
     protected const USER_PRIVILEGE_LEVEL = 'PrivilegeLevel';
     protected const ANTI_CSRF_TOKEN        = 'AntiCSRFToken';
-    protected const ENCODED_ENCRYPTION_KEY = 'EncodedEncryptionKey';
+    protected const ENCODED_ENCRYPTION_KEY = 'EEK';
 
     private function __construct(string $id, int $userId, string $username, int $privilegeLevel)
     {

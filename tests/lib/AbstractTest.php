@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Tests;
 
@@ -94,6 +94,7 @@ abstract class AbstractTest extends TestCase
 
             $mockEntries[] = $mock;
         }
+
         return $mockEntries;
     }
 
@@ -111,9 +112,9 @@ abstract class AbstractTest extends TestCase
 
             $mockTemplates[] = $mock;
         }
+
         return $mockTemplates;
     }
-
 
     protected function setMockUser(int $userId): User
     {

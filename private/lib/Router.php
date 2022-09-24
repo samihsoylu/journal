@@ -7,6 +7,7 @@ use App\Exception\UserException;
 use App\Utility\ExceptionHandler;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
+
 use function FastRoute\simpleDispatcher;
 
 /**
@@ -43,12 +44,14 @@ class Router
                 // ... 404 Not Found, route does not exist
                 http_response_code(404);
                 $errorController->renderNotFoundPage();
+
                 break;
             case Dispatcher::METHOD_NOT_ALLOWED:
                 //$allowedMethods = $routeInfo[1];
                 // ... 405 Method Not Allowed
                 http_response_code(405);
                 $errorController->methodNotAllowed();
+
                 break;
             case Dispatcher::FOUND:
                 array_shift($routeInfo);
@@ -88,6 +91,7 @@ class Router
 
         if ($exception instanceof UserException) {
             $handleException->userException($controller, $methodName);
+
             return;
         }
 

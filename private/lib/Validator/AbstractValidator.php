@@ -9,7 +9,6 @@ use App\Utility\UserSession;
 abstract class AbstractValidator
 {
     protected array $post;
-
     protected array $get;
 
     public function __construct(array $postData, array $getData = [])
@@ -42,6 +41,7 @@ abstract class AbstractValidator
 
         if (count($missingFields) > 0) {
             $missingFields = implode(', ', $missingFields);
+
             throw InvalidParameterException::missingField($missingFields);
         }
     }

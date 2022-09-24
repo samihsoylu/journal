@@ -1,5 +1,6 @@
 @charset "UTF-8";
 @import "fonts/material-icons.css";
+@import "tinymce-basics.css";
 
 /* Table of Content
 ==================================================
@@ -474,3 +475,6 @@ a .badge:hover {
 		overflow-wrap: break-word;
 	}
 }
+
+.tox-promotion { display:none; }
+.tox-statusbar__branding { display:none; }

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Service\Helper;
 
@@ -13,6 +13,7 @@ class WidgetHelper
     {
         $this->repository = new WidgetRepository();
     }
+
     public function getAllWidgetsForUser(User $user): array
     {
         return $this->repository->findByUser($user);

@@ -25,7 +25,6 @@ class Entry extends AbstractController
 
     public const CREATE_ENTRY_POST_URL = self::CREATE_ENTRY_URL . '/action';
     public const UPDATE_ENTRY_POST_URL = self::UPDATE_ENTRY_URL . '/action';
-
     private EntryService $service;
     private EntryValidator $validator;
     private CategoryService $categoryService;
@@ -113,7 +112,7 @@ class Entry extends AbstractController
         $entryId = Sanitize::int($this->getRouteParameters()['id']);
 
         try {
-            $decorator = $this->service->getEntryForUser($entryId, $this->getUserId(), $this->getUserEncryptionKey(), true);
+            $decorator = $this->service->getEntryForUser($entryId, $this->getUserId(), $this->getUserEncryptionKey());
 
             $this->template->setVariable('entry', $decorator);
         } catch (UserException $e) {

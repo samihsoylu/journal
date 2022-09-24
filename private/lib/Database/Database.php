@@ -14,7 +14,6 @@ use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 final class Database
 {
     private static ?Database $instance = null;
-
     private DependencyFactory $dependencyFactory;
 
     private function __construct()

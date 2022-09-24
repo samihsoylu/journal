@@ -2,12 +2,14 @@
 
 use App\Database\Model\Entry;
 use App\Database\Repository\EntryRepository;
+use App\Service\Helper\MediaHelper;
 use App\Utility\Command\Command;
 use App\Utility\Encryptor;
 use App\Utility\Lock\Lock;
 use App\Utility\Lock\LockName;
 use App\Utility\Sanitize;
 use Defuse\Crypto\Key;
+use Jenssegers\Blade\Blade;
 
 require(dirname(__DIR__) . '/init.php');
 
@@ -22,11 +24,19 @@ $encodedEncryptionKey = $argv[3];
 
 $lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
 $lock = Lock::acquire($lockName);
+
 try {
     $encryptionKey = (new Encryptor())->getKeyFromEncodedKey($encodedEncryptionKey);
 
     $export = new EntryExporter($userId, $username, $encryptionKey, new EntryRepository());
     $export->execute();
+} catch (\Exception $exception) {
+    $date = new DateTime();
+    echo "[{$date->format('Y-m-d H:i:s')}] {$exception}\n";
+
+    if (SENTRY_ENABLED) {
+        \Sentry\captureException($exception);
+    }
 } finally {
     $lock->unlock();
 }
@@ -55,9 +65,15 @@ class EntryExporter
         $username = Sanitize::stringForShell($this->username);
         $exportDirectoryPath = EXPORT_CACHE_PATH . "/{$username}";
 
-        $this->writeUserEntriesToDisk($exportDirectoryPath);
-        $this->zipAllEntries($username);
-        $this->removeEntriesFromDisk($exportDirectoryPath);
+        try {
+            $this->writeUserMediaToFile($exportDirectoryPath);
+            $this->writeUserEntriesToDisk($exportDirectoryPath);
+            $this->zipAllEntries($username);
+        } finally {
+            // once zipped, the directory is no longer needed
+            // and if there is an error, we don't need sensitive information exposed.
+            $this->removeEntriesFromDisk($exportDirectoryPath);
+        }
     }
 
     private function writeUserEntriesToDisk(string $exportDirectoryPath): void
@@ -72,19 +88,16 @@ class EntryExporter
         $dateString = (new DateTime())->format('d-m-Y_H-i-s');
 
         $command = new Command([
-            'cd', EXPORT_CACHE_PATH, '&&',
-            '/usr/bin/zip', '-r', "{$username}__{$dateString}.zip", "{$username}/"
+            'cd',
+            EXPORT_CACHE_PATH,
+            '&&',
+            '/usr/bin/zip',
+            '-r',
+            "{$username}__{$dateString}.zip",
+            "{$username}/"
         ]);
 
-        try {
-            $command->execute();
-        } catch (\LogicException $exception) {
-            // Intentionally caught so that removeEntriesFromDisk() is executed for privacy reasons
-            echo "[{$dateString}] {$exception}\n";
-            if (SENTRY_ENABLED) {
-                \Sentry\captureException($exception);
-            }
-        }
+        $command->execute();
     }
 
     private function removeEntriesFromDisk(string $exportDirectoryPath): void
@@ -100,9 +113,17 @@ class EntryExporter
         $category = Sanitize::stringForShell($entry->getReferencedCategory()->getName());
 
         $this->ensureDirExists("{$exportDirectoryPath}/{$category}");
+
+        $blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH);
+
+        $entryContent = $entry->getContentDecrypted($this->key);
+        $entryContent = str_replace('"/media', '"../media', $entryContent);
+
+        $html = $blade->render('export', ['content' => $entryContent]);
+
         file_put_contents(
-            "{$exportDirectoryPath}/{$category}/{$title}.md",
-            $entry->getContentDecrypted($this->key)
+            "{$exportDirectoryPath}/{$category}/{$title}.html",
+            $html
         );
     }
 
@@ -115,6 +136,22 @@ class EntryExporter
     {
         if (!is_dir($directory)) {
             mkdir($directory, 0777, true);
+        }
+    }
+
+    private function writeUserMediaToFile(string $exportDirectoryPath): void
+    {
+        $mediaDirectory = "{$exportDirectoryPath}/media";
+        $this->ensureDirExists($mediaDirectory);
+
+        $helper = new MediaHelper();
+        $service = new \App\Service\MediaService(new Encryptor(), $helper);
+
+        $images = $helper->getAllImageNamesForUser($this->userId);
+        foreach ($images as $imageName) {
+            $image = $service->getDecryptedImage($this->userId, $imageName, $this->key);
+
+            file_put_contents("{$mediaDirectory}/{$imageName}", $image->getBinary());
         }
     }
 }

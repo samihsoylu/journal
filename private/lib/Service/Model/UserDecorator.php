@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Service\Model;
 
@@ -14,7 +14,6 @@ class UserDecorator
     private int $privilegeLevel;
 
     public const ALLOWED_PRIVILEGE_LEVELS = User::ALLOWED_PRIVILEGE_LEVELS;
-
     private bool $isReadOnly;
     private int $totalCategories;
     private int $totalEntries;

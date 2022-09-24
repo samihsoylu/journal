@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Service;
 
@@ -94,6 +94,7 @@ class AuthenticationService
         $encodedEncryptionKey = $session->getEncodedEncryptionKey();
 
         $encryptor = new Encryptor();
+
         return $encryptor->getKeyFromEncodedKey($encodedEncryptionKey);
     }
 

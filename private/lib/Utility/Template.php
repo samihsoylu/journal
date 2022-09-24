@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Utility;
 
@@ -101,7 +101,7 @@ class Template
      */
     private function setAllUrlConstantsToVariables(): void
     {
-        $controllers = array_diff(scandir(BASE_PATH . '/private/lib/Controller'), array('..', '.'));
+        $controllers = array_diff(scandir(BASE_PATH . '/private/lib/Controller'), ['..', '.']);
 
         $variableList = [];
         foreach ($controllers as $controller) {

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Utility\Command;
 
@@ -25,7 +25,9 @@ class Process implements ProcessInterface
      */
     public static function start(Command $command, string $logPath = '/dev/null'): self
     {
-        $processId = shell_exec("/usr/bin/setsid {$command} > {$logPath} 2>&1 & echo $!");
+        $setsidPath = $_ENV['SETSID_PATH'] ?? '/usr/bin/setsid';
+
+        $processId = shell_exec("{$setsidPath} {$command} > {$logPath} 2>&1 & echo $!");
         $id        = filter_var($processId, FILTER_VALIDATE_INT);
 
         return new self($id);

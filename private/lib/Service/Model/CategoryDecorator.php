@@ -7,7 +7,6 @@ class CategoryDecorator
     private int $id;
     private string $name;
     private string $description;
-
     private int $totalEntries;
     private int $totalTemplates;
 

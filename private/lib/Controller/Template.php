@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Controller;
 
@@ -25,7 +25,6 @@ class Template extends AbstractController
     public const DELETE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/delete/{antiCsrfToken}';
 
     public const GET_TEMPLATE_DATA_AS_JSON_URL = self::VIEW_TEMPLATE_URL . '/ajax';
-
     private TemplateService $service;
     private TemplateValidator $validator;
     private CategoryService $categoryService;
@@ -39,7 +38,7 @@ class Template extends AbstractController
 
         $this->service   = new TemplateService();
         $this->validator = new TemplateValidator($_POST, $_GET);
-        
+
         $this->categoryService = new CategoryService();
     }
 
@@ -58,7 +57,7 @@ class Template extends AbstractController
 
         $categoryId      = Sanitize::int($_POST['category_id']);
         $templateTitle   = Sanitize::string($_POST['template_title']);
-        $templateContent = Sanitize::string($_POST['template_content'], [Sanitize::OPTION_TRIM]);
+        $templateContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $this->service->createTemplate($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $templateTitle, $templateContent);
 
@@ -85,7 +84,7 @@ class Template extends AbstractController
         $categoryId      = Sanitize::int($_POST['category_id']);
         $templateId      = Sanitize::int($this->getRouteParameters()['id']);
         $templateTitle   = Sanitize::string($_POST['template_title']);
-        $templateContent = Sanitize::string($_POST['template_content'], [Sanitize::OPTION_TRIM]);
+        $templateContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $this->service->updateTemplate(
             $this->getUserId(),

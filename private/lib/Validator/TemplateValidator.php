@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Validator;
 
@@ -11,14 +11,14 @@ class TemplateValidator extends AbstractValidator
      */
     public function create(): void
     {
-        $requiredFields = ['category_id', 'template_title', 'template_content'];
+        $requiredFields = ['category_id', 'template_title', 'entry_content'];
         $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
 
         $this->ensureValueIsNumeric($this->post, 'category_id');
 
         $this->ensureValueIsNotTooShort($this->post, 'template_title', 4);
         $this->ensureValueIsNotTooLong($this->post, 'template_title', 128);
-        $this->ensureValueIsNotTooShort($this->post, 'template_content', 1);
+        $this->ensureValueIsNotTooShort($this->post, 'entry_content', 1);
 
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
     }

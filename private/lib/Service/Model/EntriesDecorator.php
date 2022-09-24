@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Service\Model;
 
@@ -8,7 +8,6 @@ class EntriesDecorator
 {
     /** @var Entry[] */
     private array $entries;
-
     private int $totalPages;
     private int $currentPage;
 
@@ -54,12 +53,14 @@ class EntriesDecorator
     public function getPreviousPageUrl(): string
     {
         $previousPage = $this->currentPage - 1;
+
         return "{$this->getPaginationFilterUri()}page={$previousPage}";
     }
 
     public function getNextPageUrl(): string
     {
         $nextPage = $this->currentPage + 1;
+
         return "{$this->getPaginationFilterUri()}page={$nextPage}";
     }
 }

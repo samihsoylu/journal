@@ -1,10 +1,12 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Service;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
+use App\Exception\UserException\ActionNotPermittedException;
 use App\Exception\UserException\NotFoundException;
+use App\Service\Helper\MediaHelper;
 use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserSetupHelper;
 use App\Service\Helper\WidgetHelper;
@@ -31,6 +33,7 @@ class UserService
     private EntryHelper $entryHelper;
     private WidgetHelper $widgetHelper;
     private TemplateHelper $templateHelper;
+    private MediaHelper $mediaHelper;
 
     private const DEFAULT_PASSWORD_HASH_ALGORITHM = PASSWORD_ARGON2ID;
 
@@ -45,6 +48,7 @@ class UserService
         $this->entryHelper    = new EntryHelper();
         $this->templateHelper = new TemplateHelper();
         $this->widgetHelper   = new WidgetHelper();
+        $this->mediaHelper    = new MediaHelper();
     }
 
     /**
@@ -203,6 +207,17 @@ class UserService
             $this->repository->remove($widget);
         }
 
+        $files = $this->getZipFileNamesForExportedEntriesByUser($targetUser->getId());
+        foreach ($files as $file) {
+            try {
+                $this->deleteExportedEntriesZipFile($targetUser->getId(), $file);
+            } catch (NotFoundException $e) {
+                continue;
+            }
+        }
+
+        $this->mediaHelper->removeUserUploadDir($targetUser->getId());
+
         $this->repository->remove($targetUser);
 
         // Execute queued changes
@@ -254,8 +269,13 @@ class UserService
      * @param int $userId
      * @param Key $encryptionKey used for decrypting entry contents
      */
-    public function exportUserEntriesToMarkdown(int $userId, Key $encryptionKey): int
+    public function exportUserEntries(int $userId, Key $encryptionKey): int
     {
+        $exports = $this->getZipFileNamesForExportedEntriesByUser($userId);
+        if ($exports !== []) {
+            throw new ActionNotPermittedException('Allowed count of exports reached');
+        }
+
         $user = $this->userHelper->getUserById($userId);
         $exportScriptFilePath = SCRIPTS_PATH . '/ExportAllEntriesForUser.php';
 
@@ -295,9 +315,7 @@ class UserService
         /** @see EntryExporter::zipAllEntries() */
         $exportedFiles = glob(EXPORT_CACHE_PATH . "/{$user->getUsername()}__*.zip");
 
-        return array_map(static function(string $file) {
-            return basename($file);
-        }, $exportedFiles);
+        return array_map(static fn (string $file) => basename($file), $exportedFiles);
     }
 
     public function getZipFilePathForExportedEntriesByUser(int $userId, string $fileName): ?string
@@ -323,7 +341,7 @@ class UserService
             throw NotFoundException::entityNameNotFound('Zip', $fileName);
         }
 
-        unlink($filePath);
+        @unlink($filePath);
     }
 
     private function ensureValidExportEntriesZipFileName(string $fileName)
@@ -337,6 +355,7 @@ class UserService
     public function getHasExportEntriesActionRunning(int $userId, string $username): bool
     {
         $lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
+
         return Lock::exists($lockName);
     }
 }

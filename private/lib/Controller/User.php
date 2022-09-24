@@ -21,7 +21,6 @@ class User extends AbstractController
     public const DELETE_USER_URL = self::VIEW_USER_URL . '/delete/{antiCsrfToken}';
 
     public const UPDATE_USER_URL = self::VIEW_USER_URL . '/update';
-
     private UserValidator $validator;
     private UserService $service;
 

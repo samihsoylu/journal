@@ -70,7 +70,7 @@ class EntryRepository extends AbstractRepository
         );
 
         if ($limit !== null) {
-            $offset = $offset ?? 0;
+            $offset ??= 0;
 
             $qb->setFirstResult($offset)
                 ->setMaxResults($limit);

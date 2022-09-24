@@ -1,4 +1,4 @@
-    @isset($error)
+@isset($error)
         <div class="corner-alert z-depth-4 card-panel red white-text valign-wrapper"><i class="material-icons left">error</i> {{ $error }}</div>
     @endisset
 
