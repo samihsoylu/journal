@@ -10,7 +10,6 @@ use Doctrine\Migrations\Configuration\Migration\JsonFile;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
-use Doctrine\ORM\Tools\Setup;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 
 final class Database
