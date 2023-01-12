@@ -19,6 +19,7 @@ Journal is a privacy first, self-hosted digital log book. It is designed to be a
 
 * You can use [our Hosted version](https://journalapp.nl). This is the simplest way to use Journal.
 * You can [host it yourself](https://samihsoylu.notion.site/Installation-fb156297be1f421c8540a41fe34314ec)
+* You can join our [Discord](https://discord.gg/bfkMjU5teE) if you have questions
 
 ## Try it out using Docker
 ```bash
