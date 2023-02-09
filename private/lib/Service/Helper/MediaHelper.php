@@ -20,7 +20,12 @@ class MediaHelper
 
     public function getAllImageNamesForUser(int $userId)
     {
-        return array_values(array_diff(scandir($this->getUserUploadDir($userId)), ['..', '.']));
+        $directory = $this->getUserUploadDir($userId);
+        if (!is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+
+        return array_values(array_diff(scandir($directory), ['..', '.']));
     }
 
     public function getUserUploadDir(int $userId)
