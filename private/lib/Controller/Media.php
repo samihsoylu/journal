@@ -65,6 +65,8 @@ class Media extends AbstractController
             $this->renderNotFound();
         }
 
+        header('Cache-Control: max-age=86400');
+        header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + 86400));
         header("Content-Type: image/{$image->getType()}");
         echo $image->getBinary();
     }

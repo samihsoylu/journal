@@ -2,13 +2,14 @@
 
 namespace App\Database;
 
+use Doctrine\Common\Cache\Psr6\CacheAdapter;
 use Doctrine\Common\Cache\Psr6\DoctrineProvider;
 use Doctrine\Common\Proxy\AbstractProxyFactory;
 use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
 use Doctrine\Migrations\Configuration\Migration\JsonFile;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\ORMSetup;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 
 final class Database
@@ -28,13 +29,13 @@ final class Database
 
         $adapter = new PhpFilesAdapter('doctrine_results', 3600, DATABASE_CACHE_PATH . '/cache/');
         $cache = DoctrineProvider::wrap($adapter);
+        $cache = CacheAdapter::wrap($cache);
 
-        $config = Setup::createAnnotationMetadataConfiguration(
+        $config = ORMSetup::createAnnotationMetadataConfiguration(
             [MODEL_PATH],
             DEBUG_MODE,
             DATABASE_CACHE_PATH . '/proxy/',
-            $cache,
-            false
+            $cache
         );
         $config->setAutoGenerateProxyClasses(AbstractProxyFactory::AUTOGENERATE_FILE_NOT_EXISTS_OR_CHANGED);
 
