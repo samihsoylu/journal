@@ -63,6 +63,7 @@ $route->addRoute('POST', Account::UPDATE_WIDGETS_POST_URL, 'Account@updateWidget
 $route->addRoute('POST', Account::EXPORT_ENTRIES_POST_URL, 'Account@exportEntries');
 $route->addRoute('GET', Account::EXPORT_DOWNLOAD_GET_URL, 'Account@downloadEntryExport');
 $route->addRoute('POST', Account::EXPORT_DELETE_POST_URL, 'Account@deleteEntryExport');
+$route->addRoute('POST', Account::SET_DATE_TIME_ZONE_POST_URL, 'Account@setDateTimeZone');
 
 // Media
 $route->addRoute('POST', Media::MEDIA_UPLOAD_POST_URL, 'Media@upload');

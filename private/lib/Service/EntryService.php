@@ -122,7 +122,7 @@ class EntryService
             $entry->getReferencedCategory()->getId(),
             $entry->getReferencedCategory()->getName(),
             $entry->getContentDecrypted($key),
-            $entry->getLastUpdatedTimestampFormatted(),
+            $entry->getLastUpdatedTimestampFormatted($entry->getReferencedUser()->getTimezone()),
         );
     }
 

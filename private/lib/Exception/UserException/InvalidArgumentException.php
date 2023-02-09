@@ -45,4 +45,9 @@ class InvalidArgumentException extends UserException
     {
         return new self("Invalid file name provided", $code);
     }
+
+    public static function invalidTimezoneProvided(string $timezone, int $code = 406)
+    {
+        return new self("Timezone {$timezone} does not exist", $code);
+    }
 }

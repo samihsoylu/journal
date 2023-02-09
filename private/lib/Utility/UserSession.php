@@ -16,20 +16,23 @@ class UserSession
     protected int    $privilegeLevel;
     protected string $antiCSRFToken;
     protected string $encodedEncryptionKey;
+    protected ?string $timezone;
 
     protected const SESSION_ID = 'SessionID';
-    protected const USER_ID    = 'UserID';
-    protected const USER_NAME  = 'Username';
+    protected const USER_ID = 'UserID';
+    protected const USER_NAME = 'Username';
     protected const USER_PRIVILEGE_LEVEL = 'PrivilegeLevel';
-    protected const ANTI_CSRF_TOKEN        = 'AntiCSRFToken';
+    protected const ANTI_CSRF_TOKEN = 'AntiCSRFToken';
     protected const ENCODED_ENCRYPTION_KEY = 'EEK';
+    protected const TIMEZONE = 'timezone';
 
-    private function __construct(string $id, int $userId, string $username, int $privilegeLevel)
+    private function __construct(string $id, int $userId, string $username, int $privilegeLevel, ?string $timezone)
     {
         $this->sessionId      = $id;
         $this->userId         = $userId;
         $this->username       = $username;
         $this->privilegeLevel = $privilegeLevel;
+        $this->timezone       = $timezone;
     }
 
     public function getSessionId(): string
@@ -92,13 +95,24 @@ class UserSession
         $this->encodedEncryptionKey = $encodedEncryptionKey;
     }
 
+    public function getTimezone(): ?string
+    {
+        return $this->timezone;
+    }
+
+    public function setTimezone(?string $timezone): void
+    {
+        $this->timezone = $timezone;
+    }
+
     private static function fromStruct(array $struct): self
     {
         return new self(
             $struct[self::SESSION_ID],
             $struct[self::USER_ID],
             $struct[self::USER_NAME],
-            $struct[self::USER_PRIVILEGE_LEVEL]
+            $struct[self::USER_PRIVILEGE_LEVEL],
+            $struct[self::TIMEZONE] ?? null
         );
     }
 
@@ -109,6 +123,7 @@ class UserSession
             self::USER_ID              => $this->userId,
             self::USER_NAME            => $this->username,
             self::USER_PRIVILEGE_LEVEL => $this->privilegeLevel,
+            self::TIMEZONE             => $this->timezone,
         ];
     }
 
@@ -125,8 +140,13 @@ class UserSession
         $this->save();
     }
 
-    public static function create(int $userId, string $username, int $privilegeLevel, string $encodedEncryptionKey): self
-    {
+    public static function create(
+        int $userId,
+        string $username,
+        int $privilegeLevel,
+        string $encodedEncryptionKey,
+        ?string $timezone
+    ): self {
         // Generate a random prefix
         $prefix = sha1(random_bytes(5));
 
@@ -137,7 +157,8 @@ class UserSession
             $sessionId,
             $userId,
             $username,
-            $privilegeLevel
+            $privilegeLevel,
+            $timezone
         );
 
         $self->antiCSRFToken = self::generateNewAntiCSRFToken($sessionId);

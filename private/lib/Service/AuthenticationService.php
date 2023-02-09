@@ -57,7 +57,8 @@ class AuthenticationService
             $user->getId(),
             $user->getUsername(),
             $user->getPrivilegeLevel(),
-            $encodedEncryptionKey
+            $encodedEncryptionKey,
+            $user->getTimezone()
         );
 
         $this->helper->setFailedLoginCount(0);
@@ -116,8 +117,18 @@ class AuthenticationService
         return new SessionDecorator(
             $this->userHasAdminPrivileges(),
             $session->getAntiCSRFToken(),
-            $session->getPrivilegeLevel()
+            $session->getPrivilegeLevel(),
+            $session->getTimezone(),
         );
+    }
+
+    public function updateUserSessionTimezone(string $timezone): void
+    {
+        $session = $this->getUserSession();
+        $this->ensureSessionIsNotNull($session);
+
+        $session->setTimezone($timezone);
+        $session->save();
     }
 
     private function ensureSessionIsNotNull(?UserSession $session): void

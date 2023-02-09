@@ -358,4 +358,11 @@ class UserService
 
         return Lock::exists($lockName);
     }
+
+    public function setDateTimeZoneForUser(int $getUserId, string $timezone)
+    {
+        $user = $this->userHelper->getUserById($getUserId);
+        $user->setTimezone($timezone);
+        $user->save();
+    }
 }

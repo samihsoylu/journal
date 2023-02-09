@@ -51,7 +51,35 @@
                         </form>
                     </div>
                 </div>
-            </div>
+
+
+                <!-- Set timezone -->
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Timezone</span>
+                        <form method="post" action="{{ $set_date_time_zone_post_url }}">
+                            <p class="small-text">To display entry times in your local timezone, please select your timezone below.</p>
+                            <div class="input-field">
+                                <select name="timezone">
+                                    <option value="" disabled @if($user->getTimezone() == '') selected @endif>Choose your timezone</option>
+                                    @php
+                                        $timezones = DateTimeZone::listIdentifiers();
+                                    @endphp
+                                    @foreach($timezones as $timezone)
+                                        <option value="{{ $timezone }}" @if ($timezone === $user->getTimezone()) selected @endif>{{ $timezone }}</option>
+                                    @endforeach
+                                </select>
+                                <label>Timezone</label>
+                            </div>
+
+                            <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
+
+                            <button class="btn btn-default" type="submit"><i class="material-icons">watch</i> Save timezone</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div><!-- /.col -->
 
             <div class="col s12 m6">
 
@@ -118,7 +146,8 @@
                         </form>
                     </div>
                 </div>
-            </div>
+            </div><!-- /.col -->
+
         </div>
     </div>
 @endsection
