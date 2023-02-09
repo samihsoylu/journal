@@ -7,12 +7,18 @@ class SessionDecorator
     private bool $userHasAdminPrivileges;
     private string $antiCSRFToken;
     private int $privilegeLevel;
+    private ?string $timezone;
 
-    public function __construct(bool $userHasAdminPrivileges, string $antiCSRFToken, int $privilegeLevel)
-    {
+    public function __construct(
+        bool $userHasAdminPrivileges,
+        string $antiCSRFToken,
+        int $privilegeLevel,
+        ?string $timezone = null
+    ) {
         $this->userHasAdminPrivileges = $userHasAdminPrivileges;
         $this->antiCSRFToken = $antiCSRFToken;
         $this->privilegeLevel = $privilegeLevel;
+        $this->timezone = $timezone;
     }
 
     public function userHasAdminPrivileges(): bool
@@ -28,5 +34,10 @@ class SessionDecorator
     public function getPrivilegeLevel(): int
     {
         return $this->privilegeLevel;
+    }
+
+    public function getTimezone(): ?string
+    {
+        return $this->timezone;
     }
 }

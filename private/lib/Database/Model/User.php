@@ -2,6 +2,7 @@
 
 namespace App\Database\Model;
 
+use App\Exception\UserException\InvalidArgumentException;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\UniqueConstraint;
 
@@ -67,6 +68,11 @@ class User extends AbstractModel
      * @ORM\Column(type="integer", options={"unsigned":true})
      */
     protected int $lastUpdatedTimestamp;
+
+    /**
+     * @ORM\Column(type="string", nullable=true)
+     */
+    protected ?string $timezone = null;
 
     public function getUsername(): string
     {
@@ -140,5 +146,22 @@ class User extends AbstractModel
         $this->encryptionKey = $encryptionKey;
 
         return $this;
+    }
+
+    public function getTimezone(): ?string
+    {
+        return $this->timezone;
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function setTimezone(string $timezone): void
+    {
+        if (!in_array($timezone, \DateTimeZone::listIdentifiers(), true)) {
+            throw InvalidArgumentException::invalidTimezoneProvided($timezone);
+        }
+
+        $this->timezone = $timezone;
     }
 }

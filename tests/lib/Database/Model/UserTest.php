@@ -35,6 +35,10 @@ class UserTest extends TestCase
         $this->assertIsInt($user->getLastUpdatedTimestamp(), 'Expected unix timestamp, must return int');
 
         $date = new \DateTime("@{$user->getLastUpdatedTimestamp()}");
+        if ($user->getTimezone() !== null) {
+            $date->setTimezone(new \DateTimeZone($user->getTimezone()));
+        }
+
         $expectedFormattedTimestamp = $date->format('d M Y H:i');
 
         $this->assertEquals($expectedFormattedTimestamp, $user->getLastUpdatedTimestampFormatted());

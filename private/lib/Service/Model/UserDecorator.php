@@ -24,8 +24,8 @@ class UserDecorator
         $this->id                   = $user->getId();
         $this->username             = $user->getUsername();
         $this->emailAddress         = $user->getEmailAddress();
-        $this->createdTimestamp     = $user->getCreatedTimestampFormatted();
-        $this->lastUpdatedTimestamp = $user->getLastUpdatedTimestampFormatted();
+        $this->createdTimestamp     = $user->getCreatedTimestampFormatted($user->getTimezone());
+        $this->lastUpdatedTimestamp = $user->getLastUpdatedTimestampFormatted($user->getTimezone());
         $this->privilegeLevel       = $user->getPrivilegeLevel();
 
         $this->isReadOnly           = $isReadOnly;
