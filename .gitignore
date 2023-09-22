@@ -1,0 +1,16 @@
+/vendor
+/.env
+
+/storage/*
+!/storage/upload/
+/storage/upload/*
+!/storage/upload/.gitkeep
+
+/var/*
+!/var/cache/
+/var/cache/*
+!/var/cache/.gitkeep
+
+!/var/logs/
+/var/logs/*
+!/var/logs/.gitkeep
