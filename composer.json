@@ -1,0 +1,48 @@
+{
+    "name": "samihsoylu/journal",
+    "description": "Document your life, daily happenings, special occasions, and reflections on your goals.",
+    "type": "project",
+    "license": "GNU General Public License v3.0",
+    "autoload": {
+        "psr-4": {
+            "SamihSoylu\\Journal\\Framework\\": "framework/",
+            "SamihSoylu\\Journal\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SamihSoylu\\Journal\\Tests\\": "tests/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Samih Soylu",
+            "email": "mail@samihsoylu.nl"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.2",
+        "ext-openssl": "*",
+        "php-di/php-di": "^7.0",
+        "doctrine/orm": "^2.16",
+        "doctrine/dbal": "^3.6",
+        "symfony/cache": "^6.3",
+        "doctrine/migrations": "^3.6",
+        "vlucas/phpdotenv": "^5.5",
+        "ramsey/uuid-doctrine": "^2.0",
+        "symfony/finder": "^6.3",
+        "samihsoylu/cipher-suite-php": "^2.0",
+        "samihsoylu/utility-php": "^1.0"
+    },
+    "require-dev": {
+        "pestphp/pest": "^2.16",
+        "symfony/var-dumper": "^6.3",
+        "mockery/mockery": "^1.6"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
+}
