@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use SamihSoylu\Journal\Framework\Console\CommandBootstrapper;
+use SamihSoylu\Journal\Framework\Kernel;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Finder\Finder;
+
+require_once dirname(__DIR__) . '/config/bootstrap.php';
+
+if (php_sapi_name() !== 'cli') {
+    exit('This script must be run from the command line.');
+}
+
+$kernel = Kernel::boot();
+
+$console = $kernel->container->get(CommandBootstrapper::class);
+$console->run();

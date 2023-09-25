@@ -1,0 +1,19 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Psy\Configuration;
+use Psy\Shell;
+use SamihSoylu\Journal\Framework\Kernel;
+
+require_once(dirname(__DIR__) . '/config/bootstrap.php');
+
+$kernel = Kernel::boot();
+
+$shell = new Shell();
+$shell->setScopeVariables([
+    'container' => $kernel->container,
+    'kernel' => $kernel,
+]);
+$shell->run();

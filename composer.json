@@ -33,7 +33,10 @@
         "ramsey/uuid-doctrine": "^2.0",
         "symfony/finder": "^6.3",
         "samihsoylu/cipher-suite-php": "^2.0",
-        "samihsoylu/utility-php": "^1.0"
+        "samihsoylu/utility-php": "^1.0",
+        "symfony/event-dispatcher": "^6.3",
+        "psy/psysh": "^0.11.21",
+        "adrenalinkin/doctrine-naming-strategy": "^2.0"
     },
     "require-dev": {
         "pestphp/pest": "^2.16",
