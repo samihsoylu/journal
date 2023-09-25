@@ -12,4 +12,8 @@ return function (Container $container) {
     $container->set(Cacheable::class, function (Container $container) {
         return $container->get(FileCache::class);
     });
+
+    $container->set(SecureCacheable::class, function (Container $container) {
+       return $container->get(SecureTransientCache::class);
+    });
 };
