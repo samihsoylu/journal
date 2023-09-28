@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace SamihSoylu\Journal\Framework\Event\EventListener;
 
 use ReflectionClass;
-use RuntimeException;
+use SamihSoylu\Journal\Framework\Event\EventListener\Exception\MethodMissingException;
+use SamihSoylu\Journal\Framework\Event\EventListener\Exception\NotFoundException;
+use SamihSoylu\Journal\Framework\Event\EventListener\Exception\ParameterMissingException;
 
 final class EventListenerValidator
 {
@@ -21,14 +23,14 @@ final class EventListenerValidator
     private function assertClassExists(string $fqcn, string $message): void
     {
         if (!class_exists($fqcn)) {
-            throw new RuntimeException($message);
+            throw new NotFoundException($message);
         }
     }
 
     private function assertListenerHasInvokeMethod(ReflectionClass $listener, string $fqcn): void
     {
         if (!$listener->hasMethod('__invoke')) {
-            throw new RuntimeException(
+            throw new MethodMissingException(
                 "Listener class '{$fqcn}' is missing a required __invoke(Event \$event) method. Ensure that the class has an __invoke method with a single parameter of type Event."
             );
         }
@@ -40,8 +42,8 @@ final class EventListenerValidator
         $parameter = $parameters[0] ?? false;
 
         if (!$parameter) {
-            throw new RuntimeException(
-                "The __invoke() method in the listener class '{$fqcn}' is missing its required first parameter. This parameter should be of type 'Event'. Make sure the method signature is __invoke(Event \$event)."
+            throw new ParameterMissingException(
+                "The __invoke() method in the listener class '{$fqcn}' is missing its required first parameter. This parameter should be an object. Make sure the method signature is __invoke(Event \$event)."
             );
         }
     }
