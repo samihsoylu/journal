@@ -25,11 +25,14 @@ class User extends BaseEntity
     #[Column(type: Types::TEXT)]
     protected string $password;
 
+    #[Column(length: 255)]
+    protected string $emailAddress;
+
     #[Column(type: 'string', enumType: Role::class)]
     protected Role $role;
 
     #[Column(type: Types::TEXT)]
-    protected string $encryptionKey;
+    protected string $protectedKey;
 
     #[Column(length: 255, nullable: true)]
     protected string $preferredTimezone;
@@ -37,7 +40,7 @@ class User extends BaseEntity
     #[PrePersist]
     public function checkErrors(): void
     {
-        $requiredProperties = ['username', 'password', 'encryptionKey', 'role'];
+        $requiredProperties = ['username', 'password', 'emailAddress', 'encryptionKey', 'role'];
 
         $this->assertRequiredPropertiesProvided($requiredProperties);
     }
@@ -66,6 +69,18 @@ class User extends BaseEntity
         return $this;
     }
 
+    public function getEmailAddress(): string
+    {
+        return $this->emailAddress;
+    }
+
+    public function setEmailAddress(string $emailAddress): self
+    {
+        $this->emailAddress = $emailAddress;
+
+        return $this;
+    }
+
     public function getRole(): Role
     {
         return $this->role;
@@ -78,14 +93,14 @@ class User extends BaseEntity
         return $this;
     }
 
-    public function getEncryptionKey(): string
+    public function getProtectedKey(): string
     {
-        return $this->encryptionKey;
+        return $this->protectedKey;
     }
 
-    public function setEncryptionKey(string $encryptionKey): self
+    public function setProtectedKey(string $protectedKey): self
     {
-        $this->encryptionKey = $encryptionKey;
+        $this->protectedKey = $protectedKey;
 
         return $this;
     }

@@ -34,11 +34,10 @@ final readonly class SecureTransientCache implements SecureCacheable
     public function set(string $key, string $value, int $ttl = null): void
     {
         $ttl = $ttl ?? self::DEFAULT_EXPIRY_IN_SECONDS;
-        $expiresAt = new DateTimeImmutable("+{$ttl} seconds");
 
         $this->cache->set(
             $key,
-            (string) $this->encryptor->encrypt($value),
+            $this->encryptor->encrypt($value),
             $ttl
         );
     }

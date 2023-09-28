@@ -13,8 +13,7 @@ use SamihSoylu\Journal\Domain\Repository\CategoryRepositoryInterface;
 use SamihSoylu\Journal\Domain\Repository\EntryRepositoryInterface;
 use SamihSoylu\Journal\Domain\Repository\TemplateRepositoryInterface;
 use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
-use SamihSoylu\Journal\Framework\Environment;
-use SamihSoylu\Journal\Infrastructure\Adapter\Orm\Doctrine\DoctrineOrmFactory;
+use SamihSoylu\Journal\Framework\Doctrine\DoctrineOrmFactory;
 
 return function (Container $container) {
     $container->set(DoctrineOrmFactory::class, function () {

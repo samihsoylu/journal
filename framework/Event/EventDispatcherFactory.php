@@ -13,6 +13,7 @@ use SamihSoylu\Journal\Framework\Event\EventSubscriber\EventSubscriberLocator;
 use SamihSoylu\Utility\Assert;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Finder\SplFileInfo;
+use UnexpectedValueException;
 
 final readonly class EventDispatcherFactory
 {
@@ -37,7 +38,7 @@ final readonly class EventDispatcherFactory
 
         $subscribers = $this->findAllSubscribers();
         foreach ($subscribers as $subscriber) {
-            $dispatcher->addSubscriber($subscriber);
+            $dispatcher->addSubscriber($this->container->get($subscriber));
         }
 
         return $dispatcher;
@@ -66,8 +67,10 @@ final readonly class EventDispatcherFactory
 
         $subscribers = [];
         foreach ($files as $file) {
-            $fqcn = $this->getClassFQCN($file);
+            $subscribers[] = $this->getClassFQCN($file);
         }
+
+        return $subscribers;
     }
 
     private function getClassFQCN(SplFileInfo $file): string
@@ -81,7 +84,7 @@ final readonly class EventDispatcherFactory
     private function getEventName(string $fqcn): string
     {
         $listener = new ReflectionClass($fqcn);
-        $type = $this->getInvokeMethodParameter($listener, $fqcn)?->getType();
+        $type = $this->getInvokeMethodParameter($listener)?->getType();
 
         Assert::notNull(
             $type,
@@ -91,6 +94,9 @@ final readonly class EventDispatcherFactory
         return $type->getName();
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     private function getNamespaceFromFile(SplFileInfo $file): string
     {
         preg_match('/namespace\s+([a-zA-Z0-9\\\\_]+);/', $file->getContents(), $matches);
@@ -104,6 +110,9 @@ final readonly class EventDispatcherFactory
         return $namespace;
     }
 
+    /**
+     * @throws UnexpectedValueException
+     */
     private function getClassNameFromFile(SplFileInfo $file): string
     {
         preg_match('/\s+class\s+([a-zA-Z0-9_]+)/', $file->getContents(), $matches);
@@ -117,9 +126,10 @@ final readonly class EventDispatcherFactory
         return $className;
     }
 
-    private function getInvokeMethodParameter(ReflectionClass $listener, string $fqcn): ?ReflectionParameter
+    private function getInvokeMethodParameter(ReflectionClass $listener): ?ReflectionParameter
     {
         $parameters = $listener->getMethod('__invoke')->getParameters();
+
         return $parameters[0] ?? null;
     }
 }

@@ -8,4 +8,5 @@ use SamihSoylu\Journal\Domain\Entity\User;
 
 interface UserRepositoryInterface extends SaveableInterface
 {
+    public function getById(string $id): ?User;
 }

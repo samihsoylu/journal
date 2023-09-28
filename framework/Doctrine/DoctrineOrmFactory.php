@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace SamihSoylu\Journal\Infrastructure\Adapter\Orm\Doctrine;
+namespace SamihSoylu\Journal\Framework\Doctrine;
 
 use Doctrine\Common\Cache\Psr6\CacheAdapter;
 use Doctrine\Common\Cache\Psr6\DoctrineProvider;
@@ -13,15 +13,13 @@ use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
 use Doctrine\Migrations\Configuration\Migration\JsonFile;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Proxy\ProxyFactory;
 use Linkin\Component\DoctrineNamingStrategy\ORM\Mapping\CamelCaseNamingStrategy;
 use Ramsey\Uuid\Doctrine\UuidType;
-use SamihSoylu\Journal\Infrastructure\Port\Orm\ORMCreatable;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 
-final readonly class DoctrineOrmFactory implements ORMCreatable
+final readonly class DoctrineOrmFactory
 {
     private const DEFAULT_CACHE_LIFETIME = 3600;
 

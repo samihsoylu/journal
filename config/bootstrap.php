@@ -15,6 +15,8 @@ $_ENV['JOURNAL_ROOT_DIR'] = dirname(__DIR__);
 $_ENV['JOURNAL_CONFIG_DIR'] = $_ENV['JOURNAL_ROOT_DIR'] . '/config';
 $_ENV['JOURNAL_APPLICATION_DIR'] = $_ENV['JOURNAL_ROOT_DIR'] . '/src/Application';
 
+$_ENV['JOURNAL_TEST_DOUBLE_DIR_PATH'] = $_ENV['JOURNAL_ROOT_DIR'] . '/tests/TestFramework/TestDouble';
+
 $_ENV['JOURNAL_DB_ENTITY_DIR'] = $_ENV['JOURNAL_ROOT_DIR'] . '/src/Domain/Entity';
 $_ENV['JOURNAL_DB_PROXY_DIR'] = $_ENV['JOURNAL_ROOT_DIR'] . '/var/doctrine/proxy';
 $_ENV['JOURNAL_DB_CACHE_DIR'] = $_ENV['JOURNAL_ROOT_DIR'] . '/var/doctrine';
