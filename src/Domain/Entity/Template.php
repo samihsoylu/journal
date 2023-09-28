@@ -20,19 +20,19 @@ class Template extends BaseEntity
 {
     use Identifiable, Timestampable;
 
+    #[ManyToOne]
+    #[JoinColumn(name: 'userId', nullable: false)]
+    protected User $user;
+
+    #[ManyToOne]
+    #[JoinColumn(name: 'categoryId', nullable: false)]
+    protected Category $category;
+
     #[Column(length: 255)]
     protected string $title;
 
     #[Column(type: Types::TEXT)]
     protected string $content;
-
-    #[ManyToOne]
-    #[JoinColumn(nullable: false)]
-    protected Category $category;
-
-    #[ManyToOne]
-    #[JoinColumn(nullable: false)]
-    protected User $user;
 
     #[PrePersist]
     public function checkErrors(): void

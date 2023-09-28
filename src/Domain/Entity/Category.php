@@ -7,6 +7,8 @@ namespace SamihSoylu\Journal\Domain\Entity;
 use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Doctrine\ORM\Mapping\JoinColumn;
+use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\PrePersist;
 use SamihSoylu\Journal\Domain\Entity\Trait\Identifiable;
 use SamihSoylu\Journal\Domain\Entity\Trait\Timestampable;
@@ -16,6 +18,10 @@ use SamihSoylu\Journal\Domain\Repository\Doctrine\CategoryRepository;
 class Category extends BaseEntity
 {
     use Identifiable, Timestampable;
+
+    #[ManyToOne(targetEntity: User::class)]
+    #[JoinColumn(name: 'userId', nullable: false)]
+    protected User $user;
 
     #[Column(length: 255)]
     protected string $name;
@@ -32,6 +38,16 @@ class Category extends BaseEntity
         $requiredProperties = ['name', 'description', 'position'];
 
         $this->assertRequiredPropertiesProvided($requiredProperties);
+    }
+
+    public function getUser(): User
+    {
+        return $this->user;
+    }
+
+    public function setUser(User $user): void
+    {
+        $this->user = $user;
     }
 
     public function getName(): string

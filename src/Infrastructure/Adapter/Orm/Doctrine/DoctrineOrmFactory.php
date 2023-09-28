@@ -13,8 +13,10 @@ use Doctrine\Migrations\Configuration\EntityManager\ExistingEntityManager;
 use Doctrine\Migrations\Configuration\Migration\JsonFile;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\UnderscoreNamingStrategy;
 use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Proxy\ProxyFactory;
+use Linkin\Component\DoctrineNamingStrategy\ORM\Mapping\CamelCaseNamingStrategy;
 use Ramsey\Uuid\Doctrine\UuidType;
 use SamihSoylu\Journal\Infrastructure\Port\Orm\ORMCreatable;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
@@ -45,6 +47,7 @@ final readonly class DoctrineOrmFactory implements ORMCreatable
             $cache
         );
         $config->setAutoGenerateProxyClasses(ProxyFactory::AUTOGENERATE_FILE_NOT_EXISTS_OR_CHANGED);
+        $config->setNamingStrategy(new CamelCaseNamingStrategy());
 
         $dsnParser = new DsnParser($this->getSchemeMapping());
         $dbConfig = $dsnParser->parse($this->databaseDsn);

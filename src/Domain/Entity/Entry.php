@@ -20,26 +20,50 @@ class Entry extends BaseEntity
 {
     use Identifiable, Timestampable;
 
+    #[ManyToOne]
+    #[JoinColumn(name: 'userId', nullable: false)]
+    protected User $user;
+
+    #[ManyToOne]
+    #[JoinColumn(name: 'categoryId', nullable: false)]
+    protected Category $category;
+
     #[Column(length: 255)]
     protected string $title;
 
     #[Column(type: Types::TEXT)]
     protected string $content;
 
-    #[ManyToOne]
-    #[JoinColumn(nullable: false)]
-    protected Category $category;
-
-    #[ManyToOne]
-    #[JoinColumn(nullable: false)]
-    protected User $user;
-
     #[PrePersist]
     public function checkErrors(): void
     {
-        $requiredProperties = ['title', 'content', 'category', 'user'];
+        $requiredProperties = ['user', 'category', 'title', 'content'];
 
         $this->assertRequiredPropertiesProvided($requiredProperties);
+    }
+
+    public function getUser(): User
+    {
+        return $this->user;
+    }
+
+    public function setUser(User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getCategory(): Category
+    {
+        return $this->category;
+    }
+
+    public function setCategory(Category $category): self
+    {
+        $this->category = $category;
+
+        return $this;
     }
 
     public function getTitle(): string
@@ -62,30 +86,6 @@ class Entry extends BaseEntity
     public function setContent(string $content): self
     {
         $this->content = $content;
-
-        return $this;
-    }
-
-    public function getCategory(): Category
-    {
-        return $this->category;
-    }
-
-    public function setCategory(Category $category): self
-    {
-        $this->category = $category;
-
-        return $this;
-    }
-
-    public function getUser(): User
-    {
-        return $this->user;
-    }
-
-    public function setUser(User $user): self
-    {
-        $this->user = $user;
 
         return $this;
     }
