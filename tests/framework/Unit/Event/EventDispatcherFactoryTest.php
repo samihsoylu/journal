@@ -7,6 +7,7 @@ use SamihSoylu\Journal\Framework\Event\EventDispatcherFactory;
 use SamihSoylu\Journal\Framework\Event\EventListener\EventListenerLocator;
 use SamihSoylu\Journal\Framework\Event\EventListener\EventListenerValidator;
 use SamihSoylu\Journal\Framework\Event\EventSubscriber\EventSubscriberLocator;
+use SamihSoylu\Journal\Framework\Util\PhpFileParser;
 use Symfony\Component\Finder\Finder;
 
 it('should create event dispatcher with the correct listeners', function () {
@@ -15,8 +16,9 @@ it('should create event dispatcher with the correct listeners', function () {
     $factory = new EventDispatcherFactory(
         testKit()->getService(ContainerInterface::class),
         new EventListenerLocator(Finder::create(), $fakeEventListenerDirPath),
-        new EventListenerValidator(),
+        testKit()->getService(EventListenerValidator::class),
         new EventSubscriberLocator(Finder::create(), $fakeEventListenerDirPath),
+        testKit()->getService(PhpFileParser::class),
     );
 
     $eventDispatcher = $factory->create();
@@ -30,8 +32,9 @@ it('should create event dispatcher with the correct subscriber', function () {
     $factory = new EventDispatcherFactory(
         testKit()->getService(ContainerInterface::class),
         new EventListenerLocator(Finder::create(), $fakeEventSubscriberPath),
-        new EventListenerValidator(),
+        testKit()->getService(EventListenerValidator::class),
         new EventSubscriberLocator(Finder::create(), $fakeEventSubscriberPath),
+        testKit()->getService(PhpFileParser::class),
     );
 
     $eventDispatcher = $factory->create();
@@ -45,8 +48,9 @@ it('should throw an exception when an invalid class file is named to be a listen
     $factory = new EventDispatcherFactory(
         testKit()->getService(ContainerInterface::class),
         new EventListenerLocator(Finder::create(), $fakeEventListenerDirPath),
-        new EventListenerValidator(),
+        testKit()->getService(EventListenerValidator::class),
         new EventSubscriberLocator(Finder::create(), $fakeEventListenerDirPath),
+        testKit()->getService(PhpFileParser::class),
     );
 
     $factory->create();

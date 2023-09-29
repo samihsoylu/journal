@@ -8,6 +8,7 @@ use LogicException;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 use SamihSoylu\Journal\Framework\Kernel;
+use SamihSoylu\Journal\Framework\Util\PhpFileParser;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Finder\Finder;
@@ -17,25 +18,25 @@ final readonly class CommandBootstrapper
 {
     public function __construct(
         private ContainerInterface $container,
-        private Application $console,
-        private Finder $find,
-        private string $consoleCommandDir,
-        private string $consoleCommandNamespace,
+        private Application        $console,
+        private Finder             $find,
+        private PhpFileParser      $fileHelper,
+        private string             $consoleCommandDir,
     ) {}
 
-    public function run(): void
+    public function run(): int
     {
         $this->initializeCommands();
 
-        $this->console->run();
+        return $this->console->run();
     }
 
     private function initializeCommands(): void
     {
-        $commands = $this->find->files()->in($this->consoleCommandDir);
+        $files = $this->find->files()->in($this->consoleCommandDir);
 
-        foreach ($commands as $command) {
-            $fqcn = $this->getFullyQualifiedClassName($command);
+        foreach ($files as $file) {
+            $fqcn = $this->fileHelper->getFullyQualifiedClassName($file);
             $this->assertIsValidCommandClass($fqcn);
 
             /** @var Command $command */
@@ -43,14 +44,6 @@ final readonly class CommandBootstrapper
 
             $this->console->add($command);
         }
-    }
-
-    private function getFullyQualifiedClassName(SplFileInfo $command): string
-    {
-        $className = str_replace('.php', '', $command->getRelativePathname());
-        $className = str_replace('/', '\\', $className);
-
-        return $this->consoleCommandNamespace . $className;
     }
 
     private function assertIsValidCommandClass(string $fqcn): void

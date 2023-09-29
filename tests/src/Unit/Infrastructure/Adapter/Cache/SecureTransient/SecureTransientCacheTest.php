@@ -42,3 +42,12 @@ it('removes item from cache', function () {
     $secureCache->remove($key);
     expect($secureCache->has($key))->toBeFalse();
 });
+
+it('should return null when no item is found', function () {
+    $stubCache = new StubCache();
+    $stubEncryptor = new StubTransientAesEncryptor();
+    $secureCache = new SecureTransientCache($stubCache, $stubEncryptor);
+    $key = 'test_key';
+
+    expect($secureCache->get($key))->toBeNull();
+});

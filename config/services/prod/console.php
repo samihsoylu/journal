@@ -5,6 +5,7 @@ declare(strict_types=1);
 use DI\Container;
 use SamihSoylu\Journal\Framework\Console\CommandBootstrapper;
 use SamihSoylu\Journal\Framework\Environment;
+use SamihSoylu\Journal\Framework\Util\PhpFileParser;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Finder\Finder;
 
@@ -21,8 +22,8 @@ return function (Container $container) {
             $container,
             $container->get(Application::class),
             $container->get(Finder::class),
+            $container->get(PhpFileParser::class),
             $_ENV['CONSOLE_COMMAND_DIR'],
-            $_ENV['CONSOLE_COMMAND_NAMESPACE'],
         );
     });
 };

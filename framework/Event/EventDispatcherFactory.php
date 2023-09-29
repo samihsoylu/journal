@@ -10,6 +10,7 @@ use ReflectionParameter;
 use SamihSoylu\Journal\Framework\Event\EventListener\EventListenerLocator;
 use SamihSoylu\Journal\Framework\Event\EventListener\EventListenerValidator;
 use SamihSoylu\Journal\Framework\Event\EventSubscriber\EventSubscriberLocator;
+use SamihSoylu\Journal\Framework\Util\PhpFileParser;
 use SamihSoylu\Utility\Assert;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Finder\SplFileInfo;
@@ -18,10 +19,11 @@ use UnexpectedValueException;
 final readonly class EventDispatcherFactory
 {
     public function __construct(
-        private ContainerInterface $container,
-        private EventListenerLocator $listenerLocator,
+        private ContainerInterface     $container,
+        private EventListenerLocator   $listenerLocator,
         private EventListenerValidator $listenerValidator,
         private EventSubscriberLocator $subscriberLocator,
+        private PhpFileParser          $fileHelper,
     ) {}
 
     public function create(): EventDispatcher
@@ -50,9 +52,10 @@ final readonly class EventDispatcherFactory
 
         $listeners = [];
         foreach ($files as $file) {
-            $fqcn = $this->getClassFQCN($file);
+            $fqcn = $this->fileHelper->getFullyQualifiedClassName($file);
 
             $this->listenerValidator->validateListener($fqcn);
+            // refactor this, do you even need validateListener? Or You can perform assertions in get event name?
 
             $eventName = $this->getEventName($fqcn);
             $listeners[$eventName] = $fqcn;
@@ -67,18 +70,10 @@ final readonly class EventDispatcherFactory
 
         $subscribers = [];
         foreach ($files as $file) {
-            $subscribers[] = $this->getClassFQCN($file);
+            $subscribers[] = $this->fileHelper->getFullyQualifiedClassName($file);
         }
 
         return $subscribers;
-    }
-
-    private function getClassFQCN(SplFileInfo $file): string
-    {
-        $namespace = $this->getNamespaceFromFile($file);
-        $className = $this->getClassNameFromFile($file);
-
-        return $namespace . '\\' . $className;
     }
 
     private function getEventName(string $fqcn): string
@@ -92,38 +87,6 @@ final readonly class EventDispatcherFactory
         );
 
         return $type->getName();
-    }
-
-    /**
-     * @throws UnexpectedValueException
-     */
-    private function getNamespaceFromFile(SplFileInfo $file): string
-    {
-        preg_match('/namespace\s+([a-zA-Z0-9\\\\_]+);/', $file->getContents(), $matches);
-
-        $namespace = $matches[1] ?? null;
-        Assert::notNull(
-            $namespace,
-            "Missing namespace declaration in the file located at '{$file->getRealPath()}'. Ensure that the file contains a valid 'namespace' statement at the top."
-        );
-
-        return $namespace;
-    }
-
-    /**
-     * @throws UnexpectedValueException
-     */
-    private function getClassNameFromFile(SplFileInfo $file): string
-    {
-        preg_match('/\s+class\s+([a-zA-Z0-9_]+)/', $file->getContents(), $matches);
-
-        $className = $matches[1] ?? null;
-        Assert::notNull(
-            $className,
-            "No class name declaration was found in the file located at '{$file->getRealPath()}'. Please ensure that the file contains a valid class definition."
-        );
-
-        return $className;
     }
 
     private function getInvokeMethodParameter(ReflectionClass $listener): ?ReflectionParameter

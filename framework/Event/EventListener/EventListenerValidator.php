@@ -13,6 +13,7 @@ final class EventListenerValidator
 {
     public function validateListener(string $fqcn): void
     {
+        // Assert::classExists($fqcn);
         $this->assertClassExists($fqcn, "Class '{$fqcn}' not found");
 
         $listener = new ReflectionClass($fqcn);
