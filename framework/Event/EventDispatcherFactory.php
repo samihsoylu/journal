@@ -5,25 +5,22 @@ declare(strict_types=1);
 namespace SamihSoylu\Journal\Framework\Event;
 
 use Psr\Container\ContainerInterface;
-use ReflectionClass;
-use ReflectionParameter;
-use SamihSoylu\Journal\Framework\Event\EventListener\EventListenerLocator;
-use SamihSoylu\Journal\Framework\Event\EventListener\EventListenerValidator;
-use SamihSoylu\Journal\Framework\Event\EventSubscriber\EventSubscriberLocator;
-use SamihSoylu\Journal\Framework\Util\PhpFileParser;
-use SamihSoylu\Utility\Assert;
+use SamihSoylu\Journal\Framework\Event\Provider\EventListenerProvider;
+use SamihSoylu\Journal\Framework\Event\Provider\EventSubscriberProvider;
+use SamihSoylu\Utility\ClassInspector;
+use SamihSoylu\Utility\FileInspector;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\Finder\SplFileInfo;
-use UnexpectedValueException;
 
 final readonly class EventDispatcherFactory
 {
+    private const ACTION_METHOD_NAME = '__invoke';
+
     public function __construct(
-        private ContainerInterface     $container,
-        private EventListenerLocator   $listenerLocator,
-        private EventListenerValidator $listenerValidator,
-        private EventSubscriberLocator $subscriberLocator,
-        private PhpFileParser          $fileHelper,
+        private ContainerInterface $container,
+        private EventListenerProvider $listenerProvider,
+        private EventSubscriberProvider $subscriberProvider,
+        private FileInspector $fileInspector,
+        private ClassInspector $classInspector,
     ) {}
 
     public function create(): EventDispatcher
@@ -34,7 +31,7 @@ final readonly class EventDispatcherFactory
         foreach ($listeners as $eventName => $listener) {
             $dispatcher->addListener(
                 $eventName,
-                [$this->container->get($listener), '__invoke']
+                [$this->container->get($listener), self::ACTION_METHOD_NAME]
             );
         }
 
@@ -48,14 +45,11 @@ final readonly class EventDispatcherFactory
 
     private function findAllListeners(): array
     {
-        $files = $this->listenerLocator->findEventListenerFiles();
+        $files = $this->listenerProvider->findEventListenerFiles();
 
         $listeners = [];
         foreach ($files as $file) {
-            $fqcn = $this->fileHelper->getFullyQualifiedClassName($file);
-
-            $this->listenerValidator->validateListener($fqcn);
-            // refactor this, do you even need validateListener? Or You can perform assertions in get event name?
+            $fqcn = $this->fileInspector->getFullyQualifiedClassName($file);
 
             $eventName = $this->getEventName($fqcn);
             $listeners[$eventName] = $fqcn;
@@ -66,11 +60,11 @@ final readonly class EventDispatcherFactory
 
     private function findAllSubscribers(): array
     {
-        $files = $this->subscriberLocator->findEventSubscriberFiles();
+        $files = $this->subscriberProvider->findEventSubscriberFiles();
 
         $subscribers = [];
         foreach ($files as $file) {
-            $subscribers[] = $this->fileHelper->getFullyQualifiedClassName($file);
+            $subscribers[] = $this->fileInspector->getFullyQualifiedClassName($file);
         }
 
         return $subscribers;
@@ -78,21 +72,9 @@ final readonly class EventDispatcherFactory
 
     private function getEventName(string $fqcn): string
     {
-        $listener = new ReflectionClass($fqcn);
-        $type = $this->getInvokeMethodParameter($listener)?->getType();
-
-        Assert::notNull(
-            $type,
-            "Listener class '{$fqcn}' has a missing or incorrect type declaration for its __invoke() method. The method's first parameter must have a type hint specifying an Event object."
+        return $this->classInspector->getFirstParameterTypeForMethod(
+            $fqcn,
+            self::ACTION_METHOD_NAME,
         );
-
-        return $type->getName();
-    }
-
-    private function getInvokeMethodParameter(ReflectionClass $listener): ?ReflectionParameter
-    {
-        $parameters = $listener->getMethod('__invoke')->getParameters();
-
-        return $parameters[0] ?? null;
     }
 }

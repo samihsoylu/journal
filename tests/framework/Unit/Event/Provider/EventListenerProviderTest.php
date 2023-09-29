@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SamihSoylu\Journal\Framework\Event\EventSubscriber\EventSubscriberLocator;
+use SamihSoylu\Journal\Framework\Event\Provider\EventListenerProvider;
 use Symfony\Component\Finder\Finder;
 
 it('returns an empty array when no event listener files are found', function () {
@@ -12,9 +12,9 @@ it('returns an empty array when no event listener files are found', function () 
     $finderMock->shouldReceive('name')->once()->andReturnSelf();
     $finderMock->shouldReceive('hasResults')->once()->andReturn(false);
 
-    $locator = new EventSubscriberLocator($finderMock, 'some/dir');
+    $locator = new EventListenerProvider($finderMock, 'some/dir');
 
-    expect($locator->findEventSubscriberFiles())->toBe([]);
+    expect($locator->findEventListenerFiles())->toBe([]);
 });
 
 it('returns an array of event listener files when found', function () {
@@ -27,7 +27,7 @@ it('returns an array of event listener files when found', function () {
     $mockIterator = new ArrayIterator(['file1', 'file2']);
     $finderMock->shouldReceive('getIterator')->once()->andReturn($mockIterator);
 
-    $locator = new EventSubscriberLocator($finderMock, 'some/dir');
+    $locator = new EventListenerProvider($finderMock, 'some/dir');
 
-    expect($locator->findEventSubscriberFiles())->toEqual(['file1', 'file2']);
+    expect($locator->findEventListenerFiles())->toEqual(['file1', 'file2']);
 });

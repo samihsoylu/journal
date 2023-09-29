@@ -6,8 +6,8 @@ use DI\Container;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use SamihSoylu\Journal\Framework\Environment;
 use SamihSoylu\Journal\Framework\Event\EventDispatcherFactory;
-use SamihSoylu\Journal\Framework\Event\EventListener\EventListenerLocator;
-use SamihSoylu\Journal\Framework\Event\EventSubscriber\EventSubscriberLocator;
+use SamihSoylu\Journal\Framework\Event\Provider\EventListenerProvider;
+use SamihSoylu\Journal\Framework\Event\Provider\EventSubscriberProvider;
 use Symfony\Component\Finder\Finder;
 
 return function (Container $container) {
@@ -21,11 +21,11 @@ return function (Container $container) {
         return $factory->create();
     });
 
-    $container->set(EventListenerLocator::class, function () {
-        return new EventListenerLocator(Finder::create(), $_ENV['JOURNAL_APPLICATION_DIR']);
+    $container->set(EventListenerProvider::class, function () {
+        return new EventListenerProvider(Finder::create(), $_ENV['JOURNAL_APPLICATION_DIR']);
     });
 
-    $container->set(EventSubscriberLocator::class, function() {
-        return new EventSubscriberLocator(Finder::create(), $_ENV['JOURNAL_APPLICATION_DIR']);
+    $container->set(EventSubscriberProvider::class, function() {
+        return new EventSubscriberProvider(Finder::create(), $_ENV['JOURNAL_APPLICATION_DIR']);
     });
 };
