@@ -40,7 +40,7 @@ class User extends BaseEntity
     #[PrePersist]
     public function checkErrors(): void
     {
-        $requiredProperties = ['username', 'password', 'emailAddress', 'encryptionKey', 'role'];
+        $requiredProperties = ['username', 'password', 'emailAddress', 'protectedKey', 'role'];
 
         $this->assertRequiredPropertiesProvided($requiredProperties);
     }

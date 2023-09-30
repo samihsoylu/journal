@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace SamihSoylu\Journal\Framework\Event;
 
+use LogicException;
 use Psr\Container\ContainerInterface;
 use SamihSoylu\Journal\Framework\Event\Provider\EventListenerProvider;
 use SamihSoylu\Journal\Framework\Event\Provider\EventSubscriberProvider;
+use SamihSoylu\Utility\Assert;
 use SamihSoylu\Utility\ClassInspector;
 use SamihSoylu\Utility\FileInspector;
 use Symfony\Component\EventDispatcher\EventDispatcher;
@@ -72,9 +74,17 @@ final readonly class EventDispatcherFactory
 
     private function getEventName(string $fqcn): string
     {
-        return $this->classInspector->getFirstParameterTypeForMethod(
+        $eventName = $this->classInspector->getFirstParameterTypeForMethod(
             $fqcn,
             self::ACTION_METHOD_NAME,
         );
+
+        if ($eventName === null) {
+            throw new LogicException(
+                "The __invoke() method in the listener class '{$fqcn}' is missing its required first parameter. This parameter should be an object. Make sure the method signature is __invoke(Event \$event)."
+            );
+        }
+
+        return $eventName;
     }
 }

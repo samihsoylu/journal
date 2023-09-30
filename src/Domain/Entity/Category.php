@@ -35,7 +35,7 @@ class Category extends BaseEntity
     #[PrePersist]
     public function checkErrors(): void
     {
-        $requiredProperties = ['name', 'description', 'position'];
+        $requiredProperties = ['user', 'name', 'description', 'position'];
 
         $this->assertRequiredPropertiesProvided($requiredProperties);
     }

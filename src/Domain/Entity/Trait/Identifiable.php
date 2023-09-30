@@ -15,7 +15,7 @@ trait Identifiable
     #[Column(type: "uuid", unique: true)]
     #[GeneratedValue(strategy: "CUSTOM")]
     #[CustomIdGenerator(class: UuidGenerator::class)]
-    protected UuidInterface|string $id;
+    protected UuidInterface|string|null $id = null;
 
     public function getId(): ?UuidInterface
     {

@@ -8,7 +8,7 @@ use LogicException;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 use SamihSoylu\Journal\Framework\Kernel;
-use SamihSoylu\Journal\Framework\Util\PhpFileParser;
+use SamihSoylu\Utility\FileInspector;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Finder\Finder;
@@ -18,10 +18,10 @@ final readonly class CommandBootstrapper
 {
     public function __construct(
         private ContainerInterface $container,
-        private Application        $console,
-        private Finder             $find,
-        private PhpFileParser      $fileHelper,
-        private string             $consoleCommandDir,
+        private Application $console,
+        private Finder $find,
+        private FileInspector $fileInspector,
+        private string $consoleCommandDir,
     ) {}
 
     public function run(): int
@@ -36,7 +36,7 @@ final readonly class CommandBootstrapper
         $files = $this->find->files()->in($this->consoleCommandDir);
 
         foreach ($files as $file) {
-            $fqcn = $this->fileHelper->getFullyQualifiedClassName($file);
+            $fqcn = $this->fileInspector->getFullyQualifiedClassName($file);
             $this->assertIsValidCommandClass($fqcn);
 
             /** @var Command $command */
@@ -48,10 +48,6 @@ final readonly class CommandBootstrapper
 
     private function assertIsValidCommandClass(string $fqcn): void
     {
-        if (!class_exists($fqcn)) {
-            throw new RuntimeException("Class '{$fqcn}' does not exist");
-        }
-
         if (!is_subclass_of($fqcn, Command::class)) {
             throw new LogicException("Class '{$fqcn}' is not a command");
         }
