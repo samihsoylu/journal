@@ -12,12 +12,18 @@ final readonly class TestKit
     public function __construct(
         private ContainerInterface $container,
         private TestOrmInterface $testOrm,
+        private TestDbPopulator $testDbPopulator,
         private TestPath $testPath,
     ) {}
 
     public function testOrm(): TestOrmInterface
     {
         return $this->testOrm;
+    }
+
+    public function testDbPopulator(): TestDbPopulator
+    {
+        return $this->testDbPopulator;
     }
 
     public function testPath(): TestPath

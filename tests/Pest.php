@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use SamihSoylu\Journal\Framework\Kernel;
+use SamihSoylu\Journal\Tests\TestFramework\Core\TestKit;
+use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmTransactionInterface;
+
 /*
 |--------------------------------------------------------------------------
 | Test Case
@@ -13,9 +17,16 @@ declare(strict_types=1);
 |
 */
 
-//uses()
-//    ->group('Integration')
-//    ->in('Integration');
+uses()->group('unit')->in('src/Unit', 'framework/Unit');
+
+uses()
+    ->beforeEach(function () {
+        $transaction = testKit()->getService(TestOrmTransactionInterface::class);
+        $transaction->beginTransaction();
+    })->afterEach(function () {
+        $transaction = testKit()->getService(TestOrmTransactionInterface::class);
+        $transaction->rollback();
+    })->group('integration')->in('src/Integration');
 
 /*
 |--------------------------------------------------------------------------
@@ -28,12 +39,9 @@ declare(strict_types=1);
 |
 */
 
-use SamihSoylu\Journal\Framework\Kernel;
-use SamihSoylu\Journal\Tests\TestFramework\Core\TestKit;
-
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
+//expect()->extend('toBeOne', function () {
+//    return $this->toBe(1);
+//});
 
 /*
 |--------------------------------------------------------------------------
