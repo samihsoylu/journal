@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use SamihSoylu\Journal\Infrastructure\Adapter\PasswordHasher\Argon2IdPasswordHasher;
+use SamihSoylu\Journal\Infrastructure\Adapter\PasswordHasher\Argon2Id\Argon2IdPasswordHasher;
 use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\Exception\InvalidPasswordException;
 use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
 
