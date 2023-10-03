@@ -14,7 +14,7 @@ $kernel = Kernel::boot();
 
 $executable = $_SERVER['argv'][0];
 
-if (str_contains($executable, 'doctrine-migrations')) {
+if (str_contains((string) $executable, 'doctrine-migrations')) {
     return $kernel->container->get(DependencyFactory::class);
 }
 

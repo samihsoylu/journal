@@ -8,12 +8,12 @@ use SamihSoylu\Journal\Domain\Entity\Category;
 use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmInterface;
 
-final class CategorySeed
+final readonly class CategorySeed
 {
     private Category $category;
 
     public function __construct(
-        private readonly TestOrmInterface $testOrm,
+        private TestOrmInterface $testOrm,
     ) {
         $this->category = new Category();
 

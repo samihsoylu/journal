@@ -24,4 +24,4 @@ test('all repository classes are marked as final')
 test('all doctrine repository classes inherit Doctrine\ORM\EntityRepository')
     ->expect('SamihSoylu\Journal\Domain\Repository\Doctrine')
     ->classes()
-    ->toExtend('Doctrine\ORM\EntityRepository');
+    ->toExtend(\Doctrine\ORM\EntityRepository::class);

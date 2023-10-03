@@ -9,12 +9,12 @@ use SamihSoylu\Journal\Domain\Entity\Entry;
 use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmInterface;
 
-final class EntrySeed
+final readonly class EntrySeed
 {
     private Entry $entry;
 
     public function __construct(
-        private readonly TestOrmInterface $testOrm,
+        private TestOrmInterface $testOrm,
     ) {
         $this->entry = new Entry();
 

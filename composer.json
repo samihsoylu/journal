@@ -43,7 +43,8 @@
         "symfony/var-dumper": "^6.3",
         "mockery/mockery": "^1.6",
         "friendsofphp/php-cs-fixer": "^3.34",
-        "kubawerlos/php-cs-fixer-custom-fixers": "^3.16"
+        "kubawerlos/php-cs-fixer-custom-fixers": "^3.16",
+        "rector/rector": "^0.18.4"
     },
     "config": {
         "allow-plugins": {

@@ -41,7 +41,7 @@ $dotenv->required(['JOURNAL_ENV', 'JOURNAL_DB_DSN']);
 $dotenv->ifPresent('JOURNAL_ENABLE_DEBUG')->isBoolean();
 
 
-$_ENV['JOURNAL_ENABLE_DEBUG'] = boolval($_ENV['JOURNAL_ENABLE_DEBUG'] ?? false);
+$_ENV['JOURNAL_ENABLE_DEBUG'] = (bool) ($_ENV['JOURNAL_ENABLE_DEBUG'] ?? false);
 if (!$_ENV['JOURNAL_ENABLE_DEBUG']) {
     ini_set('display_errors', 0);
     error_reporting(0);

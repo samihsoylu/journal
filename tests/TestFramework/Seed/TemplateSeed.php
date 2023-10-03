@@ -9,12 +9,12 @@ use SamihSoylu\Journal\Domain\Entity\Template;
 use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmInterface;
 
-final class TemplateSeed
+final readonly class TemplateSeed
 {
     private Template $template;
 
     public function __construct(
-        private readonly TestOrmInterface $testOrm,
+        private TestOrmInterface $testOrm,
     ) {
         $this->template = new Template();
 

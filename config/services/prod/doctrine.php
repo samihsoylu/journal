@@ -16,16 +16,14 @@ use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
 use SamihSoylu\Journal\Framework\Doctrine\DoctrineOrmFactory;
 
 return function (Container $container): void {
-    $container->set(DoctrineOrmFactory::class, function () {
-        return new DoctrineOrmFactory(
-            $_ENV['JOURNAL_DB_DSN'],
-            $_ENV['JOURNAL_ROOT_DIR'],
-            $_ENV['JOURNAL_DB_CACHE_DIR'],
-            $_ENV['JOURNAL_DB_ENTITY_DIR'],
-            $_ENV['JOURNAL_DB_PROXY_DIR'],
-            $_ENV['JOURNAL_ENABLE_DEBUG'],
-        );
-    });
+    $container->set(DoctrineOrmFactory::class, fn () => new DoctrineOrmFactory(
+        $_ENV['JOURNAL_DB_DSN'],
+        $_ENV['JOURNAL_ROOT_DIR'],
+        $_ENV['JOURNAL_DB_CACHE_DIR'],
+        $_ENV['JOURNAL_DB_ENTITY_DIR'],
+        $_ENV['JOURNAL_DB_PROXY_DIR'],
+        $_ENV['JOURNAL_ENABLE_DEBUG'],
+    ));
 
     $container->set(DependencyFactory::class, function (Container $container) {
         $factory = $container->get(DoctrineOrmFactory::class);

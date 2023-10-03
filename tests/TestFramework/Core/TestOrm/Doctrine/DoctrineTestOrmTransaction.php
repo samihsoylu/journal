@@ -14,7 +14,7 @@ final class DoctrineTestOrmTransaction implements TestOrmTransactionInterface
     private static array $connections = [];
 
     public function __construct(
-        private EntityManagerInterface $entityManager,
+        private readonly EntityManagerInterface $entityManager,
     ) {}
 
     public function beginTransaction(): void

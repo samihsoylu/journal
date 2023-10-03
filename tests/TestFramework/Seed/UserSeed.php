@@ -10,14 +10,14 @@ use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
 use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmInterface;
 
-final class UserSeed
+final readonly class UserSeed
 {
     private User $user;
 
     public function __construct(
-        private readonly TestOrmInterface $testOrm,
-        private readonly PasswordHasherInterface $passwordHasher,
-        private readonly PasswordKeyManagerInterface $passwordKeyManager,
+        private TestOrmInterface $testOrm,
+        private PasswordHasherInterface $passwordHasher,
+        private PasswordKeyManagerInterface $passwordKeyManager,
     ) {
         $this->user = new User();
 

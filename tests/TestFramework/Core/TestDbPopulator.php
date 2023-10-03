@@ -10,10 +10,10 @@ use SamihSoylu\Journal\Tests\TestFramework\Seed\EntrySeed;
 use SamihSoylu\Journal\Tests\TestFramework\Seed\TemplateSeed;
 use SamihSoylu\Journal\Tests\TestFramework\Seed\UserSeed;
 
-final class TestDbPopulator
+final readonly class TestDbPopulator
 {
     public function __construct(
-        private readonly Container $container,
+        private Container $container,
     ) {}
 
     public function createNewUser(): UserSeed
