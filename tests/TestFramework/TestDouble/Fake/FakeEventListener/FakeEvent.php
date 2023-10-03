@@ -6,5 +6,4 @@ namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Fake\FakeEventListen
 
 final class FakeEvent
 {
-
 }

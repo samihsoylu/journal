@@ -2,13 +2,11 @@
 
 declare(strict_types=1);
 
-use Ramsey\Uuid\Uuid;
 use SamihSoylu\Journal\Domain\Entity\Enum\Role;
 use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
-use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmTransactionInterface;
 
-it('should get user by id', function () {
+it('should get user by id', function (): void {
     $expectedUsername = 'jacob';
 
     $expectedId = testKit()->testDbPopulator()->createNewUser()
@@ -23,7 +21,7 @@ it('should get user by id', function () {
         ->and($actualUser->getUsername())->toBe($expectedUsername);
 });
 
-it('should save a user to db', function() {
+it('should save a user to db', function (): void {
     $expectedUser = new User();
     $expectedUser->setUsername('samih')
         ->setPassword('securePassword')
@@ -45,7 +43,7 @@ it('should save a user to db', function() {
         ->and($row['role'])->toBe($expectedUser->getRole()->value);
 });
 
-it('should remove a user from db', function() {
+it('should remove a user from db', function (): void {
     $expectedUser = testKit()->testDbPopulator()->createNewUser()->save();
 
     $rows = testKit()->testOrm()->fetchAllAssoc('SELECT * FROM User');

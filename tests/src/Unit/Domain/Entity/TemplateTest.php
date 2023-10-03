@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 use SamihSoylu\Journal\Domain\Entity\Template;
 use SamihSoylu\Journal\Domain\Entity\Category;
 use SamihSoylu\Journal\Domain\Entity\User;
 
-it('should throw logic exception if required property title is missing', function () {
+it('should throw logic exception if required property title is missing', function (): void {
     $template = new Template();
     $template->setContent("content");
     $template->setCategory(new Category());
@@ -13,7 +15,7 @@ it('should throw logic exception if required property title is missing', functio
     $template->checkErrors();
 })->throws(LogicException::class);
 
-it('should throw logic exception if required property content is missing', function () {
+it('should throw logic exception if required property content is missing', function (): void {
     $template = new Template();
     $template->setTitle("title");
     $template->setCategory(new Category());
@@ -22,7 +24,7 @@ it('should throw logic exception if required property content is missing', funct
     $template->checkErrors();
 })->throws(LogicException::class);
 
-it('should throw logic exception if required property category is missing', function () {
+it('should throw logic exception if required property category is missing', function (): void {
     $template = new Template();
     $template->setTitle("title");
     $template->setContent("content");
@@ -31,7 +33,7 @@ it('should throw logic exception if required property category is missing', func
     $template->checkErrors();
 })->throws(LogicException::class);
 
-it('should throw logic exception if required property user is missing', function () {
+it('should throw logic exception if required property user is missing', function (): void {
     $template = new Template();
     $template->setTitle("title");
     $template->setContent("content");
@@ -39,7 +41,7 @@ it('should throw logic exception if required property user is missing', function
     $template->checkErrors();
 })->throws(LogicException::class);
 
-it('should not throw any exceptions when all required properties are set', function () {
+it('should not throw any exceptions when all required properties are set', function (): void {
     $fakeUser = new User();
     $fakeCategory = new Category();
 

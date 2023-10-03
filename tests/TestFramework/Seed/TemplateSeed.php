@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace SamihSoylu\Journal\Tests\TestFramework\Seed;
 
-use Ramsey\Uuid\UuidInterface;
-use SamihSoylu\CipherSuite\PasswordKeyManager\PasswordKeyManagerInterface;
 use SamihSoylu\Journal\Domain\Entity\Category;
-use SamihSoylu\Journal\Domain\Entity\Enum\Role;
 use SamihSoylu\Journal\Domain\Entity\Template;
 use SamihSoylu\Journal\Domain\Entity\User;
-use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
 use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmInterface;
 
 final class TemplateSeed
@@ -37,18 +33,21 @@ final class TemplateSeed
 
         return $this;
     }
+
     public function withContent(string $content): self
     {
         $this->template->setContent($content);
 
         return $this;
     }
+
     public function withCategory(Category $category): self
     {
         $this->template->setCategory($category);
 
         return $this;
     }
+
     public function withUser(User $user): self
     {
         $this->template->setUser($user);

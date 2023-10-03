@@ -1,17 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 use Ramsey\Uuid\UuidInterface;
-use SamihSoylu\Journal\Domain\Entity\Trait\Identifiable;
 use Ramsey\Uuid\Uuid;
 use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Fake\FakeEntity;
 
-it('should return null when the ID is not set', function () {
+it('should return null when the ID is not set', function (): void {
     $entity = new FakeEntity();
 
     expect($entity->getId())->toBeNull();
 });
 
-it('should return the correct UUID when the ID is set', function () {
+it('should return the correct UUID when the ID is set', function (): void {
     $entity = new FakeEntity();
 
     $uuid = Uuid::uuid4();

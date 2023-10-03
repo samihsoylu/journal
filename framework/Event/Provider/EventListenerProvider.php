@@ -16,6 +16,7 @@ final readonly class EventListenerProvider
     public function findEventListenerFiles(): array
     {
         $files = $this->finder->files()->in($this->sourceDir)->name('*EventListener.php');
+
         return $files->hasResults() ? iterator_to_array($files) : [];
     }
 }

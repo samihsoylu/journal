@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Stub;
 
-use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
 
 final readonly class StubContainer implements ContainerInterface
 {
@@ -21,6 +19,6 @@ final readonly class StubContainer implements ContainerInterface
 
     public function has(string $id): bool
     {
-        return isset($this->registry[$id]);
+        return array_key_exists($id, $this->registry);
     }
 }

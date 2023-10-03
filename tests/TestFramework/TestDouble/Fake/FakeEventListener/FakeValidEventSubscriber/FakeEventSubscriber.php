@@ -12,7 +12,7 @@ final class FakeEventSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            FakeEvent::class => 'doNothing'
+            FakeEvent::class => 'doNothing',
         ];
     }
 

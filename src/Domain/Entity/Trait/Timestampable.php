@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamihSoylu\Journal\Domain\Entity\Trait;
 
 use Doctrine\ORM\Mapping\Column;

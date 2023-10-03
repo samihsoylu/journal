@@ -8,7 +8,7 @@ use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Fake\FakeEventListener\Fak
 
 final class FakeEventListener
 {
-    public function __invoke(FakeEvent $event)
+    public function __invoke(FakeEvent $event): void
     {
     }
 }

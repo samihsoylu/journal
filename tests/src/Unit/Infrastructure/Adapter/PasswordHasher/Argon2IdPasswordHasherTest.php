@@ -6,7 +6,7 @@ use SamihSoylu\Journal\Infrastructure\Adapter\PasswordHasher\Argon2IdPasswordHas
 use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\Exception\InvalidPasswordException;
 use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
 
-it('should hash a password correctly', function () {
+it('should hash a password correctly', function (): void {
     $hasher = new Argon2IdPasswordHasher();
     $plainPassword = 'testPassword';
     $hashedPassword = $hasher->hash($plainPassword);
@@ -14,7 +14,7 @@ it('should hash a password correctly', function () {
     expect(password_verify($plainPassword, $hashedPassword))->toBeTrue();
 });
 
-it('should verify a hashed password', function () {
+it('should verify a hashed password', function (): void {
     $hasher = new Argon2IdPasswordHasher();
     $plainPassword = 'testPassword';
     $hashedPassword = password_hash($plainPassword, PASSWORD_ARGON2ID);
@@ -22,7 +22,7 @@ it('should verify a hashed password', function () {
     expect($hasher->verify($plainPassword, $hashedPassword))->toBeTrue();
 });
 
-it('should throw an exception for too long password', function () {
+it('should throw an exception for too long password', function (): void {
     $hasher = new Argon2IdPasswordHasher();
     $longPassword = str_repeat('a', PasswordHasherInterface::MAX_PASSWORD_LENGTH + 1);
 

@@ -10,7 +10,7 @@ use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmTransactionInterf
 
 final class DoctrineTestOrmTransaction implements TestOrmTransactionInterface
 {
-    /** @var Connection[] */
+    /** @var array<Connection> */
     private static array $connections = [];
 
     public function __construct(

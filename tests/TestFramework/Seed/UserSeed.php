@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SamihSoylu\Journal\Tests\TestFramework\Seed;
 
-use Ramsey\Uuid\UuidInterface;
 use SamihSoylu\CipherSuite\PasswordKeyManager\PasswordKeyManagerInterface;
 use SamihSoylu\Journal\Domain\Entity\Enum\Role;
 use SamihSoylu\Journal\Domain\Entity\User;

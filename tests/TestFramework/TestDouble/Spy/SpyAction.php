@@ -8,5 +8,4 @@ use SamihSoylu\Journal\Infrastructure\Port\Action\ActionInterface;
 
 final class SpyAction implements ActionInterface
 {
-
 }

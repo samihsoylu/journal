@@ -72,7 +72,7 @@ final readonly class DoctrineOrmFactory
     }
 
     /**
-     * @return string[]
+     * @return array<string>
      */
     protected function getSchemeMapping(): array
     {

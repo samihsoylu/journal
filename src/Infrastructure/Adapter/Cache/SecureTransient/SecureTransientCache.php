@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace SamihSoylu\Journal\Infrastructure\Adapter\Cache\SecureTransient;
 
-use DateTimeImmutable;
 use SamihSoylu\CipherSuite\TransientAesEncryptor\TransientAesEncryptorInterface;
 use SamihSoylu\Journal\Infrastructure\Port\Cache\Cacheable;
 use SamihSoylu\Journal\Infrastructure\Port\Cache\SecureCacheable;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 
 final readonly class SecureTransientCache implements SecureCacheable
 {
@@ -33,7 +29,7 @@ final readonly class SecureTransientCache implements SecureCacheable
 
     public function set(string $key, string $value, int $ttl = null): void
     {
-        $ttl = $ttl ?? self::DEFAULT_EXPIRY_IN_SECONDS;
+        $ttl ??= self::DEFAULT_EXPIRY_IN_SECONDS;
 
         $this->cache->set(
             $key,

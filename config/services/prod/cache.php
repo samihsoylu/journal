@@ -8,12 +8,8 @@ use SamihSoylu\Journal\Infrastructure\Adapter\Cache\SecureTransient\SecureTransi
 use SamihSoylu\Journal\Infrastructure\Port\Cache\Cacheable;
 use SamihSoylu\Journal\Infrastructure\Port\Cache\SecureCacheable;
 
-return function (Container $container) {
-    $container->set(Cacheable::class, function (Container $container) {
-        return $container->get(FileCache::class);
-    });
+return function (Container $container): void {
+    $container->set(Cacheable::class, fn (Container $container) => $container->get(FileCache::class));
 
-    $container->set(SecureCacheable::class, function (Container $container) {
-       return $container->get(SecureTransientCache::class);
-    });
+    $container->set(SecureCacheable::class, fn (Container $container) => $container->get(SecureTransientCache::class));
 };

@@ -20,10 +20,10 @@ use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmTransactionInterf
 uses()->group('unit')->in('src/Unit', 'framework/Unit');
 
 uses()
-    ->beforeEach(function () {
+    ->beforeEach(function (): void {
         $transaction = testKit()->getService(TestOrmTransactionInterface::class);
         $transaction->beginTransaction();
-    })->afterEach(function () {
+    })->afterEach(function (): void {
         $transaction = testKit()->getService(TestOrmTransactionInterface::class);
         $transaction->rollback();
     })->group('integration')->in('src/Integration');
@@ -39,9 +39,6 @@ uses()
 |
 */
 
-//expect()->extend('toBeOne', function () {
-//    return $this->toBe(1);
-//});
 
 /*
 |--------------------------------------------------------------------------

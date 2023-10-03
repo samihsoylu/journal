@@ -6,5 +6,4 @@ namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Dummy;
 
 final class DummyProdObject implements DummyObjectInterface
 {
-
 }

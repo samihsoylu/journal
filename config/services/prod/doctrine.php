@@ -15,7 +15,7 @@ use SamihSoylu\Journal\Domain\Repository\TemplateRepositoryInterface;
 use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
 use SamihSoylu\Journal\Framework\Doctrine\DoctrineOrmFactory;
 
-return function (Container $container) {
+return function (Container $container): void {
     $container->set(DoctrineOrmFactory::class, function () {
         return new DoctrineOrmFactory(
             $_ENV['JOURNAL_DB_DSN'],

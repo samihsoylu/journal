@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 use SamihSoylu\Journal\Domain\Entity\Trait\Timestampable;
 
-it('should correctly set the created at timestamp on prepersist', function () {
-    $entity = new class {
+it('should correctly set the created at timestamp on prepersist', function (): void {
+    $entity = new class () {
         use Timestampable;
 
-        public function simulatePrePersist()
+        public function simulatePrePersist(): void
         {
             $this->onPrePersist();
         }
@@ -19,11 +19,11 @@ it('should correctly set the created at timestamp on prepersist', function () {
     expect($entity->getCreatedAt())->toBeInstanceOf(DateTimeImmutable::class);
 });
 
-it('should correctly set the updatedat timestamp on preupdate', function () {
-    $entity = new class {
+it('should correctly set the updatedat timestamp on preupdate', function (): void {
+    $entity = new class () {
         use Timestampable;
 
-        public function simulatePreUpdate()
+        public function simulatePreUpdate(): void
         {
             $this->onPreUpdate();
         }
@@ -34,16 +34,16 @@ it('should correctly set the updatedat timestamp on preupdate', function () {
     expect($entity->getUpdatedAt())->toBeInstanceOf(DateTimeImmutable::class);
 });
 
-it('should return null for unset created at timestamp', function () {
-    $entity = new class {
+it('should return null for unset created at timestamp', function (): void {
+    $entity = new class () {
         use Timestampable;
     };
 
     expect($entity->getCreatedAt())->toBeNull();
 });
 
-it('should return null for unset updated at timestamp', function () {
-    $entity = new class {
+it('should return null for unset updated at timestamp', function (): void {
+    $entity = new class () {
         use Timestampable;
     };
 

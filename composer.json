@@ -41,7 +41,9 @@
     "require-dev": {
         "pestphp/pest": "^2.16",
         "symfony/var-dumper": "^6.3",
-        "mockery/mockery": "^1.6"
+        "mockery/mockery": "^1.6",
+        "friendsofphp/php-cs-fixer": "^3.34",
+        "kubawerlos/php-cs-fixer-custom-fixers": "^3.16"
     },
     "config": {
         "allow-plugins": {

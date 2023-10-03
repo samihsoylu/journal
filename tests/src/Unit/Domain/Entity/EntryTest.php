@@ -6,7 +6,7 @@ use SamihSoylu\Journal\Domain\Entity\Entry;
 use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Domain\Entity\Category;
 
-it('should correctly set and get user', function () {
+it('should correctly set and get user', function (): void {
     $entry = new Entry();
     $fakeUser = new User();
 
@@ -15,7 +15,7 @@ it('should correctly set and get user', function () {
     expect($entry->getUser())->toBe($fakeUser);
 });
 
-it('should correctly set and get category', function () {
+it('should correctly set and get category', function (): void {
     $entry = new Entry();
     $fakeCategory = new Category();
 
@@ -24,7 +24,7 @@ it('should correctly set and get category', function () {
     expect($entry->getCategory())->toBe($fakeCategory);
 });
 
-it('should correctly set and get title', function () {
+it('should correctly set and get title', function (): void {
     $entry = new Entry();
 
     $entry->setTitle('Test Title');
@@ -32,7 +32,7 @@ it('should correctly set and get title', function () {
     expect($entry->getTitle())->toBe('Test Title');
 });
 
-it('should correctly set and get content', function () {
+it('should correctly set and get content', function (): void {
     $entry = new Entry();
 
     $entry->setContent('Test Content');
@@ -40,13 +40,13 @@ it('should correctly set and get content', function () {
     expect($entry->getContent())->toBe('Test Content');
 });
 
-it('should throw logicexception if required properties are not set', function () {
+it('should throw logicexception if required properties are not set', function (): void {
     $entry = new Entry();
 
     $entry->checkErrors();
 })->throws(LogicException::class);
 
-it('should not throw any exceptions when all required properties are set', function () {
+it('should not throw any exceptions when all required properties are set', function (): void {
     $entry = new Entry();
     $fakeUser = new User();
     $fakeCategory = new Category();

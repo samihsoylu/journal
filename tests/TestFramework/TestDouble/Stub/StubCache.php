@@ -22,7 +22,7 @@ final class StubCache implements Cacheable
 
     public function has(string $key): bool
     {
-        return isset($this->store[$key]);
+        return array_key_exists($key, $this->store);
     }
 
     public function remove(string $key): void

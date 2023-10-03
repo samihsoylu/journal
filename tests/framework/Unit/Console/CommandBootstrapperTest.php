@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use Mockery\MockInterface;
 use Psr\Container\ContainerInterface;
 use SamihSoylu\Journal\Framework\Console\CommandBootstrapper;
 use SamihSoylu\Utility\FileInspector;
@@ -10,7 +9,7 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Finder\Finder;
 
-it('should correctly bootstrap and run commands', function () {
+it('should correctly bootstrap and run commands', function (): void {
     $fakeCommandDirPath = testKit()->testPath()->getFakeTestDoublePath() . '/FakeCommand/ValidCommand';
 
     $console = Mockery::mock(Application::class);
@@ -31,7 +30,7 @@ it('should correctly bootstrap and run commands', function () {
     expect($bootstrapper->run())->toBe(Command::SUCCESS);
 });
 
-it('should throw on invalid command class', function () {
+it('should throw on invalid command class', function (): void {
     $fakeCommandDirPath = testKit()->testPath()->getFakeTestDoublePath() . '/FakeCommand/InvalidCommand';
     $console = Mockery::mock(Application::class);
 

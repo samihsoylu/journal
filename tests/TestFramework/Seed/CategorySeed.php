@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace SamihSoylu\Journal\Tests\TestFramework\Seed;
 
-use Ramsey\Uuid\UuidInterface;
-use SamihSoylu\CipherSuite\PasswordKeyManager\PasswordKeyManagerInterface;
 use SamihSoylu\Journal\Domain\Entity\Category;
-use SamihSoylu\Journal\Domain\Entity\Enum\Role;
 use SamihSoylu\Journal\Domain\Entity\User;
-use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
 use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmInterface;
 
 final class CategorySeed

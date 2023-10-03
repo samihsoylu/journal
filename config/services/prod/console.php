@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 use DI\Container;
 use SamihSoylu\Journal\Framework\Console\CommandBootstrapper;
-use SamihSoylu\Journal\Framework\Environment;
 use SamihSoylu\Utility\FileInspector;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Finder\Finder;
 
-return function (Container $container) {
+return function (Container $container): void {
     $container->set(Application::class, function () {
         return new Application(
             $_ENV['JOURNAL_PROJECT_NAME'],

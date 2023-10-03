@@ -2,13 +2,10 @@
 
 declare(strict_types=1);
 
-use Ramsey\Uuid\Uuid;
 use SamihSoylu\Journal\Domain\Entity\Category;
 use SamihSoylu\Journal\Domain\Repository\CategoryRepositoryInterface;
-use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
-use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmTransactionInterface;
 
-it('should get category by id', function () {
+it('should get category by id', function (): void {
     $expectedAssignedUser = testKit()->testDbPopulator()->createNewUser()
         ->save();
 
@@ -29,7 +26,7 @@ it('should get category by id', function () {
         ->and($actualAssignedUserId)->toBe($expectedAssignedUserId);
 });
 
-it('should save a category to db', function () {
+it('should save a category to db', function (): void {
     $user = testKit()->testDbPopulator()->createNewUser()
         ->save();
 
@@ -52,7 +49,7 @@ it('should save a category to db', function () {
         ->and($row['description'])->toBe($expectedCategory->getDescription());
 });
 
-it('should remove a category from db', function() {
+it('should remove a category from db', function (): void {
     $user = testKit()->testDbPopulator()->createNewUser()->save();
     $category = testKit()->testDbPopulator()->createNewCategory()
         ->withUser($user)

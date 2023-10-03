@@ -10,7 +10,7 @@ use SamihSoylu\Utility\ClassInspector;
 use SamihSoylu\Utility\FileInspector;
 use Symfony\Component\Finder\Finder;
 
-it('should create event dispatcher with the correct listeners', function () {
+it('should create event dispatcher with the correct listeners', function (): void {
     $fakeEventListenerDirPath = testKit()->testPath()->getFakeTestDoublePath() . '/FakeEventListener/FakeValidEventListener';
 
     $factory = new EventDispatcherFactory(
@@ -26,7 +26,7 @@ it('should create event dispatcher with the correct listeners', function () {
     expect($eventDispatcher->getListeners())->toHaveCount(1);
 });
 
-it('should create event dispatcher with the correct subscriber', function () {
+it('should create event dispatcher with the correct subscriber', function (): void {
     $fakeEventSubscriberPath = testKit()->testPath()->getFakeTestDoublePath() . '/FakeEventListener/FakeValidEventSubscriber';
 
     $factory = new EventDispatcherFactory(
@@ -42,7 +42,7 @@ it('should create event dispatcher with the correct subscriber', function () {
     expect($eventDispatcher->getListeners())->toHaveCount(1);
 });
 
-it('should throw an exception when no event is provided in the event listener invoke method', function () {
+it('should throw an exception when no event is provided in the event listener invoke method', function (): void {
     $fakeEventListenerDirPath = testKit()->testPath()->getFakeTestDoublePath() . '/FakeEventListener/FakeInvalidEventListener';
 
     $factory = new EventDispatcherFactory(

@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-use SamihSoylu\Journal\Domain\Entity\Category;
 use SamihSoylu\Journal\Domain\Entity\Entry;
-use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Domain\Repository\EntryRepositoryInterface;
 
-it('should get entry by id', function () {
+it('should get entry by id', function (): void {
     $user = testKit()->testDbPopulator()->createNewUser()->save();
     $category = testKit()->testDbPopulator()->createNewCategory()->withUser($user)->save();
 
@@ -24,7 +22,7 @@ it('should get entry by id', function () {
     expect($actualEntry->getId()->toString())->toBe($expectedEntryId);
 });
 
-it('should save an entry to db', function () {
+it('should save an entry to db', function (): void {
     $user = testKit()->testDbPopulator()->createNewUser()->save();
     $category = testKit()->testDbPopulator()->createNewCategory()->withUser($user)->save();
 
@@ -45,7 +43,7 @@ it('should save an entry to db', function () {
         ->and($row['content'])->toBe($expectedEntry->getContent());
 });
 
-it('should remove an entry from db', function () {
+it('should remove an entry from db', function (): void {
     $user = testKit()->testDbPopulator()->createNewUser()->save();
     $category = testKit()->testDbPopulator()->createNewCategory()->withUser($user)->save();
     $entry = testKit()->testDbPopulator()->createNewEntry()

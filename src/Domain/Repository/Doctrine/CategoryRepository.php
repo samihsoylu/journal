@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamihSoylu\Journal\Domain\Repository\Doctrine;
 
 use Doctrine\ORM\EntityRepository;
 use SamihSoylu\Journal\Domain\Entity\Category;
-use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Domain\Repository\CategoryRepositoryInterface;
 use SamihSoylu\Journal\Domain\Repository\Doctrine\Trait\Saveable;
 

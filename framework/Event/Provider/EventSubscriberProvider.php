@@ -16,6 +16,7 @@ final readonly class EventSubscriberProvider
     public function findEventSubscriberFiles(): array
     {
         $files = $this->finder->files()->in($this->sourceDir)->name('*EventSubscriber.php');
+
         return $files->hasResults() ? iterator_to_array($files) : [];
     }
 }

@@ -10,7 +10,7 @@ use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmInterface;
 final readonly class DoctrineTestOrm implements TestOrmInterface
 {
     public function __construct(
-       private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager
     ) {}
 
     public function persist(object $object): void

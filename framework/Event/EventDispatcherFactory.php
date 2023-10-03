@@ -8,7 +8,6 @@ use LogicException;
 use Psr\Container\ContainerInterface;
 use SamihSoylu\Journal\Framework\Event\Provider\EventListenerProvider;
 use SamihSoylu\Journal\Framework\Event\Provider\EventSubscriberProvider;
-use SamihSoylu\Utility\Assert;
 use SamihSoylu\Utility\ClassInspector;
 use SamihSoylu\Utility\FileInspector;
 use Symfony\Component\EventDispatcher\EventDispatcher;

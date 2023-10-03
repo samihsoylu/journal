@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace SamihSoylu\Journal\Infrastructure\Port\PasswordHasher;
 
 use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\Exception\InvalidPasswordException;

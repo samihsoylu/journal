@@ -28,7 +28,7 @@ final readonly class FileCache implements Cacheable
 
     public function set(string $key, string $value, int $ttl = null): void
     {
-        $ttl = $ttl ?? self::DEFAULT_EXPIRY_IN_SECONDS;
+        $ttl ??= self::DEFAULT_EXPIRY_IN_SECONDS;
         $expiresAt = new DateTimeImmutable("+{$ttl} seconds");
 
         $item = $this->cache->getItem($key)

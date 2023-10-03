@@ -2,15 +2,10 @@
 
 declare(strict_types=1);
 
-use Ramsey\Uuid\Uuid;
 use SamihSoylu\Journal\Domain\Entity\Template;
-use SamihSoylu\Journal\Domain\Entity\Category;
-use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Domain\Repository\TemplateRepositoryInterface;
-use SamihSoylu\Journal\Domain\Repository\CategoryRepositoryInterface;
-use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
 
-it('should get template by id', function () {
+it('should get template by id', function (): void {
     $user = testKit()->testDbPopulator()->createNewUser()->save();
     $category = testKit()->testDbPopulator()->createNewCategory()->withUser($user)->save();
 
@@ -27,7 +22,7 @@ it('should get template by id', function () {
     expect($actualTemplate->getId()->toString())->toBe($expectedTemplateId);
 });
 
-it('should save a template to db', function() {
+it('should save a template to db', function (): void {
     $expectedUser = testKit()->testDbPopulator()->createNewUser()->save();
     $expectedCategory = testKit()->testDbPopulator()->createNewCategory()->withUser($expectedUser)->save();
 
@@ -49,7 +44,7 @@ it('should save a template to db', function() {
         ->and($row['categoryId'])->toBe($expectedCategory->getId()->toString());
 });
 
-it('should remove a template from db', function() {
+it('should remove a template from db', function (): void {
     $user = testKit()->testDbPopulator()->createNewUser()->save();
     $category = testKit()->testDbPopulator()->createNewCategory()->withUser($user)->save();
     $template = testKit()->testDbPopulator()->createNewTemplate()->withUser($user)->withCategory($category)->save();

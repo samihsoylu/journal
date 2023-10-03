@@ -5,7 +5,7 @@ declare(strict_types=1);
 use SamihSoylu\Journal\Framework\Event\Provider\EventSubscriberProvider;
 use Symfony\Component\Finder\Finder;
 
-it('returns an empty array when no event listener files are found', function () {
+it('returns an empty array when no event listener files are found', function (): void {
     $finderMock = Mockery::mock(Finder::class);
     $finderMock->shouldReceive('files')->once()->andReturnSelf();
     $finderMock->shouldReceive('in')->once()->andReturnSelf();
@@ -17,7 +17,7 @@ it('returns an empty array when no event listener files are found', function () 
     expect($locator->findEventSubscriberFiles())->toBe([]);
 });
 
-it('returns an array of event listener files when found', function () {
+it('returns an array of event listener files when found', function (): void {
     $finderMock = Mockery::mock(Finder::class);
     $finderMock->shouldReceive('files')->once()->andReturnSelf();
     $finderMock->shouldReceive('in')->once()->andReturnSelf();

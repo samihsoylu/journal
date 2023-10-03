@@ -9,7 +9,7 @@ abstract class BaseEntity
     abstract public function checkErrors(): void;
 
     /**
-     * @param string[] $requiredProperties
+     * @param array<string> $requiredProperties
      */
     protected function assertRequiredPropertiesProvided(array $requiredProperties): void
     {

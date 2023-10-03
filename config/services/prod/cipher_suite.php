@@ -7,15 +7,9 @@ use SamihSoylu\CipherSuite\PasswordKeyManager\PasswordKeyManager;
 use SamihSoylu\CipherSuite\PasswordKeyManager\PasswordKeyManagerInterface;
 use SamihSoylu\CipherSuite\TransientAesEncryptor\TransientAesEncryptor;
 use SamihSoylu\CipherSuite\TransientAesEncryptor\TransientAesEncryptorInterface;
-use SamihSoylu\Journal\Infrastructure\Adapter\Action\Synchronous\SynchronousActionDispatcher;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionDispatcherInterface;
 
-return function (Container $container) {
-    $container->set(PasswordKeyManagerInterface::class, function (Container $container) {
-        return $container->get(PasswordKeyManager::class);
-    });
+return function (Container $container): void {
+    $container->set(PasswordKeyManagerInterface::class, fn (Container $container) => $container->get(PasswordKeyManager::class));
 
-    $container->set(TransientAesEncryptorInterface::class, function (Container $container) {
-       return $container->get(TransientAesEncryptor::class);
-    });
+    $container->set(TransientAesEncryptorInterface::class, fn (Container $container) => $container->get(TransientAesEncryptor::class));
 };

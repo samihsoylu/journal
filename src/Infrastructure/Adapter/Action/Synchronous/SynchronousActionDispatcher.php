@@ -18,7 +18,7 @@ final readonly class SynchronousActionDispatcher implements ActionDispatcherInte
 
     public function dispatch(ActionInterface $action): void
     {
-        $className = get_class($action) . 'Handler';
+        $className = $action::class . 'Handler';
         if (!class_exists($className)) {
             throw new InvalidArgumentException("Action Handler '{$className}' was not found");
         }
