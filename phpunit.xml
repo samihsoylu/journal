@@ -8,6 +8,7 @@
         <testsuite name="Test Suite">
             <directory suffix="Test.php">./tests/framework</directory>
             <directory suffix="Test.php">./tests/src</directory>
+            <directory suffix="Test.php">./tests/architecture</directory>
         </testsuite>
     </testsuites>
     <source>

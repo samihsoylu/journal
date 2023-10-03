@@ -28,6 +28,7 @@ uses()
         $transaction->rollback();
     })->group('integration')->in('src/Integration');
 
+uses()->group('architecture')->in('architecture');
 /*
 |--------------------------------------------------------------------------
 | Expectations
