@@ -2,7 +2,7 @@
     "name": "samihsoylu/journal",
     "description": "Document your life, daily happenings, special occasions, and reflections on your goals.",
     "type": "project",
-    "license": "GNU General Public License v3.0",
+    "license": "GPL-3.0-only",
     "autoload": {
         "psr-4": {
             "SamihSoylu\\Journal\\Framework\\": "framework/",
