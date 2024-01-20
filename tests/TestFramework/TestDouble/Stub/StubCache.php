@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Stub;
 
 use SamihSoylu\Journal\Infrastructure\Port\Cache\Cacheable;
+use SamihSoylu\Journal\Infrastructure\Port\Cache\SecureCacheable;
 
-final class StubCache implements Cacheable
+final class StubCache implements Cacheable, SecureCacheable
 {
+    public const DEFAULT_KEY_FOR_TRANSIENT_PASSWORD = 'ABCDEF';
     private array $store = [];
 
     public function get(string $key): ?string
@@ -28,5 +30,14 @@ final class StubCache implements Cacheable
     public function remove(string $key): void
     {
         unset($this->store[$key]);
+    }
+
+    public function getFirstStoredKey(): ?string
+    {
+        foreach ($this->store as $key => $value) {
+            return $key;
+        }
+
+        return null;
     }
 }

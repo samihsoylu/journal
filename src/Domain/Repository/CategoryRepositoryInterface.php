@@ -10,4 +10,6 @@ use SamihSoylu\Journal\Domain\Repository\Interface\SaveableInterface;
 interface CategoryRepositoryInterface extends SaveableInterface
 {
     public function getById(string $id): ?Category;
+
+    public function getByName(string $userId, string $name): ?Category;
 }

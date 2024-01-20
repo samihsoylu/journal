@@ -17,6 +17,7 @@ final readonly class TestKit
         private TestOrmInterface $testOrm,
         private TestDbPopulator $testDbPopulator,
         private TestPath $testPath,
+        private TestSetupHelper $testSetupHelper,
     ) {}
 
     public function testOrm(): TestOrmInterface
@@ -32,6 +33,11 @@ final readonly class TestKit
     public function testPath(): TestPath
     {
         return $this->testPath;
+    }
+
+    public function testSetupHelper(): TestSetupHelper
+    {
+        return $this->testSetupHelper;
     }
 
     /**

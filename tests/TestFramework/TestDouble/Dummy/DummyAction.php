@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Fake;
+namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Dummy;
 
 use SamihSoylu\Journal\Infrastructure\Port\Action\ActionInterface;
 
-final class FakeAction implements ActionInterface
+final class DummyAction implements ActionInterface
 {
 }

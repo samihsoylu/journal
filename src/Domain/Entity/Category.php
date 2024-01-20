@@ -10,9 +10,11 @@ use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\PrePersist;
+use LogicException;
 use SamihSoylu\Journal\Domain\Entity\Trait\Identifiable;
 use SamihSoylu\Journal\Domain\Entity\Trait\Timestampable;
 use SamihSoylu\Journal\Domain\Repository\Doctrine\CategoryRepository;
+use SamihSoylu\Utility\Assert;
 
 #[Entity(repositoryClass: CategoryRepository::class), HasLifecycleCallbacks]
 class Category extends BaseEntity
@@ -86,5 +88,20 @@ class Category extends BaseEntity
         $this->position = $position;
 
         return $this;
+    }
+
+    public function assertBelongsToUser(User $user): void
+    {
+        $providedUserId = $user?->getId()?->toString();
+        Assert::notNull($providedUserId, 'The user passed in the method parameter does not have an id');
+
+        $ownerUserId = $this->user?->getId()?->toString();
+        Assert::notNull($ownerUserId, 'This category belongs to a user that does not have an id');
+
+        if ($providedUserId !== $ownerUserId) {
+            throw new LogicException(
+                "Category[id={$ownerUserId}] does not belong to User[id={$providedUserId}]"
+            );
+        }
     }
 }

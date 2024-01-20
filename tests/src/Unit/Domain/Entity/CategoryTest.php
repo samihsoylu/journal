@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Ramsey\Uuid\Rfc4122\UuidV4;
 use SamihSoylu\Journal\Domain\Entity\Category;
 use SamihSoylu\Journal\Domain\Entity\User;
 
@@ -57,3 +58,50 @@ it('should correctly get and set position', function (): void {
 
     expect($category->getPosition())->toBe(1);
 });
+
+it('should throw when category does not belong to user when asserting that it belongs to a user', function (): void {
+    $user = Mockery::mock(User::class);
+    $user->shouldReceive('getId')
+        ->andReturn(UuidV4::uuid4());
+
+    $category = new Category();
+    $category->setUser($user);
+
+    $anotherUser = Mockery::mock(User::class);
+    $anotherUser->shouldReceive('getId')
+        ->andReturn(UuidV4::uuid4());
+
+    $category->assertBelongsToUser($anotherUser);
+})->throws(LogicException::class);
+
+it('should throw when a category belongs to a user that does not have a user id when asserting that it belongs to a user', function (): void {
+    $user = Mockery::mock(User::class);
+    $user->shouldReceive('getId')
+        ->andReturn(null);
+
+    $category = new Category();
+    $category->setUser($user);
+
+    $anotherUser = Mockery::mock(User::class);
+    $anotherUser->shouldReceive('getId')
+        ->andReturn(UuidV4::uuid4());
+
+    $category->assertBelongsToUser($anotherUser);
+})->throws(UnexpectedValueException::class)
+    ->expectExceptionMessage('This category belongs to a user that does not have an id');
+
+it('should throw when provided user does not have an id while asserting that it belongs to a user', function (): void {
+    $user = Mockery::mock(User::class);
+    $user->shouldReceive('getId')
+        ->andReturn(null);
+
+    $category = new Category();
+    $category->setUser($user);
+
+    $anotherUser = Mockery::mock(User::class);
+    $anotherUser->shouldReceive('getId')
+        ->andReturn(UuidV4::uuid4());
+
+    $category->assertBelongsToUser($anotherUser);
+})->throws(UnexpectedValueException::class)
+    ->expectExceptionMessage('This category belongs to a user that does not have an id');

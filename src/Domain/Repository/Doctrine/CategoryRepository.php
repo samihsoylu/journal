@@ -17,4 +17,12 @@ final class CategoryRepository extends EntityRepository implements CategoryRepos
     {
         return $this->find($id);
     }
+
+    public function getByName(string $userId, string $name): ?Category
+    {
+        return $this->findOneBy([
+            'user' => $userId,
+            'name' => $name,
+        ]);
+    }
 }

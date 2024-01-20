@@ -12,6 +12,7 @@ use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmInterface;
 
 final readonly class UserSeed
 {
+    public const DEFAULT_PASSWORD = 'unsecure-test-password';
     private User $user;
 
     public function __construct(
@@ -26,10 +27,8 @@ final readonly class UserSeed
 
     private function setDefaultValues(): void
     {
-        $password = 'unsecure-test-password';
-
-        $protectedKey = $this->passwordKeyManager->createProtectedKeyForDb($password);
-        $hashedPassword = $this->passwordHasher->hash($password);
+        $protectedKey = $this->passwordKeyManager->createProtectedKeyForDb(self::DEFAULT_PASSWORD);
+        $hashedPassword = $this->passwordHasher->hash(self::DEFAULT_PASSWORD);
 
         $this->user->setUsername('joe')
             ->setPassword($hashedPassword)

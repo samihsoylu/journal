@@ -26,6 +26,24 @@ it('should get category by id', function (): void {
         ->and($actualAssignedUserId)->toBe($expectedAssignedUserId);
 });
 
+it('should find category by user id and title', function (): void {
+    $expectedAssignedUser = testKit()->testDbPopulator()->createNewUser()
+        ->save();
+
+    $expectedCategory = testKit()->testDbPopulator()->createNewCategory()
+        ->withUser($expectedAssignedUser)
+        ->save();
+
+    $categoryRepository = testKit()->getService(CategoryRepositoryInterface::class);
+    $actualCategory = $categoryRepository->getByName(
+        $expectedAssignedUser->getId()->toString(),
+        $expectedCategory->getName()
+    );
+
+    expect($actualCategory)->toBeInstanceOf(Category::class)
+        ->and($actualCategory->getName())->toEqual($expectedCategory->getName());
+});
+
 it('should save a category to db', function (): void {
     $user = testKit()->testDbPopulator()->createNewUser()
         ->save();

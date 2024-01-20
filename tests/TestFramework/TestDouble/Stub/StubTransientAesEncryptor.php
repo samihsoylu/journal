@@ -6,15 +6,17 @@ namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Stub;
 
 use SamihSoylu\CipherSuite\TransientAesEncryptor\TransientAesEncryptorInterface;
 
-final class StubTransientAesEncryptor implements TransientAesEncryptorInterface
+final readonly class StubTransientAesEncryptor implements TransientAesEncryptorInterface
 {
+    private const PREFIX = 'fake-encryption::';
+
     public function encrypt(string $plaintext): string
     {
-        return 'encrypted:' . $plaintext;
+        return self::PREFIX . $plaintext;
     }
 
     public function decrypt(string $encryptedString): string
     {
-        return str_replace('encrypted:', '', $encryptedString);
+        return str_replace(self::PREFIX, '', $encryptedString);
     }
 }
