@@ -5,7 +5,7 @@ declare(strict_types=1);
 use SamihSoylu\Journal\Infrastructure\Adapter\Cache\File\FileCache;
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
-it('returns null if item is not in cache', function (): void {
+it('should return null if item is not in cache', function (): void {
     $adapter = new FilesystemAdapter('FileTest', 300);
     $fileCache = new FileCache($adapter);
 
@@ -17,7 +17,7 @@ it('returns null if item is not in cache', function (): void {
     expect($fileCache->get($key))->toBeNull();
 });
 
-it('sets and gets item from cache', function (): void {
+it('should return set item from the cache', function (): void {
     $adapter = new FilesystemAdapter('FileTest', 300);
     $fileCache = new FileCache($adapter);
 
@@ -29,7 +29,7 @@ it('sets and gets item from cache', function (): void {
     expect($fileCache->get($key))->toBe($value);
 });
 
-it('checks if an item exists in the cache', function (): void {
+it('should return true if an item exists in the cache', function (): void {
     $adapter = new FilesystemAdapter('FileTest', 300);
     $fileCache = new FileCache($adapter);
 
@@ -41,7 +41,7 @@ it('checks if an item exists in the cache', function (): void {
     expect($fileCache->has($key))->toBeTrue();
 });
 
-it('removes item from cache', function (): void {
+it('should remove an item from the cache', function (): void {
     $adapter = new FilesystemAdapter('FileTest', 300);
     $fileCache = new FileCache($adapter);
 

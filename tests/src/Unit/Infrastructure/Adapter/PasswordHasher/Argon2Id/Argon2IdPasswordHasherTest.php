@@ -9,6 +9,7 @@ use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\PasswordHasherInterfac
 it('should hash a password correctly', function (): void {
     $hasher = new Argon2IdPasswordHasher();
     $plainPassword = 'testPassword';
+
     $hashedPassword = $hasher->hash($plainPassword);
 
     expect(password_verify($plainPassword, $hashedPassword))->toBeTrue();
@@ -17,6 +18,7 @@ it('should hash a password correctly', function (): void {
 it('should verify a hashed password', function (): void {
     $hasher = new Argon2IdPasswordHasher();
     $plainPassword = 'testPassword';
+
     $hashedPassword = password_hash($plainPassword, PASSWORD_ARGON2ID);
 
     expect($hasher->verify($plainPassword, $hashedPassword))->toBeTrue();

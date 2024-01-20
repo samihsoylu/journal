@@ -3,30 +3,25 @@
 declare(strict_types=1);
 
 use SamihSoylu\Journal\Infrastructure\Adapter\Action\Synchronous\SynchronousActionDispatcher;
-use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Fake\FakeAction;
+use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Dummy\DummyAction;
 use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Spy\SpyAction;
 use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Spy\SpyActionHandler;
 use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Stub\StubContainer;
 
-it('dispatches the action to the corresponding handler', function (): void {
-    $spyAction = new SpyAction();
+it('should dispatch the action to the corresponding handler', function (): void {
+    $fakeAction = new SpyAction();
     $spyActionHandler = new SpyActionHandler();
 
-    $stubContainer = new StubContainer([
+    $dispatcher = new SynchronousActionDispatcher(new StubContainer([
         SpyActionHandler::class => $spyActionHandler,
-    ]);
+    ]));
+    $dispatcher->dispatch($fakeAction);
 
-    $dispatcher = new SynchronousActionDispatcher($stubContainer);
-    $dispatcher->dispatch($spyAction);
-
-    $spyActionHandler->assertInvokedWith($spyAction);
+    $spyActionHandler->assertInvokedWith($fakeAction);
 });
 
-it('throws an exception if handler class does not exist', function (): void {
-    $fakeAction = new FakeAction();
+it('should throw an exception if the handler class does not exist', function (): void {
+    $dispatcher = new SynchronousActionDispatcher(new StubContainer());
 
-    $stubContainer = new StubContainer();
-
-    $dispatcher = new SynchronousActionDispatcher($stubContainer);
-    $dispatcher->dispatch($fakeAction);
+    $dispatcher->dispatch(new DummyAction());
 })->throws(InvalidArgumentException::class);

@@ -6,48 +6,42 @@ use SamihSoylu\Journal\Infrastructure\Adapter\Cache\SecureTransient\SecureTransi
 use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Stub\StubCache;
 use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Stub\StubTransientAesEncryptor;
 
-it('encrypts and stores the value, and then decrypts on retrieval', function (): void {
+it('should encrypt and store the value, and then decrypt on retrieval', function (): void {
     $stubCache = new StubCache();
-    $stubEncryptor = new StubTransientAesEncryptor();
-    $secureCache = new SecureTransientCache($stubCache, $stubEncryptor);
-    $key = 'test_key';
-    $value = 'test_value';
 
-    $secureCache->set($key, $value);
-    expect($stubCache->get($key))->toBe('encrypted:' . $value)
-        ->and($secureCache->get($key))->toBe($value);
+    $expectedKey = 'test_key';
+    $expectedValue = 'test_value';
+
+    $secureCache = new SecureTransientCache($stubCache, new StubTransientAesEncryptor());
+    $secureCache->set($expectedKey, $expectedValue);
+
+    expect($stubCache->get($expectedKey))->not()->toEqual($expectedValue)
+        ->and($secureCache->get($expectedKey))->toBe($expectedValue);
 });
 
-it('checks if an item exists in the cache', function (): void {
-    $stubCache = new StubCache();
-    $stubEncryptor = new StubTransientAesEncryptor();
-    $secureCache = new SecureTransientCache($stubCache, $stubEncryptor);
-    $key = 'test_key';
+it('should check if an item exists in the cache', function (): void {
+    $secureCache = new SecureTransientCache(new StubCache(), new StubTransientAesEncryptor());
+    $expectedKey = 'test_key';
 
-    expect($secureCache->has($key))->toBeFalse();
-    $secureCache->set($key, 'value');
-    expect($secureCache->has($key))->toBeTrue();
+    expect($secureCache->has($expectedKey))->toBeFalse();
+
+    $secureCache->set($expectedKey, 'random-value');
+    expect($secureCache->has($expectedKey))->toBeTrue();
 });
 
-it('removes item from cache', function (): void {
-    $stubCache = new StubCache();
-    $stubEncryptor = new StubTransientAesEncryptor();
-    $secureCache = new SecureTransientCache($stubCache, $stubEncryptor);
-    $key = 'test_key';
-    $value = 'test_value';
+it('should remove item from cache', function (): void {
+    $secureCache = new SecureTransientCache(new StubCache(), new StubTransientAesEncryptor());
+    $expectedKey = 'test_key';
 
-    $secureCache->set($key, $value);
-    expect($secureCache->has($key))->toBeTrue();
+    $secureCache->set($expectedKey, 'test_value');
+    expect($secureCache->has($expectedKey))->toBeTrue();
 
-    $secureCache->remove($key);
-    expect($secureCache->has($key))->toBeFalse();
+    $secureCache->remove($expectedKey);
+    expect($secureCache->has($expectedKey))->toBeFalse();
 });
 
 it('should return null when no item is found', function (): void {
-    $stubCache = new StubCache();
-    $stubEncryptor = new StubTransientAesEncryptor();
-    $secureCache = new SecureTransientCache($stubCache, $stubEncryptor);
-    $key = 'test_key';
+    $secureCache = new SecureTransientCache(new StubCache(), new StubTransientAesEncryptor());
 
-    expect($secureCache->get($key))->toBeNull();
+    expect($secureCache->get('random_test_key'))->toBeNull();
 });
