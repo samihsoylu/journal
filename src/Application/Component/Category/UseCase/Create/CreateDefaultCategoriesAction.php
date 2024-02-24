@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SamihSoylu\Journal\Application\Component\Category\UseCase\Create;
 
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionInterface;
 
 /**
  * @see CreateDefaultCategoriesActionHandler

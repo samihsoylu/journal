@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace SamihSoylu\Journal\Application\Component\User\UseCase\Create;
 
 use SamihSoylu\Journal\Domain\Entity\Enum\Role;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionInterface;
 
 /**
  * @see CreateUserActionHandler

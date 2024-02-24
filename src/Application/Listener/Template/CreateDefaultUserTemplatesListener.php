@@ -12,8 +12,8 @@ use SamihSoylu\Journal\Domain\Entity\Category;
 use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Domain\Repository\CategoryRepositoryInterface;
 use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionDispatcherInterface;
-use SamihSoylu\Journal\Infrastructure\Port\Cache\SecureCacheable;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionDispatcherInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Cache\SecureCacheable;
 use SamihSoylu\Utility\Assert;
 
 final readonly class CreateDefaultUserTemplatesListener

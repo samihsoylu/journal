@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Spy;
 
 use PHPUnit\Framework\Assert;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionHandlerInterface;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionHandlerInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionInterface;
 
 final class SpyActionHandler extends Assert implements ActionHandlerInterface
 {

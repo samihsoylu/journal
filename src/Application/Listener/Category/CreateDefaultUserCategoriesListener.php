@@ -6,7 +6,7 @@ namespace SamihSoylu\Journal\Application\Listener\Category;
 
 use SamihSoylu\Journal\Application\Component\Category\UseCase\Create\CreateDefaultCategoriesAction;
 use SamihSoylu\Journal\Application\Component\User\Event\UserCreatedEvent;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionDispatcherInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionDispatcherInterface;
 
 final readonly class CreateDefaultUserCategoriesListener
 {

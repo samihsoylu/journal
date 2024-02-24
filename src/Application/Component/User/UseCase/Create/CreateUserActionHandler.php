@@ -9,10 +9,10 @@ use SamihSoylu\CipherSuite\PasswordKeyManager\PasswordKeyManagerInterface;
 use SamihSoylu\Journal\Application\Component\User\Event\UserCreatedEvent;
 use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionHandlerInterface;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionInterface;
-use SamihSoylu\Journal\Infrastructure\Port\Cache\SecureCacheable;
-use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionHandlerInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Cache\SecureCacheable;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
 use SamihSoylu\Utility\Assert;
 
 /**

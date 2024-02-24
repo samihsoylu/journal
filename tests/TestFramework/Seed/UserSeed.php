@@ -7,7 +7,7 @@ namespace SamihSoylu\Journal\Tests\TestFramework\Seed;
 use SamihSoylu\CipherSuite\PasswordKeyManager\PasswordKeyManagerInterface;
 use SamihSoylu\Journal\Domain\Entity\Enum\Role;
 use SamihSoylu\Journal\Domain\Entity\User;
-use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
 use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmInterface;
 
 final readonly class UserSeed

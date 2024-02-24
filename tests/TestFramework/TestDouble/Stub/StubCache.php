@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Stub;
 
-use SamihSoylu\Journal\Infrastructure\Port\Cache\Cacheable;
-use SamihSoylu\Journal\Infrastructure\Port\Cache\SecureCacheable;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Cache\Cacheable;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Cache\SecureCacheable;
 
 final class StubCache implements Cacheable, SecureCacheable
 {

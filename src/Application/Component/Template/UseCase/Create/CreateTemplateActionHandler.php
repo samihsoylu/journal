@@ -12,8 +12,8 @@ use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Domain\Repository\CategoryRepositoryInterface;
 use SamihSoylu\Journal\Domain\Repository\TemplateRepositoryInterface;
 use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionHandlerInterface;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionHandlerInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionInterface;
 use SamihSoylu\Utility\Assert;
 
 /**

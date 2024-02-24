@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Spy;
 
 use PHPUnit\Framework\Assert;
-use SamihSoylu\Journal\Infrastructure\Port\Cache\Cacheable;
-use SamihSoylu\Journal\Infrastructure\Port\Cache\SecureCacheable;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Cache\Cacheable;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Cache\SecureCacheable;
 
 class SpyCache extends Assert implements Cacheable, SecureCacheable
 {

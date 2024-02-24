@@ -7,8 +7,8 @@ namespace SamihSoylu\Journal\Application\Service;
 use SamihSoylu\Journal\Application\Component\User\UseCase\Create\CreateUserAction;
 use SamihSoylu\Journal\Application\Service\Contract\UserServiceInterface;
 use SamihSoylu\Journal\Domain\Entity\Enum\Role;
-use SamihSoylu\Journal\Infrastructure\Port\Action\ActionDispatcherInterface;
-use SamihSoylu\Journal\Infrastructure\Port\Cache\SecureCacheable;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionDispatcherInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\Cache\SecureCacheable;
 use SamihSoylu\Utility\StringHelper;
 
 final class UserService implements UserServiceInterface

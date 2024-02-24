@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Stub;
 
-use SamihSoylu\Journal\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
+use SamihSoylu\Journal\Framework\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
 use SensitiveParameter;
 
 final class StubPasswordHasher implements PasswordHasherInterface
