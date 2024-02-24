@@ -8,7 +8,7 @@ use Ramsey\Uuid\UuidInterface;
 use SamihSoylu\Journal\Domain\Entity\User;
 use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
 
-final class StubUserRepository implements UserRepositoryInterface
+final readonly class StubUserRepository implements UserRepositoryInterface
 {
     public function __construct(
         private ?UuidInterface $queueForSavingWillSetId = null,
@@ -17,7 +17,7 @@ final class StubUserRepository implements UserRepositoryInterface
 
     public function queueForSaving(object $entity): static
     {
-        if ($this->queueForSavingWillSetId !== null) {
+        if ($this->queueForSavingWillSetId instanceof UuidInterface) {
             $reflector = new \ReflectionObject($entity);
             $idProperty = $reflector->getProperty('id');
             $idProperty->setAccessible(true);

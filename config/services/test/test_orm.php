@@ -9,7 +9,7 @@ use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmInterface;
 use SamihSoylu\Journal\Tests\TestFramework\Core\TestOrm\TestOrmTransactionInterface;
 
 return function (Container $container): void {
-    $container->set(TestOrmInterface::class, fn (Container $container) => $container->get(DoctrineTestOrm::class));
+    $container->set(TestOrmInterface::class, fn (Container $container): DoctrineTestOrm => $container->get(DoctrineTestOrm::class));
 
-    $container->set(TestOrmTransactionInterface::class, fn (Container $container) => $container->get(DoctrineTestOrmTransaction::class));
+    $container->set(TestOrmTransactionInterface::class, fn (Container $container): DoctrineTestOrmTransaction => $container->get(DoctrineTestOrmTransaction::class));
 };

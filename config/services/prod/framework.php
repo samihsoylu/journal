@@ -11,7 +11,7 @@ use SamihSoylu\Journal\Framework\Event\Provider\EventSubscriberProvider;
 use Symfony\Component\Finder\Finder;
 
 return function (Container $container): void {
-    $container->set(Environment::class, fn () => Environment::from($_ENV['JOURNAL_ENV']));
+    $container->set(Environment::class, fn (): Environment => Environment::from($_ENV['JOURNAL_ENV']));
 
     $container->set(EventDispatcherInterface::class, function (Container $container) {
         $factory = $container->get(EventDispatcherFactory::class);
@@ -19,7 +19,7 @@ return function (Container $container): void {
         return $factory->create();
     });
 
-    $container->set(EventListenerProvider::class, fn () => new EventListenerProvider(Finder::create(), $_ENV['JOURNAL_APPLICATION_DIR']));
+    $container->set(EventListenerProvider::class, fn (): EventListenerProvider => new EventListenerProvider(Finder::create(), $_ENV['JOURNAL_APPLICATION_DIR']));
 
-    $container->set(EventSubscriberProvider::class, fn () => new EventSubscriberProvider(Finder::create(), $_ENV['JOURNAL_APPLICATION_DIR']));
+    $container->set(EventSubscriberProvider::class, fn (): EventSubscriberProvider => new EventSubscriberProvider(Finder::create(), $_ENV['JOURNAL_APPLICATION_DIR']));
 };

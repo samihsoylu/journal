@@ -7,5 +7,5 @@ use SamihSoylu\Journal\Framework\Infrastructure\Adapter\PasswordHasher\Argon2Id\
 use SamihSoylu\Journal\Framework\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
 
 return function (Container $container): void {
-    $container->set(PasswordHasherInterface::class, fn (Container $container) => $container->get(Argon2IdPasswordHasher::class));
+    $container->set(PasswordHasherInterface::class, fn (Container $container): Argon2IdPasswordHasher => $container->get(Argon2IdPasswordHasher::class));
 };

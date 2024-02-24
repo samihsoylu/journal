@@ -26,20 +26,9 @@ use PhpCsFixerCustomFixers\Fixer\StringableInterfaceFixer;
 $rules = [
     '@PSR12' => true,
     '@PSR12:risky' => true,
-    '@PHP70Migration' => true,
-    '@PHP70Migration:risky' => true,
-    '@PHP71Migration' => true,
-    '@PHP71Migration:risky' => true,
-    '@PHP73Migration' => true,
-    '@PHP74Migration' => true,
-    '@PHP74Migration:risky' => true,
-    '@PHP80Migration' => true,
-    '@PHP80Migration:risky' => true,
-    '@PHP81Migration' => true,
     '@PHP82Migration' => true,
     'strict_param' => true,
     'array_syntax' => ['syntax' => 'short'],
-
     'declare_strict_types' => true,
     'no_unused_imports' => true,
     'concat_space' => ['spacing' => 'one'], // makes "$a.$b" look like "$a . $b"

@@ -7,7 +7,7 @@ namespace SamihSoylu\Journal\Tests\TestFramework\TestDouble\Stub;
 use SamihSoylu\Journal\Framework\Infrastructure\Port\PasswordHasher\PasswordHasherInterface;
 use SensitiveParameter;
 
-final class StubPasswordHasher implements PasswordHasherInterface
+final readonly class StubPasswordHasher implements PasswordHasherInterface
 {
     public function __construct(
         private string $hashWillReturn = '',

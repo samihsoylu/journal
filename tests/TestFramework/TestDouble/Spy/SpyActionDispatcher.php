@@ -22,7 +22,7 @@ final class SpyActionDispatcher extends Assert implements ActionDispatcherInterf
     {
         $matchingActions = array_filter(
             $this->dispatchedActions,
-            fn ($dispatchedAction) => $dispatchedAction::class === $expectedAction
+            fn ($dispatchedAction): bool => $dispatchedAction::class === $expectedAction
         );
 
         self::assertNotEmpty($matchingActions, "The action '{$expectedAction}' was not dispatched.");
@@ -32,7 +32,7 @@ final class SpyActionDispatcher extends Assert implements ActionDispatcherInterf
     {
         $matchingActions = array_filter(
             $this->dispatchedActions,
-            fn ($dispatchedAction) => $dispatchedAction::class === $expectedAction
+            fn ($dispatchedAction): bool => $dispatchedAction::class === $expectedAction
         );
 
         $dispatchedAction = reset($matchingActions);

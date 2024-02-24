@@ -18,5 +18,6 @@ final class FakeEventSubscriber implements EventSubscriberInterface
 
     public function doNothing(FakeEvent $event): void
     {
+        // do nothing
     }
 }

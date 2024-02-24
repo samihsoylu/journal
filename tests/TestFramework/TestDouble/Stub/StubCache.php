@@ -34,7 +34,7 @@ final class StubCache implements Cacheable, SecureCacheable
 
     public function getFirstStoredKey(): ?string
     {
-        foreach ($this->store as $key => $value) {
+        foreach (array_keys($this->store) as $key) {
             return $key;
         }
 

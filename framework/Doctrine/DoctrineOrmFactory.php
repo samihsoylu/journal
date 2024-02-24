@@ -74,7 +74,7 @@ final readonly class DoctrineOrmFactory
     /**
      * @return array<string>
      */
-    protected function getSchemeMapping(): array
+    private function getSchemeMapping(): array
     {
         return [
             'db2' => 'ibm_db2',

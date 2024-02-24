@@ -8,7 +8,7 @@ use Defuse\Crypto\Key;
 use SamihSoylu\CipherSuite\PasswordKeyManager\PasswordKeyManagerInterface;
 use SamihSoylu\Utility\Assert;
 
-final class StubPasswordKeyManager implements PasswordKeyManagerInterface
+final readonly class StubPasswordKeyManager implements PasswordKeyManagerInterface
 {
     public function __construct(
         private string $createProtectedKeyForDbWillReturn = '',
@@ -62,6 +62,6 @@ final class StubPasswordKeyManager implements PasswordKeyManagerInterface
 
     public function updateProtectedKeyPassword(string $protectedKey, $oldPassword, $newPassword): string
     {
-        $this->updateProtectedKeyPasswordWillReturn;
+        return $this->updateProtectedKeyPasswordWillReturn;
     }
 }

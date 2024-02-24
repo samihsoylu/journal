@@ -7,5 +7,5 @@ use SamihSoylu\Journal\Framework\Infrastructure\Adapter\Action\Synchronous\Synch
 use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionDispatcherInterface;
 
 return function (Container $container): void {
-    $container->set(ActionDispatcherInterface::class, fn (Container $container) => $container->get(SynchronousActionDispatcher::class));
+    $container->set(ActionDispatcherInterface::class, fn (Container $container): SynchronousActionDispatcher => $container->get(SynchronousActionDispatcher::class));
 };

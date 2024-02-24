@@ -16,7 +16,7 @@ use SamihSoylu\Journal\Domain\Repository\UserRepositoryInterface;
 use SamihSoylu\Journal\Framework\Doctrine\DoctrineOrmFactory;
 
 return function (Container $container): void {
-    $container->set(DoctrineOrmFactory::class, fn () => new DoctrineOrmFactory(
+    $container->set(DoctrineOrmFactory::class, fn (): DoctrineOrmFactory => new DoctrineOrmFactory(
         $_ENV['JOURNAL_DB_DSN'],
         $_ENV['JOURNAL_ROOT_DIR'],
         $_ENV['JOURNAL_DB_CACHE_DIR'],

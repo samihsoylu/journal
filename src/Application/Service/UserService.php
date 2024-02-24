@@ -11,7 +11,7 @@ use SamihSoylu\Journal\Framework\Infrastructure\Port\Action\ActionDispatcherInte
 use SamihSoylu\Journal\Framework\Infrastructure\Port\Cache\SecureCacheable;
 use SamihSoylu\Utility\StringHelper;
 
-final class UserService implements UserServiceInterface
+final readonly class UserService implements UserServiceInterface
 {
     public function __construct(
         private ActionDispatcherInterface $actionDispatcher,

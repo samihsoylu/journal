@@ -6,5 +6,5 @@ use DI\Container;
 use SamihSoylu\Journal\Tests\TestFramework\Core\TestPath;
 
 return function (Container $container): void {
-    $container->set(TestPath::class, fn () => new TestPath($_ENV['JOURNAL_TEST_DOUBLE_DIR_PATH']));
+    $container->set(TestPath::class, fn (): TestPath => new TestPath($_ENV['JOURNAL_TEST_DOUBLE_DIR_PATH']));
 };

@@ -76,10 +76,15 @@ final readonly class TestKit
 
     private function assertInteractiveModeEnabledWithInputs(array $options, array $inputs): void
     {
-        if ($options['interactive'] === false && $inputs !== []) {
-            throw new \RuntimeException(
-                "The 'interactive' option must be set to 'true' when providing inputs."
-            );
+        if ($options['interactive'] !== false) {
+            return;
         }
+        if ($inputs === []) {
+            return;
+        }
+
+        throw new \RuntimeException(
+            "The 'interactive' option must be set to 'true' when providing inputs."
+        );
     }
 }

@@ -7,5 +7,5 @@ use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Dummy\DummyObjectInterface
 use SamihSoylu\Journal\Tests\TestFramework\TestDouble\Dummy\DummyTestObject;
 
 return function (Container $container): void {
-    $container->set(DummyObjectInterface::class, fn () => new DummyTestObject());
+    $container->set(DummyObjectInterface::class, fn (): DummyTestObject => new DummyTestObject());
 };

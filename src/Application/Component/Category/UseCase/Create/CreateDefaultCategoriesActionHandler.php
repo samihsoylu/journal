@@ -65,7 +65,7 @@ final class CreateDefaultCategoriesActionHandler implements ActionHandlerInterfa
         return $mappedCategories;
     }
 
-    protected function dispatchDefaultCategoriesCreatedEvent(CreateDefaultCategoriesAction $action): void
+    private function dispatchDefaultCategoriesCreatedEvent(CreateDefaultCategoriesAction $action): void
     {
         $this->eventDispatcher->dispatch(
             new DefaultCategoriesCreatedEvent(
@@ -75,7 +75,7 @@ final class CreateDefaultCategoriesActionHandler implements ActionHandlerInterfa
         );
     }
 
-    protected function getUser(string $userId): User
+    private function getUser(string $userId): User
     {
         $user = $this->userRepository->getById($userId);
         Assert::notNull($user, "User[id={$userId}] not found");

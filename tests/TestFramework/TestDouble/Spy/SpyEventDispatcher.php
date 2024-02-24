@@ -23,7 +23,7 @@ final class SpyEventDispatcher extends Assert implements EventDispatcherInterfac
     {
         $matchingEvents = array_filter(
             $this->dispatchedEvents,
-            fn ($dispatchedEvent) => $dispatchedEvent::class === $expectedEvent
+            fn ($dispatchedEvent): bool => $dispatchedEvent::class === $expectedEvent
         );
 
         $dispatchedEvent = reset($matchingEvents);

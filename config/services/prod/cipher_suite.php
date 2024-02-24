@@ -9,7 +9,7 @@ use SamihSoylu\CipherSuite\TransientAesEncryptor\TransientAesEncryptor;
 use SamihSoylu\CipherSuite\TransientAesEncryptor\TransientAesEncryptorInterface;
 
 return function (Container $container): void {
-    $container->set(PasswordKeyManagerInterface::class, fn (Container $container) => $container->get(PasswordKeyManager::class));
+    $container->set(PasswordKeyManagerInterface::class, fn (Container $container): PasswordKeyManager => $container->get(PasswordKeyManager::class));
 
-    $container->set(TransientAesEncryptorInterface::class, fn (Container $container) => $container->get(TransientAesEncryptor::class));
+    $container->set(TransientAesEncryptorInterface::class, fn (Container $container): TransientAesEncryptor => $container->get(TransientAesEncryptor::class));
 };
