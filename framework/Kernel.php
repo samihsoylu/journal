@@ -7,6 +7,7 @@ namespace SamihSoylu\Journal\Framework;
 use Psr\Container\ContainerInterface;
 use RuntimeException;
 use SamihSoylu\Journal\Framework\Container\ContainerFactory;
+use Symfony\Component\HttpFoundation\Request;
 
 final readonly class Kernel
 {
@@ -14,29 +15,35 @@ final readonly class Kernel
     public Environment $environment;
     public bool $isDebugMode;
 
-    private function __construct()
+    private function __construct(?Request $request)
     {
         $this->assertEnvironmentVariablesAreSet();
 
         $this->environment = Environment::from($_ENV['JOURNAL_ENV']);
         $this->isDebugMode = $_ENV['JOURNAL_ENABLE_DEBUG'];
 
-        $this->initializeContainer();
+        $this->initializeContainer($request);
     }
 
-    public static function boot(): self
+    public static function boot(?Request $request = null): self
     {
-        return new self();
+        return new self($request);
     }
 
-    private function initializeContainer(): void
+    private function initializeContainer(?Request $request): void
     {
         $factory = new ContainerFactory(
             $_ENV['JOURNAL_CONFIG_DIR'],
             $this->environment,
         );
 
-        $this->container = $factory->create();
+        $container = $factory->create();
+
+        if ($request instanceof Request) {
+            $container->set(Request::class, $request);
+        }
+
+        $this->container = $container;
     }
 
     private function assertEnvironmentVariablesAreSet(): void
