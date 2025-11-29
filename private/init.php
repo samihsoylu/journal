@@ -95,3 +95,9 @@ if (SENTRY_ENABLED) {
 
     \Sentry\init(['dsn' => $_ENV['SENTRY_DSN']]);
 }
+
+// Initialize Kernel for dependency injection
+$kernel = new \App\Framework\Kernel(
+    $_ENV['APP_ENV'] ?? 'prod',
+    DEBUG_MODE
+);

@@ -2,4 +2,6 @@
 
 require_once(dirname(__DIR__) . '/private/init.php');
 
+/** @var \App\Framework\Kernel $kernel */
+
 \App\Router::route();

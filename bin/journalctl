@@ -6,6 +6,8 @@ use Symfony\Component\Console\Command\Command;
 
 require_once(dirname(__DIR__) . '/private/init.php');
 
+/** @var \App\Framework\Kernel $kernel */
+
 $version = PROJECT_VERSION;
 $app = new Application("Journal <comment>v{$version}</comment>");
 
