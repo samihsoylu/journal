@@ -7,13 +7,10 @@ use App\Database\Model\Template;
 use App\Database\Model\User;
 use App\Database\Repository\CategoryRepository;
 use App\Database\Repository\UserRepository;
-use App\Utility\Registry;
 use Defuse\Crypto\Key;
 
 class UserSetupHelper
 {
-    private UserRepository $repository;
-    private CategoryRepository $categoryRepository;
     private User $user;
     private Key $userEncryptionKey;
 
@@ -21,18 +18,14 @@ class UserSetupHelper
     private const FOOD_CATEGORY = 'Food';
     private const WORK_CATEGORY = 'Work';
 
-    public function __construct(User $user, Key $userEncryptionKey)
-    {
+    public function __construct(
+        User $user,
+        Key $userEncryptionKey,
+        private UserRepository $repository,
+        private CategoryRepository $categoryRepository
+    ) {
         $this->user = $user;
         $this->userEncryptionKey = $userEncryptionKey;
-
-        /** @var UserRepository $repository */
-        $repository = Registry::get(UserRepository::class);
-        $this->repository = $repository;
-
-        /** @var CategoryRepository $categoryRepository */
-        $categoryRepository = Registry::get(CategoryRepository::class);
-        $this->categoryRepository = $categoryRepository;
     }
 
     public function setDefaults(): void
