@@ -4,6 +4,8 @@ namespace App\Utility;
 
 use Throwable;
 
+use function Sentry\captureException;
+
 class ExceptionHandler
 {
     private Throwable $exception;
@@ -77,22 +79,11 @@ class ExceptionHandler
             throw $this->getException();
         }
 
-        $exceptionsFile = BASE_PATH . '/exceptions.txt';
-        if (!file_exists($exceptionsFile)) {
-            file_put_contents($exceptionsFile, '');
+        // Send exception to Sentry for tracking and monitoring
+        // Sentry provides stack traces, user context, request data, and notifications
+        if (SENTRY_ENABLED) {
+            captureException($this->getException());
         }
-
-        $timestamp = date('d-m-Y H:i:s');
-
-        $contents = file_get_contents($exceptionsFile);
-        $contents .= "\n[{$timestamp}] {$this->getException()} \n";
-
-        file_put_contents($exceptionsFile, $contents);
-
-        $to      = ADMIN_EMAIL_ADDRESS;
-        $subject = 'An internal exception occurred in ' . SITE_TITLE;
-        $message = $this->getException()->getMessage();
-        mail($to, $subject, $message);
 
         http_response_code(500);
         $this->getTemplatingEngine()->render('errors/500');
