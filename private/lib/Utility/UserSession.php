@@ -249,6 +249,18 @@ class UserSession
 
     private static function setCookie(string $cookieName, string $cookieValue, int $cookieExpiryTime): void
     {
-        \setcookie($cookieName, $cookieValue, $cookieExpiryTime, '/');
+        $options = [
+            'expires' => $cookieExpiryTime,
+            'path' => '/',
+            'httponly' => true,  // Prevents JavaScript access (XSS protection)
+            'samesite' => 'Strict',  // Prevents CSRF attacks
+        ];
+
+        // Only set Secure flag when SSL is enabled (production environments)
+        if (SSL_IS_ENABLED) {
+            $options['secure'] = true;  // Only transmit over HTTPS
+        }
+
+        \setcookie($cookieName, $cookieValue, $options);
     }
 }
