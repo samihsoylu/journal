@@ -147,11 +147,8 @@ class UserSession
         string $encodedEncryptionKey,
         ?string $timezone
     ): self {
-        // Generate a random prefix
-        $prefix = sha1(random_bytes(5));
-
-        // Generate a unique session id
-        $sessionId = uniqid($prefix, true);
+        // Generate a cryptographically secure random session ID
+        $sessionId = bin2hex(random_bytes(32));
 
         $self = new self(
             $sessionId,
