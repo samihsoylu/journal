@@ -14,10 +14,10 @@ use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 
 final class Database
 {
-    private static ?Database $instance = null;
     private DependencyFactory $dependencyFactory;
+    private EntityManager $entityManager;
 
-    private function __construct()
+    public function __construct()
     {
         $dbParams = [
             'driver'   => 'pdo_mysql',
@@ -39,20 +39,24 @@ final class Database
         );
         $config->setAutoGenerateProxyClasses(AbstractProxyFactory::AUTOGENERATE_FILE_NOT_EXISTS_OR_CHANGED);
 
-        $entityManager = EntityManager::create($dbParams, $config);
+        $this->entityManager = EntityManager::create($dbParams, $config);
 
-        $this->dependencyFactory = DependencyFactory::fromEntityManager(new JsonFile(BASE_PATH . '/migrations.json'), new ExistingEntityManager($entityManager));
+        $this->dependencyFactory = DependencyFactory::fromEntityManager(
+            new JsonFile(BASE_PATH . '/migrations.json'),
+            new ExistingEntityManager($this->entityManager)
+        );
 
         $this->testDatabaseConnection();
     }
 
-    public static function getInstance(): DependencyFactory
+    public function getEntityManager(): EntityManager
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
+        return $this->entityManager;
+    }
 
-        return (self::$instance)->dependencyFactory;
+    public function getDependencyFactory(): DependencyFactory
+    {
+        return $this->dependencyFactory;
     }
 
     private function testDatabaseConnection(): void

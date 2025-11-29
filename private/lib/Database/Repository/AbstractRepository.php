@@ -2,24 +2,20 @@
 
 namespace App\Database\Repository;
 
-use App\Database\Database;
 use App\Database\Model\ModelInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
 
 abstract class AbstractRepository
 {
-    protected EntityManagerInterface $db;
-
     /**
      * @var string RESOURCE_NAME name of the database model (name of table)
      */
     public const RESOURCE_NAME = '';
 
-    public function __construct()
-    {
-        $this->db = Database::getInstance()->getEntityManager();
-    }
+    public function __construct(
+        protected EntityManagerInterface $db
+    ) {}
 
     /**
      * Retrieves all entries from the database table of RESOURCE_NAME
