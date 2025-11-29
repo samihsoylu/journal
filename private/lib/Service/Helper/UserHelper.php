@@ -5,18 +5,12 @@ namespace App\Service\Helper;
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
 use App\Exception\UserException\NotFoundException;
-use App\Utility\Registry;
 
 class UserHelper
 {
-    private UserRepository $repository;
-
-    public function __construct()
-    {
-        /** @var UserRepository $repository */
-        $repository = Registry::get(UserRepository::class);
-        $this->repository = $repository;
-    }
+    public function __construct(
+        private UserRepository $repository
+    ) {}
 
     /**
      * Get all registered users from the database

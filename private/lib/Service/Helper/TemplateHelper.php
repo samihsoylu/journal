@@ -6,19 +6,12 @@ use App\Database\Model\Template;
 use App\Database\Model\User;
 use App\Database\Repository\TemplateRepository;
 use App\Exception\UserException\NotFoundException;
-use App\Utility\Registry;
 
 class TemplateHelper
 {
-    private TemplateRepository $repository;
-
-    public function __construct()
-    {
-        /** @var TemplateRepository $templateRepository */
-        $templateRepository = Registry::get(TemplateRepository::class);
-
-        $this->repository = $templateRepository;
-    }
+    public function __construct(
+        private TemplateRepository $repository
+    ) {}
 
     public function getTemplateForUser(int $templateId, $userId): Template
     {

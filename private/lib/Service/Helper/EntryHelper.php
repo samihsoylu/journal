@@ -6,19 +6,12 @@ use App\Database\Model\Entry;
 use App\Database\Model\User;
 use App\Database\Repository\EntryRepository;
 use App\Exception\UserException\NotFoundException;
-use App\Utility\Registry;
 
 class EntryHelper
 {
-    private EntryRepository $repository;
-
-    public function __construct()
-    {
-        /** @var EntryRepository $repository */
-        $repository = Registry::get(EntryRepository::class);
-
-        $this->repository = $repository;
-    }
+    public function __construct(
+        private EntryRepository $repository
+    ) {}
 
     /**
      * @return Entry[]

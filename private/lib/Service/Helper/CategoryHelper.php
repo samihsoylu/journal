@@ -6,19 +6,12 @@ use App\Database\Model\Category;
 use App\Database\Model\User;
 use App\Database\Repository\CategoryRepository;
 use App\Exception\UserException\NotFoundException;
-use App\Utility\Registry;
 
 class CategoryHelper
 {
-    private CategoryRepository $repository;
-
-    public function __construct()
-    {
-        /** @var CategoryRepository $categoryRepository */
-        $categoryRepository = Registry::get(CategoryRepository::class);
-
-        $this->repository = $categoryRepository;
-    }
+    public function __construct(
+        private CategoryRepository $repository
+    ) {}
 
     public function getCategoryForUser(int $categoryId, int $userId): Category
     {
