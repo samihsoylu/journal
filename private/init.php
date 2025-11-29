@@ -74,6 +74,17 @@ if (headers_sent()) {
     echo "Headers were sent, session_start() was not invoked.\n";
 } else {
     session_start();
+
+    // Security Headers - Defense in depth against XSS, clickjacking, and other attacks
+    header("X-Frame-Options: DENY");  // Prevent clickjacking
+    header("X-Content-Type-Options: nosniff");  // Prevent MIME-sniffing
+    header("Referrer-Policy: strict-origin-when-cross-origin");  // Control referrer information
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'");
+
+    // Additional security header when SSL is enabled
+    if (SSL_IS_ENABLED) {
+        header("Strict-Transport-Security: max-age=31536000; includeSubDomains");  // Force HTTPS for 1 year
+    }
 }
 
 if (SENTRY_ENABLED) {
