@@ -22,21 +22,19 @@ class Account extends AbstractController
     public const EXPORT_DELETE_POST_URL = self::EXPORT_ENTRIES_POST_URL . '/delete';
     public const EXPORT_DOWNLOAD_GET_URL = self::EXPORT_DOWNLOAD_URL . '/{fileName}';
     public const SET_DATE_TIME_ZONE_POST_URL = self::ACCOUNT_URL . '/set-date-time-zone';
-    private UserService $userService;
-    private WidgetService $widgetService;
-    private AccountValidator $validator;
-    private AuthenticationService $authenticationService;
 
-    public function __construct(array $routeParameters)
-    {
-        parent::__construct($routeParameters);
+    private AccountValidator $validator;
+
+    public function __construct(
+        private AuthenticationService $authenticationService,
+        private UserService $userService,
+        private WidgetService $widgetService
+    ) {
+        parent::__construct($authenticationService);
 
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->userService = new UserService();
-        $this->widgetService = new WidgetService();
-        $this->authenticationService = new AuthenticationService();
         $this->validator = new AccountValidator($_POST);
     }
 

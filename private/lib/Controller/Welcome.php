@@ -2,24 +2,32 @@
 
 namespace App\Controller;
 
+use App\Service\AuthenticationService;
 use App\Service\EntryService;
 
 class Welcome extends AbstractController
 {
     public const DASHBOARD_URL = BASE_URL . '/dashboard';
 
+    public function __construct(
+        AuthenticationService $authenticationService,
+        private EntryService $entryService,
+        private Authentication $authenticationController
+    ) {
+        parent::__construct($authenticationService);
+    }
+
     public function index(): void
     {
         // direct new visitors to login
-        (new Authentication([]))->loginView();
+        $this->authenticationController->loginView();
     }
 
     public function dashboard(): void
     {
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $service = new EntryService();
-        $entries = $service->getAllEntriesForUserFromFilter(
+        $entries = $this->entryService->getAllEntriesForUserFromFilter(
             $this->getUserId(),
             null,
             null,

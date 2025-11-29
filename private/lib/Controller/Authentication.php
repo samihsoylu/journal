@@ -16,14 +16,14 @@ class Authentication extends AbstractController
     public const LOGIN_URL         = BASE_URL . '/login';
     public const LOGIN_POST_URL    = self::LOGIN_URL . '/action';
     public const LOGOUT_URL        = BASE_URL . '/logout';
-    private AuthenticationService $service;
+
     private AuthenticationValidator $validator;
 
-    public function __construct(array $routeParameters)
-    {
-        parent::__construct($routeParameters);
+    public function __construct(
+        private AuthenticationService $authenticationService
+    ) {
+        parent::__construct($authenticationService);
 
-        $this->service   = new AuthenticationService();
         $this->validator = new AuthenticationValidator($_POST);
     }
 
@@ -43,7 +43,7 @@ class Authentication extends AbstractController
         $password = $_POST['password'];
 
         // Log the user in
-        $this->service->login($username, $password);
+        $this->authenticationService->login($username, $password);
 
         /** @see AbstractController::redirectLoggedOutUsersToLoginPage() */
         $referredFrom = Session::get('referred_from');
@@ -80,7 +80,7 @@ class Authentication extends AbstractController
      */
     public function logout(): void
     {
-        $this->service->logout();
+        $this->authenticationService->logout();
 
         $this->setNotification(Notification::TYPE_INFO, 'You have been logged out');
 

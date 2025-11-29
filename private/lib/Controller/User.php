@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\AuthenticationService;
 use App\Service\UserService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
@@ -21,19 +22,20 @@ class User extends AbstractController
     public const DELETE_USER_URL = self::VIEW_USER_URL . '/delete/{antiCsrfToken}';
 
     public const UPDATE_USER_URL = self::VIEW_USER_URL . '/update';
-    private UserValidator $validator;
-    private UserService $service;
 
-    public function __construct(array $routeParameters)
-    {
-        parent::__construct($routeParameters);
+    private UserValidator $validator;
+
+    public function __construct(
+        AuthenticationService $authenticationService,
+        private UserService $service
+    ) {
+        parent::__construct($authenticationService);
 
         // for every action in this controller, the user must be logged in and have admin rights
         $this->redirectLoggedOutUsersToLoginPage();
         $this->ensureUserHasAdminPrivileges();
 
         $this->validator = new UserValidator($_POST);
-        $this->service   = new UserService();
     }
 
     /**

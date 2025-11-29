@@ -2,11 +2,14 @@
 
 namespace App\Controller;
 
+use App\Service\AuthenticationService;
+
 class Error extends AbstractController
 {
-    public function __construct(array $routeParameters = [])
-    {
-        parent::__construct($routeParameters);
+    public function __construct(
+        AuthenticationService $authenticationService
+    ) {
+        parent::__construct($authenticationService);
     }
 
     public function renderNotFoundPage(): void

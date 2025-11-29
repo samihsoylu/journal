@@ -3,11 +3,12 @@
 namespace App\Controller;
 
 use App\Exception\UserException;
+use App\Service\AuthenticationService;
+use App\Service\CategoryService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
 use App\Validator\CategoryValidator;
-use App\Service\CategoryService;
 use App\Database\Model\Category as CategoryModel;
 
 class Category extends AbstractController
@@ -26,17 +27,18 @@ class Category extends AbstractController
     public const DELETE_CATEGORY_URL       = self::READ_CATEGORY_URL . '/delete/{antiCsrfToken}';
 
     public const SET_CATEGORY_ORDER_URL    = self::CATEGORIES_URL . '/ajax/sort-order';
-    protected CategoryService $service;
+
     protected CategoryValidator $validator;
 
-    public function __construct(array $routeParameters)
-    {
-        parent::__construct($routeParameters);
+    public function __construct(
+        AuthenticationService $authenticationService,
+        protected CategoryService $service
+    ) {
+        parent::__construct($authenticationService);
 
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->service   = new CategoryService();
         $this->validator = new CategoryValidator($_POST);
     }
 

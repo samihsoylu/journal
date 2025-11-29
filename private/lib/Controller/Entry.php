@@ -25,25 +25,22 @@ class Entry extends AbstractController
 
     public const CREATE_ENTRY_POST_URL = self::CREATE_ENTRY_URL . '/action';
     public const UPDATE_ENTRY_POST_URL = self::UPDATE_ENTRY_URL . '/action';
-    private EntryService $service;
-    private EntryValidator $validator;
-    private CategoryService $categoryService;
-    private WidgetService $widgetService;
-    private TemplateService $templateService;
 
-    public function __construct(array $routeParameters)
-    {
-        parent::__construct($routeParameters);
+    private EntryValidator $validator;
+
+    public function __construct(
+        AuthenticationService $authenticationService,
+        private EntryService $service,
+        private CategoryService $categoryService,
+        private WidgetService $widgetService,
+        private TemplateService $templateService
+    ) {
+        parent::__construct($authenticationService);
 
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->service   = new EntryService();
         $this->validator = new EntryValidator($_POST, $_GET);
-
-        $this->categoryService = new CategoryService();
-        $this->widgetService = new WidgetService();
-        $this->templateService = new TemplateService();
     }
 
     /**

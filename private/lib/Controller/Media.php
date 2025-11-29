@@ -2,24 +2,23 @@
 
 namespace App\Controller;
 
-use App\Service\Helper\MediaHelper;
+use App\Service\AuthenticationService;
 use App\Service\MediaService;
 use App\Service\ValueObject\Image;
-use App\Utility\Encryptor;
 
 class Media extends AbstractController
 {
     public const MEDIA_URL = BASE_URL . '/media';
     public const MEDIA_UPLOAD_POST_URL = self::MEDIA_URL . '/upload';
     public const MEDIA_GET_URL = self::MEDIA_URL . '/{imageName}';
-    public MediaService $service;
 
-    public function __construct(array $routeParameters)
-    {
-        parent::__construct($routeParameters);
+    public function __construct(
+        AuthenticationService $authenticationService,
+        public MediaService $service
+    ) {
+        parent::__construct($authenticationService);
 
         $this->redirectLoggedOutUsersToLoginPage();
-        $this->service = new MediaService(new Encryptor(), new MediaHelper());
     }
 
     public function upload(): void

@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Exception\UserException;
+use App\Service\AuthenticationService;
 use App\Service\CategoryService;
 use App\Service\TemplateService;
 use App\Utility\Notification;
@@ -25,21 +26,20 @@ class Template extends AbstractController
     public const DELETE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/delete/{antiCsrfToken}';
 
     public const GET_TEMPLATE_DATA_AS_JSON_URL = self::VIEW_TEMPLATE_URL . '/ajax';
-    private TemplateService $service;
-    private TemplateValidator $validator;
-    private CategoryService $categoryService;
 
-    public function __construct(array $routeParameters)
-    {
-        parent::__construct($routeParameters);
+    private TemplateValidator $validator;
+
+    public function __construct(
+        AuthenticationService $authenticationService,
+        private TemplateService $service,
+        private CategoryService $categoryService
+    ) {
+        parent::__construct($authenticationService);
 
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->service   = new TemplateService();
         $this->validator = new TemplateValidator($_POST, $_GET);
-
-        $this->categoryService = new CategoryService();
     }
 
     public function indexView(): void
