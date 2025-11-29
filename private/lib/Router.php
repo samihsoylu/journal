@@ -5,6 +5,7 @@ namespace App;
 use App\Controller\Error;
 use App\Exception\UserException;
 use App\Utility\ExceptionHandler;
+use DI\Container;
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector;
 
@@ -17,7 +18,7 @@ class Router
 {
     protected const PATH_TO_ROUTES = BASE_PATH . '/private/lib/Router';
 
-    public static function route(): void
+    public static function route(Container $container): void
     {
         $dispatcher = simpleDispatcher(static function (RouteCollector $route) {
             // Load all pre-defined routes
@@ -69,8 +70,10 @@ class Router
                     throw new \RuntimeException("Controller class {$className} does not exist");
                 }
 
-                // Creates controller instance, and ensures provided methodName exists
-                $controller = new $fullClassPath($routeParameters);
+                // Creates controller instance from DI container, and ensures provided methodName exists
+                $controller = $container->get($fullClassPath);
+                $controller->setRouteParameters($routeParameters);
+
                 if (!method_exists($controller, $methodName)) {
                     throw new \RuntimeException("Method {$methodName} was not found in class {$className}");
                 }

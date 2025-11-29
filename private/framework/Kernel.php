@@ -21,4 +21,9 @@ final class Kernel
     {
         return $this->container->get($id);
     }
+
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
 }

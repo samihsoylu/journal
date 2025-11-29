@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Service\AuthenticationService;
-use App\Utility\Registry;
 use App\Utility\Session;
 use App\Utility\Template;
 use App\Utility\Notification;
@@ -16,12 +15,7 @@ abstract class AbstractController
     /**
      * @var array route specific parameters (entryId, page, etc..)
      */
-    private array $routeParameters;
-
-    /**
-     * @var AuthenticationService used to determine user is logged in or not in inheriting controller classes
-     */
-    private AuthenticationService $authenticationService;
+    private array $routeParameters = [];
 
     /**
      * @var Notification gives the ability to set notifications for inheriting controller classes
@@ -33,16 +27,11 @@ abstract class AbstractController
      */
     protected Template $template;
 
-    public function __construct(array $routeParameters)
-    {
-        /** @var AuthenticationService $authenticationService */
-        $authenticationService = Registry::get(AuthenticationService::class);
-        $this->authenticationService = $authenticationService;
-
-        // Router variables (/user/{userId}/entry/{entryId}/)
-        $this->routeParameters = $routeParameters;
-        $this->template        = Template::getInstance();
-        $this->notification    = new Notification();
+    public function __construct(
+        private AuthenticationService $authenticationService
+    ) {
+        $this->template     = Template::getInstance();
+        $this->notification = new Notification();
 
         if (SENTRY_ENABLED) {
             \Sentry\configureScope(function (\Sentry\State\Scope $scope) use ($authenticationService): void {
@@ -55,6 +44,11 @@ abstract class AbstractController
                 }
             });
         }
+    }
+
+    public function setRouteParameters(array $routeParameters): void
+    {
+        $this->routeParameters = $routeParameters;
     }
 
     protected function getRouteParameters(): array
