@@ -21,35 +21,22 @@ use App\Utility\Command\Process;
 use App\Utility\Encryptor;
 use App\Utility\Lock\Lock;
 use App\Utility\Lock\LockName;
-use App\Utility\Registry;
 use App\Utility\UserSession;
 use Defuse\Crypto\Key;
 
 class UserService
 {
-    private UserRepository $repository;
-    private UserHelper $userHelper;
-    private CategoryHelper $categoryHelper;
-    private EntryHelper $entryHelper;
-    private WidgetHelper $widgetHelper;
-    private TemplateHelper $templateHelper;
-    private MediaHelper $mediaHelper;
-
     private const DEFAULT_PASSWORD_HASH_ALGORITHM = PASSWORD_ARGON2ID;
 
-    public function __construct()
-    {
-        /** @var UserRepository $repository */
-        $repository = Registry::get(UserRepository::class);
-
-        $this->repository     = $repository;
-        $this->userHelper     = new UserHelper();
-        $this->categoryHelper = new CategoryHelper();
-        $this->entryHelper    = new EntryHelper();
-        $this->templateHelper = new TemplateHelper();
-        $this->widgetHelper   = new WidgetHelper();
-        $this->mediaHelper    = new MediaHelper();
-    }
+    public function __construct(
+        private UserRepository $repository,
+        private UserHelper $userHelper,
+        private CategoryHelper $categoryHelper,
+        private EntryHelper $entryHelper,
+        private WidgetHelper $widgetHelper,
+        private TemplateHelper $templateHelper,
+        private MediaHelper $mediaHelper
+    ) {}
 
     /**
      * Get all registered users

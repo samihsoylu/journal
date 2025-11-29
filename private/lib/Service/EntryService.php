@@ -9,26 +9,16 @@ use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\EntryHelper;
 use App\Service\Helper\UserHelper;
 use App\Service\Model\EntryDecorator;
-use App\Utility\Registry;
 use Defuse\Crypto\Key;
 
 class EntryService
 {
-    private EntryRepository $repository;
-    private EntryHelper $entryHelper;
-    private CategoryHelper $categoryHelper;
-    private UserHelper $userHelper;
-
-    public function __construct()
-    {
-        /** @var EntryRepository $repository */
-        $repository = Registry::get(EntryRepository::class);
-
-        $this->repository     = $repository;
-        $this->entryHelper    = new EntryHelper();
-        $this->categoryHelper = new CategoryHelper();
-        $this->userHelper     = new UserHelper();
-    }
+    public function __construct(
+        private EntryRepository $repository,
+        private EntryHelper $entryHelper,
+        private CategoryHelper $categoryHelper,
+        private UserHelper $userHelper
+    ) {}
 
     /**
      * Create a new entry for a user

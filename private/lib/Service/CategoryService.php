@@ -12,28 +12,17 @@ use App\Service\Helper\EntryHelper;
 use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserHelper;
 use App\Service\Model\CategoryDecorator;
-use App\Utility\Registry;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class CategoryService
 {
-    private CategoryRepository $repository;
-    private CategoryHelper $categoryHelper;
-    private UserHelper $userHelper;
-    private EntryHelper $entryHelper;
-    private TemplateHelper $templateHelper;
-
-    public function __construct()
-    {
-        /** @var CategoryRepository $repository */
-        $repository = Registry::get(CategoryRepository::class);
-        $this->repository    = $repository;
-
-        $this->categoryHelper = new CategoryHelper();
-        $this->userHelper     = new UserHelper();
-        $this->entryHelper    = new EntryHelper();
-        $this->templateHelper = new TemplateHelper();
-    }
+    public function __construct(
+        private CategoryRepository $repository,
+        private CategoryHelper $categoryHelper,
+        private UserHelper $userHelper,
+        private EntryHelper $entryHelper,
+        private TemplateHelper $templateHelper
+    ) {}
 
     /**
      * @return Category[]

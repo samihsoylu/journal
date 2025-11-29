@@ -9,23 +9,15 @@ use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
 use App\Service\Helper\AuthenticationHelper;
 use App\Utility\Encryptor;
-use App\Utility\Registry;
 use App\Utility\UserSession;
 use Defuse\Crypto\Key;
 
 class AuthenticationService
 {
-    private UserRepository $repository;
-    private AuthenticationHelper $helper;
-
-    public function __construct()
-    {
-        /** @var UserRepository $repository */
-        $repository = Registry::get(UserRepository::class);
-        $this->repository = $repository;
-
-        $this->helper = new AuthenticationHelper();
-    }
+    public function __construct(
+        private UserRepository $repository,
+        private AuthenticationHelper $helper
+    ) {}
 
     public function getUserSession(): ?UserSession
     {

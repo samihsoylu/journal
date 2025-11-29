@@ -9,27 +9,17 @@ use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserHelper;
 use App\Service\Model\TemplateDecorator;
-use App\Utility\Registry;
 use Defuse\Crypto\Key;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class TemplateService
 {
-    private TemplateRepository $repository;
-    private TemplateHelper $templateHelper;
-    private UserHelper $userHelper;
-    private CategoryHelper $categoryHelper;
-
-    public function __construct()
-    {
-        /** @var TemplateRepository $repository */
-        $repository = Registry::get(TemplateRepository::class);
-        $this->repository     = $repository;
-
-        $this->templateHelper = new TemplateHelper();
-        $this->userHelper     = new UserHelper();
-        $this->categoryHelper = new CategoryHelper();
-    }
+    public function __construct(
+        private TemplateRepository $repository,
+        private TemplateHelper $templateHelper,
+        private UserHelper $userHelper,
+        private CategoryHelper $categoryHelper
+    ) {}
 
     /**
      * @return Template[]

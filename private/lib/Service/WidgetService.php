@@ -8,14 +8,10 @@ use App\Service\Helper\UserHelper;
 
 class WidgetService
 {
-    private WidgetRepository $repository;
-    private UserHelper $userHelper;
-
-    public function __construct()
-    {
-        $this->repository = new WidgetRepository();
-        $this->userHelper = new UserHelper();
-    }
+    public function __construct(
+        private WidgetRepository $repository,
+        private UserHelper $userHelper
+    ) {}
 
     public function getEnabledWidgetsForUser(int $userId): array
     {
