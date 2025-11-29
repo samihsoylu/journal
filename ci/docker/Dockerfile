@@ -1,4 +1,4 @@
-FROM php:8.0-apache
+FROM php:8.4-apache
 
 # Copy files to /var/www/html as www-data user
 ADD --chown=www-data:www-data . /var/www/html/
