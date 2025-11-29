@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Framework;
 
 use DI\Container;
+use DI\ContainerBuilder;
 
 final class ContainerFactory
 {
@@ -17,26 +18,31 @@ final class ContainerFactory
         $this->environment = $environment;
     }
 
-    public function create(): Container
+    public function create() : Container
     {
-        $container = new Container();
+        $containerBuilder = new ContainerBuilder();
+        $containerBuilder->useAutowiring(true);
+
+        $container = $containerBuilder->build();
 
         $this->loadConfigs($container, $this->environment);
 
         return $container;
     }
 
-    private function loadConfigs(Container $container, string $env): void
+    private function loadConfigs(Container $container, string $env) : void
     {
         $servicesPath = "{$this->configPath}/services/{$env}";
 
-        if (!is_dir($servicesPath)) {
+        if ( ! is_dir($servicesPath)) {
             return;
         }
 
         $files = glob("{$servicesPath}/*.php") ?: [];
+
         foreach ($files as $file) {
             $configurator = require $file;
+
             if (is_callable($configurator)) {
                 $configurator($container);
             }

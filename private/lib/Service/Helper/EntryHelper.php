@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service\Helper;
 
@@ -7,21 +9,21 @@ use App\Database\Model\User;
 use App\Database\Repository\EntryRepository;
 use App\Exception\UserException\NotFoundException;
 
-class EntryHelper
+final readonly class EntryHelper
 {
     public function __construct(
-        private EntryRepository $repository
+        private EntryRepository $repository,
     ) {}
 
     /**
      * @return Entry[]
      */
-    public function getAllEntriesForUser(User $user): array
+    public function getAllEntriesForUser(User $user) : array
     {
         return $this->repository->findByUser($user);
     }
 
-    public function getEntryForUser(int $entryId, int $userId): Entry
+    public function getEntryForUser(int $entryId, int $userId) : Entry
     {
         $entry = $this->repository->getById($entryId);
         $this->ensureEntryIsNotNull($entry, $entryId);
@@ -30,17 +32,14 @@ class EntryHelper
         return $entry;
     }
 
-    /**
-     * @return int
-     */
-    public function getEntryCountForUser(User $user): int
+    public function getEntryCountForUser(User $user) : int
     {
         $entries = $this->repository->findByUser($user);
 
         return count($entries);
     }
 
-    public function getEntryCountForCategory(int $userId, int $categoryId): int
+    public function getEntryCountForCategory(int $userId, int $categoryId) : int
     {
         $entries = $this->getEntriesForUserByCategory($userId, $categoryId);
 
@@ -50,12 +49,12 @@ class EntryHelper
     /**
      * @return Entry[]
      */
-    public function getEntriesForUserByCategory(int $userId, int $categoryId): array
+    public function getEntriesForUserByCategory(int $userId, int $categoryId) : array
     {
         return $this->repository->findByUserIdAndCategoryId($userId, $categoryId);
     }
 
-    private function ensureUserOwnsEntry(Entry $entry, int $userId): void
+    private function ensureUserOwnsEntry(Entry $entry, int $userId) : void
     {
         if ($entry->getReferencedUser()->getId() !== $userId) {
             // Found entry does not belong to the logged in user
@@ -63,9 +62,9 @@ class EntryHelper
         }
     }
 
-    private function ensureEntryIsNotNull(?Entry $entry, $entryId): void
+    private function ensureEntryIsNotNull(?Entry $entry, int $entryId) : void
     {
-        if ($entry === null) {
+        if ( ! $entry instanceof Entry) {
             throw NotFoundException::entityIdNotFound(Entry::getClassName(), $entryId);
         }
     }

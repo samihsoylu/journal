@@ -1,42 +1,45 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Database\Repository;
 
-use App\Database\Model\User;
 use App\Database\Model\Category;
+use App\Database\Model\User;
 
 /**
  * @method Category[] getAll()
- * @method Category|null getById(int $id)
+ * @method null|Category getById(int $id)
  */
-class CategoryRepository extends AbstractRepository
+final class CategoryRepository extends AbstractRepository
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public const RESOURCE_NAME = Category::class;
 
     /**
-     * Queries the database for a list of categories that were created by the provided user
+     * Queries the database for a list of categories that were created by the provided user.
      *
-     * @param User $user
      * @return Category[]
      */
-    public function findByUser(User $user): array
+    public function findByUser(User $user) : array
     {
         return $this->db->getRepository(self::RESOURCE_NAME)
             ->findBy(
                 ['referencedUser' => $user],
                 ['sortOrder' => 'ASC'],
-            );
+            )
+        ;
     }
 
-    public function findByCategoryName(User $user, string $categoryName): ?Category
+    public function findByCategoryName(User $user, string $categoryName) : ?Category
     {
         return $this->db->getRepository(self::RESOURCE_NAME)
             ->findOneBy([
                 'referencedUser' => $user,
-                 'name' => $categoryName,
-                ]);
+                'name' => $categoryName,
+            ])
+        ;
     }
 }

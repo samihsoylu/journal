@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Database\Repository;
 
@@ -10,28 +12,29 @@ use Doctrine\ORM\QueryBuilder;
 
 /**
  * @method Entry[] getAll()
- * @method Entry|null getById(int $id)
+ * @method null|Entry getById(int $id)
  */
-class EntryRepository extends AbstractRepository
+final class EntryRepository extends AbstractRepository
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public const RESOURCE_NAME = Entry::class;
 
     /**
      * @return Entry[]
      */
-    public function findByUser(User $user): array
+    public function findByUser(User $user) : array
     {
         return $this->db->getRepository(self::RESOURCE_NAME)
-            ->findBy(['referencedUser' => $user]);
+            ->findBy(['referencedUser' => $user])
+        ;
     }
 
     /**
      * @return Entry[]
      */
-    public function findByUserIdAndCategoryId(int $userId, int $categoryId): array
+    public function findByUserIdAndCategoryId(int $userId, int $categoryId) : array
     {
         $qb = $this->db->createQueryBuilder();
 
@@ -39,7 +42,8 @@ class EntryRepository extends AbstractRepository
             ->from(self::RESOURCE_NAME, 'e')
             ->where('e.referencedCategory = :categoryId AND e.referencedUser = :userId')
             ->setParameter('categoryId', $categoryId)
-            ->setParameter('userId', $userId);
+            ->setParameter('userId', $userId)
+        ;
 
         return $qb->getQuery()->getResult();
     }
@@ -54,8 +58,8 @@ class EntryRepository extends AbstractRepository
         ?int $startCreatedDate,
         ?int $endCreatedDate,
         ?int $offset,
-        ?int $limit
-    ): array {
+        ?int $limit,
+    ) : array {
         $qb = $this->db->createQueryBuilder();
 
         $qb->select('e')->distinct();
@@ -66,14 +70,15 @@ class EntryRepository extends AbstractRepository
             $search,
             $categoryId,
             $startCreatedDate,
-            $endCreatedDate
+            $endCreatedDate,
         );
 
         if ($limit !== null) {
             $offset ??= 0;
 
             $qb->setFirstResult($offset)
-                ->setMaxResults($limit);
+                ->setMaxResults($limit)
+            ;
         }
 
         return $qb->getQuery()->getResult();
@@ -84,8 +89,8 @@ class EntryRepository extends AbstractRepository
         ?string $search,
         ?int $categoryId,
         ?int $startCreatedDate,
-        ?int $endCreatedDate
-    ): int {
+        ?int $endCreatedDate,
+    ) : int {
         $qb = $this->db->createQueryBuilder();
 
         $qb->select('count(distinct e.id)');
@@ -96,67 +101,73 @@ class EntryRepository extends AbstractRepository
             $search,
             $categoryId,
             $startCreatedDate,
-            $endCreatedDate
+            $endCreatedDate,
         );
 
-        return (int)$qb->getQuery()->getSingleScalarResult();
+        return (int) $qb->getQuery()->getSingleScalarResult();
     }
 
     private function addParametersToQueryBuilderSearchCategoryStartEndDate(
         QueryBuilder $qb,
-        $userId,
+        int $userId,
         ?string $search,
         ?int $categoryId,
         ?int $startCreatedDate,
-        ?int $endCreatedDate
-    ): void {
+        ?int $endCreatedDate,
+    ) : void {
         $qb->from(self::RESOURCE_NAME, 'e')
             ->where('e.referencedUser = :userId')
             ->orderBy('e.createdTimestamp', 'DESC')
-            ->setParameter('userId', $userId);
+            ->setParameter('userId', $userId)
+        ;
 
         if ($categoryId !== null) {
             $qb->innerJoin(CategoryRepository::RESOURCE_NAME, 'c', Join::WITH, 'e.referencedCategory = :categoryId')
                 ->where('c.referencedUser = :userId')
-                ->setParameter('categoryId', $categoryId);
+                ->setParameter('categoryId', $categoryId)
+            ;
         }
 
         if ($startCreatedDate !== null && $endCreatedDate !== null) {
             $qb->andWhere('e.createdTimestamp BETWEEN :startTime AND :endTime')
                 ->setParameter('startTime', $startCreatedDate)
-                ->setParameter('endTime', $endCreatedDate);
+                ->setParameter('endTime', $endCreatedDate)
+            ;
         }
 
         if ($search !== null) {
             $qb->andWhere($qb->expr()->like('e.title', ':search'))
-                ->setParameter('search', "%{$search}%");
+                ->setParameter('search', sprintf('%%%s%%', $search))
+            ;
         }
     }
 
-    public function getTotalCountByUserId($userId): int
+    public function getTotalCountByUserId($userId) : int
     {
         $qb = $this->db->createQueryBuilder();
 
         $qb->select('count(distinct e.id)')
             ->from(self::RESOURCE_NAME, 'e')
             ->where('e.referencedUser = :userId')
-            ->setParameter('userId', $userId);
+            ->setParameter('userId', $userId)
+        ;
 
         try {
-            return (int)$qb->getQuery()->getSingleScalarResult();
-        } catch (NoResultException $exception) {
+            return (int) $qb->getQuery()->getSingleScalarResult();
+        } catch (NoResultException) {
             return 0;
         }
     }
 
-    public function getAllEntriesForUser(int $userId): iterable
+    public function getAllEntriesForUser(int $userId) : iterable
     {
         $qb = $this->db->createQueryBuilder();
 
         $qb->select('e')->distinct()
             ->from(self::RESOURCE_NAME, 'e')
             ->where('e.referencedUser = :userId')
-            ->setParameter('userId', $userId);
+            ->setParameter('userId', $userId)
+        ;
 
         return $qb->getQuery()->toIterable();
     }

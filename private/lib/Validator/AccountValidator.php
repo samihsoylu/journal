@@ -1,13 +1,15 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Validator;
 
 use App\Exception\UserException\ActionNotPermittedException;
 use App\Exception\UserException\InvalidArgumentException;
 
-class AccountValidator extends AbstractValidator
+final class AccountValidator extends AbstractValidator
 {
-    public function changePassword(): void
+    public function changePassword() : void
     {
         $requiredFields = ['currentPassword', 'newPassword', 'confirmPassword'];
         $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
@@ -16,7 +18,7 @@ class AccountValidator extends AbstractValidator
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
     }
 
-    public function changeEmail(): void
+    public function changeEmail() : void
     {
         $this->ensureRequiredFieldsAreProvided($this->post, ['email']);
 
@@ -25,22 +27,22 @@ class AccountValidator extends AbstractValidator
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
     }
 
-    public function deleteAccount(): void
+    public function deleteAccount() : void
     {
         $this->ensureRequiredFieldsAreProvided($this->post, ['password']);
 
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
     }
 
-    public function updateWidgets(): void
+    public function updateWidgets() : void
     {
         $allowedFields = [
             'quickAddEntriesBoxEntriesOverview',
             'form_key',
         ];
 
-        foreach ($this->post as $fieldName => $fieldValue) {
-            if (!in_array($fieldName, $allowedFields, true)) {
+        foreach (array_keys($this->post) as $fieldName) {
+            if ( ! in_array($fieldName, $allowedFields, true)) {
                 throw ActionNotPermittedException::invalidFormFieldProvided($fieldName);
             }
         }
@@ -48,20 +50,20 @@ class AccountValidator extends AbstractValidator
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
     }
 
-    private function ensurePasswordsMatch(string $newPassword, string $confirmPassword): void
+    private function ensurePasswordsMatch(string $newPassword, string $confirmPassword) : void
     {
         if ($newPassword !== $confirmPassword) {
             throw InvalidArgumentException::passwordsDoNotMatch();
         }
     }
 
-    public function exportEntries(): void
+    public function exportEntries() : void
     {
         $this->ensureRequiredFieldsAreProvided($this->post, ['form_key']);
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
     }
 
-    public function deleteEntryExport(): void
+    public function deleteEntryExport() : void
     {
         $this->ensureRequiredFieldsAreProvided($this->post, ['form_key', 'fileName']);
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
@@ -10,17 +12,17 @@ use App\Utility\Session;
 use App\Utility\UserSession;
 use App\Validator\AuthenticationValidator;
 
-class Authentication extends AbstractController
+final class Authentication extends AbstractController
 {
     // Route url constants, to keep paths consistent within multiple classes
-    public const LOGIN_URL         = BASE_URL . '/login';
-    public const LOGIN_POST_URL    = self::LOGIN_URL . '/action';
-    public const LOGOUT_URL        = BASE_URL . '/logout';
+    public const string LOGIN_URL = BASE_URL . '/login';
+    public const string LOGIN_POST_URL = self::LOGIN_URL . '/action';
+    public const string LOGOUT_URL = BASE_URL . '/logout';
 
-    private AuthenticationValidator $validator;
+    private readonly AuthenticationValidator $validator;
 
     public function __construct(
-        private AuthenticationService $authenticationService
+        private readonly AuthenticationService $authenticationService,
     ) {
         parent::__construct($authenticationService);
 
@@ -28,15 +30,13 @@ class Authentication extends AbstractController
     }
 
     /**
-     * Login a user
-     *
-     * @return void
+     * Login a user.
      */
-    public function login(): void
+    public function login() : void
     {
         $this->redirectLoggedInUsersToDashboard();
 
-        /** @see AuthenticationValidator::login() */
+        // @see AuthenticationValidator::login()
         $this->validator->validate(__FUNCTION__);
 
         $username = Sanitize::string($_POST['username'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
@@ -47,21 +47,20 @@ class Authentication extends AbstractController
 
         /** @see AbstractController::redirectLoggedOutUsersToLoginPage() */
         $referredFrom = Session::get('referred_from');
+
         if ($referredFrom !== null) {
             Session::delete('referred_from');
 
-            Redirect::to(BASE_URL . "/{$referredFrom}");
+            Redirect::to(BASE_URL . ('/' . $referredFrom));
         }
 
         Redirect::to(Welcome::DASHBOARD_URL);
     }
 
     /**
-     * Display a login form
-     *
-     * @return void
+     * Display a login form.
      */
-    public function loginView(): void
+    public function loginView() : void
     {
         $this->redirectLoggedInUsersToDashboard();
 
@@ -74,11 +73,9 @@ class Authentication extends AbstractController
     }
 
     /**
-     * Logout a user
-     *
-     * @return void
+     * Logout a user.
      */
-    public function logout(): void
+    public function logout() : void
     {
         $this->authenticationService->logout();
 

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
@@ -14,35 +16,37 @@ use App\Service\Helper\UserHelper;
 use App\Service\Model\CategoryDecorator;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
-class CategoryService
+final readonly class CategoryService
 {
     public function __construct(
         private CategoryRepository $repository,
         private CategoryHelper $categoryHelper,
         private UserHelper $userHelper,
         private EntryHelper $entryHelper,
-        private TemplateHelper $templateHelper
+        private TemplateHelper $templateHelper,
     ) {}
 
     /**
      * @return Category[]
+     *
      * @throws NotFoundException
      */
-    public function getAllCategoriesForUser(int $userId): array
+    public function getAllCategoriesForUser(int $userId) : array
     {
         $user = $this->userHelper->getUserById($userId);
 
         return $this->categoryHelper->getAllCategoriesForUser($user);
     }
 
-    public function getAllCategoriesWithExcludeFilter(int $userId, array $excludeCategoryNames): array
+    public function getAllCategoriesWithExcludeFilter(int $userId, array $excludeCategoryNames) : array
     {
         $user = $this->userHelper->getUserById($userId);
         $categories = $this->categoryHelper->getAllCategoriesForUser($user);
 
         $filteredCategories = [];
+
         foreach ($categories as $category) {
-            if (!in_array($category->getName(), $excludeCategoryNames, true)) {
+            if ( ! in_array($category->getName(), $excludeCategoryNames, true)) {
                 $filteredCategories[] = $category;
             }
         }
@@ -50,7 +54,7 @@ class CategoryService
         return $filteredCategories;
     }
 
-    public function getCategoryForUser(int $categoryId, int $userId): CategoryDecorator
+    public function getCategoryForUser(int $categoryId, int $userId) : CategoryDecorator
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
@@ -69,7 +73,7 @@ class CategoryService
     /**
      * @throws InvalidArgumentException|NotFoundException
      */
-    public function createCategory(int $userId, string $categoryName, string $categoryDescription, int $order = null): Category
+    public function createCategory(int $userId, string $categoryName, string $categoryDescription, ?int $order = null) : Category
     {
         $user = $this->userHelper->getUserById($userId);
 
@@ -80,22 +84,23 @@ class CategoryService
 
         $category = new Category();
         $category->setReferencedUser($user)
-                 ->setName($categoryName)
-                 ->setDescription($categoryDescription)
-                 ->setSortOrder($order);
+            ->setName($categoryName)
+            ->setDescription($categoryDescription)
+            ->setSortOrder($order)
+        ;
 
         $this->repository->queue($category);
 
         try {
             $this->repository->save();
-        } catch (UniqueConstraintViolationException $e) {
+        } catch (UniqueConstraintViolationException) {
             throw InvalidArgumentException::categoryAlreadyExists($categoryName);
         }
 
         return $category;
     }
 
-    public function updateCategory(int $userId, int $categoryId, string $categoryName, string $categoryDescription): void
+    public function updateCategory(int $userId, int $categoryId, string $categoryName, string $categoryDescription) : void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
@@ -106,7 +111,7 @@ class CategoryService
         $this->repository->save();
     }
 
-    public function deleteCategory(int $userId, int $categoryId): void
+    public function deleteCategory(int $userId, int $categoryId) : void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
@@ -116,18 +121,20 @@ class CategoryService
         $this->repository->save();
     }
 
-    public function moveEntriesAndTemplatesAwayFromCategory(Category $category)
+    public function moveEntriesAndTemplatesAwayFromCategory(Category $category) : void
     {
         $user = $category->getReferencedUser();
         $uncategorizedCategory = $this->ensureUnCategorizedCategoryExists($user);
 
         $templates = $this->templateHelper->getTemplatesForUserByCategory($user->getId(), $category->getId());
+
         foreach ($templates as $template) {
             $template->setReferencedCategory($uncategorizedCategory);
             $this->repository->queue($template);
         }
 
         $entries = $this->entryHelper->getEntriesForUserByCategory($user->getId(), $category->getId());
+
         foreach ($entries as $entry) {
             $entry->setReferencedCategory($uncategorizedCategory);
             $this->repository->queue($entry);
@@ -136,23 +143,25 @@ class CategoryService
         $this->repository->save();
     }
 
-    public function updateCategoryOrder(int $userId, int $categoryId, int $order): void
+    public function updateCategoryOrder(int $userId, int $categoryId, int $order) : void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
         $category->setSortOrder($order);
         $category->save();
     }
 
-    private function ensureUnCategorizedCategoryExists(User $user): Category
+    private function ensureUnCategorizedCategoryExists(User $user) : Category
     {
         $category = $this->repository->findByCategoryName($user, Category::UNCATEGORIZED_CATEGORY_NAME);
-        if ($category === null) {
+
+        if ( ! $category instanceof Category) {
             $category = new Category();
             $category->setName(Category::UNCATEGORIZED_CATEGORY_NAME)
                 ->setDescription(Category::UNCATEGORIZED_CATEGORY_DESCRIPTION)
                 ->setReferencedUser($user)
                 ->setSortOrder(2147483646)
-                ->save();
+                ->save()
+            ;
         }
 
         return $category;

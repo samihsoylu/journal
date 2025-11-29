@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
@@ -10,25 +12,25 @@ use App\Utility\Redirect;
 use App\Utility\Sanitize;
 use App\Validator\AccountValidator;
 
-class Account extends AbstractController
+final class Account extends AbstractController
 {
-    public const ACCOUNT_URL = BASE_URL . '/account';
-    public const UPDATE_EMAIL_POST_URL = self::ACCOUNT_URL . '/update/email';
-    public const CHANGE_PASSWORD_POST_URL = self::ACCOUNT_URL . '/change-password';
-    public const DELETE_ACCOUNT_POST_URL = self::ACCOUNT_URL . '/delete';
-    public const UPDATE_WIDGETS_POST_URL = self::ACCOUNT_URL . '/widgets/update';
-    public const EXPORT_ENTRIES_POST_URL = self::ACCOUNT_URL . '/export-entries';
-    public const EXPORT_DOWNLOAD_URL = self::EXPORT_ENTRIES_POST_URL . '/download';
-    public const EXPORT_DELETE_POST_URL = self::EXPORT_ENTRIES_POST_URL . '/delete';
-    public const EXPORT_DOWNLOAD_GET_URL = self::EXPORT_DOWNLOAD_URL . '/{fileName}';
-    public const SET_DATE_TIME_ZONE_POST_URL = self::ACCOUNT_URL . '/set-date-time-zone';
+    public const string ACCOUNT_URL = BASE_URL . '/account';
+    public const string UPDATE_EMAIL_POST_URL = self::ACCOUNT_URL . '/update/email';
+    public const string CHANGE_PASSWORD_POST_URL = self::ACCOUNT_URL . '/change-password';
+    public const string DELETE_ACCOUNT_POST_URL = self::ACCOUNT_URL . '/delete';
+    public const string UPDATE_WIDGETS_POST_URL = self::ACCOUNT_URL . '/widgets/update';
+    public const string EXPORT_ENTRIES_POST_URL = self::ACCOUNT_URL . '/export-entries';
+    public const string EXPORT_DOWNLOAD_URL = self::EXPORT_ENTRIES_POST_URL . '/download';
+    public const string EXPORT_DELETE_POST_URL = self::EXPORT_ENTRIES_POST_URL . '/delete';
+    public const string EXPORT_DOWNLOAD_GET_URL = self::EXPORT_DOWNLOAD_URL . '/{fileName}';
+    public const string SET_DATE_TIME_ZONE_POST_URL = self::ACCOUNT_URL . '/set-date-time-zone';
 
-    private AccountValidator $validator;
+    private readonly AccountValidator $validator;
 
     public function __construct(
-        private AuthenticationService $authenticationService,
-        private UserService $userService,
-        private WidgetService $widgetService
+        private readonly AuthenticationService $authenticationService,
+        private readonly UserService $userService,
+        private readonly WidgetService $widgetService,
     ) {
         parent::__construct($authenticationService);
 
@@ -39,11 +41,9 @@ class Account extends AbstractController
     }
 
     /**
-     * View all available account settings page
-     *
-     * @return void
+     * View all available account settings page.
      */
-    public function indexView(): void
+    public function indexView() : void
     {
         $user = $this->userService->getUser($this->getUserId());
         $this->template->setVariable('user', $user);
@@ -58,11 +58,9 @@ class Account extends AbstractController
     }
 
     /**
-     * Change email post action from the Account settings page
-     *
-     * @return void
+     * Change email post action from the Account settings page.
      */
-    public function changeEmail(): void
+    public function changeEmail() : void
     {
         $this->validator->validate(__FUNCTION__);
 
@@ -70,7 +68,7 @@ class Account extends AbstractController
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
-            "Email was updated to {$newEmail}"
+            'Email was updated to ' . $newEmail,
         );
 
         $this->userService->changeUserEmail($this->getUserId(), $newEmail);
@@ -78,17 +76,15 @@ class Account extends AbstractController
         $this->changeEmailView();
     }
 
-    public function changeEmailView(): void
+    public function changeEmailView() : void
     {
         Redirect::to(self::ACCOUNT_URL);
     }
 
     /**
-     * Change password action from the account settings page
-     *
-     * @return void
+     * Change password action from the account settings page.
      */
-    public function changePassword(): void
+    public function changePassword() : void
     {
         $this->validator->validate(__FUNCTION__);
 
@@ -96,23 +92,21 @@ class Account extends AbstractController
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
-            'Password changed'
+            'Password changed',
         );
 
         $this->changePasswordView();
     }
 
-    public function changePasswordView(): void
+    public function changePasswordView() : void
     {
         Redirect::to(self::ACCOUNT_URL);
     }
 
     /**
-     * Account delete post action on account settings page
-     *
-     * @return void
+     * Account delete post action on account settings page.
      */
-    public function deleteAccount(): void
+    public function deleteAccount() : void
     {
         $this->validator->validate(__FUNCTION__);
 
@@ -120,23 +114,21 @@ class Account extends AbstractController
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
-            'Your account has been deleted'
+            'Your account has been deleted',
         );
 
         Redirect::to(BASE_URL . '/');
     }
 
-    public function deleteAccountView(): void
+    public function deleteAccountView() : void
     {
         Redirect::to(self::ACCOUNT_URL);
     }
 
     /**
-     * Update widget settings post action
-     *
-     * @return void
+     * Update widget settings post action.
      */
-    public function updateWidgets(): void
+    public function updateWidgets() : void
     {
         $this->validator->validate(__FUNCTION__);
 
@@ -144,23 +136,23 @@ class Account extends AbstractController
 
         $this->widgetService->updateWidgetSettingsForUser(
             $this->getUserId(),
-            $_POST
+            $_POST,
         );
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
-            'Widgets updated'
+            'Widgets updated',
         );
 
         $this->updateWidgetsView();
     }
 
-    public function updateWidgetsView(): void
+    public function updateWidgetsView() : void
     {
         Redirect::to(self::ACCOUNT_URL);
     }
 
-    public function exportEntries(): void
+    public function exportEntries() : void
     {
         $this->validator->validate(__FUNCTION__);
 
@@ -168,38 +160,39 @@ class Account extends AbstractController
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
-            "Export triggered, process id: {$processId}"
+            'Export triggered, process id: ' . $processId,
         );
 
         Redirect::to(self::ACCOUNT_URL);
     }
 
-    public function exportEntriesView(): void
+    public function exportEntriesView() : void
     {
         Redirect::to(self::ACCOUNT_URL);
     }
 
-    public function downloadEntryExport(): void
+    public function downloadEntryExport() : void
     {
         $targetFileName = $this->getRouteParameters()['fileName'];
 
         $filePath = $this->userService->getZipFilePathForExportedEntriesByUser($this->getUserId(), $targetFileName);
+
         if ($filePath === null) {
             http_response_code(404);
-            (new Error())->renderNotFoundPage();
+            new Error()->renderNotFoundPage();
         }
 
-        $fileName = urlencode(basename($filePath));
-        header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
-        header("Cache-Control: private", false);
+        $fileName = urlencode(basename((string) $filePath));
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Cache-Control: private', false);
         header('Content-Type: application/zip');
-        header("Content-Disposition: attachment; filename={$fileName}");
+        header('Content-Disposition: attachment; filename=' . $fileName);
         header('Content-Transfer-Encoding: binary');
 
         readfile($filePath);
     }
 
-    public function deleteEntryExport(): void
+    public function deleteEntryExport() : void
     {
         $this->validator->validate(__FUNCTION__);
         unset($_POST['form_key']);
@@ -208,21 +201,21 @@ class Account extends AbstractController
 
         $this->userService->deleteExportedEntriesZipFile($this->getUserId(), $targetFileName);
 
-        $this->setNotification(Notification::TYPE_SUCCESS, "Removed {$targetFileName} successfully");
+        $this->setNotification(Notification::TYPE_SUCCESS, sprintf('Removed %s successfully', $targetFileName));
         $this->deleteEntryExportView();
     }
 
-    public function deleteEntryExportView(): void
+    public function deleteEntryExportView() : void
     {
         Redirect::to(self::ACCOUNT_URL);
     }
 
-    public function downloadEntryExportView(): void
+    public function downloadEntryExportView() : void
     {
         Redirect::to(self::ACCOUNT_URL);
     }
 
-    public function setDateTimeZone(): void
+    public function setDateTimeZone() : void
     {
         $this->validator->validate(__FUNCTION__);
 
@@ -235,7 +228,7 @@ class Account extends AbstractController
         $this->setDateTimeZoneView();
     }
 
-    public function setDateTimeZoneView(): void
+    public function setDateTimeZoneView() : void
     {
         Redirect::to(self::ACCOUNT_URL);
     }

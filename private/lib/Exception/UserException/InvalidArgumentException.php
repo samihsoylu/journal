@@ -1,53 +1,55 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Exception\UserException;
 
 use App\Exception\UserException;
 
-class InvalidArgumentException extends UserException
+final class InvalidArgumentException extends UserException
 {
-    public function __construct(string $message = "", int $code = 0)
+    public function __construct(string $message = '', int $code = 0)
     {
         parent::__construct($message, $code);
     }
 
-    public static function incorrectLogin(int $code = 406): self
+    public static function incorrectLogin(int $code = 406) : self
     {
-        return new self("Username or Password is incorrect", $code);
+        return new self('Username or Password is incorrect', $code);
     }
 
-    public static function alreadyRegistered(string $fieldName, string $fieldValue, int $code = 406): self
+    public static function alreadyRegistered(string $fieldName, string $fieldValue, int $code = 406) : self
     {
-        return new self("User with {$fieldName} '{$fieldValue}' already exists", $code);
+        return new self(sprintf("User with %s '%s' already exists", $fieldName, $fieldValue), $code);
     }
 
-    public static function categoryAlreadyExists(string $categoryName, int $code = 406): self
+    public static function categoryAlreadyExists(string $categoryName, int $code = 406) : self
     {
-        return new self("The category with name '{$categoryName}' already exists", $code);
+        return new self(sprintf("The category with name '%s' already exists", $categoryName), $code);
     }
 
-    public static function templateAlreadyExists(string $templateTitle, int $code = 406): self
+    public static function templateAlreadyExists(string $templateTitle, int $code = 406) : self
     {
-        return new self("The template with title '{$templateTitle}' already exists", $code);
+        return new self(sprintf("The template with title '%s' already exists", $templateTitle), $code);
     }
 
-    public static function incorrectPassword(int $code = 406): self
+    public static function incorrectPassword(int $code = 406) : self
     {
-        return new self("The password you provided is incorrect", $code);
+        return new self('The password you provided is incorrect', $code);
     }
 
-    public static function passwordsDoNotMatch(int $code = 406): self
+    public static function passwordsDoNotMatch(int $code = 406) : self
     {
-        return new self("The two passwords provided do not match", $code);
+        return new self('The two passwords provided do not match', $code);
     }
 
-    public static function invalidFileNameProvided(int $code = 406)
+    public static function invalidFileNameProvided(int $code = 406) : self
     {
-        return new self("Invalid file name provided", $code);
+        return new self('Invalid file name provided', $code);
     }
 
-    public static function invalidTimezoneProvided(string $timezone, int $code = 406)
+    public static function invalidTimezoneProvided(string $timezone, int $code = 406) : self
     {
-        return new self("Timezone {$timezone} does not exist", $code);
+        return new self(sprintf('Timezone %s does not exist', $timezone), $code);
     }
 }

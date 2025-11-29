@@ -1,23 +1,25 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Exception\UserException;
 
 use App\Exception\UserException;
 
-class NotFoundException extends UserException
+final class NotFoundException extends UserException
 {
-    public function __construct(string $message = "", int $code = 0)
+    public function __construct(string $message = '', int $code = 0)
     {
         parent::__construct($message, $code);
     }
 
-    public static function entityNameNotFound(string $entityTitle, string $entityName, int $code = 404): self
+    public static function entityNameNotFound(string $entityTitle, string $entityName, int $code = 404) : self
     {
-        return new self("{$entityTitle} with name {$entityName} was not found", $code);
+        return new self(sprintf('%s with name %s was not found', $entityTitle, $entityName), $code);
     }
 
-    public static function entityIdNotFound(string $entityTitle, int $entityId, int $code = 404): self
+    public static function entityIdNotFound(string $entityTitle, int $entityId, int $code = 404) : self
     {
-        return new self("{$entityTitle} with id '{$entityId}' was not found", $code);
+        return new self(sprintf("%s with id '%d' was not found", $entityTitle, $entityId), $code);
     }
 }

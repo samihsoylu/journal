@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Validator;
 
@@ -6,12 +8,12 @@ use App\Database\Model\User;
 use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\InvalidParameterException;
 
-class UserValidator extends AbstractValidator
+final class UserValidator extends AbstractValidator
 {
     /**
-     * @throws InvalidParameterException|InvalidOperationException
+     * @throws InvalidOperationException|InvalidParameterException
      */
-    public function create(): void
+    public function create() : void
     {
         $requiredFields = ['username', 'password', 'email', 'privilegeLevel', 'form_key'];
         $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
@@ -26,7 +28,7 @@ class UserValidator extends AbstractValidator
         $this->ensureUserHasProvidedValidAntiCSRFToken($_POST['form_key']);
     }
 
-    public function update(): void
+    public function update() : void
     {
         $requiredFields = ['privilegeLevel', 'form_key'];
         $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
@@ -37,14 +39,14 @@ class UserValidator extends AbstractValidator
         $this->ensureUserHasProvidedValidAntiCSRFToken($_POST['form_key']);
     }
 
-    public function delete(): void
+    public function delete() : void
     {
         $this->ensureUserHasProvidedValidAntiCSRFToken($_GET['form_key']);
     }
 
-    private function ensureProvidedPrivilegeLevelExists(int $privilegeLevel, string $fieldName): void
+    private function ensureProvidedPrivilegeLevelExists(int $privilegeLevel, string $fieldName) : void
     {
-        if (!array_key_exists($privilegeLevel, User::ALLOWED_PRIVILEGE_LEVELS)) {
+        if ( ! array_key_exists($privilegeLevel, User::ALLOWED_PRIVILEGE_LEVELS)) {
             throw InvalidParameterException::invalidFieldValue($fieldName);
         }
     }

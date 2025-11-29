@@ -1,44 +1,48 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Console\Command\User;
 
 use App\Database\Model\User;
 use App\Service\UserService;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class GetAll extends Command
+#[AsCommand(
+    name: 'user:list',
+    description: 'List all users',
+    help: 'This command lists all users in the system',
+)]
+final readonly class GetAll
 {
-    public function configure(): void
-    {
-        $this->setName('user:list')
-            ->setDescription('List all users')
-            ->setHelp("This command lists all users in the system");
-    }
+    public function __construct(
+        private UserService $userService,
+    ) {}
 
-    public function execute(InputInterface $input, OutputInterface $output): int
+    public function __invoke(OutputInterface $output) : int
     {
-        $service = new UserService();
-        $users   = $service->getAllUsers();
+        $users = $this->userService->getAllUsers();
 
         $table = new Table($output);
         $table->setStyle('symfony-style-guide');
         $table->setHeaders(['ID', 'Username', 'Privilege Level'])
             ->setRows(
                 array_map(
-                    fn (User $row) => [
+                    static fn (User $row) : array => [
                         $row->getId(),
                         $row->getUsername(),
-                        $row->getPrivilegeLevelAsString()
+                        $row->getPrivilegeLevelAsString(),
                     ],
-                    $users
-                )
-            );
+                    $users,
+                ),
+            )
+        ;
 
         $table->render();
 
-        return 0;
+        return Command::SUCCESS;
     }
 }

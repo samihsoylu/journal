@@ -2,7 +2,7 @@
 <?php
 
 use Symfony\Component\Console\Application;
-use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 
 require_once(dirname(__DIR__) . '/private/init.php');
 
@@ -22,8 +22,14 @@ foreach ($finder as $file) {
     $fullClassName = "{$namespace}{$className}";
 
     $reflectionClass = new ReflectionClass($fullClassName);
-    if ($reflectionClass->isInstantiable() && $reflectionClass->isSubclassOf(Command::class)) {
-        $app->add(new $fullClassName);
+    if (!$reflectionClass->isInstantiable()) {
+        continue;
+    }
+
+    // Only support invokable commands with #[AsCommand] attribute
+    if (!empty($reflectionClass->getAttributes(AsCommand::class))) {
+        $command = $kernel->getContainer()->get($fullClassName);
+        $app->add($command);
     }
 }
 

@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Shell;
 
-class Shell extends \Psy\Shell
+final class Shell extends \Psy\Shell
 {
     protected function getHeader()
     {

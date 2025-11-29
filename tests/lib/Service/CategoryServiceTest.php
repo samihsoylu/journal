@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Service;
 
@@ -12,14 +14,17 @@ use Doctrine\DBAL\Driver\PDO\Exception;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Tests\AbstractTest;
 
-class CategoryServiceTest extends AbstractTest
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
+final class CategoryServiceTest extends AbstractTest
 {
     /**
      * Tests that all categories are returned in an array.
-     *
-     * @return void
      */
-    public function testGetAllCategoriesForUser(): void
+    public function testGetAllCategoriesForUser() : void
     {
         $userId = 190;
         $mockUser = $this->getMockUser($userId);
@@ -28,25 +33,25 @@ class CategoryServiceTest extends AbstractTest
         $this->userRepository->expects(self::once())
             ->method('getById')
             ->with($userId)
-            ->willReturn($mockUser);
+            ->willReturn($mockUser)
+        ;
 
         $this->categoryRepository->expects(self::once())
             ->method('findByUser')
             ->with($mockUser)
-            ->willReturn($mockCategories);
+            ->willReturn($mockCategories)
+        ;
 
-        $service    = new CategoryService();
+        $service = new CategoryService();
         $categories = $service->getAllCategoriesForUser($userId);
 
-        $this->assertCount(count($mockCategories), $categories);
+        self::assertCount(count($mockCategories), $categories);
     }
 
     /**
-     * Tests whether an exception is thrown if a user does not exist when making this resource call
-     *
-     * @return void
+     * Tests whether an exception is thrown if a user does not exist when making this resource call.
      */
-    public function testGetAllCategoriesForUserNotFoundUserException(): void
+    public function testGetAllCategoriesForUserNotFoundUserException() : void
     {
         $this->expectException(NotFoundException::class);
         $userId = 190;
@@ -54,18 +59,17 @@ class CategoryServiceTest extends AbstractTest
         $this->userRepository->expects(self::once())
             ->method('getById')
             ->with($userId)
-            ->willReturn(null);
+            ->willReturn(null)
+        ;
 
         $service = new CategoryService();
         $service->getAllCategoriesForUser($userId);
     }
 
     /**
-     * Tests the retrieval of an individual category, the user is found and category is too, this throws no exceptions
-     *
-     * @return void
+     * Tests the retrieval of an individual category, the user is found and category is too, this throws no exceptions.
      */
-    public function testGetCategoryForUser(): void
+    public function testGetCategoryForUser() : void
     {
         $categoryId = 3910;
         $userId = 41034;
@@ -77,21 +81,20 @@ class CategoryServiceTest extends AbstractTest
         $this->categoryRepository
             ->method('getById')
             ->with($categoryId)
-            ->willReturn($mockCategory);
+            ->willReturn($mockCategory)
+        ;
 
         $helper = new CategoryHelper();
         $category = $helper->getCategoryForUser($categoryId, $userId);
 
-        $this->assertEquals($category->getId(), $categoryId);
-        $this->assertEquals($category->getReferencedUser()->getId(), $userId);
+        self::assertSame($category->getId(), $categoryId);
+        self::assertSame($category->getReferencedUser()->getId(), $userId);
     }
 
     /**
      * Tests if the category is created properly, one queue() call and one save() call.
-     *
-     * @return void
      */
-    public function testCreateCategory(): void
+    public function testCreateCategory() : void
     {
         $userId = 5;
         $mockUser = $this->getMockUser($userId);
@@ -99,21 +102,22 @@ class CategoryServiceTest extends AbstractTest
         $this->userRepository->expects(self::once())
             ->method('getById')
             ->with($userId)
-            ->willReturn($mockUser);
+            ->willReturn($mockUser)
+        ;
 
         // Asserts that queued object must be an instance of Category
         $this->categoryRepository->expects(self::once())
             ->method('queue')
             ->with(
-                $this->callback(
-                    function ($model) {
-                        return ($model instanceof Category);
-                    }
-                )
-            );
+                self::callback(
+                    static fn ($model) => $model instanceof Category,
+                ),
+            )
+        ;
 
         $this->categoryRepository->expects(self::once())
-            ->method('save');
+            ->method('save')
+        ;
 
         $service = new CategoryService();
         $service->createCategory($userId, 'Random name', 'Random description');
@@ -122,10 +126,8 @@ class CategoryServiceTest extends AbstractTest
     /**
      * Tests that the unique constraint exception is caught and handled properly, this exception occurs when a category
      * with the name exists already in the database.
-     *
-     * @return void
      */
-    public function testCreateCategoryUniqueConstraintException(): void
+    public function testCreateCategoryUniqueConstraintException() : void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -135,7 +137,8 @@ class CategoryServiceTest extends AbstractTest
         $this->userRepository->expects(self::once())
             ->method('getById')
             ->with($userId)
-            ->willReturn($mockUser);
+            ->willReturn($mockUser)
+        ;
 
         $this->categoryRepository->expects(self::once())
             ->method('save')
@@ -143,19 +146,18 @@ class CategoryServiceTest extends AbstractTest
                 new UniqueConstraintViolationException(
                     new Exception('Category'),
                     null,
-                )
-            );
+                ),
+            )
+        ;
 
         $service = new CategoryService();
         $service->createCategory($userId, 'Random title', 'Random description');
     }
 
     /**
-     * Tests that the queue and save methods are invoked when updating a category
-     *
-     * @return void
+     * Tests that the queue and save methods are invoked when updating a category.
      */
-    public function testUpdateCategory(): void
+    public function testUpdateCategory() : void
     {
         $userId = 3;
         $categoryId = 5;
@@ -166,21 +168,22 @@ class CategoryServiceTest extends AbstractTest
         $this->categoryRepository
             ->method('getById')
             ->with($categoryId)
-            ->willReturn($mockCategory);
+            ->willReturn($mockCategory)
+        ;
 
         // Asserts that queued object must be an instance of Category
         $this->categoryRepository->expects(self::once())
             ->method('queue')
             ->with(
-                $this->callback(
-                    function ($model) {
-                        return ($model instanceof Category);
-                    }
-                )
-            );
+                self::callback(
+                    static fn ($model) => $model instanceof Category,
+                ),
+            )
+        ;
 
         $this->categoryRepository->expects(self::once())
-            ->method('save');
+            ->method('save')
+        ;
 
         $service = new CategoryService();
         $service->updateCategory($userId, $categoryId, 'New Category Name', 'New Category Description');

@@ -1,15 +1,17 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Validator;
 
 use App\Exception\UserException\InvalidParameterException;
 
-class CategoryValidator extends AbstractValidator
+final class CategoryValidator extends AbstractValidator
 {
     /**
      * @throws InvalidParameterException
      */
-    public function create(): void
+    public function create() : void
     {
         $requiredFields = ['category_name', 'category_description'];
         $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
@@ -20,7 +22,7 @@ class CategoryValidator extends AbstractValidator
     /**
      * @throws InvalidParameterException
      */
-    public function update(): void
+    public function update() : void
     {
         $this->create();
     }
@@ -28,12 +30,12 @@ class CategoryValidator extends AbstractValidator
     /**
      * @throws InvalidParameterException
      */
-    public function delete(): void
+    public function delete() : void
     {
         $this->ensureUserHasProvidedValidAntiCSRFToken($_GET['form_key']);
     }
 
-    public function setCategoryOrder(): void
+    public function setCategoryOrder() : void
     {
         $fieldName = 'orderedCategoryIds';
 

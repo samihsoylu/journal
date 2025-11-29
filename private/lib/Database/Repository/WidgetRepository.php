@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Database\Repository;
 
@@ -7,24 +9,24 @@ use App\Database\Model\Widget;
 
 /**
  * @method Widget[] getAll()
- * @method Widget|null getById(int $id)
+ * @method null|Widget getById(int $id)
  */
-class WidgetRepository extends AbstractRepository
+final class WidgetRepository extends AbstractRepository
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public const RESOURCE_NAME = Widget::class;
 
     /**
-     * Queries the database for a list of categories that were created by the provided user
+     * Queries the database for a list of categories that were created by the provided user.
      *
-     * @param User $user
      * @return Widget[]
      */
-    public function findByUser(User $user): array
+    public function findByUser(User $user) : array
     {
         return $this->db->getRepository(self::RESOURCE_NAME)
-            ->findBy(['referencedUser' => $user]);
+            ->findBy(['referencedUser' => $user])
+        ;
     }
 }

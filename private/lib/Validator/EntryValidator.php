@@ -1,16 +1,19 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Validator;
 
 use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\InvalidParameterException;
+use DateTime;
 
-class EntryValidator extends AbstractValidator
+final class EntryValidator extends AbstractValidator
 {
     /**
      * @throws InvalidParameterException
      */
-    public function index(): void
+    public function index() : void
     {
         $this->ensureOptionalValueIsNumeric($this->get, 'category_id');
         $this->ensureOptionalValueIsNumeric($this->get, 'page_size');
@@ -21,9 +24,9 @@ class EntryValidator extends AbstractValidator
     }
 
     /**
-     * @throws InvalidParameterException|InvalidOperationException
+     * @throws InvalidOperationException|InvalidParameterException
      */
-    public function create(): void
+    public function create() : void
     {
         $requiredFields = ['category_id', 'entry_title', 'entry_content'];
         $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
@@ -37,21 +40,22 @@ class EntryValidator extends AbstractValidator
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
     }
 
-    public function update(): void
+    public function update() : void
     {
         $this->create();
     }
 
-    public function delete(): void
+    public function delete() : void
     {
         $this->ensureUserHasProvidedValidAntiCSRFToken($_GET['form_key']);
     }
 
-    private function ensureOptionalDateFormatIsValid(array $values, string $fieldName): void
+    private function ensureOptionalDateFormatIsValid(array $values, string $fieldName) : void
     {
         $value = $values[$fieldName] ?? null;
+
         if ($value !== null && $value !== '') {
-            $date = \DateTime::createFromFormat('M d, Y', trim($value));
+            $date = DateTime::createFromFormat('M d, Y', trim((string) $value));
 
             if ($date === false) {
                 throw InvalidParameterException::invalidDateFormat($fieldName);

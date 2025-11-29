@@ -1,35 +1,36 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Console\Command\User;
 
 use App\Service\UserService;
+use Symfony\Component\Console\Attribute\Argument;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class Delete extends Command
+#[AsCommand(
+    name: 'user:delete',
+    description: 'Delete a user',
+    help: 'This command deletes a user\'s account',
+)]
+final readonly class Delete
 {
-    private const FIELD_ID = 'id';
+    public function __construct(
+        private UserService $userService,
+    ) {}
 
-    public function configure(): void
-    {
-        $this->setName('user:delete')
-            ->setDescription('Delete a user')
-            ->addArgument(self::FIELD_ID, InputArgument::REQUIRED, 'User id')
-            ->setHelp("This command deletes a user's account");
-    }
+    public function __invoke(
+        #[Argument(description: 'User id')]
+        int $id,
+        OutputInterface $output,
+    ) : int {
+        $user = $this->userService->getUser($id);
+        $this->userService->deleteUser($user);
 
-    public function execute(InputInterface $input, OutputInterface $output): int
-    {
-        $userId = (int)$input->getArgument(self::FIELD_ID);
+        $output->writeln(sprintf('User %s deleted successfully', $user->getUsername()));
 
-        $service = new UserService();
-        $user = $service->getUser($userId);
-        $service->deleteUser($user);
-
-        $output->writeln("User {$user->getUsername()} deleted successfully");
-
-        return 0;
+        return Command::SUCCESS;
     }
 }

@@ -1,28 +1,30 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Exception\UserException;
 
 use App\Exception\UserException;
 
-class InvalidOperationException extends UserException
+final class InvalidOperationException extends UserException
 {
-    public static function userIsNotLoggedIn(): self
+    public static function userIsNotLoggedIn() : self
     {
-        return new self("Something went wrong.. It appears you are not logged in.");
+        return new self('Something went wrong.. It appears you are not logged in.');
     }
 
-    public static function loginAttemptsExceeded(int $loginCount): self
+    public static function loginAttemptsExceeded(int $loginCount) : self
     {
-        return new self("You have {$loginCount} failed login attempts, you have been blocked from logging in for 1 hour");
+        return new self(sprintf('You have %d failed login attempts, you have been blocked from logging in for 1 hour', $loginCount));
     }
 
-    public static function insufficientPrivileges(string $userPrivilegeLevelAsString): self
+    public static function insufficientPrivileges(string $userPrivilegeLevelAsString) : self
     {
-        return new self("Your privilege level is {$userPrivilegeLevelAsString} which is not enough to perform this operation");
+        return new self(sprintf('Your privilege level is %s which is not enough to perform this operation', $userPrivilegeLevelAsString));
     }
 
-    public static function actionIsAlreadyRunning(string $actionDescription): self
+    public static function actionIsAlreadyRunning(string $actionDescription) : self
     {
-        return new self("An action for {$actionDescription} is already running");
+        return new self(sprintf('An action for %s is already running', $actionDescription));
     }
 }

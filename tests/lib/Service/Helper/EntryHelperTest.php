@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Service\Helper;
 
@@ -10,30 +12,36 @@ use App\Service\Helper\EntryHelper;
 use App\Utility\Registry;
 use PHPUnit\Framework\TestCase;
 
-class EntryHelperTest extends TestCase
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
+final class EntryHelperTest extends TestCase
 {
     private $entryRepository;
 
-    public function setUp(): void
+    protected function setUp() : void
     {
         $this->entryRepository = $this->createMock(EntryRepository::class);
 
         Registry::set(EntryRepository::class, $this->entryRepository);
     }
 
-    public function testGetEntryForUserNotFoundException(): void
+    public function testGetEntryForUserNotFoundException() : void
     {
         $this->expectException(NotFoundException::class);
 
         $this->entryRepository
             ->method('getById')
-            ->willReturn(null);
+            ->willReturn(null)
+        ;
 
         $helper = new EntryHelper();
         $helper->getEntryForUser(5, 5);
     }
 
-    public function testGetEntryForUserNotOwnedByUserException(): void
+    public function testGetEntryForUserNotOwnedByUserException() : void
     {
         $this->expectException(NotFoundException::class);
 
@@ -45,7 +53,8 @@ class EntryHelperTest extends TestCase
 
         $this->entryRepository
             ->method('getById')
-            ->willReturn($mockEntry);
+            ->willReturn($mockEntry)
+        ;
 
         $helper = new EntryHelper();
         $helper->getEntryForUser(5, 5);

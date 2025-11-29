@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Utility;
 
-class Text
+final class Text
 {
-    public static function containsHtml(string $string): bool
+    public static function containsHtml(string $string) : bool
     {
         return $string !== strip_tags($string);
     }

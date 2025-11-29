@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service\Helper;
 
@@ -7,13 +9,13 @@ use App\Database\Model\User;
 use App\Database\Repository\TemplateRepository;
 use App\Exception\UserException\NotFoundException;
 
-class TemplateHelper
+final readonly class TemplateHelper
 {
     public function __construct(
-        private TemplateRepository $repository
+        private TemplateRepository $repository,
     ) {}
 
-    public function getTemplateForUser(int $templateId, $userId): Template
+    public function getTemplateForUser(int $templateId, int $userId) : Template
     {
         $template = $this->repository->getById($templateId);
         $this->ensureTemplateIsNotNull($template, $templateId);
@@ -25,19 +27,19 @@ class TemplateHelper
     /**
      * @return Template[]
      */
-    public function getAllTemplatesForUser(User $user): array
+    public function getAllTemplatesForUser(User $user) : array
     {
         return $this->repository->findByUser($user);
     }
 
-    public function getTemplateCountForUser(User $user): int
+    public function getTemplateCountForUser(User $user) : int
     {
         $templates = $this->repository->findByUser($user);
 
         return count($templates);
     }
 
-    public function getTemplateCountForCategory(int $userId, int $categoryId): int
+    public function getTemplateCountForCategory(int $userId, int $categoryId) : int
     {
         $templates = $this->getTemplatesForUserByCategory($userId, $categoryId);
 
@@ -47,19 +49,19 @@ class TemplateHelper
     /**
      * @return Template[]
      */
-    public function getTemplatesForUserByCategory(int $userId, int $categoryId): array
+    public function getTemplatesForUserByCategory(int $userId, int $categoryId) : array
     {
         return $this->repository->findByUserIdAndCategoryId($userId, $categoryId);
     }
 
-    private function ensureTemplateIsNotNull(?Template $template, int $templateId): void
+    private function ensureTemplateIsNotNull(?Template $template, int $templateId) : void
     {
-        if ($template === null) {
+        if ( ! $template instanceof Template) {
             throw NotFoundException::entityIdNotFound(Template::getClassName(), $templateId);
         }
     }
 
-    private function ensureUserOwnsTemplate(Template $template, int $userId): void
+    private function ensureUserOwnsTemplate(Template $template, int $userId) : void
     {
         if ($template->getReferencedUser()->getId() !== $userId) {
             // found template does not belong to the logged in user

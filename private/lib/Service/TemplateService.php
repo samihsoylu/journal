@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
@@ -12,26 +14,26 @@ use App\Service\Model\TemplateDecorator;
 use Defuse\Crypto\Key;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
-class TemplateService
+final readonly class TemplateService
 {
     public function __construct(
         private TemplateRepository $repository,
         private TemplateHelper $templateHelper,
         private UserHelper $userHelper,
-        private CategoryHelper $categoryHelper
+        private CategoryHelper $categoryHelper,
     ) {}
 
     /**
      * @return Template[]
      */
-    public function getAllTemplatesForUser(int $userId): array
+    public function getAllTemplatesForUser(int $userId) : array
     {
         $user = $this->userHelper->getUserById($userId);
 
         return $this->templateHelper->getAllTemplatesForUser($user);
     }
 
-    public function getTemplateForUser(int $templateId, int $userId, Key $key, bool $getTemplateContentAsMarkup = false): TemplateDecorator
+    public function getTemplateForUser(int $templateId, int $userId, Key $key, bool $getTemplateContentAsMarkup = false) : TemplateDecorator
     {
         $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 
@@ -46,7 +48,7 @@ class TemplateService
         );
     }
 
-    public function createTemplate(int $userId, Key $encryptionKey, int $categoryId, string $templateTitle, string $templateContent)
+    public function createTemplate(int $userId, Key $encryptionKey, int $categoryId, string $templateTitle, string $templateContent) : void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
@@ -54,38 +56,38 @@ class TemplateService
 
         $template = new Template();
         $template->setReferencedUser($user)
-                 ->setReferencedCategory($category)
-                 ->setTitle($templateTitle)
-                 ->setContentAndEncrypt($templateContent, $encryptionKey);
+            ->setReferencedCategory($category)
+            ->setTitle($templateTitle)
+            ->setContentAndEncrypt($templateContent, $encryptionKey)
+        ;
 
         $this->repository->queue($template);
 
         try {
             $this->repository->save();
-        } catch (UniqueConstraintViolationException $e) {
+        } catch (UniqueConstraintViolationException) {
             throw InvalidArgumentException::templateAlreadyExists($templateTitle);
         }
     }
 
-    public function updateTemplate(int $userId, Key $encryptionKey, int $categoryId, int $templateId, string $templateTitle, string $templateContent): void
+    public function updateTemplate(int $userId, Key $encryptionKey, int $categoryId, int $templateId, string $templateTitle, string $templateContent) : void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
         $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 
         $template->setTitle($templateTitle)
-                 ->setContentAndEncrypt($templateContent, $encryptionKey)
-                 ->setReferencedCategory($category);
+            ->setContentAndEncrypt($templateContent, $encryptionKey)
+            ->setReferencedCategory($category)
+        ;
 
         $this->repository->queue($template);
         $this->repository->save();
     }
 
     /**
-     * Removes an existing template for user
-     *
-     * @return void
+     * Removes an existing template for user.
      */
-    public function deleteTemplate(int $templateId, int $userId): void
+    public function deleteTemplate(int $templateId, int $userId) : void
     {
         $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 

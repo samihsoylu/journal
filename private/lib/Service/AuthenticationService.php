@@ -1,38 +1,42 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
-use App\Service\Model\SessionDecorator;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
 use App\Service\Helper\AuthenticationHelper;
+use App\Service\Model\SessionDecorator;
 use App\Utility\Encryptor;
 use App\Utility\UserSession;
 use Defuse\Crypto\Key;
 
-class AuthenticationService
+final readonly class AuthenticationService
 {
     public function __construct(
         private UserRepository $repository,
-        private AuthenticationHelper $helper
+        private AuthenticationHelper $helper,
     ) {}
 
-    public function getUserSession(): ?UserSession
+    public function getUserSession() : ?UserSession
     {
         return UserSession::load();
     }
 
-    public function login(string $username, string $password): void
+    public function login(string $username, string $password) : void
     {
         $userFailedLoginCount = $this->helper->getFailedLoginCount();
+
         if ($userFailedLoginCount >= 10) {
             throw InvalidOperationException::loginAttemptsExceeded($userFailedLoginCount);
         }
 
         $user = $this->repository->findByUsername($username);
-        if ($user === null || !password_verify($password, $user->getPassword())) {
+
+        if ( ! $user instanceof User || ! password_verify($password, $user->getPassword())) {
             $this->helper->setFailedLoginCount(++$userFailedLoginCount);
 
             // Username or password is incorrect
@@ -42,7 +46,7 @@ class AuthenticationService
         $encryptor = new Encryptor();
         $encodedEncryptionKey = $encryptor->getEncodedKeyFromProtectedKey(
             $user->getEncryptionKey(),
-            $password
+            $password,
         );
 
         UserSession::create(
@@ -50,36 +54,37 @@ class AuthenticationService
             $user->getUsername(),
             $user->getPrivilegeLevel(),
             $encodedEncryptionKey,
-            $user->getTimezone()
+            $user->getTimezone(),
         );
 
         $this->helper->setFailedLoginCount(0);
     }
 
-    public function logout(): void
+    public function logout() : void
     {
         UserSession::destroy();
     }
 
-    public function isUserLoggedIn(): bool
+    public function isUserLoggedIn() : bool
     {
         $session = $this->getUserSession();
 
-        return ($session !== null);
+        return $session instanceof UserSession;
     }
 
-    public function userHasAdminPrivileges(): bool
+    public function userHasAdminPrivileges() : bool
     {
         $session = $this->getUserSession();
-        if ($session === null) {
+
+        if ( ! $session instanceof UserSession) {
             return false;
         }
 
         // 1|2 <= 2 - is true for admin and owner
-        return ($session->getPrivilegeLevel() <= User::PRIVILEGE_LEVEL_ADMIN);
+        return $session->getPrivilegeLevel() <= User::PRIVILEGE_LEVEL_ADMIN;
     }
 
-    public function getUserDecodedEncryptionKey(): Key
+    public function getUserDecodedEncryptionKey() : Key
     {
         $session = $this->getUserSession();
         $this->ensureSessionIsNotNull($session);
@@ -91,7 +96,7 @@ class AuthenticationService
         return $encryptor->getKeyFromEncodedKey($encodedEncryptionKey);
     }
 
-    public function getUserId(): int
+    public function getUserId() : int
     {
         $session = $this->getUserSession();
         $this->ensureSessionIsNotNull($session);
@@ -99,10 +104,11 @@ class AuthenticationService
         return $session->getUserId();
     }
 
-    public function getSessionDecorator(): ?SessionDecorator
+    public function getSessionDecorator() : ?SessionDecorator
     {
         $session = $this->getUserSession();
-        if ($session === null) {
+
+        if ( ! $session instanceof UserSession) {
             return null;
         }
 
@@ -114,7 +120,7 @@ class AuthenticationService
         );
     }
 
-    public function updateUserSessionTimezone(string $timezone): void
+    public function updateUserSessionTimezone(string $timezone) : void
     {
         $session = $this->getUserSession();
         $this->ensureSessionIsNotNull($session);
@@ -123,9 +129,9 @@ class AuthenticationService
         $session->save();
     }
 
-    private function ensureSessionIsNotNull(?UserSession $session): void
+    private function ensureSessionIsNotNull(?UserSession $session) : void
     {
-        if ($session === null) {
+        if ( ! $session instanceof UserSession) {
             throw InvalidOperationException::userIsNotLoggedIn();
         }
     }

@@ -1,33 +1,36 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Utility;
 
 use Jenssegers\Blade\Blade;
+use ReflectionClass;
 
 /**
- * Class Template a utility for rendering blade templates
+ * Class Template a utility for rendering blade templates.
  */
-class Template
+final class Template
 {
     /**
      * @var null|self look up singleton design pattern
      */
-    protected static $instance = null;
+    private static $instance;
 
     /**
      * @var Blade templating library
      */
-    protected Blade $blade;
+    private Blade $blade;
 
     /**
      * @var Notification used to show notification to the user
      */
-    protected Notification $notification;
+    private Notification $notification;
 
     /**
      * @var array list of variables that will be passed on to the template
      */
-    protected array $variables;
+    private array $variables;
 
     private function __construct()
     {
@@ -38,7 +41,7 @@ class Template
         $this->setDefaultVariables();
     }
 
-    public static function getInstance(): self
+    public static function getInstance() : self
     {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -48,11 +51,9 @@ class Template
     }
 
     /**
-     * Set multiple variables that will be passed on to the blade templating engine
-     *
-     * @param array $variables
+     * Set multiple variables that will be passed on to the blade templating engine.
      */
-    public function setVariables(array $variables): void
+    public function setVariables(array $variables) : void
     {
         foreach ($variables as $key => $value) {
             $this->setVariable($key, $value);
@@ -60,22 +61,20 @@ class Template
     }
 
     /**
-     * Set a variable name that will be passed on to the blade templating engine
+     * Set a variable name that will be passed on to the blade templating engine.
      *
      * @param string $key variable name
      * @param mixed $value
      */
-    public function setVariable(string $key, $value): void
+    public function setVariable(string $key, $value) : void
     {
         $this->variables[$key] = $value;
     }
 
     /**
-     * Renders a blade template
-     *
-     * @param string $templateName
+     * Renders a blade template.
      */
-    public function render(string $templateName): void
+    public function render(string $templateName) : void
     {
         // Check if notifications were set prior to attempting to load the blade template
         if ($this->notification->exists()) {
@@ -85,7 +84,7 @@ class Template
             $this->setVariable($type, $message);
         }
 
-        if (count($_POST) > 0) {
+        if ($_POST !== []) {
             // This condition is likely true when there is a validation error on the website.
             // Form is submitted -> UserException is caught -> then the same form page is rendered with a error notification
             $this->setVariable('post', $_POST);
@@ -96,24 +95,25 @@ class Template
 
     /**
      * Dynamically loads existing url constants in all controllers into the templating engine.
-     *
-     * @return void
      */
-    private function setAllUrlConstantsToVariables(): void
+    private function setAllUrlConstantsToVariables() : void
     {
         $controllers = array_diff(scandir(BASE_PATH . '/private/lib/Controller'), ['..', '.']);
 
         $variableList = [];
+
         foreach ($controllers as $controller) {
-            if (strpos($controller, 'Abstract') !== false) {
+            if (str_contains($controller, 'Abstract')) {
                 // ignore abstract class
                 continue;
             }
+
             $controllerName = str_replace('.php', '', $controller);
 
-            $refl = new \ReflectionClass("\\App\\Controller\\{$controllerName}");
+            $refl = new ReflectionClass('\App\Controller\\' . $controllerName);
+
             foreach ($refl->getConstants() as $key => $value) {
-                if (strpos($key, '_URL') === false) {
+                if ( ! str_contains($key, '_URL')) {
                     // if constant does not have url in its name, ignore it.
                     continue;
                 }
@@ -127,10 +127,8 @@ class Template
 
     /**
      * Finds current user's active page. Used later to determine which navigation item should be set to active.
-     *
-     * @return string
      */
-    private function getActivePage(): string
+    private function getActivePage() : string
     {
         // Remove base url
         $activePage = str_replace(BASE_URL, '', $_SERVER['REQUEST_URI']);
@@ -145,16 +143,14 @@ class Template
     }
 
     /**
-     * Sets default variables required to render all templates
-     *
-     * @return void
+     * Sets default variables required to render all templates.
      */
-    private function setDefaultVariables(): void
+    private function setDefaultVariables() : void
     {
         $struct = [
-            'site_title'  => SITE_TITLE,
-            'base_url'    => BASE_URL,
-            'assets_url'  => ASSETS_URL,
+            'site_title' => SITE_TITLE,
+            'base_url' => BASE_URL,
+            'assets_url' => ASSETS_URL,
             'active_page' => $this->getActivePage(),
         ];
 
@@ -162,13 +158,12 @@ class Template
     }
 
     /**
-     * Clears template cache directory so that changes go in to effect immediately
-     *
-     * @return void
+     * Clears template cache directory so that changes go in to effect immediately.
      */
-    public function clearCache(): void
+    public function clearCache() : void
     {
         $staticTemplateFiles = glob(TEMPLATE_CACHE_PATH . '/*.php');
+
         foreach ($staticTemplateFiles as $staticFile) {
             unlink($staticFile);
         }

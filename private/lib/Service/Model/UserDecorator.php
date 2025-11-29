@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service\Model;
 
 use App\Database\Model\User;
 
-class UserDecorator
+final readonly class UserDecorator
 {
     private int $id;
     private string $username;
@@ -13,73 +15,69 @@ class UserDecorator
     private string $lastUpdatedTimestamp;
     private int $privilegeLevel;
 
-    public const ALLOWED_PRIVILEGE_LEVELS = User::ALLOWED_PRIVILEGE_LEVELS;
-    private bool $isReadOnly;
-    private int $totalCategories;
-    private int $totalEntries;
-    private int $totalTemplates;
+    public const array ALLOWED_PRIVILEGE_LEVELS = User::ALLOWED_PRIVILEGE_LEVELS;
 
-    public function __construct(User $user, bool $isReadOnly, int $totalCategories, int $totalEntries, int $totalTemplates)
-    {
-        $this->id                   = $user->getId();
-        $this->username             = $user->getUsername();
-        $this->emailAddress         = $user->getEmailAddress();
-        $this->createdTimestamp     = $user->getCreatedTimestampFormatted($user->getTimezone());
+    public function __construct(
+        User $user,
+        private bool $isReadOnly,
+        private int $totalCategories,
+        private int $totalEntries,
+        private int $totalTemplates,
+    ) {
+        $this->id = $user->getId();
+        $this->username = $user->getUsername();
+        $this->emailAddress = $user->getEmailAddress();
+        $this->createdTimestamp = $user->getCreatedTimestampFormatted($user->getTimezone());
         $this->lastUpdatedTimestamp = $user->getLastUpdatedTimestampFormatted($user->getTimezone());
-        $this->privilegeLevel       = $user->getPrivilegeLevel();
-
-        $this->isReadOnly           = $isReadOnly;
-        $this->totalCategories      = $totalCategories;
-        $this->totalEntries         = $totalEntries;
-        $this->totalTemplates       = $totalTemplates;
+        $this->privilegeLevel = $user->getPrivilegeLevel();
     }
 
-    public function getId(): int
+    public function getId() : int
     {
         return $this->id;
     }
 
-    public function getUsername(): string
+    public function getUsername() : string
     {
         return $this->username;
     }
 
-    public function getEmailAddress(): string
+    public function getEmailAddress() : string
     {
         return $this->emailAddress;
     }
 
-    public function getLastUpdatedTimestamp(): string
+    public function getLastUpdatedTimestamp() : string
     {
         return $this->lastUpdatedTimestamp;
     }
 
-    public function getCreatedTimestamp(): string
+    public function getCreatedTimestamp() : string
     {
         return $this->createdTimestamp;
     }
 
-    public function getPrivilegeLevel(): int
+    public function getPrivilegeLevel() : int
     {
         return $this->privilegeLevel;
     }
 
-    public function isReadOnly(): bool
+    public function isReadOnly() : bool
     {
         return $this->isReadOnly;
     }
 
-    public function getTotalCategories(): int
+    public function getTotalCategories() : int
     {
         return $this->totalCategories;
     }
 
-    public function getTotalEntries(): int
+    public function getTotalEntries() : int
     {
         return $this->totalEntries;
     }
 
-    public function getTotalTemplates(): int
+    public function getTotalTemplates() : int
     {
         return $this->totalTemplates;
     }

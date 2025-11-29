@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests;
 
@@ -21,11 +23,11 @@ abstract class AbstractTest extends TestCase
     protected UserRepository $userRepository;
     protected TemplateRepository $templateRepository;
 
-    public function setUp(): void
+    protected function setUp() : void
     {
         $this->categoryRepository = $this->createMock(CategoryRepository::class);
-        $this->entryRepository    = $this->createMock(EntryRepository::class);
-        $this->userRepository     = $this->createMock(UserRepository::class);
+        $this->entryRepository = $this->createMock(EntryRepository::class);
+        $this->userRepository = $this->createMock(UserRepository::class);
         $this->templateRepository = $this->createMock(TemplateRepository::class);
 
         Registry::set(CategoryRepository::class, $this->categoryRepository);
@@ -37,15 +39,17 @@ abstract class AbstractTest extends TestCase
     /**
      * @return Category|MockObject
      */
-    protected function getMockCategory(User $user, ?int $categoryId): Category
+    protected function getMockCategory(User $user, ?int $categoryId) : Category
     {
         $mock = $this->createMock(Category::class);
         $mock->method('getReferencedUser')
-            ->willReturn($user);
+            ->willReturn($user)
+        ;
 
         if ($categoryId !== null) {
             $mock->method('getId')
-                ->willReturn($categoryId);
+                ->willReturn($categoryId)
+            ;
         }
 
         return $mock;
@@ -54,14 +58,15 @@ abstract class AbstractTest extends TestCase
     /**
      * @return Category[]|MockObject[]
      */
-    protected function getMockCategories(User $user): array
+    protected function getMockCategories(User $user) : array
     {
         $mockCategories = [];
 
-        for ($i = 0; $i < 5; $i++) {
+        for ($i = 0; $i < 5; ++$i) {
             $mock = $this->createMock(Category::class);
             $mock->method('getReferencedUser')
-                ->willReturn($user);
+                ->willReturn($user)
+            ;
 
             $mockCategories[] = $mock;
         }
@@ -70,9 +75,9 @@ abstract class AbstractTest extends TestCase
     }
 
     /**
-     * @return User|MockObject
+     * @return MockObject|User
      */
-    protected function getMockUser(int $userId): User
+    protected function getMockUser(int $userId) : User
     {
         $mockUser = $this->createMock(User::class);
         $mockUser->method('getId')->willReturn($userId);
@@ -80,17 +85,21 @@ abstract class AbstractTest extends TestCase
         return $mockUser;
     }
 
-    protected function getMockEntries(User $user, Category $category): array
+    protected function getMockEntries(User $user, Category $category) : array
     {
         $mockEntries = [];
-        for ($i = 0; $i < 5; $i++) {
+
+        for ($i = 0; $i < 5; ++$i) {
             $mock = $this->createMock(Entry::class);
             $mock->method('getId')
-                ->willReturn($i + 1);
+                ->willReturn($i + 1)
+            ;
             $mock->method('getReferencedCategory')
-                ->willReturn($category);
+                ->willReturn($category)
+            ;
             $mock->method('getReferencedUser')
-                ->willReturn($user);
+                ->willReturn($user)
+            ;
 
             $mockEntries[] = $mock;
         }
@@ -98,17 +107,21 @@ abstract class AbstractTest extends TestCase
         return $mockEntries;
     }
 
-    protected function getMockTemplates(User $user, Category $category): array
+    protected function getMockTemplates(User $user, Category $category) : array
     {
         $mockTemplates = [];
-        for ($i = 0; $i < 5; $i++) {
+
+        for ($i = 0; $i < 5; ++$i) {
             $mock = $this->createMock(Template::class);
             $mock->method('getId')
-                ->willReturn($i + 1);
+                ->willReturn($i + 1)
+            ;
             $mock->method('getReferencedCategory')
-                ->willReturn($category);
+                ->willReturn($category)
+            ;
             $mock->method('getReferencedUser')
-                ->willReturn($user);
+                ->willReturn($user)
+            ;
 
             $mockTemplates[] = $mock;
         }
@@ -116,49 +129,54 @@ abstract class AbstractTest extends TestCase
         return $mockTemplates;
     }
 
-    protected function setMockUser(int $userId): User
+    protected function setMockUser(int $userId) : User
     {
         $mockUser = $this->getMockUser($userId);
 
         $this->userRepository->method('getById')
             ->with($userId)
-            ->willReturn($mockUser);
+            ->willReturn($mockUser)
+        ;
 
         return $mockUser;
     }
 
-    protected function setMockCategory(User $mockUser, int $categoryId): Category
+    protected function setMockCategory(User $mockUser, int $categoryId) : Category
     {
         $mockCategory = $this->getMockCategory($mockUser, $categoryId);
 
         $this->categoryRepository
             ->method('getById')
             ->with($categoryId)
-            ->willReturn($mockCategory);
+            ->willReturn($mockCategory)
+        ;
 
         return $mockCategory;
     }
 
-    protected function setMockEntries(User $mockUser, Category $mockCategory): array
+    protected function setMockEntries(User $mockUser, Category $mockCategory) : array
     {
         $mockEntries = $this->getMockEntries($mockUser, $mockCategory);
 
         $this->entryRepository
             ->method('findByUserIdAndCategoryId')
-            ->willReturn($mockEntries);
+            ->willReturn($mockEntries)
+        ;
         $this->entryRepository
             ->method('findByUser')
-            ->willReturn($mockEntries);
+            ->willReturn($mockEntries)
+        ;
 
         return $mockEntries;
     }
 
-    protected function setMockTemplates(User $mockUser, Category $mockCategory): array
+    protected function setMockTemplates(User $mockUser, Category $mockCategory) : array
     {
         $mockTemplates = $this->getMockTemplates($mockUser, $mockCategory);
 
         $this->templateRepository->method('findByUserIdAndCategoryId')
-            ->willReturn($mockTemplates);
+            ->willReturn($mockTemplates)
+        ;
 
         return $mockTemplates;
     }

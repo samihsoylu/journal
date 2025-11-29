@@ -1,55 +1,48 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service\Model;
 
-class TemplateDecorator implements \JsonSerializable
+use JsonSerializable;
+use ReturnTypeWillChange;
+
+final readonly class TemplateDecorator implements JsonSerializable
 {
-    private int $id;
-    private string $title;
-    private int $categoryId;
-    private string $categoryName;
-    private string $content;
-
     public function __construct(
-        int $id,
-        string $title,
-        int $categoryId,
-        string $categoryName,
-        string $content
-    ) {
-        $this->id           = $id;
-        $this->title        = $title;
-        $this->categoryId   = $categoryId;
-        $this->categoryName = $categoryName;
-        $this->content      = $content;
-    }
+        private int $id,
+        private string $title,
+        private int $categoryId,
+        private string $categoryName,
+        private string $content,
+    ) {}
 
-    public function getId(): int
+    public function getId() : int
     {
         return $this->id;
     }
 
-    public function getTitle(): string
+    public function getTitle() : string
     {
         return $this->title;
     }
 
-    public function getCategoryId(): int
+    public function getCategoryId() : int
     {
         return $this->categoryId;
     }
 
-    public function getCategoryName(): string
+    public function getCategoryName() : string
     {
         return $this->categoryName;
     }
 
-    public function getContent(): string
+    public function getContent() : string
     {
         return $this->content;
     }
 
-    #[\ReturnTypeWillChange]
+    #[ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return get_object_vars($this);

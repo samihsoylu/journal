@@ -1,32 +1,28 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Utility;
 
+use Exception;
 use Throwable;
 
 use function Sentry\captureException;
 
-class ExceptionHandler
+final readonly class ExceptionHandler
 {
-    private Throwable $exception;
     private Template $templatingEngine;
     private Notification $notifier;
 
-    public function __construct(Throwable $exception)
+    public function __construct(private Throwable $exception)
     {
-        $this->exception = $exception;
         $this->templatingEngine = Template::getInstance();
         $this->notifier = new Notification();
     }
 
-    public function getException(): Throwable
+    public function getException() : Throwable
     {
         return $this->exception;
-    }
-
-    private function getTemplatingEngine(): Template
-    {
-        return $this->templatingEngine;
     }
 
     /**
@@ -34,10 +30,8 @@ class ExceptionHandler
      * visits.
      *
      * @see \App\Utility\Template::render()
-     * @param string $message
-     * @return void
      */
-    private function setNotification(string $message): void
+    private function setNotification(string $message) : void
     {
         $this->notifier->set(Notification::TYPE_ERROR, $message);
     }
@@ -50,17 +44,13 @@ class ExceptionHandler
      * To explain the rule, as an example, if a function login() exists in the Authentication controller, it is also
      * expected to have a loginView() method implemented. The loginView is then rendered below with a notification set.
      *
-     * @param object $controller
-     * @param string $methodName
-     * @return void
-     *
      * @throws Throwable
      */
-    public function userException(object $controller, string $methodName): void
+    public function userException(object $controller, string $methodName) : void
     {
         $this->setNotification($this->getException()->getMessage());
 
-        if (!str_contains($methodName, 'View')) {
+        if ( ! str_contains($methodName, 'View')) {
             // Ensures action template is renamed to view, example: login() changes to loginView()
             $methodName .= 'View';
         }
@@ -68,12 +58,12 @@ class ExceptionHandler
         try {
             // Render a template
             $controller->{$methodName}();
-        } catch (\Exception $e) {
+        } catch (Exception) {
             $this->genericException();
         }
     }
 
-    public function genericException(): void
+    public function genericException() : void
     {
         if (DEBUG_MODE) {
             throw $this->getException();
@@ -86,6 +76,6 @@ class ExceptionHandler
         }
 
         http_response_code(500);
-        $this->getTemplatingEngine()->render('errors/500');
+        $this->templatingEngine->render('errors/500');
     }
 }

@@ -1,53 +1,55 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Exception\UserException;
 
 use App\Exception\UserException;
 
-class InvalidParameterException extends UserException
+final class InvalidParameterException extends UserException
 {
-    public function __construct(string $message = "", int $code = 0)
+    public function __construct(string $message = '', int $code = 0)
     {
         parent::__construct($message, $code);
     }
 
-    public static function notNumeric(string $fieldName, int $code = 406): self
+    public static function notNumeric(string $fieldName, int $code = 406) : self
     {
-        return new self("The provided field '{$fieldName}' is not a number", $code);
+        return new self(sprintf("The provided field '%s' is not a number", $fieldName), $code);
     }
 
-    public static function stringTooLong(string $fieldName, int $maxChars, int $code = 406): self
+    public static function stringTooLong(string $fieldName, int $maxChars, int $code = 406) : self
     {
-        return new self("The provided field '{$fieldName}' can be '{$maxChars}' characters long maximum", $code);
+        return new self(sprintf("The provided field '%s' can be '%d' characters long maximum", $fieldName, $maxChars), $code);
     }
 
-    public static function stringTooShort(string $fieldName, int $minChars, int $code = 406): self
+    public static function stringTooShort(string $fieldName, int $minChars, int $code = 406) : self
     {
-        return new self("The provided field '{$fieldName}' must be at least '{$minChars}' characters long", $code);
+        return new self(sprintf("The provided field '%s' must be at least '%d' characters long", $fieldName, $minChars), $code);
     }
 
-    public static function invalidFieldValue(string $fieldName, int $code = 406): self
+    public static function invalidFieldValue(string $fieldName, int $code = 406) : self
     {
-        return new self("The provided value in field {$fieldName} is invalid", $code);
+        return new self(sprintf('The provided value in field %s is invalid', $fieldName), $code);
     }
 
-    public static function missingField(string $fieldName, int $code = 406): self
+    public static function missingField(string $fieldName, int $code = 406) : self
     {
-        return new self("Field {$fieldName} is required", $code);
+        return new self(sprintf('Field %s is required', $fieldName), $code);
     }
 
-    public static function invalidDateFormat(string $fieldName, int $code = 406): self
+    public static function invalidDateFormat(string $fieldName, int $code = 406) : self
     {
-        return new self("Field {$fieldName} provided an incorrect date format", $code);
+        return new self(sprintf('Field %s provided an incorrect date format', $fieldName), $code);
     }
 
-    public static function invalidFormKey(): self
+    public static function invalidFormKey() : self
     {
-        return new self("Invalid Form Key. Please try again.");
+        return new self('Invalid Form Key. Please try again.');
     }
 
-    public static function notArray(string $fieldName): self
+    public static function notArray(string $fieldName) : self
     {
-        return new self("Field {$fieldName} must be an array", 406);
+        return new self(sprintf('Field %s must be an array', $fieldName), 406);
     }
 }

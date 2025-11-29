@@ -1,22 +1,24 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Utility;
+
+use LogicException;
 
 /**
  * Class Sanitize holds methods that help sanitizing user input.
  */
-class Sanitize
+final class Sanitize
 {
-    public const OPTION_LOWERCASE = 'lowercase';
-    public const OPTION_TRIM = 'trim';
-    public const OPTION_STRIP = 'strip';
-    public const OPTION_CLEAN_SPACES = 'clean-spaces';
-    public const OPTION_CLEAN_SPECIAL_CHARS = 'clean-special-chars';
-
-    public const TYPE_INT = 'int';
-    public const TYPE_STRING = 'string';
-
-    private const OPTIONS_ALLOWED = [
+    public const string OPTION_LOWERCASE = 'lowercase';
+    public const string OPTION_TRIM = 'trim';
+    public const string OPTION_STRIP = 'strip';
+    public const string OPTION_CLEAN_SPACES = 'clean-spaces';
+    public const string OPTION_CLEAN_SPECIAL_CHARS = 'clean-special-chars';
+    public const string TYPE_INT = 'int';
+    public const string TYPE_STRING = 'string';
+    private const array OPTIONS_ALLOWED = [
         self::OPTION_LOWERCASE,
         self::OPTION_TRIM,
         self::OPTION_STRIP,
@@ -32,28 +34,26 @@ class Sanitize
      * - htmlspecialchars removes all html tags from the string
      * - strip combines lowercase, trim and htmlspecialchars at once.
      *
-     * @param string $value
      * @param string[] $options
-     * @return string
      */
-    public static function string(string $value, array $options = [self::OPTION_STRIP]): string
+    public static function string(string $value, array $options = [self::OPTION_STRIP]) : string
     {
         foreach ($options as $option) {
-            if (!in_array($option, self::OPTIONS_ALLOWED, true)) {
-                throw new \LogicException("Option '{$option}' does not exist");
+            if ( ! in_array($option, self::OPTIONS_ALLOWED, true)) {
+                throw new LogicException(sprintf("Option '%s' does not exist", $option));
             }
 
             switch ($option) {
                 case self::OPTION_LOWERCASE:
-                    $value = strtolower($value);
+                    $value = strtolower((string) $value);
 
                     break;
                 case self::OPTION_TRIM:
-                    $value = trim($value);
+                    $value = trim((string) $value);
 
                     break;
                 case self::OPTION_STRIP:
-                    $value = trim($value);
+                    $value = trim((string) $value);
                     $value = htmlspecialchars($value);
 
                     break;
@@ -62,7 +62,7 @@ class Sanitize
 
                     break;
                 case self::OPTION_CLEAN_SPECIAL_CHARS:
-                    $value = preg_replace('/[^A-Za-z0-9\-]/', '', $value);
+                    $value = preg_replace('/[^A-Za-z0-9\-]/', '', (string) $value);
 
                     break;
             }
@@ -71,24 +71,21 @@ class Sanitize
         return $value;
     }
 
-    public static function int(string $value): int
+    public static function int(string $value) : int
     {
-        return (int)filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+        return (int) filter_var($value, FILTER_SANITIZE_NUMBER_INT);
     }
 
     /**
      * User provided fields through $_GET can be sanitized using this method. This method allows optional variables
      * to be sanitized too by returning null if the provided field name does not exist.
      *
-     * @param array $getVariable
-     * @param string $fieldName
      * @param string $expectedDataType int|string
      * @param array $options must be provided when using dataType 'string'
      *
-     * @return int|string|null
      * @see Sanitize::string() for possible options for the $options parameter
      */
-    public static function getVariable(array $getVariable, string $fieldName, string $expectedDataType, array $options = [self::OPTION_STRIP])
+    public static function getVariable(array $getVariable, string $fieldName, string $expectedDataType, array $options = [self::OPTION_STRIP]) : int|string|null
     {
         $value = $getVariable[$fieldName] ?? null;
 
@@ -104,9 +101,9 @@ class Sanitize
         return null;
     }
 
-    public static function stringForShell(string $input)
+    public static function stringForShell(string $input) : ?string
     {
-        $input = self::string($input, [Sanitize::OPTION_LOWERCASE]);
+        $input = self::string($input, [self::OPTION_LOWERCASE]);
 
         // Remove spaces and special characters
         $input = str_replace(' ', '_', $input);

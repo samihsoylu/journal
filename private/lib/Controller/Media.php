@@ -1,34 +1,36 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
 use App\Service\AuthenticationService;
 use App\Service\MediaService;
 use App\Service\ValueObject\Image;
+use Exception;
 
-class Media extends AbstractController
+final class Media extends AbstractController
 {
-    public const MEDIA_URL = BASE_URL . '/media';
-    public const MEDIA_UPLOAD_POST_URL = self::MEDIA_URL . '/upload';
-    public const MEDIA_GET_URL = self::MEDIA_URL . '/{imageName}';
+    public const string MEDIA_URL = BASE_URL . '/media';
+    public const string MEDIA_UPLOAD_POST_URL = self::MEDIA_URL . '/upload';
+    public const string MEDIA_GET_URL = self::MEDIA_URL . '/{imageName}';
 
     public function __construct(
         AuthenticationService $authenticationService,
-        public MediaService $service
+        public MediaService $service,
     ) {
         parent::__construct($authenticationService);
 
         $this->redirectLoggedOutUsersToLoginPage();
     }
 
-    public function upload(): void
+    public function upload() : void
     {
-        $file     = $_FILES['file'] ?? null;
-        $name     = $file['name'];
-        $tmpName  = $file['tmp_name'];
-        $size     = $file['size'];
+        $file = $_FILES['file'] ?? null;
+        $name = $file['name'];
+        $tmpName = $file['tmp_name'];
 
-        $imageType = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $imageType = strtolower(pathinfo((string) $file['name'], PATHINFO_EXTENSION));
         $file['type'] = $imageType;
 
         $binary = $this->getUploadedImageBinaryAsBase64Encoded($file);
@@ -40,17 +42,17 @@ class Media extends AbstractController
             $this->getUserId(),
             $image,
             $this->getUserEncryptionKey(),
-            $tmpName
+            $tmpName,
         );
 
-        if (!$uploaded) {
+        if ( ! $uploaded) {
             $this->renderCouldNotUploadFile();
         }
 
-        $this->renderJsonResponse(['location' => self::MEDIA_URL . "/{$hashedImageName}"]);
+        $this->renderJsonResponse(['location' => self::MEDIA_URL . ('/' . $hashedImageName)]);
     }
 
-    public function showImage(): void
+    public function showImage() : void
     {
         $imageName = $this->getRouteParameters()['imageName'] ?? '';
 
@@ -58,29 +60,26 @@ class Media extends AbstractController
             $image = $this->service->getDecryptedImage(
                 $this->getUserId(),
                 $imageName,
-                $this->getUserEncryptionKey()
+                $this->getUserEncryptionKey(),
             );
-        } catch (\Exception $e) {
+        } catch (Exception) {
             $this->renderNotFound();
         }
 
         header('Cache-Control: max-age=86400');
         header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + 86400));
-        header("Content-Type: image/{$image->getType()}");
+        header('Content-Type: image/' . $image->getType());
         echo $image->getBinary();
     }
 
-    /**
-     * @return never
-     */
-    private function renderNotFound(): void
+    private function renderNotFound() : never
     {
-        header("HTTP/1.1 404 Not Found");
+        header('HTTP/1.1 404 Not Found');
         $this->renderTemplate('errors/404');
         exit;
     }
 
-    private function getUploadedImageBinaryAsBase64Encoded(?array $file): string
+    private function getUploadedImageBinaryAsBase64Encoded(?array $file) : string
     {
         $this->ensureIsUploadRequest($file);
         $this->ensureFileWasUploaded($file['tmp_name']);
@@ -88,8 +87,9 @@ class Media extends AbstractController
         $this->ensureFileSizeIsWithinLimits($file['size']);
 
         $image = file_get_contents($file['tmp_name']);
-        if (!$image) {
-            header("HTTP/1.1 500 Server Error");
+
+        if ( ! $image) {
+            header('HTTP/1.1 500 Server Error');
             $this->renderJsonResponse(['Could not read uploaded file.']);
             exit;
         }
@@ -97,10 +97,11 @@ class Media extends AbstractController
         return base64_encode($image);
     }
 
-    private function ensureFileSizeIsWithinLimits(int $size): void
+    private function ensureFileSizeIsWithinLimits(int $size) : void
     {
         // Convert MB to Bytes
         $sizeLimit = 1024 * 1024 * IMAGE_UPLOAD_SIZE_LIMIT;
+
         if ($size > $sizeLimit) {
             header('HTTP/1.1 400 File size too large.');
             $this->renderJsonResponse(['File size is too large.']);
@@ -108,25 +109,25 @@ class Media extends AbstractController
         }
     }
 
-    private function ensureFileWasUploaded(string $filePath): void
+    private function ensureFileWasUploaded(string $filePath) : void
     {
-        if (!is_uploaded_file($filePath)) {
-            header("HTTP/1.1 500 Server Error");
+        if ( ! is_uploaded_file($filePath)) {
+            header('HTTP/1.1 500 Server Error');
             $this->renderJsonResponse(['File was not uploaded.']);
             exit;
         }
     }
 
-    private function ensureFileTypeIsValid(string $fileType): void
+    private function ensureFileTypeIsValid(string $fileType) : void
     {
-        if (!in_array($fileType, Image::ALLOWED_TYPES)) {
+        if ( ! in_array($fileType, Image::ALLOWED_TYPES, true)) {
             header('HTTP/1.1 400 Invalid file type.');
             $this->renderJsonResponse(['File type not allowed.']);
             exit;
         }
     }
 
-    private function ensureIsUploadRequest(?array $file): void
+    private function ensureIsUploadRequest(?array $file) : void
     {
         if ($file === null) {
             header('HTTP/1.1 400 Bad Request');
@@ -135,12 +136,9 @@ class Media extends AbstractController
         }
     }
 
-    /**
-     * @return never
-     */
-    private function renderCouldNotUploadFile(): void
+    private function renderCouldNotUploadFile() : never
     {
-        header("HTTP/1.1 500 Server Error");
+        header('HTTP/1.1 500 Server Error');
         $this->renderJsonResponse(['Could not upload file.']);
         exit;
     }

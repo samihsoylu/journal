@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
@@ -6,19 +8,20 @@ use App\Database\Model\Widget;
 use App\Database\Repository\WidgetRepository;
 use App\Service\Helper\UserHelper;
 
-class WidgetService
+final readonly class WidgetService
 {
     public function __construct(
         private WidgetRepository $repository,
-        private UserHelper $userHelper
+        private UserHelper $userHelper,
     ) {}
 
-    public function getEnabledWidgetsForUser(int $userId): array
+    public function getEnabledWidgetsForUser(int $userId) : array
     {
         $user = $this->userHelper->getUserById($userId);
         $widgets = $this->repository->findByUser($user);
 
         $enabledWidgets = [];
+
         foreach ($widgets as $widget) {
             if ($widget->isEnabled()) {
                 $enabledWidgets[$widget->getName()] = true;
@@ -28,15 +31,17 @@ class WidgetService
         return $enabledWidgets;
     }
 
-    public function updateWidgetSettingsForUser(int $userId, array $checkedWidgets): void
+    public function updateWidgetSettingsForUser(int $userId, array $checkedWidgets) : void
     {
         $user = $this->userHelper->getUserById($userId);
         $widgets = $this->repository->findByUser($user);
 
         $existingWidgets = [];
+
         foreach ($widgets as $widget) {
             $widget->setEnabled(true);
-            if (!array_key_exists($widget->getName(), $checkedWidgets)) {
+
+            if ( ! array_key_exists($widget->getName(), $checkedWidgets)) {
                 $widget->setEnabled(false);
             }
 
@@ -44,7 +49,7 @@ class WidgetService
             $existingWidgets[] = $widget->getName();
         }
 
-        foreach ($checkedWidgets as $widgetName => $widgetValue) {
+        foreach (array_keys($checkedWidgets) as $widgetName) {
             if (in_array($widgetName, $existingWidgets, true)) {
                 continue;
             }

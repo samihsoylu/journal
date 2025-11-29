@@ -1,31 +1,33 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
 use App\Database\Model\Entry;
 use App\Database\Repository\EntryRepository;
-use App\Service\Model\EntriesDecorator;
 use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\EntryHelper;
 use App\Service\Helper\UserHelper;
+use App\Service\Model\EntriesDecorator;
 use App\Service\Model\EntryDecorator;
 use Defuse\Crypto\Key;
 
-class EntryService
+final readonly class EntryService
 {
     public function __construct(
         private EntryRepository $repository,
         private EntryHelper $entryHelper,
         private CategoryHelper $categoryHelper,
-        private UserHelper $userHelper
+        private UserHelper $userHelper,
     ) {}
 
     /**
-     * Create a new entry for a user
+     * Create a new entry for a user.
      *
      * @return int Entry id
      */
-    public function createEntry(int $userId, Key $encryptionKey, int $categoryId, string $title, string $content): int
+    public function createEntry(int $userId, Key $encryptionKey, int $categoryId, string $title, string $content) : int
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
@@ -35,7 +37,8 @@ class EntryService
         $entry->setReferencedCategory($category)
             ->setReferencedUser($user)
             ->setTitle($title)
-            ->setContentAndEncrypt($content, $encryptionKey);
+            ->setContentAndEncrypt($content, $encryptionKey)
+        ;
 
         $this->repository->queue($entry);
         $this->repository->save();
@@ -44,18 +47,17 @@ class EntryService
     }
 
     /**
-     * Update an entry for a user
-     *
-     * @return void
+     * Update an entry for a user.
      */
-    public function updateEntry(int $userId, Key $encryptionKey, int $entryId, int $categoryId, string $title, string $content): void
+    public function updateEntry(int $userId, Key $encryptionKey, int $entryId, int $categoryId, string $title, string $content) : void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
         $entry = $this->entryHelper->getEntryForUser($entryId, $userId);
         $entry->setReferencedCategory($category)
             ->setTitle($title)
-            ->setContentAndEncrypt($content, $encryptionKey);
+            ->setContentAndEncrypt($content, $encryptionKey)
+        ;
 
         $this->repository->queue($entry);
         $this->repository->save();
@@ -68,12 +70,13 @@ class EntryService
         ?int $startCreatedDate,
         ?int $endCreatedDate,
         ?int $page = 1,
-        ?int $pageSize = 25
-    ): EntriesDecorator {
+        ?int $pageSize = 25,
+    ) : EntriesDecorator {
         if ($page < 1) {
             $page = 1;
         }
-        $index  = $page - 1;
+
+        $index = $page - 1;
         $offset = $index * $pageSize;
 
         $entries = $this->repository->getEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
@@ -83,7 +86,7 @@ class EntryService
             $startCreatedDate,
             $endCreatedDate,
             $offset,
-            $pageSize
+            $pageSize,
         );
 
         $totalEntriesCount = $this->repository->getTotalCountOfEntriesBySearchQueryLimitCategoryStartEndDateAndOffset(
@@ -91,18 +94,19 @@ class EntryService
             $search,
             $categoryId,
             $startCreatedDate,
-            $endCreatedDate
+            $endCreatedDate,
         );
 
         $totalPages = 1;
+
         if ($totalEntriesCount > 0) {
-            $totalPages = (int)ceil($totalEntriesCount / $pageSize);
+            $totalPages = (int) ceil($totalEntriesCount / $pageSize);
         }
 
         return new EntriesDecorator($entries, $totalPages, $page);
     }
 
-    public function getEntryForUser(int $entryId, int $userId, Key $key): EntryDecorator
+    public function getEntryForUser(int $entryId, int $userId, Key $key) : EntryDecorator
     {
         $entry = $this->entryHelper->getEntryForUser($entryId, $userId);
 
@@ -117,11 +121,9 @@ class EntryService
     }
 
     /**
-     * Removes an existing entry for user
-     *
-     * @return void
+     * Removes an existing entry for user.
      */
-    public function deleteEntry(int $entryId, int $userId): void
+    public function deleteEntry(int $entryId, int $userId) : void
     {
         $entry = $this->entryHelper->getEntryForUser($entryId, $userId);
 

@@ -1,7 +1,9 @@
-<?php declare(strict_types=1);
+<?php
 
-require_once(dirname(__DIR__) . '/private/init.php');
+declare(strict_types=1);
 
-/** @var \App\Framework\Kernel $kernel */
+require_once dirname(__DIR__) . '/private/init.php';
 
-\App\Router::route($kernel->getContainer());
+// @var App\Framework\Kernel $kernel
+
+App\Router::route($kernel->getContainer());

@@ -1,35 +1,32 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Utility;
 
-class Session
+final class Session
 {
     /**
-     * Checks if a Session exists
-     *
-     * @param string $name
-     * @return bool
+     * Checks if a Session exists.
      */
-    public static function exists(string $name): bool
+    public static function exists(string $name) : bool
     {
         return isset($_SESSION[$name]);
     }
 
     /**
-     * Creates a Session
+     * Creates a Session.
      *
-     * @param string $name
      * @param mixed $value
      */
-    public static function put(string $name, $value): void
+    public static function put(string $name, $value) : void
     {
         $_SESSION[$name] = $value;
     }
 
     /**
-     * Reads a Session
+     * Reads a Session.
      *
-     * @param string $name
      * @return null|mixed
      */
     public static function get(string $name)
@@ -38,11 +35,9 @@ class Session
     }
 
     /**
-     * Removes a Session
-     *
-     * @param string $name
+     * Removes a Session.
      */
-    public static function delete(string $name): void
+    public static function delete(string $name) : void
     {
         if (self::exists($name)) {
             unset($_SESSION[$name]);
@@ -50,11 +45,9 @@ class Session
     }
 
     /**
-     * Destroys all Session associated with the user
-     *
-     * @return void
+     * Destroys all Session associated with the user.
      */
-    public static function destroy(): void
+    public static function destroy() : void
     {
         // Destroy all associated sessions
         session_destroy();

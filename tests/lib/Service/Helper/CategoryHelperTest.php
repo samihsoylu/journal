@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Tests\Service\Helper;
 
@@ -10,30 +12,36 @@ use App\Service\Helper\CategoryHelper;
 use App\Utility\Registry;
 use PHPUnit\Framework\TestCase;
 
-class CategoryHelperTest extends TestCase
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
+final class CategoryHelperTest extends TestCase
 {
     private $categoryRepository;
 
-    public function setUp(): void
+    protected function setUp() : void
     {
         $this->categoryRepository = $this->createMock(CategoryRepository::class);
 
         Registry::set(CategoryRepository::class, $this->categoryRepository);
     }
 
-    public function testGetCategoryForUserNotFoundException(): void
+    public function testGetCategoryForUserNotFoundException() : void
     {
         $this->expectException(NotFoundException::class);
 
         $this->categoryRepository
             ->method('getById')
-            ->willReturn(null);
+            ->willReturn(null)
+        ;
 
         $helper = new CategoryHelper();
         $helper->getCategoryForUser(5, 5);
     }
 
-    public function testGetCategoryForUserCategoryNotOwnedByUserException(): void
+    public function testGetCategoryForUserCategoryNotOwnedByUserException() : void
     {
         $this->expectException(NotFoundException::class);
 
@@ -45,7 +53,8 @@ class CategoryHelperTest extends TestCase
 
         $this->categoryRepository
             ->method('getById')
-            ->willReturn($mockCategory);
+            ->willReturn($mockCategory)
+        ;
 
         $helper = new CategoryHelper();
         $helper->getCategoryForUser(5, 5);

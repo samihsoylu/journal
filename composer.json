@@ -36,7 +36,8 @@
         "doctrine/migrations": "^3.1",
         "symfony/console": "^8.0",
         "sentry/sdk": "^4.0",
-        "php-di/php-di": "^7.0"
+        "php-di/php-di": "^7.0",
+        "symfony/var-exporter": "^7.0"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
@@ -44,6 +45,7 @@
         "php-parallel-lint/php-parallel-lint": "dev-master",
         "friendsofphp/php-cs-fixer": "^3.4",
         "phpstan/phpstan": "^2.0",
-        "phpcompatibility/php-compatibility": "^9.3"
+        "phpcompatibility/php-compatibility": "^9.3",
+        "rector/rector": "^2.2"
     }
 }
