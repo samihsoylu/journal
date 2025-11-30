@@ -43,7 +43,7 @@ final class Entry extends AbstractController
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->validator = new EntryValidator($_POST, $_GET);
+        $this->validator = new EntryValidator($_POST, $_GET, $authenticationService->getUserSession());
     }
 
     /**

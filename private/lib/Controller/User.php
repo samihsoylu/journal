@@ -36,7 +36,7 @@ final class User extends AbstractController
         $this->redirectLoggedOutUsersToLoginPage();
         $this->ensureUserHasAdminPrivileges();
 
-        $this->validator = new UserValidator($_POST);
+        $this->validator = new UserValidator($_POST, [], $authenticationService->getUserSession());
     }
 
     /**

@@ -39,7 +39,7 @@ final class Account extends AbstractController
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->validator = new AccountValidator($_POST);
+        $this->validator = new AccountValidator($_POST, [], $authenticationService->getUserSession());
     }
 
     /**

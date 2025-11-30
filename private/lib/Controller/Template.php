@@ -39,7 +39,7 @@ final class Template extends AbstractController
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->validator = new TemplateValidator($_POST, $_GET);
+        $this->validator = new TemplateValidator($_POST, $_GET, $authenticationService->getUserSession());
     }
 
     public function indexView() : void

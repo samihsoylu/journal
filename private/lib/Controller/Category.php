@@ -39,7 +39,7 @@ final class Category extends AbstractController
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->validator = new CategoryValidator($_POST);
+        $this->validator = new CategoryValidator($_POST, [], $authenticationService->getUserSession());
     }
 
     /**
