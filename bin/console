@@ -29,7 +29,7 @@ foreach ($finder as $file) {
     // Only support invokable commands with #[AsCommand] attribute
     if (!empty($reflectionClass->getAttributes(AsCommand::class))) {
         $command = $kernel->getContainer()->get($fullClassName);
-        $app->add($command);
+        $app->addCommand($command);
     }
 }
 
