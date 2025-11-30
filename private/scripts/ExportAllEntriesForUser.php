@@ -114,7 +114,7 @@ final readonly class ExportAllEntriesForUser
 
         $this->ensureDirExists(sprintf('%s/%s', $exportDirectoryPath, $category));
 
-        $blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH);
+        $blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH, null);
 
         $entryContent = $entry->getContentDecrypted($this->key);
         $entryContent = str_replace('"/media', '"../media', $entryContent);

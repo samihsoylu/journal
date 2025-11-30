@@ -28,6 +28,7 @@
         "doctrine/orm": "^3.0",
         "vlucas/phpdotenv": "^5.4",
         "jenssegers/blade": "^2.0",
+        "illuminate/view": "~11.7.0",
         "nikic/fast-route": "^1.3",
         "symfony/cache": "^8.0",
         "psr/cache": "^3.0",
