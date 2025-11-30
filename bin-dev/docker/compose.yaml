@@ -1,0 +1,26 @@
+services:
+  database:
+    image: mariadb:latest
+    container_name: journal-mariadb
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_DATABASE: journal
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_USER: journal
+      MARIADB_PASSWORD: journal
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      timeout: 20s
+      retries: 5
+    volumes:
+      - journal_data:/var/lib/mysql:rw
+
+volumes:
+  journal_data:
+    driver: local
+
+networks:
+  journal_network:
+    driver: bridge

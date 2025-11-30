@@ -10,7 +10,6 @@ use Doctrine\Migrations\Configuration\Migration\JsonFile;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
-use Exception;
 use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 
 final readonly class DoctrineOrmFactory
@@ -58,30 +57,9 @@ final readonly class DoctrineOrmFactory
             $config,
         );
 
-        $dependencyFactory = DependencyFactory::fromEntityManager(
+        return DependencyFactory::fromEntityManager(
             new JsonFile($this->rootDirPath . '/migrations.json'),
             new ExistingEntityManager($entityManager),
         );
-
-        $this->testDatabaseConnection($dependencyFactory);
-
-        return $dependencyFactory;
-    }
-
-    private function testDatabaseConnection(DependencyFactory $dependencyFactory) : void
-    {
-        try {
-            // In Doctrine DBAL 4.x, use getNativeConnection() to test the connection
-            $dependencyFactory->getEntityManager()->getConnection()->getNativeConnection();
-        } catch (Exception $exception) {
-            http_response_code(500);
-            echo '<h2>Error establishing a database connection</h2>';
-
-            if ($this->isDebugMode) {
-                echo sprintf('<pre>%s</pre>', $exception->getMessage());
-            }
-
-            exit;
-        }
     }
 }
