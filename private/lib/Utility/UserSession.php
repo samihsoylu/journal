@@ -28,7 +28,51 @@ final class UserSession
     private const string ENCODED_ENCRYPTION_KEY = 'EEK';
     private const string TIMEZONE = 'timezone';
 
-    public function __construct(private readonly Cache $cache) {}
+    private bool $isLoaded = false;
+
+    public function __construct(private readonly Cache $cache)
+    {
+        $this->autoLoad();
+    }
+
+    /**
+     * Automatically loads the session when UserSession is instantiated.
+     * This eliminates the need for explicit load() calls throughout the codebase.
+     */
+    private function autoLoad() : void
+    {
+        $sessionId = Session::get(self::SESSION_ID);
+        $encodedEncryptionKey = $_COOKIE[self::ENCODED_ENCRYPTION_KEY] ?? null;
+
+        if ( ! $sessionId || ! $encodedEncryptionKey) {
+            $this->isLoaded = false;
+
+            return;
+        }
+
+        /** @var CacheItem $item */
+        $item = $this->cache->getItem($sessionId);
+
+        if ( ! $item->isHit()) {
+            // Cache item has expired, user is no longer considered to be logged in
+            $this->isLoaded = false;
+
+            return;
+        }
+
+        $this->fromStruct($item->get());
+        $token = Session::get(self::ANTI_CSRF_TOKEN);
+
+        $this->setAntiCSRFToken($token);
+        $this->setEncodedEncryptionKey($encodedEncryptionKey);
+
+        $this->isLoaded = true;
+    }
+
+    public function exists() : bool
+    {
+        return $this->isLoaded;
+    }
 
     public function getSessionId() : ?string
     {
@@ -171,36 +215,6 @@ final class UserSession
         Session::put(self::SESSION_ID, $this->sessionId);
         Session::put(self::ANTI_CSRF_TOKEN, $this->antiCSRFToken);
         $this->setCookie(self::ENCODED_ENCRYPTION_KEY, $this->encodedEncryptionKey, time() + DEFAULT_SESSION_EXPIRY_TIME);
-    }
-
-    /**
-     * Reads the user $_SESSION and loads session data from cache if it exists.
-     * Returns true if session was loaded successfully, false if user is not logged in.
-     */
-    public function load() : bool
-    {
-        $sessionId = Session::get(self::SESSION_ID);
-        $encodedEncryptionKey = $_COOKIE[self::ENCODED_ENCRYPTION_KEY] ?? null;
-
-        if ( ! $sessionId || ! $encodedEncryptionKey) {
-            return false;
-        }
-
-        /** @var CacheItem $item */
-        $item = $this->cache->getItem($sessionId);
-
-        if ( ! $item->isHit()) {
-            // Cache item has expired, user is no longer considered to be logged in
-            return false;
-        }
-
-        $this->fromStruct($item->get());
-        $token = Session::get(self::ANTI_CSRF_TOKEN);
-
-        $this->setAntiCSRFToken($token);
-        $this->setEncodedEncryptionKey($encodedEncryptionKey);
-
-        return true;
     }
 
     /**

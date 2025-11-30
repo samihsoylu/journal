@@ -93,13 +93,7 @@ abstract class AbstractValidator
 
     protected function ensureUserHasProvidedValidAntiCSRFToken(?string $token) : void
     {
-        if ( ! $this->userSession instanceof UserSession) {
-            throw InvalidOperationException::userIsNotLoggedIn();
-        }
-
-        $loaded = $this->userSession->load();
-
-        if ( ! $loaded) {
+        if ( ! $this->userSession instanceof UserSession || ! $this->userSession->exists()) {
             throw InvalidOperationException::userIsNotLoggedIn();
         }
 

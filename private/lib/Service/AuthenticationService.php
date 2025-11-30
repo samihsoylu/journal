@@ -24,9 +24,7 @@ final readonly class AuthenticationService
 
     public function getUserSession() : ?UserSession
     {
-        $loaded = $this->userSession->load();
-
-        return $loaded ? $this->userSession : null;
+        return $this->userSession->exists() ? $this->userSession : null;
     }
 
     public function login(string $username, string $password) : void
