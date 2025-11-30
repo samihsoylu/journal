@@ -47,6 +47,7 @@
         "friendsofphp/php-cs-fixer": "^3.4",
         "phpstan/phpstan": "^2.0",
         "phpcompatibility/php-compatibility": "^9.3",
-        "rector/rector": "^2.2"
+        "rector/rector": "^2.2",
+        "symfony/var-dumper": "^8.0"
     }
 }
