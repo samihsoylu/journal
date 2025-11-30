@@ -100,6 +100,10 @@ $rules = [
     ],
     'phpdoc_summary' => true, // Ensure PHPDoc summary ends with period
     'phpdoc_trim_consecutive_blank_line_separation' => true,
+    'single_line_comment_style' => [
+        'comment_types' => ['hash'], // Only convert # comments to //, preserve /** @var */ for PHPStan
+    ],
+    'phpdoc_to_comment' => false, // Don't convert /** @var */ to /* @var */ (breaks PHPStan)
 
     // Strict comparisons and type safety
     'strict_comparison' => true, // Force === and !== instead of == and !=

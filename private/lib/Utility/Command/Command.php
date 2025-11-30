@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace App\Utility\Command;
 
 use LogicException;
+use Sentry\State\Scope;
 use Stringable;
+
+use function Sentry\configureScope;
 
 final readonly class Command implements Stringable
 {
@@ -45,7 +48,8 @@ final readonly class Command implements Stringable
 
         if ($exitCode !== 0) {
             if (SENTRY_ENABLED && $output !== []) {
-                \Sentry\configureScope(static function (\Sentry\State\Scope $scope) use ($output) : void {
+                configureScope(static function (Scope $scope) use ($output) : void {
+                    // @phpstan-ignore-next-line
                     $scope->setContext('Command output', $output);
                 });
             }

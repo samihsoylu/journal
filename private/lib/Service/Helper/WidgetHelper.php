@@ -9,12 +9,9 @@ use App\Database\Repository\WidgetRepository;
 
 final readonly class WidgetHelper
 {
-    private WidgetRepository $repository;
-
-    public function __construct()
-    {
-        $this->repository = new WidgetRepository();
-    }
+    public function __construct(
+        private WidgetRepository $repository,
+    ) {}
 
     public function getAllWidgetsForUser(User $user) : array
     {

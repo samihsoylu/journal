@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Exception\UserException;
+use App\Service\AuthenticationService;
 use App\Service\CategoryService;
 use App\Service\EntryService;
 use App\Service\TemplateService;
@@ -12,6 +13,7 @@ use App\Service\WidgetService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
+use App\Utility\Template;
 use App\Validator\EntryValidator;
 use DateTime;
 
@@ -30,12 +32,13 @@ final class Entry extends AbstractController
 
     public function __construct(
         AuthenticationService $authenticationService,
+        Template $template,
         private readonly EntryService $service,
         private readonly CategoryService $categoryService,
         private readonly WidgetService $widgetService,
         private readonly TemplateService $templateService,
     ) {
-        parent::__construct($authenticationService);
+        parent::__construct($authenticationService, $template);
 
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
@@ -50,7 +53,7 @@ final class Entry extends AbstractController
     {
         $this->template->setVariable('get', $_GET);
 
-        // @see EntryValidator::index()
+        /** @see EntryValidator::index() */
         $this->validator->validate(__FUNCTION__);
 
         $searchQuery = Sanitize::getVariable($_GET, 'search_by_title', Sanitize::TYPE_STRING);
@@ -124,7 +127,7 @@ final class Entry extends AbstractController
      */
     public function create() : void
     {
-        // @see EntryValidator::create()
+        /** @see EntryValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
         $categoryId = Sanitize::int($_POST['category_id']);
@@ -161,9 +164,9 @@ final class Entry extends AbstractController
     /**
      * Update an entry.
      */
-    public function update() : void
+    public function update() : never
     {
-        // @see EntryValidator::update()
+        /** @see EntryValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
         $entryId = Sanitize::int($this->getRouteParameters()['id']);
@@ -218,14 +221,14 @@ final class Entry extends AbstractController
     /**
      * Delete an existing entry.
      */
-    public function delete() : void
+    public function delete() : never
     {
         $entryId = Sanitize::int($this->getRouteParameters()['id']);
 
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
-        // @see EntryValidator::delete()
+        /** @see EntryValidator::delete() */
         $this->validator->validate(__FUNCTION__);
 
         $this->service->deleteEntry($entryId, $this->getUserId());
@@ -238,7 +241,7 @@ final class Entry extends AbstractController
     /**
      * Redirect user to all entries page.
      */
-    public function deleteView() : void
+    public function deleteView() : never
     {
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::ENTRIES_URL);

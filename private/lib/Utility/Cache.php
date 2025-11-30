@@ -5,27 +5,31 @@ declare(strict_types=1);
 namespace App\Utility;
 
 use Symfony\Component\Cache\Adapter\FilesystemAdapter;
-use Symfony\Contracts\Cache\CacheInterface;
 
 /**
- * Cache utility that instantiates Symfony/Cache.
+ * Cache utility that provides Symfony/Cache FilesystemAdapter.
  */
-final class Cache
+final readonly class Cache
 {
-    private static $instance;
-    public CacheInterface $cache;
+    private FilesystemAdapter $cache;
 
-    private function __construct()
+    public function __construct()
     {
         $this->cache = new FilesystemAdapter('', DEFAULT_CACHE_EXPIRY_TIME, SESSION_CACHE_PATH);
     }
 
-    public static function getInstance() : FilesystemAdapter
+    public function getItem(string $key) : mixed
     {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
+        return $this->cache->getItem($key);
+    }
 
-        return self::$instance->cache;
+    public function save(mixed $item) : bool
+    {
+        return $this->cache->save($item);
+    }
+
+    public function delete(string $key) : bool
+    {
+        return $this->cache->delete($key);
     }
 }

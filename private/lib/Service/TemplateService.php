@@ -33,7 +33,7 @@ final readonly class TemplateService
         return $this->templateHelper->getAllTemplatesForUser($user);
     }
 
-    public function getTemplateForUser(int $templateId, int $userId, Key $key, bool $getTemplateContentAsMarkup = false) : TemplateDecorator
+    public function getTemplateForUser(int $templateId, int $userId, Key $key) : TemplateDecorator
     {
         $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 

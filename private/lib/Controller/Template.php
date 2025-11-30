@@ -11,6 +11,7 @@ use App\Service\TemplateService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
+use App\Utility\Template as TemplateUtility;
 use App\Validator\TemplateValidator;
 
 final class Template extends AbstractController
@@ -29,10 +30,11 @@ final class Template extends AbstractController
 
     public function __construct(
         AuthenticationService $authenticationService,
+        TemplateUtility $template,
         private readonly TemplateService $service,
         private readonly CategoryService $categoryService,
     ) {
-        parent::__construct($authenticationService);
+        parent::__construct($authenticationService, $template);
 
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
@@ -48,9 +50,9 @@ final class Template extends AbstractController
         $this->renderTemplate('template/all');
     }
 
-    public function create() : void
+    public function create() : never
     {
-        // @see TemplateValidator::create()
+        /** @see TemplateValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
         $categoryId = Sanitize::int($_POST['category_id']);
@@ -72,11 +74,11 @@ final class Template extends AbstractController
         $this->renderTemplate('template/create');
     }
 
-    public function update() : void
+    public function update() : never
     {
         $this->template->setVariable('post', $_POST);
 
-        // @see TemplateValidator::update()
+        /** @see TemplateValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
         $categoryId = Sanitize::int($_POST['category_id']);
@@ -123,14 +125,14 @@ final class Template extends AbstractController
         $this->renderTemplate('template/update');
     }
 
-    public function delete() : void
+    public function delete() : never
     {
         $templateId = Sanitize::int($this->getRouteParameters()['id']);
 
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
-        // @see TemplateValidator::delete()
+        /** @see TemplateValidator::delete() */
         $this->validator->validate(__FUNCTION__);
 
         $this->service->deleteTemplate($templateId, $this->getUserId());
@@ -140,7 +142,7 @@ final class Template extends AbstractController
         $this->deleteView();
     }
 
-    public function deleteView() : void
+    public function deleteView() : never
     {
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::TEMPLATES_URL);

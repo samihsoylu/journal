@@ -14,6 +14,11 @@ final class UserSession
 {
     private string $antiCSRFToken;
     private string $encodedEncryptionKey;
+    private ?string $sessionId = null;
+    private ?int $userId = null;
+    private ?string $username = null;
+    private ?int $privilegeLevel = null;
+    private ?string $timezone = null;
 
     private const string SESSION_ID = 'SessionID';
     private const string USER_ID = 'UserID';
@@ -23,50 +28,44 @@ final class UserSession
     private const string ENCODED_ENCRYPTION_KEY = 'EEK';
     private const string TIMEZONE = 'timezone';
 
-    private function __construct(
-        private string $sessionId,
-        private int $userId,
-        private string $username,
-        private int $privilegeLevel,
-        private ?string $timezone,
-    ) {}
+    public function __construct(private readonly Cache $cache) {}
 
-    public function getSessionId() : string
+    public function getSessionId() : ?string
     {
         return $this->sessionId;
     }
 
-    public function setSessionId(string $sessionId) : void
+    private function setSessionId(string $sessionId) : void
     {
         $this->sessionId = $sessionId;
     }
 
-    public function getUserId() : int
+    public function getUserId() : ?int
     {
         return $this->userId;
     }
 
-    public function setUserId(int $userId) : void
+    private function setUserId(int $userId) : void
     {
         $this->userId = $userId;
     }
 
-    public function getUsername() : string
+    public function getUsername() : ?string
     {
         return $this->username;
     }
 
-    public function setUsername(string $username) : void
+    private function setUsername(string $username) : void
     {
         $this->username = $username;
     }
 
-    public function getPrivilegeLevel() : int
+    public function getPrivilegeLevel() : ?int
     {
         return $this->privilegeLevel;
     }
 
-    public function setPrivilegeLevel(int $privilegeLevel) : void
+    private function setPrivilegeLevel(int $privilegeLevel) : void
     {
         $this->privilegeLevel = $privilegeLevel;
     }
@@ -101,15 +100,13 @@ final class UserSession
         $this->timezone = $timezone;
     }
 
-    private static function fromStruct(array $struct) : self
+    private function fromStruct(array $struct) : void
     {
-        return new self(
-            $struct[self::SESSION_ID],
-            $struct[self::USER_ID],
-            $struct[self::USER_NAME],
-            $struct[self::USER_PRIVILEGE_LEVEL],
-            $struct[self::TIMEZONE] ?? null,
-        );
+        $this->setSessionId($struct[self::SESSION_ID]);
+        $this->setUserId($struct[self::USER_ID]);
+        $this->setUsername($struct[self::USER_NAME]);
+        $this->setPrivilegeLevel($struct[self::USER_PRIVILEGE_LEVEL]);
+        $this->setTimezone($struct[self::TIMEZONE] ?? null);
     }
 
     private function toStruct() : array
@@ -136,29 +133,25 @@ final class UserSession
         $this->save();
     }
 
-    public static function create(
+    public function create(
         int $userId,
         string $username,
         int $privilegeLevel,
         string $encodedEncryptionKey,
         ?string $timezone,
-    ) : self {
+    ) : void {
         // Generate a cryptographically secure random session ID
         $sessionId = bin2hex(random_bytes(32));
 
-        $self = new self(
-            $sessionId,
-            $userId,
-            $username,
-            $privilegeLevel,
-            $timezone,
-        );
+        $this->setSessionId($sessionId);
+        $this->setUserId($userId);
+        $this->setUsername($username);
+        $this->setPrivilegeLevel($privilegeLevel);
+        $this->setTimezone($timezone);
 
-        $self->antiCSRFToken = self::generateNewAntiCSRFToken($sessionId);
-        $self->setEncodedEncryptionKey($encodedEncryptionKey);
-        $self->save();
-
-        return $self;
+        $this->antiCSRFToken = self::generateNewAntiCSRFToken($sessionId);
+        $this->setEncodedEncryptionKey($encodedEncryptionKey);
+        $this->save();
     }
 
     /**
@@ -166,58 +159,54 @@ final class UserSession
      */
     public function save() : void
     {
-        $cache = Cache::getInstance();
-
         // Get or create a cache item
-        $item = $cache->getItem($this->sessionId);
+        $item = $this->cache->getItem($this->sessionId);
 
-        // @var CacheItem $item
+        /** @var CacheItem $item */
         $item->set($this->toStruct());
         $item->expiresAfter(DEFAULT_SESSION_EXPIRY_TIME);
 
-        $cache->save($item);
+        $this->cache->save($item);
 
         Session::put(self::SESSION_ID, $this->sessionId);
         Session::put(self::ANTI_CSRF_TOKEN, $this->antiCSRFToken);
-        self::setCookie(self::ENCODED_ENCRYPTION_KEY, $this->encodedEncryptionKey, time() + DEFAULT_SESSION_EXPIRY_TIME);
+        $this->setCookie(self::ENCODED_ENCRYPTION_KEY, $this->encodedEncryptionKey, time() + DEFAULT_SESSION_EXPIRY_TIME);
     }
 
     /**
-     * Reads the user $_SESSION and returns an UserSession instance if it exists in the cache. Returns null if user is
-     * not logged in.
+     * Reads the user $_SESSION and loads session data from cache if it exists.
+     * Returns true if session was loaded successfully, false if user is not logged in.
      */
-    public static function load() : ?self
+    public function load() : bool
     {
         $sessionId = Session::get(self::SESSION_ID);
         $encodedEncryptionKey = $_COOKIE[self::ENCODED_ENCRYPTION_KEY] ?? null;
 
         if ( ! $sessionId || ! $encodedEncryptionKey) {
-            return null;
+            return false;
         }
 
-        $cache = Cache::getInstance();
-
         /** @var CacheItem $item */
-        $item = $cache->getItem($sessionId);
+        $item = $this->cache->getItem($sessionId);
 
         if ( ! $item->isHit()) {
             // Cache item has expired, user is no longer considered to be logged in
-            return null;
+            return false;
         }
 
-        $userSession = self::fromStruct($item->get());
+        $this->fromStruct($item->get());
         $token = Session::get(self::ANTI_CSRF_TOKEN);
 
-        $userSession->setAntiCSRFToken($token);
-        $userSession->setEncodedEncryptionKey($encodedEncryptionKey);
+        $this->setAntiCSRFToken($token);
+        $this->setEncodedEncryptionKey($encodedEncryptionKey);
 
-        return $userSession;
+        return true;
     }
 
     /**
-     * Deletes an existing user session by clearing the cache and user $_SESSION.
+     * Deletes the current user session by clearing the cache and user $_SESSION.
      */
-    public static function destroy() : void
+    public function destroy() : void
     {
         $sessionId = Session::get(self::SESSION_ID);
 
@@ -225,20 +214,19 @@ final class UserSession
             return;
         }
 
-        $cache = Cache::getInstance();
-        $cacheItem = $cache->getItem($sessionId);
+        $cacheItem = $this->cache->getItem($sessionId);
 
         if ($cacheItem->isHit()) {
-            $cache->delete($sessionId);
+            $this->cache->delete($sessionId);
         }
 
         unset($_COOKIE[self::ENCODED_ENCRYPTION_KEY]);
-        self::setCookie(self::ENCODED_ENCRYPTION_KEY, '', time() - 3600);
+        $this->setCookie(self::ENCODED_ENCRYPTION_KEY, '', time() - 3600);
 
         Session::destroy();
     }
 
-    private static function setCookie(string $cookieName, string $cookieValue, int $cookieExpiryTime) : void
+    private function setCookie(string $cookieName, string $cookieValue, int $cookieExpiryTime) : void
     {
         $options = [
             'expires' => $cookieExpiryTime,

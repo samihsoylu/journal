@@ -11,12 +11,12 @@ use function Sentry\captureException;
 
 final readonly class ExceptionHandler
 {
-    private Template $templatingEngine;
     private Notification $notifier;
 
-    public function __construct(private Throwable $exception)
-    {
-        $this->templatingEngine = Template::getInstance();
+    public function __construct(
+        private Throwable $exception,
+        private Template $templatingEngine,
+    ) {
         $this->notifier = new Notification();
     }
 
@@ -48,7 +48,7 @@ final readonly class ExceptionHandler
      */
     public function userException(object $controller, string $methodName) : void
     {
-        $this->setNotification($this->getException()->getMessage());
+        $this->setNotification($this->exception->getMessage());
 
         if ( ! str_contains($methodName, 'View')) {
             // Ensures action template is renamed to view, example: login() changes to loginView()
@@ -66,13 +66,13 @@ final readonly class ExceptionHandler
     public function genericException() : void
     {
         if (DEBUG_MODE) {
-            throw $this->getException();
+            throw $this->exception;
         }
 
         // Send exception to Sentry for tracking and monitoring
         // Sentry provides stack traces, user context, request data, and notifications
         if (SENTRY_ENABLED) {
-            captureException($this->getException());
+            captureException($this->exception);
         }
 
         http_response_code(500);

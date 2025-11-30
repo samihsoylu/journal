@@ -19,11 +19,14 @@ final readonly class AuthenticationService
     public function __construct(
         private UserRepository $repository,
         private AuthenticationHelper $helper,
+        private UserSession $userSession,
     ) {}
 
     public function getUserSession() : ?UserSession
     {
-        return UserSession::load();
+        $loaded = $this->userSession->load();
+
+        return $loaded ? $this->userSession : null;
     }
 
     public function login(string $username, string $password) : void
@@ -49,7 +52,7 @@ final readonly class AuthenticationService
             $password,
         );
 
-        UserSession::create(
+        $this->userSession->create(
             $user->getId(),
             $user->getUsername(),
             $user->getPrivilegeLevel(),
@@ -62,7 +65,7 @@ final readonly class AuthenticationService
 
     public function logout() : void
     {
-        UserSession::destroy();
+        $this->userSession->destroy();
     }
 
     public function isUserLoggedIn() : bool
@@ -125,8 +128,8 @@ final readonly class AuthenticationService
         $session = $this->getUserSession();
         $this->ensureSessionIsNotNull($session);
 
-        $session->setTimezone($timezone);
-        $session->save();
+        $this->userSession->setTimezone($timezone);
+        $this->userSession->save();
     }
 
     private function ensureSessionIsNotNull(?UserSession $session) : void

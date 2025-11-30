@@ -13,41 +13,27 @@ use ReflectionClass;
 final class Template
 {
     /**
-     * @var null|self look up singleton design pattern
-     */
-    private static $instance;
-
-    /**
      * @var Blade templating library
      */
-    private Blade $blade;
+    private readonly Blade $blade;
 
     /**
      * @var Notification used to show notification to the user
      */
-    private Notification $notification;
+    private readonly Notification $notification;
 
     /**
      * @var array list of variables that will be passed on to the template
      */
     private array $variables;
 
-    private function __construct()
+    public function __construct()
     {
         $this->blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH);
         $this->notification = new Notification();
 
         $this->setAllUrlConstantsToVariables();
         $this->setDefaultVariables();
-    }
-
-    public static function getInstance() : self
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-
-        return self::$instance;
     }
 
     /**

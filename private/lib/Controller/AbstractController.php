@@ -24,15 +24,13 @@ abstract class AbstractController
      */
     private readonly Notification $notification;
 
-    /**
-     * @var Template allows inheriting controller classes to render templates
-     */
-    protected Template $template;
-
     public function __construct(
         private readonly AuthenticationService $authenticationService,
+        /**
+         * @var Template allows inheriting controller classes to render templates
+         */
+        protected Template $template,
     ) {
-        $this->template = Template::getInstance();
         $this->notification = new Notification();
 
         if (SENTRY_ENABLED) {

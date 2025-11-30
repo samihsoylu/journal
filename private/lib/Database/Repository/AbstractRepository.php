@@ -6,7 +6,6 @@ namespace App\Database\Repository;
 
 use App\Database\Model\ModelInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\ORMException;
 
 abstract class AbstractRepository
 {
@@ -50,8 +49,6 @@ abstract class AbstractRepository
     /**
      * Queue model to be removed from the database. This function call must follow with the save method for the model
      * changes to go in to effect.
-     *
-     * @throws ORMException
      */
     public function remove(ModelInterface $model) : void
     {

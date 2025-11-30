@@ -11,6 +11,7 @@ use App\Service\CategoryService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
+use App\Utility\Template;
 use App\Validator\CategoryValidator;
 
 final class Category extends AbstractController
@@ -26,13 +27,14 @@ final class Category extends AbstractController
     public const string DELETE_CATEGORY_URL = self::READ_CATEGORY_URL . '/delete/{antiCsrfToken}';
     public const string SET_CATEGORY_ORDER_URL = self::CATEGORIES_URL . '/ajax/sort-order';
 
-    protected CategoryValidator $validator;
+    private readonly CategoryValidator $validator;
 
     public function __construct(
         AuthenticationService $authenticationService,
-        protected CategoryService $service,
+        Template $template,
+        private readonly CategoryService $service,
     ) {
-        parent::__construct($authenticationService);
+        parent::__construct($authenticationService, $template);
 
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
@@ -54,9 +56,9 @@ final class Category extends AbstractController
     /**
      * Create a new category.
      */
-    public function create() : void
+    public function create() : never
     {
-        // @see CategoryValidator::create()
+        /** @see CategoryValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
         $title = Sanitize::string($_POST['category_name']);
@@ -83,9 +85,9 @@ final class Category extends AbstractController
     /**
      * Update an existing category.
      */
-    public function update() : void
+    public function update() : never
     {
-        // @see CategoryValidator::update()
+        /** @see CategoryValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
         $categoryId = Sanitize::int($this->getRouteParameters()['id']);
@@ -123,14 +125,14 @@ final class Category extends AbstractController
     /**
      * Delete a category.
      */
-    public function delete() : void
+    public function delete() : never
     {
         $categoryId = Sanitize::int($this->getRouteParameters()['id']);
 
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
-        // @see CategoryValidator::delete()
+        /** @see CategoryValidator::delete() */
         $this->validator->validate(__FUNCTION__);
 
         $this->service->deleteCategory($this->getUserId(), $categoryId);
@@ -143,7 +145,7 @@ final class Category extends AbstractController
     /**
      * Redirect the user to all categories page.
      */
-    public function deleteView() : void
+    public function deleteView() : never
     {
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::CATEGORIES_URL);
@@ -151,7 +153,7 @@ final class Category extends AbstractController
 
     public function setCategoryOrder() : void
     {
-        // @see CategoryValidator::setCategoryOrder()
+        /** @see CategoryValidator::setCategoryOrder() */
         $this->validator->validate(__FUNCTION__);
 
         $sortOrders = $_POST['orderedCategoryIds'];

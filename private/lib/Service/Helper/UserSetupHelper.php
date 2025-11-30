@@ -8,6 +8,7 @@ use App\Database\Model\Category;
 use App\Database\Model\Template;
 use App\Database\Model\User;
 use App\Database\Repository\CategoryRepository;
+use App\Database\Repository\TemplateRepository;
 use App\Database\Repository\UserRepository;
 use Defuse\Crypto\Key;
 use RuntimeException;
@@ -23,6 +24,7 @@ final readonly class UserSetupHelper
         private Key $userEncryptionKey,
         private UserRepository $repository,
         private CategoryRepository $categoryRepository,
+        private TemplateRepository $templateRepository,
     ) {}
 
     public function setDefaults() : void
@@ -78,7 +80,9 @@ final readonly class UserSetupHelper
             )
             ->setReferencedCategory($foodCategory)
             ->setReferencedUser($this->user)
-            ->save()
         ;
+
+        $this->templateRepository->queue($food);
+        $this->templateRepository->save();
     }
 }

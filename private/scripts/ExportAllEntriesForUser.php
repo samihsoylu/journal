@@ -11,10 +11,12 @@ use App\Utility\Lock\Lock;
 use App\Utility\Lock\LockName;
 use App\Utility\Sanitize;
 use Defuse\Crypto\Key;
+use Doctrine\ORM\EntityManagerInterface;
 use Jenssegers\Blade\Blade;
 
 require dirname(__DIR__) . '/init.php';
 
+/** @var App\Framework\Kernel $kernel */
 if (count($argv) !== 4) {
     printf("Usage: %s <userId> <username> <encodedEncryptionKey>\n", $_SERVER['PHP_SELF']);
     exit(1);
@@ -29,8 +31,10 @@ $lock = Lock::acquire($lockName);
 
 try {
     $encryptionKey = new Encryptor()->getKeyFromEncodedKey($encodedEncryptionKey);
+    $entityManager = $kernel->get(EntityManagerInterface::class);
+    $entryRepository = new EntryRepository($entityManager);
 
-    $export = new EntryExporter($userId, $username, $encryptionKey, new EntryRepository());
+    $export = new ExportAllEntriesForUser($userId, $username, $encryptionKey, $entryRepository);
     $export->execute();
 } catch (Exception $exception) {
     $date = new DateTime();

@@ -6,4 +6,4 @@ namespace App\Exception;
 
 use Exception;
 
-final class UserException extends Exception {}
+abstract class UserException extends Exception {}

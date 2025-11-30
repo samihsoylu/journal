@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Database\Model\User;
+use App\Database\Repository\CategoryRepository;
+use App\Database\Repository\TemplateRepository;
 use App\Database\Repository\UserRepository;
 use App\Exception\UserException\ActionNotPermittedException;
 use App\Exception\UserException\InvalidArgumentException;
@@ -33,12 +35,15 @@ final readonly class UserService
 
     public function __construct(
         private UserRepository $repository,
+        private CategoryRepository $categoryRepository,
+        private TemplateRepository $templateRepository,
         private UserHelper $userHelper,
         private CategoryHelper $categoryHelper,
         private EntryHelper $entryHelper,
         private WidgetHelper $widgetHelper,
         private TemplateHelper $templateHelper,
         private MediaHelper $mediaHelper,
+        private UserSession $userSession,
     ) {}
 
     /**
@@ -96,11 +101,13 @@ final readonly class UserService
             ->setEmailAddress($email)
             ->setPrivilegeLevel($privilegeLevel)
             ->setEncryptionKey($protectedEncryptionKey)
-            ->save()
         ;
 
+        $this->repository->queue($user);
+        $this->repository->save();
+
         $key = $encryptor->getKeyFromProtectedKey($protectedEncryptionKey, $password);
-        $setup = new UserSetupHelper($user, $key);
+        $setup = new UserSetupHelper($user, $key, $this->repository, $this->categoryRepository, $this->templateRepository);
         $setup->setDefaults();
 
         return $user->getId();
@@ -171,7 +178,7 @@ final readonly class UserService
 
         $this->deleteUser($user);
 
-        UserSession::destroy();
+        $this->userSession->destroy();
     }
 
     public function deleteUser(User $targetUser) : void
@@ -245,7 +252,9 @@ final readonly class UserService
         $encryptor = new Encryptor();
         $newEncryptedKey = $encryptor->changePassword($user->getEncryptionKey(), $currentPassword, $newPassword);
         $user->setEncryptionKey($newEncryptedKey);
-        $user->save();
+
+        $this->repository->queue($user);
+        $this->repository->save();
     }
 
     public function getUser(int $loggedInUserId) : User
@@ -257,7 +266,9 @@ final readonly class UserService
     {
         $user = $this->userHelper->getUserById($userId);
         $user->setEmailAddress($newEmailAddress);
-        $user->save();
+
+        $this->repository->queue($user);
+        $this->repository->save();
     }
 
     /**
@@ -359,6 +370,8 @@ final readonly class UserService
     {
         $user = $this->userHelper->getUserById($getUserId);
         $user->setTimezone($timezone);
-        $user->save();
+
+        $this->repository->queue($user);
+        $this->repository->save();
     }
 }

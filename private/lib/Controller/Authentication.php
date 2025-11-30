@@ -9,6 +9,7 @@ use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
 use App\Utility\Session;
+use App\Utility\Template;
 use App\Utility\UserSession;
 use App\Validator\AuthenticationValidator;
 
@@ -23,8 +24,9 @@ final class Authentication extends AbstractController
 
     public function __construct(
         private readonly AuthenticationService $authenticationService,
+        Template $template,
     ) {
-        parent::__construct($authenticationService);
+        parent::__construct($authenticationService, $template);
 
         $this->validator = new AuthenticationValidator($_POST);
     }
@@ -36,7 +38,7 @@ final class Authentication extends AbstractController
     {
         $this->redirectLoggedInUsersToDashboard();
 
-        // @see AuthenticationValidator::login()
+        /** @see AuthenticationValidator::login() */
         $this->validator->validate(__FUNCTION__);
 
         $username = Sanitize::string($_POST['username'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
@@ -75,7 +77,7 @@ final class Authentication extends AbstractController
     /**
      * Logout a user.
      */
-    public function logout() : void
+    public function logout() : never
     {
         $this->authenticationService->logout();
 

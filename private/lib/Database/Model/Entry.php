@@ -26,11 +26,11 @@ class Entry extends AbstractModel
     #[ORM\GeneratedValue]
     protected int $id;
 
-    #[ManyToOne(targetEntity: \Category::class)]
+    #[ManyToOne(targetEntity: Category::class)]
     #[JoinColumn(name: 'categoryId', referencedColumnName: 'id', nullable: false)]
     protected Category $referencedCategory;
 
-    #[ManyToOne(targetEntity: \User::class)]
+    #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(name: 'userId', referencedColumnName: 'id', nullable: false)]
     protected User $referencedUser;
 

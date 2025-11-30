@@ -13,6 +13,7 @@ abstract class AbstractValidator
     public function __construct(
         protected array $post,
         protected array $get = [],
+        protected ?UserSession $userSession = null,
     ) {}
 
     /**
@@ -92,17 +93,21 @@ abstract class AbstractValidator
 
     protected function ensureUserHasProvidedValidAntiCSRFToken(?string $token) : void
     {
-        $session = UserSession::load();
-
-        if ( ! $session instanceof UserSession) {
+        if ( ! $this->userSession instanceof UserSession) {
             throw InvalidOperationException::userIsNotLoggedIn();
         }
 
-        if ($token === null || hash_equals($session->getAntiCSRFToken(), $token) === false) {
+        $loaded = $this->userSession->load();
+
+        if ( ! $loaded) {
+            throw InvalidOperationException::userIsNotLoggedIn();
+        }
+
+        if ($token === null || hash_equals($this->userSession->getAntiCSRFToken(), $token) === false) {
             throw InvalidParameterException::invalidFormKey();
         }
 
         // regenerate so that in the next request the user has a different token
-        $session->regenerateNewAntiCSRFToken();
+        $this->userSession->regenerateNewAntiCSRFToken();
     }
 }

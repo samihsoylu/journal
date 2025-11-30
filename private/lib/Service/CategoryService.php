@@ -147,7 +147,9 @@ final readonly class CategoryService
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
         $category->setSortOrder($order);
-        $category->save();
+
+        $this->repository->queue($category);
+        $this->repository->save();
     }
 
     private function ensureUnCategorizedCategoryExists(User $user) : Category
@@ -160,8 +162,10 @@ final readonly class CategoryService
                 ->setDescription(Category::UNCATEGORIZED_CATEGORY_DESCRIPTION)
                 ->setReferencedUser($user)
                 ->setSortOrder(2147483646)
-                ->save()
             ;
+
+            $this->repository->queue($category);
+            $this->repository->save();
         }
 
         return $category;

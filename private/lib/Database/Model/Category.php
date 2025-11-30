@@ -25,7 +25,7 @@ class Category extends AbstractModel
     #[ORM\GeneratedValue]
     protected int $id;
 
-    #[ManyToOne(targetEntity: \User::class)]
+    #[ManyToOne(targetEntity: User::class)]
     #[JoinColumn(name: 'userId', referencedColumnName: 'id', nullable: false)]
     protected User $referencedUser;
 

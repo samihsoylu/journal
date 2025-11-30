@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Service\AuthenticationService;
 use App\Service\MediaService;
 use App\Service\ValueObject\Image;
+use App\Utility\Template;
 use Exception;
 
 final class Media extends AbstractController
@@ -17,9 +18,10 @@ final class Media extends AbstractController
 
     public function __construct(
         AuthenticationService $authenticationService,
+        Template $template,
         public MediaService $service,
     ) {
-        parent::__construct($authenticationService);
+        parent::__construct($authenticationService, $template);
 
         $this->redirectLoggedOutUsersToLoginPage();
     }

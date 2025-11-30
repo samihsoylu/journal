@@ -7,6 +7,7 @@ namespace App;
 use App\Controller\Error;
 use App\Exception\UserException;
 use App\Utility\ExceptionHandler;
+use App\Utility\Template;
 use DI\Container;
 use Exception;
 use FastRoute\Dispatcher;
@@ -89,17 +90,19 @@ final class Router
 
                 try {
                     $controller->{$methodName}();
+                    // @phpstan-ignore-next-line
                 } catch (Exception|Throwable $exception) {
-                    self::handleException($exception, $controller, $methodName);
+                    self::handleException($exception, $controller, $methodName, $container);
                 }
 
                 break;
         } // end of switch
     }
 
-    private static function handleException(Throwable $exception, object $controller, string $methodName) : void
+    private static function handleException(Throwable $exception, object $controller, string $methodName, Container $container) : void
     {
-        $handleException = new ExceptionHandler($exception);
+        $template = $container->get(Template::class);
+        $handleException = new ExceptionHandler($exception, $template);
 
         if ($exception instanceof UserException) {
             $handleException->userException($controller, $methodName);

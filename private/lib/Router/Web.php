@@ -11,7 +11,7 @@ use App\Controller\Template;
 use App\Controller\User;
 use App\Controller\Welcome;
 
-// @var FastRoute\RouteCollector $route
+/** @var FastRoute\RouteCollector $route */
 // Welcome
 $route->addRoute('GET', BASE_URL, 'Welcome@index');
 $route->addRoute('GET', Welcome::DASHBOARD_URL, 'Welcome@dashboard');

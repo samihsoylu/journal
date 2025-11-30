@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Database\Model;
 
-use App\Database\Database;
 use DateTime;
 use DateTimeZone;
+use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Class AbstractModel represents all tables in the database. The properties defined in this file are present in every
  * table. Columns such as id, created & updated dates are enforced here on to all models.
  */
+#[ORM\HasLifecycleCallbacks]
 abstract class AbstractModel implements ModelInterface
 {
     protected int $id;
@@ -81,12 +82,21 @@ abstract class AbstractModel implements ModelInterface
         return str_replace(__NAMESPACE__ . '\\', '', static::class);
     }
 
-    public function save() : void
+    /**
+     * Doctrine lifecycle callback - called before persist (insert).
+     */
+    #[ORM\PrePersist]
+    public function onPrePersist() : void
     {
         $this->setLastUpdatedTimestamp();
+    }
 
-        $db = Database::getInstance()->getEntityManager();
-        $db->persist($this);
-        $db->flush();
+    /**
+     * Doctrine lifecycle callback - called before update.
+     */
+    #[ORM\PreUpdate]
+    public function onPreUpdate() : void
+    {
+        $this->setLastUpdatedTimestamp();
     }
 }

@@ -10,6 +10,7 @@ use App\Service\UserService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
+use App\Utility\Template;
 use App\Validator\UserValidator;
 
 final class User extends AbstractController
@@ -26,9 +27,10 @@ final class User extends AbstractController
 
     public function __construct(
         AuthenticationService $authenticationService,
+        Template $template,
         private readonly UserService $service,
     ) {
-        parent::__construct($authenticationService);
+        parent::__construct($authenticationService, $template);
 
         // for every action in this controller, the user must be logged in and have admin rights
         $this->redirectLoggedOutUsersToLoginPage();
@@ -51,9 +53,9 @@ final class User extends AbstractController
     /**
      * Create a user.
      */
-    public function create() : void
+    public function create() : never
     {
-        // @see UserValidator::create()
+        /** @see UserValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
         $username = Sanitize::string($_POST['username'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
@@ -112,14 +114,14 @@ final class User extends AbstractController
     /**
      * Delete a user.
      */
-    public function delete() : void
+    public function delete() : never
     {
         $targetUserId = Sanitize::int($this->getRouteParameters()['id']);
 
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
-        // @see UserValidator::delete()
+        /** @see UserValidator::delete() */
         $this->validator->validate(__FUNCTION__);
 
         $this->service->deleteUserForAdmin($this->getUserId(), $targetUserId);
@@ -132,7 +134,7 @@ final class User extends AbstractController
     /**
      * Redirect user to all users page.
      */
-    public function deleteView() : void
+    public function deleteView() : never
     {
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::USERS_URL);

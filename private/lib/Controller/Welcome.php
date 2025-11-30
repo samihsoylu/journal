@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Service\AuthenticationService;
 use App\Service\EntryService;
+use App\Utility\Template;
 
 final class Welcome extends AbstractController
 {
@@ -13,10 +14,11 @@ final class Welcome extends AbstractController
 
     public function __construct(
         AuthenticationService $authenticationService,
+        Template $template,
         private readonly EntryService $entryService,
         private readonly Authentication $authenticationController,
     ) {
-        parent::__construct($authenticationService);
+        parent::__construct($authenticationService, $template);
     }
 
     public function index() : void
