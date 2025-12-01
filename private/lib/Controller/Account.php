@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Service\AuthenticationService;
+use App\Service\UserExportService;
 use App\Service\UserService;
 use App\Service\WidgetService;
 use App\Utility\Notification;
@@ -32,6 +33,7 @@ final class Account extends AbstractController
         private readonly AuthenticationService $authenticationService,
         Template $template,
         private readonly UserService $userService,
+        private readonly UserExportService $userExportService,
         private readonly WidgetService $widgetService,
         private readonly Sanitize $sanitize,
     ) {
@@ -54,7 +56,7 @@ final class Account extends AbstractController
         $enabledWidgets = $this->widgetService->getEnabledWidgetsForUser($this->getUserId());
         $this->template->setVariable('enabledWidgets', $enabledWidgets);
 
-        $exportedFiles = $this->userService->getZipFileNamesForExportedEntriesByUser($this->getUserId());
+        $exportedFiles = $this->userExportService->getZipFileNamesForExportedEntriesByUser($this->getUserId());
         $this->template->setVariable('exportedFiles', $exportedFiles);
 
         $this->renderTemplate('account/index');
@@ -159,7 +161,7 @@ final class Account extends AbstractController
     {
         $this->validator->validate(__FUNCTION__);
 
-        $processId = $this->userService->exportUserEntries($this->getUserId(), $this->getUserEncryptionKey());
+        $processId = $this->userExportService->exportUserEntries($this->getUserId(), $this->getUserEncryptionKey());
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
@@ -178,7 +180,7 @@ final class Account extends AbstractController
     {
         $targetFileName = $this->getRouteParameters()['fileName'];
 
-        $filePath = $this->userService->getZipFilePathForExportedEntriesByUser($this->getUserId(), $targetFileName);
+        $filePath = $this->userExportService->getZipFilePathForExportedEntriesByUser($this->getUserId(), $targetFileName);
 
         if ($filePath === null) {
             http_response_code(404);
@@ -202,7 +204,7 @@ final class Account extends AbstractController
 
         $targetFileName = $_POST['fileName'];
 
-        $this->userService->deleteExportedEntriesZipFile($this->getUserId(), $targetFileName);
+        $this->userExportService->deleteExportedEntriesZipFile($this->getUserId(), $targetFileName);
 
         $this->setNotification(Notification::TYPE_SUCCESS, sprintf('Removed %s successfully', $targetFileName));
         $this->deleteEntryExportView();
