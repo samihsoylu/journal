@@ -32,8 +32,17 @@ final class ContainerFactory
 
     private function loadConfigs(Container $container, string $env) : void
     {
-        $servicesPath = "{$this->configPath}/services/{$env}";
+        // Always load prod configs first as the base
+        $this->loadConfigsFromPath($container, "{$this->configPath}/services/prod");
 
+        // Then load environment-specific configs (may override prod)
+        if ($env !== 'prod') {
+            $this->loadConfigsFromPath($container, "{$this->configPath}/services/{$env}");
+        }
+    }
+
+    private function loadConfigsFromPath(Container $container, string $servicesPath) : void
+    {
         if ( ! is_dir($servicesPath)) {
             return;
         }
