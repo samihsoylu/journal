@@ -224,7 +224,6 @@ start_mariadb() {
 
     while [ $attempt -lt $max_attempts ]; do
         if docker compose exec -T database healthcheck.sh --connect --innodb_initialized >/dev/null 2>&1; then
-            print_success "MariaDB"
             break
         fi
 
@@ -235,6 +234,23 @@ start_mariadb() {
         fi
 
         sleep 2
+    done
+
+    # Wait for init scripts to create journal user/database
+    attempt=0
+    while [ $attempt -lt $max_attempts ]; do
+        if docker compose exec -T database mariadb -ujournal -pjournal -e "SELECT 1" >/dev/null 2>&1; then
+            print_success "MariaDB"
+            return
+        fi
+
+        attempt=$((attempt + 1))
+        if [ $attempt -eq $max_attempts ]; then
+            print_error "MariaDB user initialization failed"
+            exit 1
+        fi
+
+        sleep 1
     done
 }
 
@@ -266,6 +282,26 @@ install_composer_dependencies() {
 # Database Management
 # ==============================================================================
 
+create_test_database() {
+    cd "$DOCKER_DIR"
+
+    # Check if test database exists
+    if docker compose exec -T database mariadb -ujournal -pjournal -e "USE journal_test" >/dev/null 2>&1; then
+        print_success "Test database (journal_test)"
+        return
+    fi
+
+    print_step "Creating test database..."
+    docker compose exec -T database mariadb -ujournal -pjournal -e "CREATE DATABASE IF NOT EXISTS journal_test" >/dev/null 2>&1
+
+    if docker compose exec -T database mariadb -ujournal -pjournal -e "USE journal_test" >/dev/null 2>&1; then
+        print_success "Test database (journal_test)"
+    else
+        print_error "Failed to create test database"
+        exit 1
+    fi
+}
+
 execute_doctrine_migrations() {
     cd "$PROJECT_ROOT"
 
@@ -280,6 +316,21 @@ execute_doctrine_migrations() {
     ./vendor/bin/doctrine-migrations migrations:migrate --no-interaction >/dev/null 2>&1
 
     print_success "Database migrations"
+}
+
+execute_test_migrations() {
+    cd "$PROJECT_ROOT"
+
+    if [ "$RESET_DATABASE" = true ]; then
+        print_step "Resetting test database..."
+        APP_ENV=test ./vendor/bin/doctrine-migrations migrations:migrate first --no-interaction >/dev/null 2>&1 || true
+    fi
+
+    # Run test migrations
+    print_step "Running test migrations..."
+    APP_ENV=test ./vendor/bin/doctrine-migrations migrations:migrate --no-interaction >/dev/null 2>&1
+
+    print_success "Test database migrations"
 }
 
 create_env_file() {
@@ -374,6 +425,8 @@ main() {
     create_env_file
     install_composer_dependencies
     execute_doctrine_migrations
+    create_test_database
+    execute_test_migrations
     start_php_server
 
     # Success message with summary

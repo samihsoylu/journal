@@ -60,6 +60,9 @@ $rules = [
     // Make all classes final (except abstract and Doctrine entities)
     'final_class' => true,
 
+    // PHPUnit test method naming convention: it_should_save_category instead of itShouldSaveCategory
+    'php_unit_method_casing' => ['case' => 'snake_case'],
+
     // Spacing rules
     'not_operator_with_space' => true,
     'binary_operator_spaces' => [

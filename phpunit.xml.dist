@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    colors="true"
+    failOnDeprecation="true"
+    failOnNotice="true"
+    failOnWarning="true"
+    bootstrap="tests/bootstrap.php"
+    cacheDirectory=".phpunit.cache">
+
+    <php>
+        <ini name="display_errors" value="1"/>
+        <ini name="error_reporting" value="-1"/>
+        <env name="APP_ENV" value="test"/>
+    </php>
+
+    <testsuites>
+        <testsuite name="Integration">
+            <directory>tests/Integration</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory>private/lib</directory>
+        </include>
+    </source>
+</phpunit>
