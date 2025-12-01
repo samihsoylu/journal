@@ -25,6 +25,7 @@ final class Authentication extends AbstractController
     public function __construct(
         private readonly AuthenticationService $authenticationService,
         Template $template,
+        private readonly Sanitize $sanitize,
     ) {
         parent::__construct($authenticationService, $template);
 
@@ -41,7 +42,7 @@ final class Authentication extends AbstractController
         /** @see AuthenticationValidator::login() */
         $this->validator->validate(__FUNCTION__);
 
-        $username = Sanitize::string($_POST['username'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
+        $username = $this->sanitize->string($_POST['username'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
         $password = $_POST['password'];
 
         // Log the user in

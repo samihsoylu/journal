@@ -33,6 +33,7 @@ final class Account extends AbstractController
         Template $template,
         private readonly UserService $userService,
         private readonly WidgetService $widgetService,
+        private readonly Sanitize $sanitize,
     ) {
         parent::__construct($authenticationService, $template);
 
@@ -66,7 +67,7 @@ final class Account extends AbstractController
     {
         $this->validator->validate(__FUNCTION__);
 
-        $newEmail = Sanitize::string($_POST['email'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
+        $newEmail = $this->sanitize->string($_POST['email'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,

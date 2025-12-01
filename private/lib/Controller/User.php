@@ -29,6 +29,7 @@ final class User extends AbstractController
         AuthenticationService $authenticationService,
         Template $template,
         private readonly UserService $service,
+        private readonly Sanitize $sanitize,
     ) {
         parent::__construct($authenticationService, $template);
 
@@ -58,9 +59,9 @@ final class User extends AbstractController
         /** @see UserValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $username = Sanitize::string($_POST['username'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
-        $email = Sanitize::string($_POST['email'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
-        $privilegeLevel = Sanitize::int($_POST['privilegeLevel']);
+        $username = $this->sanitize->string($_POST['username'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
+        $email = $this->sanitize->string($_POST['email'], [Sanitize::OPTION_LOWERCASE, Sanitize::OPTION_STRIP]);
+        $privilegeLevel = $this->sanitize->int($_POST['privilegeLevel']);
         $password = $_POST['password'];
 
         $userId = $this->service->createUserForAdmin($this->getUserId(), $username, $password, $email, $privilegeLevel);
@@ -90,8 +91,8 @@ final class User extends AbstractController
     {
         $this->validator->validate(__FUNCTION__);
 
-        $targetUserId = Sanitize::int($this->getRouteParameters()['id']);
-        $newPrivilegeLevel = Sanitize::int($_POST['privilegeLevel']);
+        $targetUserId = $this->sanitize->int($this->getRouteParameters()['id']);
+        $newPrivilegeLevel = $this->sanitize->int($_POST['privilegeLevel']);
 
         $this->service->updateUserPrivilegesForAdmin($this->getUserId(), $targetUserId, $newPrivilegeLevel);
 
@@ -103,7 +104,7 @@ final class User extends AbstractController
      */
     public function updateView() : void
     {
-        $targetUserId = Sanitize::int($this->getRouteParameters()['id']);
+        $targetUserId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         $user = $this->service->getUserForAdmin($this->getUserId(), $targetUserId);
 
@@ -116,7 +117,7 @@ final class User extends AbstractController
      */
     public function delete() : never
     {
-        $targetUserId = Sanitize::int($this->getRouteParameters()['id']);
+        $targetUserId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];

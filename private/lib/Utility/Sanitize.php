@@ -36,7 +36,7 @@ final class Sanitize
      *
      * @param string[] $options
      */
-    public static function string(string $value, array $options = [self::OPTION_STRIP]) : string
+    public function string(string $value, array $options = [self::OPTION_STRIP]) : string
     {
         foreach ($options as $option) {
             if ( ! in_array($option, self::OPTIONS_ALLOWED, true)) {
@@ -71,7 +71,7 @@ final class Sanitize
         return $value;
     }
 
-    public static function int(string $value) : int
+    public function int(string $value) : int
     {
         return (int) filter_var($value, FILTER_SANITIZE_NUMBER_INT);
     }
@@ -85,25 +85,25 @@ final class Sanitize
      *
      * @see Sanitize::string() for possible options for the $options parameter
      */
-    public static function getVariable(array $getVariable, string $fieldName, string $expectedDataType, array $options = [self::OPTION_STRIP]) : int|string|null
+    public function getVariable(array $getVariable, string $fieldName, string $expectedDataType, array $options = [self::OPTION_STRIP]) : int|string|null
     {
         $value = $getVariable[$fieldName] ?? null;
 
         if ($value !== null && $value !== '') {
             switch ($expectedDataType) {
                 case self::TYPE_INT:
-                    return self::int($value);
+                    return $this->int($value);
                 case self::TYPE_STRING:
-                    return self::string($value, $options);
+                    return $this->string($value, $options);
             }
         }
 
         return null;
     }
 
-    public static function stringForShell(string $input) : ?string
+    public function stringForShell(string $input) : ?string
     {
-        $input = self::string($input, [self::OPTION_LOWERCASE]);
+        $input = $this->string($input, [self::OPTION_LOWERCASE]);
 
         // Remove spaces and special characters
         $input = str_replace(' ', '_', $input);

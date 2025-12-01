@@ -37,6 +37,7 @@ final class Entry extends AbstractController
         private readonly CategoryService $categoryService,
         private readonly WidgetService $widgetService,
         private readonly TemplateService $templateService,
+        private readonly Sanitize $sanitize,
     ) {
         parent::__construct($authenticationService, $template);
 
@@ -56,12 +57,12 @@ final class Entry extends AbstractController
         /** @see EntryValidator::index() */
         $this->validator->validate(__FUNCTION__);
 
-        $searchQuery = Sanitize::getVariable($_GET, 'search_by_title', Sanitize::TYPE_STRING);
-        $categoryId = Sanitize::getVariable($_GET, 'category_id', Sanitize::TYPE_INT);
-        $createdDateFrom = Sanitize::getVariable($_GET, 'date_from', Sanitize::TYPE_STRING);
-        $createdDateTo = Sanitize::getVariable($_GET, 'date_to', Sanitize::TYPE_STRING);
-        $pageSize = Sanitize::getVariable($_GET, 'page_size', Sanitize::TYPE_INT) ?? 25;
-        $page = Sanitize::getVariable($_GET, 'page', Sanitize::TYPE_INT) ?? 1;
+        $searchQuery = $this->sanitize->getVariable($_GET, 'search_by_title', Sanitize::TYPE_STRING);
+        $categoryId = $this->sanitize->getVariable($_GET, 'category_id', Sanitize::TYPE_INT);
+        $createdDateFrom = $this->sanitize->getVariable($_GET, 'date_from', Sanitize::TYPE_STRING);
+        $createdDateTo = $this->sanitize->getVariable($_GET, 'date_to', Sanitize::TYPE_STRING);
+        $pageSize = $this->sanitize->getVariable($_GET, 'page_size', Sanitize::TYPE_INT) ?? 25;
+        $page = $this->sanitize->getVariable($_GET, 'page', Sanitize::TYPE_INT) ?? 1;
 
         if ($createdDateFrom !== null) {
             $date = new DateTime($createdDateFrom);
@@ -106,7 +107,7 @@ final class Entry extends AbstractController
      */
     public function entryView() : void
     {
-        $entryId = Sanitize::int($this->getRouteParameters()['id']);
+        $entryId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         try {
             $decorator = $this->service->getEntryForUser($entryId, $this->getUserId(), $this->getUserEncryptionKey());
@@ -130,9 +131,9 @@ final class Entry extends AbstractController
         /** @see EntryValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $categoryId = Sanitize::int($_POST['category_id']);
-        $entryTitle = Sanitize::string($_POST['entry_title']);
-        $entryContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
+        $categoryId = $this->sanitize->int($_POST['category_id']);
+        $entryTitle = $this->sanitize->string($_POST['entry_title']);
+        $entryContent = $this->sanitize->string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $entryId = $this->service->createEntry($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $entryTitle, $entryContent);
 
@@ -169,10 +170,10 @@ final class Entry extends AbstractController
         /** @see EntryValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
-        $entryId = Sanitize::int($this->getRouteParameters()['id']);
-        $categoryId = Sanitize::int($_POST['category_id']);
-        $entryTitle = Sanitize::string($_POST['entry_title']);
-        $entryContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
+        $entryId = $this->sanitize->int($this->getRouteParameters()['id']);
+        $categoryId = $this->sanitize->int($_POST['category_id']);
+        $entryTitle = $this->sanitize->string($_POST['entry_title']);
+        $entryContent = $this->sanitize->string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $this->service->updateEntry(
             $this->getUserId(),
@@ -196,7 +197,7 @@ final class Entry extends AbstractController
      */
     public function updateView() : void
     {
-        $entryId = Sanitize::int($this->getRouteParameters()['id']);
+        $entryId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         try {
             $templates = $this->templateService->getAllTemplatesForUser($this->getUserId());
@@ -223,7 +224,7 @@ final class Entry extends AbstractController
      */
     public function delete() : never
     {
-        $entryId = Sanitize::int($this->getRouteParameters()['id']);
+        $entryId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];

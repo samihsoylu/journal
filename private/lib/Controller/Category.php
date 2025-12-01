@@ -33,6 +33,7 @@ final class Category extends AbstractController
         AuthenticationService $authenticationService,
         Template $template,
         private readonly CategoryService $service,
+        private readonly Sanitize $sanitize,
     ) {
         parent::__construct($authenticationService, $template);
 
@@ -61,8 +62,8 @@ final class Category extends AbstractController
         /** @see CategoryValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $title = Sanitize::string($_POST['category_name']);
-        $description = Sanitize::string($_POST['category_description']);
+        $title = $this->sanitize->string($_POST['category_name']);
+        $description = $this->sanitize->string($_POST['category_description']);
 
         $this->service->createCategory($this->getUserId(), $title, $description);
 
@@ -90,9 +91,9 @@ final class Category extends AbstractController
         /** @see CategoryValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
-        $categoryId = Sanitize::int($this->getRouteParameters()['id']);
-        $title = Sanitize::string($_POST['category_name']);
-        $description = Sanitize::string($_POST['category_description']);
+        $categoryId = $this->sanitize->int($this->getRouteParameters()['id']);
+        $title = $this->sanitize->string($_POST['category_name']);
+        $description = $this->sanitize->string($_POST['category_description']);
 
         $this->service->updateCategory($this->getUserId(), $categoryId, $title, $description);
 
@@ -109,7 +110,7 @@ final class Category extends AbstractController
      */
     public function updateView() : void
     {
-        $categoryId = Sanitize::int($this->getRouteParameters()['id']);
+        $categoryId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         try {
             $category = $this->service->getCategoryForUser($categoryId, $this->getUserId());
@@ -127,7 +128,7 @@ final class Category extends AbstractController
      */
     public function delete() : never
     {
-        $categoryId = Sanitize::int($this->getRouteParameters()['id']);
+        $categoryId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
@@ -172,7 +173,7 @@ final class Category extends AbstractController
              * )
              */
             foreach ($sortOrders as $sortOrder => $categoryId) {
-                $categoryId = Sanitize::int($categoryId);
+                $categoryId = $this->sanitize->int($categoryId);
 
                 $this->service->updateCategoryOrder($this->getUserId(), $categoryId, $sortOrder);
             }

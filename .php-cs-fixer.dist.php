@@ -1,5 +1,7 @@
 <?php declare(strict_types=1);
 
+use PhpCsFixer\Runner\Parallel\ParallelConfigFactory;
+
 $rules = [
     '@PhpCsFixer' => true,
     '@PhpCsFixer:risky' => true,
@@ -38,7 +40,7 @@ $rules = [
 
     // Type declarations
     'fully_qualified_strict_types' => true,
-    'native_function_type_declaration_casing' => true,
+    'native_type_declaration_casing' => true,
 
     // Import attributes
     'attribute_empty_parentheses' => true,
@@ -125,7 +127,7 @@ $rules = [
     ],
 
     // Visibility and final
-    'visibility_required' => ['elements' => ['property', 'method', 'const']], // Always declare visibility
+    'modifier_keywords' => ['elements' => ['property', 'method', 'const']], // Always declare visibility
     'final_internal_class' => true, // Make @internal classes final
 ];
 

@@ -33,6 +33,7 @@ final class Template extends AbstractController
         TemplateUtility $template,
         private readonly TemplateService $service,
         private readonly CategoryService $categoryService,
+        private readonly Sanitize $sanitize,
     ) {
         parent::__construct($authenticationService, $template);
 
@@ -55,9 +56,9 @@ final class Template extends AbstractController
         /** @see TemplateValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $categoryId = Sanitize::int($_POST['category_id']);
-        $templateTitle = Sanitize::string($_POST['template_title']);
-        $templateContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
+        $categoryId = $this->sanitize->int($_POST['category_id']);
+        $templateTitle = $this->sanitize->string($_POST['template_title']);
+        $templateContent = $this->sanitize->string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $this->service->createTemplate($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $templateTitle, $templateContent);
 
@@ -81,10 +82,10 @@ final class Template extends AbstractController
         /** @see TemplateValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
-        $categoryId = Sanitize::int($_POST['category_id']);
-        $templateId = Sanitize::int($this->getRouteParameters()['id']);
-        $templateTitle = Sanitize::string($_POST['template_title']);
-        $templateContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
+        $categoryId = $this->sanitize->int($_POST['category_id']);
+        $templateId = $this->sanitize->int($this->getRouteParameters()['id']);
+        $templateTitle = $this->sanitize->string($_POST['template_title']);
+        $templateContent = $this->sanitize->string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $this->service->updateTemplate(
             $this->getUserId(),
@@ -105,7 +106,7 @@ final class Template extends AbstractController
 
     public function updateView() : void
     {
-        $templateId = Sanitize::int($this->getRouteParameters()['id']);
+        $templateId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         try {
             $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
@@ -127,7 +128,7 @@ final class Template extends AbstractController
 
     public function delete() : never
     {
-        $templateId = Sanitize::int($this->getRouteParameters()['id']);
+        $templateId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         // setting get variable for validator
         $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
@@ -153,7 +154,7 @@ final class Template extends AbstractController
      */
     public function getTemplateAsJsonView() : void
     {
-        $templateId = Sanitize::int($this->getRouteParameters()['id']);
+        $templateId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         try {
             $template = $this->service->getTemplateForUser($templateId, $this->getUserId(), $this->getUserEncryptionKey());

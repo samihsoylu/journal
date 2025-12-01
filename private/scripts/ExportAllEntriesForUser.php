@@ -33,8 +33,9 @@ try {
     $encryptionKey = new Encryptor()->getKeyFromEncodedKey($encodedEncryptionKey);
     $entityManager = $kernel->get(EntityManagerInterface::class);
     $entryRepository = new EntryRepository($entityManager);
+    $sanitize = new Sanitize();
 
-    $export = new ExportAllEntriesForUser($userId, $username, $encryptionKey, $entryRepository);
+    $export = new ExportAllEntriesForUser($userId, $username, $encryptionKey, $entryRepository, $sanitize);
     $export->execute();
 } catch (Exception $exception) {
     $date = new DateTime();
@@ -54,6 +55,7 @@ final readonly class ExportAllEntriesForUser
         private string $username,
         private Key $key,
         private EntryRepository $entryRepository,
+        private Sanitize $sanitize,
     ) {}
 
     public function execute() : void
@@ -62,7 +64,7 @@ final readonly class ExportAllEntriesForUser
             return;
         }
 
-        $username = Sanitize::stringForShell($this->username);
+        $username = $this->sanitize->stringForShell($this->username);
         $exportDirectoryPath = EXPORT_CACHE_PATH . ('/' . $username);
 
         try {
@@ -109,8 +111,8 @@ final readonly class ExportAllEntriesForUser
 
     private function saveEntryToFile(Entry $entry, string $exportDirectoryPath) : void
     {
-        $title = Sanitize::stringForShell($entry->getTitle());
-        $category = Sanitize::stringForShell($entry->getReferencedCategory()->getName());
+        $title = $this->sanitize->stringForShell($entry->getTitle());
+        $category = $this->sanitize->stringForShell($entry->getReferencedCategory()->getName());
 
         $this->ensureDirExists(sprintf('%s/%s', $exportDirectoryPath, $category));
 
