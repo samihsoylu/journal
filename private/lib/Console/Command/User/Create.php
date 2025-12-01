@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Console\Command\User;
 
 use App\Database\Model\User;
-use App\Service\UserService;
+use App\Service\UserManagementService;
 use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,7 +21,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final readonly class Create
 {
     public function __construct(
-        private UserService $userService,
+        private UserManagementService $userManagementService,
     ) {}
 
     public function __invoke(InputInterface $input, OutputInterface $output) : int
@@ -46,7 +46,7 @@ final readonly class Create
 
         $privilegeLevels = array_flip(User::ALLOWED_PRIVILEGE_LEVELS);
 
-        $this->userService->createUser($username, $password, $email, $privilegeLevels[$privilegeLevel]);
+        $this->userManagementService->createUser($username, $password, $email, $privilegeLevels[$privilegeLevel]);
 
         $io->success(sprintf('User %s registered successfully', $username));
 

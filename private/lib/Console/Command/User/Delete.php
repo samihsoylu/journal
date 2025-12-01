@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Command\User;
 
+use App\Service\UserManagementService;
 use App\Service\UserService;
 use Symfony\Component\Console\Attribute\Argument;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -19,6 +20,7 @@ final readonly class Delete
 {
     public function __construct(
         private UserService $userService,
+        private UserManagementService $userManagementService,
     ) {}
 
     public function __invoke(
@@ -27,7 +29,7 @@ final readonly class Delete
         OutputInterface $output,
     ) : int {
         $user = $this->userService->getUser($id);
-        $this->userService->deleteUser($user);
+        $this->userManagementService->deleteUser($user);
 
         $output->writeln(sprintf('User %s deleted successfully', $user->getUsername()));
 
