@@ -6,6 +6,7 @@ namespace App\Controller;
 
 use App\Database\Model\User as UserModel;
 use App\Service\AuthenticationService;
+use App\Service\UserManagementService;
 use App\Service\UserService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
@@ -28,7 +29,8 @@ final class User extends AbstractController
     public function __construct(
         AuthenticationService $authenticationService,
         Template $template,
-        private readonly UserService $service,
+        private readonly UserManagementService $userManagementService,
+        private readonly UserService $userService,
         private readonly Sanitize $sanitize,
     ) {
         parent::__construct($authenticationService, $template);
@@ -45,7 +47,7 @@ final class User extends AbstractController
      */
     public function indexView() : void
     {
-        $users = $this->service->getAllUsers();
+        $users = $this->userService->getAllUsers();
 
         $this->template->setVariable('users', $users);
         $this->renderTemplate('user/all');
@@ -64,7 +66,7 @@ final class User extends AbstractController
         $privilegeLevel = $this->sanitize->int($_POST['privilegeLevel']);
         $password = $_POST['password'];
 
-        $userId = $this->service->createUserForAdmin($this->getUserId(), $username, $password, $email, $privilegeLevel);
+        $userId = $this->userManagementService->createUserForAdmin($this->getUserId(), $username, $password, $email, $privilegeLevel);
 
         // Present success message
         $this->setNotification(
@@ -94,7 +96,7 @@ final class User extends AbstractController
         $targetUserId = $this->sanitize->int($this->getRouteParameters()['id']);
         $newPrivilegeLevel = $this->sanitize->int($_POST['privilegeLevel']);
 
-        $this->service->updateUserPrivilegesForAdmin($this->getUserId(), $targetUserId, $newPrivilegeLevel);
+        $this->userManagementService->updateUserPrivilegesForAdmin($this->getUserId(), $targetUserId, $newPrivilegeLevel);
 
         $this->updateView();
     }
@@ -106,7 +108,7 @@ final class User extends AbstractController
     {
         $targetUserId = $this->sanitize->int($this->getRouteParameters()['id']);
 
-        $user = $this->service->getUserForAdmin($this->getUserId(), $targetUserId);
+        $user = $this->userManagementService->getUserForAdmin($this->getUserId(), $targetUserId);
 
         $this->template->setVariable('user', $user);
         $this->renderTemplate('user/update');
@@ -125,7 +127,7 @@ final class User extends AbstractController
         /** @see UserValidator::delete() */
         $this->validator->validate(__FUNCTION__);
 
-        $this->service->deleteUserForAdmin($this->getUserId(), $targetUserId);
+        $this->userManagementService->deleteUserForAdmin($this->getUserId(), $targetUserId);
 
         $this->setNotification(Notification::TYPE_SUCCESS, 'User was removed');
 
