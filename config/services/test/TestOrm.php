@@ -6,8 +6,8 @@ use DI\Container;
 use Doctrine\ORM\EntityManagerInterface;
 use Tests\TestFramework\TestOrm\Doctrine\DoctrineTestOrm;
 use Tests\TestFramework\TestOrm\Doctrine\DoctrineTestOrmTransaction;
-use Tests\TestFramework\TestOrm\TestOrmInterface;
-use Tests\TestFramework\TestOrm\TestOrmTransactionInterface;
+use Tests\TestFramework\TestOrm\TestOrm;
+use Tests\TestFramework\TestOrm\TestOrmTransaction;
 
 /**
  * Test service configuration.
@@ -16,7 +16,7 @@ use Tests\TestFramework\TestOrm\TestOrmTransactionInterface;
  * Loaded only in 'test' environment.
  */
 return static function (Container $container) : void {
-    $container->set(TestOrmInterface::class, static fn (Container $c) : TestOrmInterface => new DoctrineTestOrm($c->get(EntityManagerInterface::class)));
+    $container->set(TestOrm::class, static fn (Container $c) : TestOrm => new DoctrineTestOrm($c->get(EntityManagerInterface::class)));
 
-    $container->set(TestOrmTransactionInterface::class, static fn (Container $c) : TestOrmTransactionInterface => new DoctrineTestOrmTransaction($c->get(EntityManagerInterface::class)));
+    $container->set(TestOrmTransaction::class, static fn (Container $c) : TestOrmTransaction => new DoctrineTestOrmTransaction($c->get(EntityManagerInterface::class)));
 };

@@ -19,6 +19,7 @@ DOCKER_DIR="${SCRIPT_DIR}/docker"
 CONTAINER_NAME="journal-mariadb"
 RESET_DATABASE=false
 HELP_REQUESTED=false
+VERBOSE=false
 PHP_SERVER_PORT=8080
 
 # Colors for output
@@ -64,6 +65,21 @@ print_section() {
     echo ""
 }
 
+print_verbose() {
+    if [ "$VERBOSE" = true ]; then
+        echo -e "${GRAY}    $1${NC}"
+    fi
+}
+
+# Run command, show output only in verbose mode
+run_cmd() {
+    if [ "$VERBOSE" = true ]; then
+        "$@"
+    else
+        "$@" >/dev/null 2>&1
+    fi
+}
+
 # ==============================================================================
 # Help Function
 # ==============================================================================
@@ -76,11 +92,13 @@ Usage: $0 [OPTIONS]
 
 Options:
     --reset         Reset the database by removing Docker volumes
+    --verbose, -v   Show detailed output for debugging
     --help, -h      Show this help message
 
 Examples:
     $0                  # Start development environment
     $0 --reset          # Reset database and start
+    $0 --verbose        # Start with detailed output
 
 Description:
     This script manages the development environment by:
@@ -104,6 +122,10 @@ parse_args() {
         case $1 in
             --reset)
                 RESET_DATABASE=true
+                shift
+                ;;
+            --verbose|-v)
+                VERBOSE=true
                 shift
                 ;;
             --help|-h)
@@ -211,23 +233,26 @@ start_mariadb() {
     # Reset database if requested
     if [ "$RESET_DATABASE" = true ]; then
         print_step "Resetting database volumes..."
-        docker compose down -v >/dev/null 2>&1
+        run_cmd docker compose down -v
     fi
 
     # Start container
     print_step "Starting MariaDB..."
-    docker compose up -d >/dev/null 2>&1
+    run_cmd docker compose up -d
 
     # Wait for MariaDB to be healthy
+    print_verbose "Waiting for MariaDB to be healthy..."
     local max_attempts=30
     local attempt=0
 
     while [ $attempt -lt $max_attempts ]; do
         if docker compose exec -T database healthcheck.sh --connect --innodb_initialized >/dev/null 2>&1; then
+            print_verbose "MariaDB health check passed"
             break
         fi
 
         attempt=$((attempt + 1))
+        print_verbose "Health check attempt $attempt/$max_attempts..."
         if [ $attempt -eq $max_attempts ]; then
             print_error "MariaDB failed to start"
             exit 1
@@ -237,14 +262,17 @@ start_mariadb() {
     done
 
     # Wait for init scripts to create journal user/database
+    print_verbose "Waiting for journal user to be ready..."
     attempt=0
     while [ $attempt -lt $max_attempts ]; do
         if docker compose exec -T database mariadb -ujournal -pjournal -e "SELECT 1" >/dev/null 2>&1; then
+            print_verbose "Journal user is ready"
             print_success "MariaDB"
             return
         fi
 
         attempt=$((attempt + 1))
+        print_verbose "User check attempt $attempt/$max_attempts..."
         if [ $attempt -eq $max_attempts ]; then
             print_error "MariaDB user initialization failed"
             exit 1
@@ -268,7 +296,7 @@ install_composer_dependencies() {
     fi
 
     print_step "Installing composer dependencies..."
-    composer install >/dev/null 2>&1
+    run_cmd composer install
 
     if [ -d "vendor" ]; then
         print_success "Composer dependencies"
@@ -285,19 +313,30 @@ install_composer_dependencies() {
 create_test_database() {
     cd "$DOCKER_DIR"
 
-    # Check if test database exists
+    # Check if test database exists (journal user has access)
     if docker compose exec -T database mariadb -ujournal -pjournal -e "USE journal_test" >/dev/null 2>&1; then
         print_success "Test database (journal_test)"
         return
     fi
 
+    # Database doesn't exist or journal user doesn't have access - create with root
     print_step "Creating test database..."
-    docker compose exec -T database mariadb -ujournal -pjournal -e "CREATE DATABASE IF NOT EXISTS journal_test" >/dev/null 2>&1
+    print_verbose "Running: CREATE DATABASE IF NOT EXISTS journal_test (as root)"
 
+    local output
+    if output=$(docker compose exec -T database mariadb -uroot -proot -e "CREATE DATABASE IF NOT EXISTS journal_test; GRANT ALL PRIVILEGES ON journal_test.* TO 'journal'@'%'; FLUSH PRIVILEGES;" 2>&1); then
+        print_verbose "Database created successfully"
+    else
+        print_verbose "Command output: $output"
+        print_error "Failed to create test database"
+        exit 1
+    fi
+
+    # Verify journal user can access the database
     if docker compose exec -T database mariadb -ujournal -pjournal -e "USE journal_test" >/dev/null 2>&1; then
         print_success "Test database (journal_test)"
     else
-        print_error "Failed to create test database"
+        print_error "Failed to grant access to test database"
         exit 1
     fi
 }
@@ -308,12 +347,12 @@ execute_doctrine_migrations() {
     if [ "$RESET_DATABASE" = true ]; then
         print_step "Resetting database..."
         # Drop all tables by running migrations down to version 0, then back up
-        ./vendor/bin/doctrine-migrations migrations:migrate first --no-interaction >/dev/null 2>&1 || true
+        run_cmd ./vendor/bin/doctrine-migrations migrations:migrate first --no-interaction || true
     fi
 
     # Run migrations
     print_step "Running migrations..."
-    ./vendor/bin/doctrine-migrations migrations:migrate --no-interaction >/dev/null 2>&1
+    run_cmd ./vendor/bin/doctrine-migrations migrations:migrate --no-interaction
 
     print_success "Database migrations"
 }
@@ -323,12 +362,12 @@ execute_test_migrations() {
 
     if [ "$RESET_DATABASE" = true ]; then
         print_step "Resetting test database..."
-        APP_ENV=test ./vendor/bin/doctrine-migrations migrations:migrate first --no-interaction >/dev/null 2>&1 || true
+        APP_ENV=test run_cmd ./vendor/bin/doctrine-migrations migrations:migrate first --no-interaction || true
     fi
 
     # Run test migrations
     print_step "Running test migrations..."
-    APP_ENV=test ./vendor/bin/doctrine-migrations migrations:migrate --no-interaction >/dev/null 2>&1
+    APP_ENV=test run_cmd ./vendor/bin/doctrine-migrations migrations:migrate --no-interaction
 
     print_success "Test database migrations"
 }
@@ -367,7 +406,11 @@ start_php_server() {
     print_step "Starting PHP built-in server..."
 
     # Start PHP server in background
-    php -S 127.0.0.1:${PHP_SERVER_PORT} -t public/ >/dev/null 2>&1 &
+    if [ "$VERBOSE" = true ]; then
+        php -S 127.0.0.1:${PHP_SERVER_PORT} -t public/ &
+    else
+        php -S 127.0.0.1:${PHP_SERVER_PORT} -t public/ >/dev/null 2>&1 &
+    fi
     PHP_SERVER_PID=$!
 
     # Wait a moment for the server to start

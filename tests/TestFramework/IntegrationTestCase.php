@@ -8,10 +8,11 @@ use App\Framework\Kernel;
 use DI\Container;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Tests\TestFramework\TestOrm\Doctrine\DoctrineTestOrm;
 use Tests\TestFramework\TestOrm\Doctrine\DoctrineTestOrmTransaction;
-use Tests\TestFramework\TestOrm\TestOrmInterface;
-use Tests\TestFramework\TestOrm\TestOrmTransactionInterface;
+use Tests\TestFramework\TestOrm\TestOrm;
+use Tests\TestFramework\TestOrm\TestOrmTransaction;
 
 /**
  * Base class for integration tests.
@@ -40,26 +41,20 @@ use Tests\TestFramework\TestOrm\TestOrmTransactionInterface;
  */
 abstract class IntegrationTestCase extends TestCase
 {
-    /**
-     * Shared kernel instance (singleton per test run).
-     */
     protected static ?Kernel $kernel = null;
 
-    /**
-     * TestOrm instance for database operations and assertions.
-     */
-    protected TestOrmInterface $testOrm;
-
-    /**
-     * Transaction manager for test isolation.
-     */
-    protected TestOrmTransactionInterface $transaction;
+    protected ContainerInterface $container;
+    protected TestOrm $testOrm;
+    private TestOrmTransaction $transaction;
 
     protected function setUp() : void
     {
         parent::setUp();
 
         $this->bootKernel();
+
+        $this->testOrm = $this->container->get(TestOrm::class);
+        $this->transaction = $this->container->get(TestOrmTransaction::class);
 
         // Begin transaction for test isolation
         $this->transaction->beginTransaction();
@@ -70,29 +65,36 @@ abstract class IntegrationTestCase extends TestCase
 
     protected function tearDown() : void
     {
+        parent::tearDown();
+
         // Rollback transaction to restore database state
         $this->transaction->rollback();
 
         // Clear TestContext
         TestContext::$testOrm = null;
-
-        parent::tearDown();
     }
 
     /**
      * Boot the application kernel (once per test run).
+     *
+     * If the EntityManager is closed (e.g., after a database error),
+     * the kernel is reset to get a fresh EntityManager.
      */
     private function bootKernel() : void
     {
-        if ( ! self::$kernel instanceof Kernel) {
-            self::$kernel = new Kernel('test', true);
+        if (self::$kernel instanceof Kernel) {
+            $em = self::$kernel->getContainer()->get(EntityManagerInterface::class);
+            if ($em->isOpen()) {
+                $this->container = self::$kernel->getContainer();
+
+                return;
+            }
+            // EntityManager is closed, reset kernel to get a fresh one
+            self::$kernel = null;
         }
 
-        $container = self::$kernel->getContainer();
-        $entityManager = $container->get(EntityManagerInterface::class);
-
-        $this->testOrm = new DoctrineTestOrm($entityManager);
-        $this->transaction = new DoctrineTestOrmTransaction($entityManager);
+        self::$kernel = new Kernel('test', true);
+        $this->container = self::$kernel->getContainer();
     }
 
     /**

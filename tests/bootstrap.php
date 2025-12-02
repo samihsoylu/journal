@@ -18,7 +18,7 @@ if (file_exists($envTestPath)) {
 // Set test environment
 $_ENV['APP_ENV'] = 'test';
 
-// Project constants needed by tests
+// Project constants needed by tests (must be defined before Kernel)
 const MODEL_PATH = BASE_PATH . '/private/lib/Database/Model/';
 const TEMPLATE_PATH = BASE_PATH . '/private/templates/';
 const CACHE_PATH = BASE_PATH . '/private/cache/';

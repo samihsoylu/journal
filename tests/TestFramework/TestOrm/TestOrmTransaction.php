@@ -11,7 +11,7 @@ namespace Tests\TestFramework\TestOrm;
  * - Begin transaction at test start
  * - Rollback at test end to restore database state
  */
-interface TestOrmTransactionInterface
+interface TestOrmTransaction
 {
     /**
      * Begin a database transaction.

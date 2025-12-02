@@ -22,12 +22,13 @@ if ( ! file_exists($pathToAutoLoader)) {
 // Composer autoloader
 require $pathToAutoLoader;
 
-// Load .env file
-$dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH);
+// Load environment file based on APP_ENV (check before dotenv overwrites it)
+$appEnv = $_ENV['APP_ENV'] ?? $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?: null;
+$envFile = $appEnv === 'test' ? '.env.test' : '.env';
+$dotenv = Dotenv\Dotenv::createImmutable(BASE_PATH, $envFile);
 $dotenv->load();
 $dotenv->required(['SITE_TITLE', 'DB_HOST', 'DB_SCHEMA', 'DB_USERNAME', 'DB_PASSWORD', 'BASE_URL', 'DEBUG_MODE', 'ADMIN_EMAIL_ADDRESS', 'USE_SSL']);
 $dotenv->required('DEBUG_MODE')->isBoolean();
-
 define('BASE_URL', rtrim($_ENV['BASE_URL'], '/'));
 define('DEBUG_MODE', $_ENV['DEBUG_MODE'] === 'true');
 define('SSL_IS_ENABLED', $_ENV['USE_SSL'] === 'true');

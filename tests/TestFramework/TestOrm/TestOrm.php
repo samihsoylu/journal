@@ -11,7 +11,7 @@ namespace Tests\TestFramework\TestOrm;
  * - Execute raw SQL queries for assertions
  * - Persist entities to the database
  */
-interface TestOrmInterface
+interface TestOrm
 {
     /**
      * Execute SQL query and fetch one row as associative array.

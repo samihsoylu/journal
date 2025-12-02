@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\TestFramework;
 
-use Tests\TestFramework\TestOrm\TestOrmInterface;
+use Tests\TestFramework\TestOrm\TestOrm;
 
 /**
  * Global context holder for test infrastructure.
@@ -18,5 +18,5 @@ use Tests\TestFramework\TestOrm\TestOrmInterface;
  */
 final class TestContext
 {
-    public static ?TestOrmInterface $testOrm = null;
+    public static ?TestOrm $testOrm = null;
 }

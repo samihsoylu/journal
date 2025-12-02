@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\TestFramework\TestOrm\Doctrine;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Tests\TestFramework\TestOrm\TestOrmInterface;
+use Tests\TestFramework\TestOrm\TestOrm;
 
 /**
  * Doctrine implementation of TestOrmInterface.
@@ -14,7 +14,7 @@ use Tests\TestFramework\TestOrm\TestOrmInterface;
  * - Raw SQL query execution via DBAL Connection
  * - Entity persistence with automatic flush
  */
-final readonly class DoctrineTestOrm implements TestOrmInterface
+final readonly class DoctrineTestOrm implements TestOrm
 {
     public function __construct(
         private EntityManagerInterface $entityManager,
@@ -22,14 +22,16 @@ final readonly class DoctrineTestOrm implements TestOrmInterface
 
     public function fetchOneAssoc(string $sql, array $params = []) : ?array
     {
-        $result = $this->entityManager->getConnection()->fetchAssociative($sql, $params);
+        $connection = $this->entityManager->getConnection();
 
-        return $result !== false ? $result : null;
+        return $connection->fetchAssociative($sql, $params);
     }
 
     public function fetchAllAssoc(string $sql, array $params = []) : array
     {
-        return $this->entityManager->getConnection()->fetchAllAssociative($sql, $params);
+        $connection = $this->entityManager->getConnection();
+
+        return $connection->fetchAllAssociative($sql, $params);
     }
 
     public function save(object ...$entities) : void
@@ -39,5 +41,6 @@ final readonly class DoctrineTestOrm implements TestOrmInterface
         }
 
         $this->entityManager->flush();
+        $this->entityManager->clear();
     }
 }
