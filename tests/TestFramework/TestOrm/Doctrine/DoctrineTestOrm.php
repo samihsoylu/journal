@@ -41,6 +41,5 @@ final readonly class DoctrineTestOrm implements TestOrm
         }
 
         $this->entityManager->flush();
-        $this->entityManager->clear();
     }
 }

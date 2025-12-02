@@ -15,6 +15,7 @@ use RuntimeException;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
+#[ORM\HasLifecycleCallbacks]
 #[UniqueConstraint(name: 'unique_username', columns: ['username'])]
 #[UniqueConstraint(name: 'unique_email', columns: ['emailAddress'])]
 class User extends AbstractModel

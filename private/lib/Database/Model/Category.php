@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'categories')]
+#[ORM\HasLifecycleCallbacks]
 #[UniqueConstraint(name: 'unique_category_name', columns: ['userId', 'name'])]
 class Category extends AbstractModel
 {

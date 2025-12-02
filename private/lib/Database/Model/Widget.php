@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping\UniqueConstraint;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'widgets')]
+#[ORM\HasLifecycleCallbacks]
 #[UniqueConstraint(name: 'unique_widget_name', columns: ['userId', 'name'])]
 class Widget extends AbstractModel
 {

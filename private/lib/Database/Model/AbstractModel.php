@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class AbstractModel represents all tables in the database. The properties defined in this file are present in every
  * table. Columns such as id, created & updated dates are enforced here on to all models.
  */
+#[ORM\MappedSuperclass]
 #[ORM\HasLifecycleCallbacks]
 abstract class AbstractModel implements ModelInterface
 {

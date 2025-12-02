@@ -18,6 +18,7 @@ use Parsedown;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'entries')]
+#[ORM\HasLifecycleCallbacks]
 #[Index(name: 'SearchBy_UserId_CategoryId_CreatedTimestamp_Title', columns: ['userId', 'categoryId', 'createdTimestamp', 'title'])]
 class Entry extends AbstractModel
 {

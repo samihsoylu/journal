@@ -18,6 +18,7 @@ use Parsedown;
  */
 #[ORM\Entity]
 #[ORM\Table(name: 'templates')]
+#[ORM\HasLifecycleCallbacks]
 #[UniqueConstraint(name: 'unique_template_title', columns: ['userId', 'title'])]
 class Template extends AbstractModel
 {
