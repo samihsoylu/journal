@@ -15,7 +15,7 @@ return RectorConfig::configure()
         __DIR__ . '/vendor',
     ])
     ->withPhpSets(
-        php84: true,
+        php85: true,
     )->withAttributesSets(
         symfony: true,
         doctrine: true,

@@ -8,11 +8,6 @@ use App\Exception\UserException;
 
 final class NotFoundException extends UserException
 {
-    public function __construct(string $message = '', int $code = 0)
-    {
-        parent::__construct($message, $code);
-    }
-
     public static function entityNameNotFound(string $entityTitle, string $entityName, int $code = 404) : self
     {
         return new self(sprintf('%s with name %s was not found', $entityTitle, $entityName), $code);

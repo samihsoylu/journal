@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\Index;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
+use Override;
 use Parsedown;
 
 /**
@@ -25,6 +26,7 @@ class Entry extends AbstractModel
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]
+    #[Override]
     protected int $id;
 
     #[ManyToOne(targetEntity: Category::class)]
@@ -42,9 +44,11 @@ class Entry extends AbstractModel
     protected string $content;
 
     #[ORM\Column(type: 'integer', nullable: false)]
+    #[Override]
     protected int $createdTimestamp;
 
     #[ORM\Column(type: 'integer', nullable: false)]
+    #[Override]
     protected int $lastUpdatedTimestamp;
 
     public function getReferencedCategory() : Category

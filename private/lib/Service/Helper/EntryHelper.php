@@ -11,9 +11,7 @@ use App\Exception\UserException\NotFoundException;
 
 final readonly class EntryHelper
 {
-    public function __construct(
-        private EntryRepository $repository,
-    ) {}
+    public function __construct(private EntryRepository $repository) {}
 
     /**
      * @return Entry[]

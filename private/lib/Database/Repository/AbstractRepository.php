@@ -14,9 +14,7 @@ abstract class AbstractRepository
      */
     public const RESOURCE_NAME = '';
 
-    public function __construct(
-        protected EntityManagerInterface $db,
-    ) {}
+    public function __construct(protected EntityManagerInterface $db) {}
 
     /**
      * Retrieves all entries from the database table of RESOURCE_NAME.

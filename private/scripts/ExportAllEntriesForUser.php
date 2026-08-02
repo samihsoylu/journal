@@ -17,14 +17,16 @@ use Jenssegers\Blade\Blade;
 require dirname(__DIR__) . '/init.php';
 
 /** @var App\Framework\Kernel $kernel */
-if (count($argv) !== 4) {
+$arguments = $_SERVER['argv'] ?? [];
+
+if (count($arguments) !== 4) {
     printf("Usage: %s <userId> <username> <encodedEncryptionKey>\n", $_SERVER['PHP_SELF']);
     exit(1);
 }
 
-$userId = (int) $argv[1];
-$username = $argv[2];
-$encodedEncryptionKey = $argv[3];
+$userId = (int) $arguments[1];
+$username = $arguments[2];
+$encodedEncryptionKey = $arguments[3];
 
 $lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
 $lock = Lock::acquire($lockName);
@@ -116,7 +118,7 @@ final readonly class ExportAllEntriesForUser
 
         $this->ensureDirExists(sprintf('%s/%s', $exportDirectoryPath, $category));
 
-        $blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH, null);
+        $blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH);
 
         $entryContent = $entry->getContentDecrypted($this->key);
         $entryContent = str_replace('"/media', '"../media', $entryContent);

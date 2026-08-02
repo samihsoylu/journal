@@ -31,7 +31,7 @@ abstract class AbstractValidator
         $missingFields = [];
 
         foreach ($requiredFields as $requiredFieldName) {
-            if ( ! array_key_exists($requiredFieldName, $userProvidedData)) {
+            if ( ! array_key_exists((string) $requiredFieldName, $userProvidedData)) {
                 $missingFields[] = $requiredFieldName;
             }
         }

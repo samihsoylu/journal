@@ -20,9 +20,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 final readonly class Create
 {
-    public function __construct(
-        private UserManagementService $userManagementService,
-    ) {}
+    public function __construct(private UserManagementService $userManagementService) {}
 
     public function __invoke(InputInterface $input, OutputInterface $output) : int
     {

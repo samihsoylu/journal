@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\UniqueConstraint;
+use Override;
 use Parsedown;
 
 /**
@@ -25,6 +26,7 @@ class Template extends AbstractModel
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]
+    #[Override]
     protected int $id;
 
     #[ManyToOne(targetEntity: User::class)]
@@ -42,9 +44,11 @@ class Template extends AbstractModel
     protected string $content;
 
     #[ORM\Column(type: 'integer', nullable: false)]
+    #[Override]
     protected int $createdTimestamp;
 
     #[ORM\Column(type: 'integer', nullable: false)]
+    #[Override]
     protected int $lastUpdatedTimestamp;
 
     public function getReferencedUser() : User

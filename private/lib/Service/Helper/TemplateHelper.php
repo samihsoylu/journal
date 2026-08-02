@@ -11,9 +11,7 @@ use App\Exception\UserException\NotFoundException;
 
 final readonly class TemplateHelper
 {
-    public function __construct(
-        private TemplateRepository $repository,
-    ) {}
+    public function __construct(private TemplateRepository $repository) {}
 
     public function getTemplateForUser(int $templateId, int $userId) : Template
     {

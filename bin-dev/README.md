@@ -17,7 +17,7 @@ Reset the database and start fresh:
 ## What It Does
 
 The `start` script will:
-1. Check for required dependencies (PHP 8.4, Composer, Docker)
+1. Check for required dependencies (PHP 8.5, Composer, Docker)
 2. Start MariaDB in a Docker container
 3. Create `.env` file if it doesn't exist
 4. Install Composer dependencies

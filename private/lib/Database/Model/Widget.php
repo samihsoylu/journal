@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Doctrine\ORM\Mapping\UniqueConstraint;
+use Override;
 
 /**
  * This model class represents a single database record from the `widgets` table.
@@ -21,6 +22,7 @@ class Widget extends AbstractModel
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]
+    #[Override]
     protected int $id;
 
     #[ManyToOne(targetEntity: User::class)]
@@ -34,9 +36,11 @@ class Widget extends AbstractModel
     protected bool $enabled;
 
     #[ORM\Column(type: 'integer', nullable: false)]
+    #[Override]
     protected int $createdTimestamp;
 
     #[ORM\Column(type: 'integer', nullable: false)]
+    #[Override]
     protected int $lastUpdatedTimestamp;
 
     public function getReferencedUser() : User

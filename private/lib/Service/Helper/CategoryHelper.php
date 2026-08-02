@@ -11,9 +11,7 @@ use App\Exception\UserException\NotFoundException;
 
 final readonly class CategoryHelper
 {
-    public function __construct(
-        private CategoryRepository $repository,
-    ) {}
+    public function __construct(private CategoryRepository $repository) {}
 
     public function getCategoryForUser(int $categoryId, int $userId) : Category
     {

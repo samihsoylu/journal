@@ -28,7 +28,7 @@ final class UserSession
     private const string ENCODED_ENCRYPTION_KEY = 'EEK';
     private const string TIMEZONE = 'timezone';
 
-    private bool $isLoaded = false;
+    private bool $isLoaded;
 
     public function __construct(private readonly Cache $cache)
     {

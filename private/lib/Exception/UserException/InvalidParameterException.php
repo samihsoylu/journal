@@ -8,11 +8,6 @@ use App\Exception\UserException;
 
 final class InvalidParameterException extends UserException
 {
-    public function __construct(string $message = '', int $code = 0)
-    {
-        parent::__construct($message, $code);
-    }
-
     public static function notNumeric(string $fieldName, int $code = 406) : self
     {
         return new self(sprintf("The provided field '%s' is not a number", $fieldName), $code);

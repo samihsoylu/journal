@@ -8,11 +8,6 @@ use App\Exception\UserException;
 
 final class InvalidArgumentException extends UserException
 {
-    public function __construct(string $message = '', int $code = 0)
-    {
-        parent::__construct($message, $code);
-    }
-
     public static function incorrectLogin(int $code = 406) : self
     {
         return new self('Username or Password is incorrect', $code);

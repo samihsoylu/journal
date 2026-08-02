@@ -18,9 +18,7 @@ use LogicException;
 
 final readonly class UserExportService
 {
-    public function __construct(
-        private UserHelper $userHelper,
-    ) {}
+    public function __construct(private UserHelper $userHelper) {}
 
     /**
      * @param Key $encryptionKey used for decrypting entry contents

@@ -7,7 +7,7 @@ set -e
 # ==============================================================================
 # This script manages the development environment including:
 # - Docker MariaDB container
-# - PHP 8.4 built-in server
+# - PHP 8.5 built-in server
 # - Composer dependencies
 # - Doctrine migrations
 # ==============================================================================
@@ -102,7 +102,7 @@ Examples:
 
 Description:
     This script manages the development environment by:
-    1. Checking required dependencies (PHP 8.4, Composer, Docker)
+    1. Checking required dependencies (PHP 8.5, Composer, Docker)
     2. Starting MariaDB Docker container
     3. Installing Composer dependencies
     4. Running Doctrine migrations
@@ -174,21 +174,21 @@ cleanup() {
 check_php() {
     if ! command -v php >/dev/null 2>&1; then
         print_error "PHP not installed"
-        echo "Install PHP 8.4:"
-        echo "  brew install php@8.4"
-        echo "  brew link php@8.4 --force"
+        echo "Install PHP 8.5:"
+        echo "  brew install php@8.5"
+        echo "  brew link php@8.5 --force"
         exit 1
     fi
 
     # Check PHP version
     PHP_VERSION=$(php -r "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;")
-    if [[ "$PHP_VERSION" != "8.4" ]]; then
-        print_warning "PHP ${PHP_VERSION} detected, but 8.4 is recommended"
-        echo "Install PHP 8.4:"
-        echo "  brew install php@8.4"
-        echo "  brew link php@8.4 --force"
+    if [[ "$PHP_VERSION" != "8.5" ]]; then
+        print_warning "PHP ${PHP_VERSION} detected, but 8.5 is recommended"
+        echo "Install PHP 8.5:"
+        echo "  brew install php@8.5"
+        echo "  brew link php@8.5 --force"
     else
-        print_success "PHP 8.4"
+        print_success "PHP 8.5"
     fi
 }
 

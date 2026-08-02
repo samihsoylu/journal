@@ -1,4 +1,4 @@
-FROM php:8.4-apache
+FROM php:8.5-apache
 
 # Copy files to /var/www/html as www-data user
 ADD --chown=www-data:www-data . /var/www/html/
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Change document root to /var/www/html/public
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
@@ -33,6 +33,14 @@ RUN chmod 700 /usr/local/bin/wait-for-it.sh
 
 # Change workdir and user for "composer install"
 WORKDIR /var/www/html
+RUN mkdir -p \
+    private/cache/database/cache \
+    private/cache/database/proxy \
+    private/cache/export \
+    private/cache/sessions \
+    private/cache/templates \
+    uploads && \
+    chown -R www-data:www-data private/cache uploads
 USER www-data
 RUN composer install --no-dev --no-cache
 

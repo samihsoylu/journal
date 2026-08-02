@@ -15,6 +15,7 @@ use Symfony\Component\Cache\Adapter\PhpFilesAdapter;
 final readonly class DoctrineOrmFactory
 {
     private const DEFAULT_CACHE_LIFETIME = 3600;
+    private const CACHE_NAMESPACE = 'doctrine_php85';
 
     public function __construct(
         private string $dbHost,
@@ -39,7 +40,7 @@ final readonly class DoctrineOrmFactory
         ];
 
         // Doctrine ORM 3.x uses PSR-6 cache directly
-        $cache = new PhpFilesAdapter('doctrine_results', self::DEFAULT_CACHE_LIFETIME, $this->databaseCacheDirPath . '/cache/');
+        $cache = new PhpFilesAdapter(self::CACHE_NAMESPACE, self::DEFAULT_CACHE_LIFETIME, $this->databaseCacheDirPath . '/cache/');
 
         // Doctrine ORM 3.x uses attributes instead of annotations
         $config = ORMSetup::createAttributeMetadataConfiguration(
@@ -48,6 +49,10 @@ final readonly class DoctrineOrmFactory
             $this->databaseProxyDirPath . '/proxy/',
             $cache,
         );
+
+        // PHP 8.4+ provides native lazy objects. Doctrine requires this mode
+        // when Symfony VarExporter 8 is installed.
+        $config->enableNativeLazyObjects(true);
 
         // Auto-generate proxies: 0 = never, 1 = always, 2 = if not exists, 3 = if not exists or changed
         $config->setAutoGenerateProxyClasses(3);

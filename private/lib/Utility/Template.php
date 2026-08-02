@@ -29,7 +29,7 @@ final class Template
 
     public function __construct()
     {
-        $this->blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH, null);
+        $this->blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH);
         $this->notification = new Notification();
 
         $this->setAllUrlConstantsToVariables();

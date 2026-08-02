@@ -8,6 +8,7 @@ use App\Exception\UserException\InvalidArgumentException;
 use DateTimeZone;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\UniqueConstraint;
+use Override;
 use RuntimeException;
 
 /**
@@ -32,6 +33,7 @@ class User extends AbstractModel
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]
+    #[Override]
     protected int $id;
 
     #[ORM\Column(type: 'string')]
@@ -50,9 +52,11 @@ class User extends AbstractModel
     protected string $encryptionKey;
 
     #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
+    #[Override]
     protected int $createdTimestamp;
 
     #[ORM\Column(type: 'integer', options: ['unsigned' => true])]
+    #[Override]
     protected int $lastUpdatedTimestamp;
 
     #[ORM\Column(type: 'string', nullable: true)]

@@ -29,7 +29,7 @@ final readonly class ExceptionHandler
      * Sets a notification that is stored in a cookie in between redirects. It is rendered on the first page the user
      * visits.
      *
-     * @see \App\Utility\Template::render()
+     * @see Template::render()
      */
     private function setNotification(string $message) : void
     {

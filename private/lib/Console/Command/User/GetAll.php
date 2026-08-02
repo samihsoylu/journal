@@ -18,9 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 final readonly class GetAll
 {
-    public function __construct(
-        private UserService $userService,
-    ) {}
+    public function __construct(private UserService $userService) {}
 
     public function __invoke(OutputInterface $output) : int
     {

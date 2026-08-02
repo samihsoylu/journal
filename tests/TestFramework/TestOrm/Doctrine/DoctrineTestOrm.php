@@ -8,7 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Tests\TestFramework\TestOrm\TestOrm;
 
 /**
- * Doctrine implementation of TestOrmInterface.
+ * Doctrine implementation of TestOrm.
  *
  * Wraps Doctrine's EntityManager to provide:
  * - Raw SQL query execution via DBAL Connection
@@ -16,15 +16,15 @@ use Tests\TestFramework\TestOrm\TestOrm;
  */
 final readonly class DoctrineTestOrm implements TestOrm
 {
-    public function __construct(
-        private EntityManagerInterface $entityManager,
-    ) {}
+    public function __construct(private EntityManagerInterface $entityManager) {}
 
     public function fetchOneAssoc(string $sql, array $params = []) : ?array
     {
         $connection = $this->entityManager->getConnection();
 
-        return $connection->fetchAssociative($sql, $params);
+        $result = $connection->fetchAssociative($sql, $params);
+
+        return $result === false ? null : $result;
     }
 
     public function fetchAllAssoc(string $sql, array $params = []) : array

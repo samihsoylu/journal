@@ -31,12 +31,12 @@ Visit: `http://localhost:8080/` Username: `demouser` Password: `demopass`
 
 ## Requirements
 - A Linux-based server with shell access
-- PHP 7.4 or later.
-- MySQL 5.6+
+- PHP 8.5
+- MySQL 5.6+ or MariaDB
 
 ### PHP Extensions
 
-The listed extensions are usually installed and enabled by default in most PHP 7 installations
+The listed extensions are commonly available in standard PHP installations.
 
 - [json](https://www.php.net/manual/en/book.json.php)
 - [pdo](https://www.php.net/manual/en/book.pdo.php)
@@ -47,7 +47,29 @@ The listed extensions are usually installed and enabled by default in most PHP 7
 - [pcre](https://www.php.net/manual/en/book.pcre)
 - [session](https://www.php.net/manual/en/book.session)
 
+## Development
+
+```bash
+composer install
+./bin-dev/start
+```
+
+The development script starts MariaDB in Docker, prepares the development and
+test databases, runs migrations, and serves the application with host PHP at
+<http://127.0.0.1:8080>.
+
+Common checks:
+
+```bash
+./vendor/bin/phpunit
+./vendor/bin/phpstan analyse -c phpstan.neon
+./vendor/bin/php-cs-fixer fix --dry-run --diff
+```
+
 ## Documentation
 
+* [Architecture](docs/architecture.md)
+* [Testing](docs/testing.md)
+* [Development environment](bin-dev/README.md)
 * [Installation](https://samihsoylu.notion.site/Installation-fb156297be1f421c8540a41fe34314ec)
 * [Upgrading](https://samihsoylu.notion.site/Upgrading-04fcbde744c244bcacad577604c43b41)

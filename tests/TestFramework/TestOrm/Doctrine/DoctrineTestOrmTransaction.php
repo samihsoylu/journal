@@ -19,9 +19,7 @@ final class DoctrineTestOrmTransaction implements TestOrmTransaction
     /** @var array<Connection> */
     private static array $connections = [];
 
-    public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-    ) {}
+    public function __construct(private readonly EntityManagerInterface $entityManager) {}
 
     public function beginTransaction() : void
     {

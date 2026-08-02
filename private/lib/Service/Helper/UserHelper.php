@@ -10,9 +10,7 @@ use App\Exception\UserException\NotFoundException;
 
 final readonly class UserHelper
 {
-    public function __construct(
-        private UserRepository $repository,
-    ) {}
+    public function __construct(private UserRepository $repository) {}
 
     /**
      * Get all registered users from the database.

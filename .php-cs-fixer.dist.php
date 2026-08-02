@@ -7,8 +7,8 @@ $rules = [
     '@PhpCsFixer:risky' => true,
     '@PSR12' => true,
     '@PSR12:risky' => true,
-    '@PHP8x4Migration' => true,
-    '@PHP8x4Migration:risky' => true,
+    '@PHP8x5Migration' => true,
+    '@PHP8x5Migration:risky' => true,
     'declare_strict_types' => true,
     'no_unused_imports' => true,
     'concat_space' => ['spacing' => 'one'], // makes "$a.$b" look like "$a . $b"

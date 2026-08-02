@@ -24,8 +24,8 @@ tests/
 │   │   ├── EntryFactory.php
 │   │   └── TemplateFactory.php
 │   └── TestOrm/                    # ORM abstraction
-│       ├── TestOrmInterface.php
-│       ├── TestOrmTransactionInterface.php
+│       ├── TestOrm.php
+│       ├── TestOrmTransaction.php
 │       └── Doctrine/
 │           ├── DoctrineTestOrm.php
 │           └── DoctrineTestOrmTransaction.php

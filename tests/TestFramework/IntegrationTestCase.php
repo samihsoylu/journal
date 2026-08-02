@@ -9,8 +9,6 @@ use DI\Container;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Tests\TestFramework\TestOrm\Doctrine\DoctrineTestOrm;
-use Tests\TestFramework\TestOrm\Doctrine\DoctrineTestOrmTransaction;
 use Tests\TestFramework\TestOrm\TestOrm;
 use Tests\TestFramework\TestOrm\TestOrmTransaction;
 
@@ -42,7 +40,6 @@ use Tests\TestFramework\TestOrm\TestOrmTransaction;
 abstract class IntegrationTestCase extends TestCase
 {
     protected static ?Kernel $kernel = null;
-
     protected ContainerInterface $container;
     protected TestOrm $testOrm;
     private TestOrmTransaction $transaction;
@@ -84,6 +81,7 @@ abstract class IntegrationTestCase extends TestCase
     {
         if (self::$kernel instanceof Kernel) {
             $em = self::$kernel->getContainer()->get(EntityManagerInterface::class);
+
             if ($em->isOpen()) {
                 $this->container = self::$kernel->getContainer();
 
