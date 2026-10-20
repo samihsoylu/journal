@@ -15,12 +15,14 @@ use Illuminate\View\Engines\PhpEngine;
 use Illuminate\View\Factory;
 use Illuminate\View\FileViewFinder;
 
-final readonly class BladeRenderer
+final readonly class BladeRenderer implements TemplateRendererInterface, TemplateCacheInterface
 {
     private Factory $views;
 
-    public function __construct(string $templatePath = TEMPLATE_PATH, string $cachePath = TEMPLATE_CACHE_PATH)
-    {
+    public function __construct(
+        string $templatePath = TEMPLATE_PATH,
+        private string $cachePath = TEMPLATE_CACHE_PATH,
+    ) {
         $files = new Filesystem();
         $compiler = new BladeCompiler($files, $cachePath);
         $engines = new EngineResolver();
@@ -35,5 +37,12 @@ final readonly class BladeRenderer
     public function render(string $template, array $variables = []) : string
     {
         return $this->views->make($template, $variables)->render();
+    }
+
+    public function clearCache() : void
+    {
+        foreach (glob($this->cachePath . '/*.php') ?: [] as $path) {
+            unlink($path);
+        }
     }
 }

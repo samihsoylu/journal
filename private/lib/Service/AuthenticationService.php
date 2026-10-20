@@ -10,7 +10,7 @@ use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
 use App\Service\Helper\AuthenticationHelper;
 use App\Service\Model\SessionDecorator;
-use App\Utility\Encryptor;
+use App\Service\Security\UserKeys;
 use App\Utility\UserSession;
 use Defuse\Crypto\Key;
 
@@ -20,6 +20,7 @@ final readonly class AuthenticationService
         private UserRepository $repository,
         private AuthenticationHelper $helper,
         private UserSession $userSession,
+        private UserKeys $keys,
     ) {}
 
     public function getUserSession() : ?UserSession
@@ -44,8 +45,7 @@ final readonly class AuthenticationService
             throw InvalidArgumentException::incorrectLogin();
         }
 
-        $encryptor = new Encryptor();
-        $encodedEncryptionKey = $encryptor->getEncodedKeyFromProtectedKey(
+        $encodedEncryptionKey = $this->keys->getEncodedKeyFromProtectedKey(
             $user->getEncryptionKey(),
             $password,
         );
@@ -92,9 +92,7 @@ final readonly class AuthenticationService
 
         $encodedEncryptionKey = $session->getEncodedEncryptionKey();
 
-        $encryptor = new Encryptor();
-
-        return $encryptor->getKeyFromEncodedKey($encodedEncryptionKey);
+        return $this->keys->getKeyFromEncodedKey($encodedEncryptionKey);
     }
 
     public function getUserId() : int

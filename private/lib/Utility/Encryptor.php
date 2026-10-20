@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Utility;
 
+use App\Service\Security\UserKeys;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
 use Defuse\Crypto\KeyProtectedByPassword;
 
-final class Encryptor
+final class Encryptor implements UserKeys
 {
     /**
      * @return string protected encryption key that should be stored in the database

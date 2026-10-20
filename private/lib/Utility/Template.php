@@ -12,25 +12,15 @@ use ReflectionClass;
 final class Template
 {
     /**
-     * @var BladeRenderer templating engine
-     */
-    private readonly BladeRenderer $blade;
-
-    /**
-     * @var Notification used to show notification to the user
-     */
-    private readonly Notification $notification;
-
-    /**
      * @var array list of variables that will be passed on to the template
      */
     private array $variables;
 
-    public function __construct()
-    {
-        $this->blade = new BladeRenderer();
-        $this->notification = new Notification();
-
+    public function __construct(
+        private readonly TemplateRendererInterface $blade,
+        private readonly Notification $notification,
+        private readonly TemplateCacheInterface $cache,
+    ) {
         $this->setAllUrlConstantsToVariables();
         $this->setDefaultVariables();
     }
@@ -147,10 +137,6 @@ final class Template
      */
     public function clearCache() : void
     {
-        $staticTemplateFiles = glob(TEMPLATE_CACHE_PATH . '/*.php');
-
-        foreach ($staticTemplateFiles as $staticFile) {
-            unlink($staticFile);
-        }
+        $this->cache->clearCache();
     }
 }

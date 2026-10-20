@@ -7,18 +7,24 @@ namespace Tests\Integration\Service;
 use App\Database\Repository\EntryRepository;
 use App\Exception\UserException\ActionNotPermittedException;
 use App\Service\EntryExporter;
+use App\Service\Export\ExportArchiveStore;
+use App\Service\Export\ExportJobRunner;
 use App\Service\Helper\MediaHelper;
+use App\Service\Helper\UserHelper;
 use App\Service\MediaService;
 use App\Service\UserExportService;
 use App\Service\ValueObject\Image;
+use App\Utility\BladeRenderer;
 use App\Utility\Encryptor;
 use App\Utility\Sanitize;
+use App\Utility\TemplateRendererInterface;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
 use FilesystemIterator;
 use PHPUnit\Framework\Attributes\Test;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use RuntimeException;
 use Tests\TestFramework\Factory\CategoryFactory;
 use Tests\TestFramework\Factory\EntryFactory;
 use Tests\TestFramework\Factory\UserFactory;
@@ -44,7 +50,7 @@ final class ExportRegressionTest extends IntegrationTestCase
         mkdir($this->directory, 0o700);
         $this->mediaHelper = new MediaHelper($this->directory . '/uploads');
         $this->media = new MediaService(new Encryptor(), $this->mediaHelper);
-        $this->exporter = new EntryExporter($this->getRepository(EntryRepository::class), $this->media, $this->mediaHelper, new Sanitize(), $this->directory . '/exports');
+        $this->exporter = new EntryExporter($this->getRepository(EntryRepository::class), $this->media, $this->mediaHelper, new Sanitize(), new BladeRenderer(), $this->directory . '/exports');
     }
 
     protected function tearDown() : void
@@ -177,8 +183,80 @@ final class ExportRegressionTest extends IntegrationTestCase
     {
         $factory = UserFactory::setup();
         $user = $factory->create();
+        $archives = $this->createMock(ExportArchiveStore::class);
+        $archives->expects(self::never())->method('listForUser');
+        $jobs = $this->createMock(ExportJobRunner::class);
+        $jobs->expects(self::never())->method('start');
+        $service = new UserExportService($this->getService(UserHelper::class), $this->getRepository(EntryRepository::class), $archives, $jobs);
         $this->expectException(ActionNotPermittedException::class);
         $this->expectExceptionMessage('There are no entries to export');
-        $this->getService(UserExportService::class)->exportUserEntries($user->getId(), $factory->getDecryptionKey());
+        $service->exportUserEntries($user->getId(), $factory->getDecryptionKey());
+    }
+
+    #[Test]
+    public function an_export_can_use_a_different_job_runner_without_changing_its_policy() : void
+    {
+        $factory = UserFactory::setup();
+        $user = $factory->create();
+        $key = $factory->getDecryptionKey();
+        EntryFactory::setup()->withUser($user)->withContent('<p>Private</p>', $key)->create();
+        $archives = $this->createMock(ExportArchiveStore::class);
+        $archives->expects(self::once())->method('listForUser')->with($user->getUsername())->willReturn([]);
+        $jobs = $this->createMock(ExportJobRunner::class);
+        $jobs->expects(self::once())->method('start')->with($user->getId(), $user->getUsername(), $key)->willReturn(42);
+        $service = new UserExportService($this->getService(UserHelper::class), $this->getRepository(EntryRepository::class), $archives, $jobs);
+        self::assertSame(42, $service->exportUserEntries($user->getId(), $key));
+    }
+
+    #[Test]
+    public function an_existing_archive_prevents_starting_any_export_job() : void
+    {
+        $factory = UserFactory::setup();
+        $user = $factory->create();
+        $key = $factory->getDecryptionKey();
+        EntryFactory::setup()->withUser($user)->withContent('<p>Private</p>', $key)->create();
+        $archives = $this->createMock(ExportArchiveStore::class);
+        $archives->expects(self::once())->method('listForUser')->with($user->getUsername())->willReturn(['existing.zip']);
+        $jobs = $this->createMock(ExportJobRunner::class);
+        $jobs->expects(self::never())->method('start');
+        $service = new UserExportService($this->getService(UserHelper::class), $this->getRepository(EntryRepository::class), $archives, $jobs);
+        $this->expectException(ActionNotPermittedException::class);
+        $this->expectExceptionMessage('Allowed count of exports reached');
+        $service->exportUserEntries($user->getId(), $key);
+    }
+
+    #[Test]
+    public function renderer_failure_leaves_no_archive_or_plaintext_files() : void
+    {
+        $factory = UserFactory::setup();
+        $user = $factory->create();
+        $key = $factory->getDecryptionKey();
+        EntryFactory::setup()->withUser($user)->withContent('<p>Private</p>', $key)->create();
+        $renderer = $this->createMock(TemplateRendererInterface::class);
+        $renderer->expects(self::once())->method('render')->with('export', ['content' => '<p>Private</p>'])->willThrowException(new RuntimeException('Renderer unavailable'));
+        $exporter = new EntryExporter($this->getRepository(EntryRepository::class), $this->media, $this->mediaHelper, new Sanitize(), $renderer, $this->directory . '/exports');
+
+        try {
+            $exporter->export($user->getId(), $user->getUsername(), $key);
+            self::fail('Export succeeded despite a rendering failure');
+        } catch (RuntimeException $exception) {
+            self::assertSame('Renderer unavailable', $exception->getMessage());
+            self::assertSame([], array_values(array_diff(scandir($this->directory . '/exports'), ['.', '..'])));
+        }
+    }
+
+    #[Test]
+    public function an_export_can_use_a_renderer_without_blade_or_a_global_template_cache() : void
+    {
+        $factory = UserFactory::setup();
+        $user = $factory->create();
+        $key = $factory->getDecryptionKey();
+        EntryFactory::setup()->withUser($user)->withContent('<p>Private</p>', $key)->create();
+        $renderer = $this->createMock(TemplateRendererInterface::class);
+        $renderer->expects(self::once())->method('render')->with('export', ['content' => '<p>Private</p>'])->willReturn('<html>Alternate renderer output</html>');
+        $exporter = new EntryExporter($this->getRepository(EntryRepository::class), $this->media, $this->mediaHelper, new Sanitize(), $renderer, $this->directory . '/exports');
+        $path = $exporter->export($user->getId(), $user->getUsername(), $key);
+        self::assertNotNull($path);
+        self::assertSame(['<html>Alternate renderer output</html>'], array_values($this->readArchive($path)));
     }
 }

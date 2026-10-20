@@ -34,6 +34,12 @@ final class BladeRendererTest extends TestCase
                 '<main><h1>&lt;Private&gt;</h1><p>Entry HTML</p></main>',
                 $renderer->render('page', ['title' => '<Private>', 'content' => '<p>Entry HTML</p>']),
             );
+            self::assertNotEmpty(glob($directory . '/cache/*.php'));
+            file_put_contents($directory . '/cache/keep.txt', 'unrelated file');
+            $renderer->clearCache();
+            self::assertSame([], glob($directory . '/cache/*.php'));
+            self::assertFileExists($directory . '/cache/keep.txt');
+            self::assertFileExists($directory . '/page.blade.php');
         } finally {
             $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
 

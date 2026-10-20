@@ -57,6 +57,13 @@ Production Doctrine definitions live in `config/services/prod/doctrine.php`:
 
 The test environment first receives those production definitions, then `config/services/test/TestOrm.php` binds the test ORM and transaction abstractions. Keep environment-only services in their environment directory rather than branching throughout application code.
 
+Application bindings live in `config/services/prod/services.php`: rendering and
+template-cache contracts use the Blade adapter, account-key operations use the
+existing encryptor, and export storage and jobs use filesystem/background-process
+adapters. Services receive these contracts through their constructors. Construct
+library adapters at this boundary or inside their infrastructure wrapper; creating
+entities and value objects inside a use case is normal.
+
 ## HTTP boundaries
 
 Routes are declared in `private/lib/Router/Web.php`. A handler string such as `Entry@create` maps to `App\Controller\Entry::create()`.
@@ -77,9 +84,36 @@ The recent user-service split is an example of the intended direction:
 
 - `UserService` handles the current user's core account operations.
 - `UserManagementService` handles administrator CRUD and destructive user lifecycle operations.
-- `UserExportService` handles export process orchestration and export-file lifecycle.
+- `UserExportService` checks export eligibility and coordinates archive and job contracts.
+- `FilesystemExportArchiveStore` lists, finds, and deletes archives for the supplied
+  account. It reconstructs paths from that account, never from a submitted path.
+- `BackgroundExportJobRunner` handles worker commands, logs, and running-job checks.
 - `EntryExporter` builds a private ZIP directly from decrypted entries/media, uses
   IDs to preserve colliding names, and publishes the file only after completion.
+  It receives its renderer and shares safe filename rules with storage and jobs.
+
+`UserSetupHelper` receives repositories, while each call receives the user and
+key to set up. `UserManagementService` creates accounts without constructing the
+helper or knowing how its category/template dependencies are wired.
+
+## SOLID in these boundaries
+
+- **Single responsibility:** export policy, worker transport, archive storage,
+  and template rendering have separate owners and classes.
+- **Open/closed:** a different renderer, archive store, or job runner can be bound
+  in configuration without changing the export policy. Tests exercise substitutions.
+- **Liskov substitution:** implementations keep the same signatures and outcomes;
+  substitution tests cover successful exports, rejected jobs, and failure cleanup.
+  Existing repository/model inheritance keeps its public contracts.
+- **Interface segregation:** rendering does not require cache management, and
+  account-key clients do not depend on content/file encryption methods. Contracts
+  expose the operations used at each boundary.
+- **Dependency inversion:** application services receive those contracts; the
+  composition root selects Blade, filesystem, process, and encryption adapters.
+
+These are design rules for future features, not a claim that tests can prove
+every design decision correct. Keep contracts focused on real callers rather than
+adding a matching interface for every class.
 
 Other feature services include authentication, entries, categories, templates, widgets, and media. Helpers provide reusable queries and ownership checks. Repositories should remain focused on persistence, not request or authorization policy.
 
@@ -120,7 +154,8 @@ Mutating forms carry the current session's anti-CSRF token. Validators compare w
 
 - `bin/console` is the Symfony Console entry point for user administration commands.
 - `private/scripts/ExportAllEntriesForUser.php` creates encrypted-content exports in a background process.
-- `UserExportService` coordinates the process with command, process, and lock utilities.
+- `UserExportService` delegates worker startup to `ExportJobRunner`; its background
+  adapter uses the existing command, process, and lock utilities.
 - `cli-config.php` and `migrations.json` configure Doctrine Migrations commands.
 
 ## Testing architecture

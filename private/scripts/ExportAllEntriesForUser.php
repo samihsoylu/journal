@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Service\EntryExporter;
 use App\Utility\Encryptor;
+use App\Utility\Export\ExportFileName;
 use App\Utility\Lock\Lock;
 use App\Utility\Lock\LockName;
 
@@ -23,9 +24,9 @@ $lock = null;
 $exitCode = 0;
 
 try {
-    $lockName = LockName::create($userId, EntryExporter::archivePrefix($username), LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
+    $lockName = LockName::create($userId, ExportFileName::prefix($username), LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
     $lock = Lock::acquire($lockName);
-    $key = new Encryptor()->getKeyFromEncodedKey($arguments[3]);
+    $key = $kernel->get(Encryptor::class)->getKeyFromEncodedKey($arguments[3]);
     $kernel->get(EntryExporter::class)->export($userId, $username, $key);
 } catch (Throwable $exception) {
     fwrite(STDERR, 'Export failed: ' . $exception->getMessage() . PHP_EOL);

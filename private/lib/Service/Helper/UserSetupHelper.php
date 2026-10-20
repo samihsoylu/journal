@@ -9,7 +9,6 @@ use App\Database\Model\Template;
 use App\Database\Model\User;
 use App\Database\Repository\CategoryRepository;
 use App\Database\Repository\TemplateRepository;
-use App\Database\Repository\UserRepository;
 use Defuse\Crypto\Key;
 use RuntimeException;
 
@@ -20,51 +19,48 @@ final readonly class UserSetupHelper
     private const string WORK_CATEGORY = 'Work';
 
     public function __construct(
-        private User $user,
-        private Key $userEncryptionKey,
-        private UserRepository $repository,
         private CategoryRepository $categoryRepository,
         private TemplateRepository $templateRepository,
     ) {}
 
-    public function setDefaults() : void
+    public function setDefaults(User $user, Key $key) : void
     {
-        $this->createDefaultCategories();
-        $this->createDefaultTemplates();
+        $this->createDefaultCategories($user);
+        $this->createDefaultTemplates($user, $key);
     }
 
-    private function createDefaultCategories() : void
+    private function createDefaultCategories(User $user) : void
     {
         $personal = new Category();
         $personal->setName(self::PERSONAL_CATEGORY);
         $personal->setDescription('Stories about your experiences, passions and ambitions');
-        $personal->setReferencedUser($this->user);
+        $personal->setReferencedUser($user);
         $personal->setSortOrder(1);
 
-        $this->repository->queue($personal);
+        $this->categoryRepository->queue($personal);
 
         $diet = new Category();
         $diet->setName(self::FOOD_CATEGORY);
         $diet->setDescription('Food journaling for reaching healthy eating goals');
-        $diet->setReferencedUser($this->user);
+        $diet->setReferencedUser($user);
         $diet->setSortOrder(2);
 
-        $this->repository->queue($diet);
+        $this->categoryRepository->queue($diet);
 
         $work = new Category();
         $work->setName(self::WORK_CATEGORY);
         $work->setDescription('Meeting notes, deadlines, countless other bits of information that are best stored here instead of your brain');
-        $work->setReferencedUser($this->user);
+        $work->setReferencedUser($user);
         $work->setSortOrder(3);
 
-        $this->repository->queue($work);
+        $this->categoryRepository->queue($work);
 
-        $this->repository->save();
+        $this->categoryRepository->save();
     }
 
-    public function createDefaultTemplates() : void
+    private function createDefaultTemplates(User $user, Key $key) : void
     {
-        $foodCategory = $this->categoryRepository->findByCategoryName($this->user, self::FOOD_CATEGORY);
+        $foodCategory = $this->categoryRepository->findByCategoryName($user, self::FOOD_CATEGORY);
 
         if ( ! $foodCategory instanceof Category) {
             throw new RuntimeException(
@@ -76,10 +72,10 @@ final readonly class UserSetupHelper
         $food->setTitle('Food tracking')
             ->setContentAndEncrypt(
                 "# Breakfast\n\n* ...\n* ...\n* ...\n\n# Lunch\n\n* ...\n* ...\n* ...\n\n# Dinner\n\n* ...\n* ...\n* ...\n\n",
-                $this->userEncryptionKey,
+                $key,
             )
             ->setReferencedCategory($foodCategory)
-            ->setReferencedUser($this->user)
+            ->setReferencedUser($user)
         ;
 
         $this->templateRepository->queue($food);

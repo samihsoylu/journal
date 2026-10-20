@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Service;
 
+use App\Utility\BladeRenderer;
 use App\Utility\ExceptionHandler;
+use App\Utility\Notification;
 use App\Utility\Template;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
@@ -43,7 +45,8 @@ final class ExceptionHandlerTest extends TestCase
 
         try {
             ob_start();
-            new ExceptionHandler(new RuntimeException($privateMessage), new Template())->genericException();
+            $renderer = new BladeRenderer();
+            new ExceptionHandler(new RuntimeException($privateMessage), new Template($renderer, new Notification(), $renderer))->genericException();
             $page = ob_get_clean();
             self::assertSame(500, http_response_code());
             self::assertStringContainsString('Internal Server Error', $page);

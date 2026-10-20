@@ -9,7 +9,7 @@ use App\Database\Repository\UserRepository;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
 use App\Service\Helper\UserHelper;
-use App\Utility\Encryptor;
+use App\Service\Security\UserKeys;
 use App\Utility\UserSession;
 
 final readonly class UserService
@@ -21,6 +21,7 @@ final readonly class UserService
         private UserHelper $userHelper,
         private UserSession $userSession,
         private UserManagementService $userManagementService,
+        private UserKeys $keys,
     ) {}
 
     /**
@@ -49,8 +50,7 @@ final readonly class UserService
         $newEncryptedPassword = password_hash($newPassword, self::DEFAULT_PASSWORD_HASH_ALGORITHM);
         $user->setPassword($newEncryptedPassword);
 
-        $encryptor = new Encryptor();
-        $newEncryptedKey = $encryptor->changePassword($user->getEncryptionKey(), $currentPassword, $newPassword);
+        $newEncryptedKey = $this->keys->changePassword($user->getEncryptionKey(), $currentPassword, $newPassword);
         $user->setEncryptionKey($newEncryptedKey);
 
         $this->repository->queue($user);

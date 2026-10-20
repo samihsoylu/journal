@@ -6,8 +6,9 @@ namespace App\Service;
 
 use App\Database\Repository\EntryRepository;
 use App\Service\Helper\MediaHelper;
-use App\Utility\BladeRenderer;
+use App\Utility\Export\ExportFileName;
 use App\Utility\Sanitize;
+use App\Utility\TemplateRendererInterface;
 use Defuse\Crypto\Key;
 use RuntimeException;
 use ZipArchive;
@@ -19,14 +20,9 @@ final readonly class EntryExporter
         private MediaService $media,
         private MediaHelper $mediaHelper,
         private Sanitize $sanitize,
+        private TemplateRendererInterface $renderer,
         private string $exportPath = EXPORT_CACHE_PATH,
     ) {}
-
-    public static function archivePrefix(string $username) : string
-    {
-        // Preserve distinct usernames while preventing paths/glob metacharacters.
-        return preg_match('/\A[A-Za-z0-9._-]+\z/', $username) ? $username : '~' . bin2hex($username);
-    }
 
     public function export(int $userId, string $username, Key $key) : ?string
     {
@@ -38,7 +34,7 @@ final readonly class EntryExporter
             throw new RuntimeException('Could not create the export directory');
         }
 
-        $archivePath = $this->exportPath . '/' . self::archivePrefix($username) . '__' . date('d-m-Y_H-i-s') . '.zip';
+        $archivePath = $this->exportPath . '/' . ExportFileName::prefix($username) . '__' . date('d-m-Y_H-i-s') . '.zip';
 
         if (file_exists($archivePath)) {
             throw new RuntimeException('An export already exists for this account and time');
@@ -59,7 +55,6 @@ final readonly class EntryExporter
             }
             $opened = true;
             $root = $this->sanitize->stringForShell($username) ?: 'user_' . $userId;
-            $blade = new BladeRenderer();
 
             foreach ($this->mediaHelper->getAllImageNamesForUser($userId) as $imageName) {
                 $image = $this->media->getDecryptedImage($userId, $imageName, $key);
@@ -83,7 +78,7 @@ final readonly class EntryExporter
                 foreach ($prefixes as $prefix) {
                     $content = str_replace(['"' . $prefix, "'" . $prefix], ['"../media/', "'../media/"], $content);
                 }
-                $document = $blade->render('export', ['content' => $content]);
+                $document = $this->renderer->render('export', ['content' => $content]);
 
                 if ( ! $archive->addFromString($root . '/' . $categoryName . '/' . $title . '.html', $document)) {
                     throw new RuntimeException('Could not add an entry to the export');

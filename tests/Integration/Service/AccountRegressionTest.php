@@ -5,8 +5,12 @@ declare(strict_types=1);
 namespace Tests\Integration\Service;
 
 use App\Database\Model\User;
+use App\Database\Repository\CategoryRepository;
+use App\Database\Repository\TemplateRepository;
+use App\Database\Repository\UserRepository;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
+use App\Service\Security\UserKeys;
 use App\Service\UserManagementService;
 use App\Service\UserService;
 use App\Service\WidgetService;
@@ -30,6 +34,28 @@ final class AccountRegressionTest extends IntegrationTestCase
 
         foreach (['categories', 'templates'] as $table) {
             self::assertNotEmpty($this->testOrm->fetchAllAssoc('SELECT * FROM ' . $table . ' WHERE userId = ?', [$id]));
+        }
+    }
+
+    #[Test]
+    public function shared_default_setup_keeps_two_users_and_their_keys_separate() : void
+    {
+        $management = $this->getService(UserManagementService::class);
+        $ids = [
+            $management->createUser('first-user', 'first-password', 'first@example.test', User::PRIVILEGE_LEVEL_USER),
+            $management->createUser('second-user', 'second-password', 'second@example.test', User::PRIVILEGE_LEVEL_USER),
+        ];
+
+        foreach ($ids as $index => $id) {
+            $user = $this->getRepository(UserRepository::class)->getById($id);
+            $password = $index === 0 ? 'first-password' : 'second-password';
+            $key = $this->getService(UserKeys::class)->getKeyFromProtectedKey($user->getEncryptionKey(), $password);
+            $categories = $this->getRepository(CategoryRepository::class)->findByUser($user);
+            self::assertSame(['Personal', 'Food', 'Work'], array_map(static fn ($category) => $category->getName(), $categories));
+            $templates = $this->getRepository(TemplateRepository::class)->findByUser($user);
+            self::assertCount(1, $templates);
+            self::assertSame($id, $templates[0]->getReferencedCategory()->getReferencedUser()->getId());
+            self::assertStringContainsString('<h1>Breakfast</h1>', $templates[0]->getContentDecrypted($key));
         }
     }
 

@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Service;
 
 use App\Database\Model\User;
-use App\Database\Repository\CategoryRepository;
-use App\Database\Repository\TemplateRepository;
 use App\Database\Repository\UserRepository;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
@@ -19,7 +17,7 @@ use App\Service\Helper\UserHelper;
 use App\Service\Helper\UserSetupHelper;
 use App\Service\Helper\WidgetHelper;
 use App\Service\Model\UserDecorator;
-use App\Utility\Encryptor;
+use App\Service\Security\UserKeys;
 
 final readonly class UserManagementService
 {
@@ -27,8 +25,6 @@ final readonly class UserManagementService
 
     public function __construct(
         private UserRepository $repository,
-        private CategoryRepository $categoryRepository,
-        private TemplateRepository $templateRepository,
         private UserHelper $userHelper,
         private CategoryHelper $categoryHelper,
         private EntryHelper $entryHelper,
@@ -36,6 +32,8 @@ final readonly class UserManagementService
         private TemplateHelper $templateHelper,
         private MediaHelper $mediaHelper,
         private UserExportService $userExportService,
+        private UserKeys $keys,
+        private UserSetupHelper $userSetup,
     ) {}
 
     /**
@@ -74,8 +72,7 @@ final readonly class UserManagementService
 
         $encryptedPassword = password_hash($password, self::DEFAULT_PASSWORD_HASH_ALGORITHM);
 
-        $encryptor = new Encryptor();
-        $protectedEncryptionKey = $encryptor->generateProtectedKey($password);
+        $protectedEncryptionKey = $this->keys->generateProtectedKey($password);
 
         $user = new User();
         $user->setUsername($username)
@@ -88,9 +85,8 @@ final readonly class UserManagementService
         $this->repository->queue($user);
         $this->repository->save();
 
-        $key = $encryptor->getKeyFromProtectedKey($protectedEncryptionKey, $password);
-        $setup = new UserSetupHelper($user, $key, $this->repository, $this->categoryRepository, $this->templateRepository);
-        $setup->setDefaults();
+        $key = $this->keys->getKeyFromProtectedKey($protectedEncryptionKey, $password);
+        $this->userSetup->setDefaults($user, $key);
 
         return $user->getId();
     }

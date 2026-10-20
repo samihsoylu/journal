@@ -6,6 +6,7 @@ This document describes how to write and run tests for the Journal application.
 
 The test suite uses:
 - **PHPUnit 12** for the testing framework
+- **Unit tests** for archive storage and filename ownership without a database
 - **Transaction-based isolation** - each test runs in a transaction that is rolled back
 - **Factory pattern** for creating test entities
 - **TestOrm** for raw SQL assertions
@@ -104,6 +105,9 @@ inside the disposable legacy container. A Chrome test checks TinyMCE image paste
 blob preview, upload, save, and reload, plus login-session rotation and cookie flags.
 Chrome and ChromeDriver are test tools, with no browser dependency in the app image.
 See [upgrading.md](upgrading.md) for the scope and limits.
+Export boundary tests also substitute renderers and job runners, reject jobs when
+policy disallows them, and check cleanup if rendering fails. Account setup tests
+create two users through the same service and verify separate defaults and keys.
 
 ### Run All Tests
 
