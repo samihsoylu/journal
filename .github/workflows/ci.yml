@@ -1,0 +1,83 @@
+name: Platform checks
+
+on:
+  pull_request:
+    branches: [master]
+  push:
+    branches: [master, maintenance/platform]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: PHP 8.5 / ${{ matrix.database }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        database: ['mysql:8.0', 'mariadb:10.11']
+    services:
+      database:
+        image: ${{ matrix.database }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: journal_test
+          MYSQL_USER: journal
+          MYSQL_PASSWORD: journal
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      APP_ENV: test
+      SENTRY_DSN: ''
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql, mbstring, curl, dom, zip
+          coverage: none
+      - run: composer validate --strict
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: composer audit --locked
+      - run: vendor/bin/parallel-lint --exclude vendor --exclude private/cache .
+      - run: vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no
+      - run: vendor/bin/phpstan analyse --no-progress
+      - run: vendor/bin/doctrine-migrations migrate --no-interaction
+      - run: vendor/bin/phpunit
+
+  installation:
+    name: Container install and v1 upgrade / ${{ matrix.database }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        database: ['mysql:8.0', 'mariadb:10.11']
+    env:
+      TEST_DATABASE_IMAGE: ${{ matrix.database }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: curl, zip
+          coverage: none
+      - uses: browser-actions/setup-chrome@v2
+        id: chrome
+        with:
+          chrome-version: '155.0.8059.84'
+          install-dependencies: true
+          install-chromedriver: true
+      - run: php ci/verify-install-upgrade.php
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          CHROMEDRIVER_PATH: ${{ steps.chrome.outputs.chromedriver-path }}

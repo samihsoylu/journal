@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Utility;
 
-use Jenssegers\Blade\Blade;
 use ReflectionClass;
 
 /**
@@ -13,9 +12,9 @@ use ReflectionClass;
 final class Template
 {
     /**
-     * @var Blade templating library
+     * @var BladeRenderer templating engine
      */
-    private readonly Blade $blade;
+    private readonly BladeRenderer $blade;
 
     /**
      * @var Notification used to show notification to the user
@@ -29,7 +28,7 @@ final class Template
 
     public function __construct()
     {
-        $this->blade = new Blade([TEMPLATE_PATH], TEMPLATE_CACHE_PATH);
+        $this->blade = new BladeRenderer();
         $this->notification = new Notification();
 
         $this->setAllUrlConstantsToVariables();

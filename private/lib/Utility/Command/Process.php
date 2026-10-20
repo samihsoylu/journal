@@ -22,7 +22,7 @@ final readonly class Process implements ProcessInterface
     {
         $setsidPath = $_ENV['SETSID_PATH'] ?? '/usr/bin/setsid';
 
-        $processId = shell_exec(sprintf('%s %s > %s 2>&1 & echo $!', $setsidPath, $command, $logPath));
+        $processId = shell_exec(sprintf('%s %s > %s 2>&1 & echo $!', escapeshellarg($setsidPath), $command, escapeshellarg($logPath)));
         $id = filter_var($processId, FILTER_VALIDATE_INT);
 
         return new self($id);

@@ -29,3 +29,4 @@ const EXPORT_CACHE_PATH = BASE_PATH . '/private/cache/export';
 const SCRIPTS_PATH = BASE_PATH . '/private/scripts';
 const DEFAULT_CACHE_EXPIRY_TIME = 3600;
 const DEFAULT_SESSION_EXPIRY_TIME = 86400;
+const SSL_IS_ENABLED = false;

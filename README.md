@@ -29,10 +29,15 @@ docker compose up -d
 ```
 Visit: `http://localhost:8080/` Username: `demouser` Password: `demopass`
 
+New `v*` version tags publish the Docker image and update `latest`; merges only
+run checks. If you already have the image, run `docker compose pull journal`
+before `docker compose up -d` to fetch the latest published version. For existing
+installations, follow the [upgrade instructions](docs/upgrading.md) first.
+
 ## Requirements
 - A Linux-based server with shell access
 - PHP 8.5
-- MySQL 5.6+ or MariaDB
+- MySQL or MariaDB (automated checks cover MySQL 8.0 and MariaDB 10.11)
 
 ### PHP Extensions
 
@@ -46,6 +51,7 @@ The listed extensions are commonly available in standard PHP installations.
 - [ctype](https://www.php.net/manual/en/book.ctype)
 - [pcre](https://www.php.net/manual/en/book.pcre)
 - [session](https://www.php.net/manual/en/book.session)
+- [zip](https://www.php.net/manual/en/book.zip.php) (entry exports)
 
 ## Development
 
@@ -71,5 +77,6 @@ Common checks:
 * [Architecture](docs/architecture.md)
 * [Testing](docs/testing.md)
 * [Development environment](bin-dev/README.md)
+* [Upgrading an existing v1 installation](docs/upgrading.md)
 * [Installation](https://samihsoylu.notion.site/Installation-fb156297be1f421c8540a41fe34314ec)
 * [Upgrading](https://samihsoylu.notion.site/Upgrading-04fcbde744c244bcacad577604c43b41)

@@ -78,6 +78,8 @@ The recent user-service split is an example of the intended direction:
 - `UserService` handles the current user's core account operations.
 - `UserManagementService` handles administrator CRUD and destructive user lifecycle operations.
 - `UserExportService` handles export process orchestration and export-file lifecycle.
+- `EntryExporter` builds a private ZIP directly from decrypted entries/media, uses
+  IDs to preserve colliding names, and publishes the file only after completion.
 
 Other feature services include authentication, entries, categories, templates, widgets, and media. Helpers provide reusable queries and ownership checks. Repositories should remain focused on persistence, not request or authorization policy.
 
@@ -108,7 +110,7 @@ This protects database, backup, and upload data at rest. It does not protect aga
 
 ## Templates and frontend
 
-The project uses standalone Blade through `App\Utility\Template`, without Laravel. Templates live in `private/templates/`, and compiled templates are cached in `private/cache/templates/`.
+The project uses Illuminate Blade directly through `App\Utility\BladeRenderer` and `App\Utility\Template`, without Laravel. Templates live in `private/templates/`, and compiled templates are cached in `private/cache/templates/`.
 
 The frontend has no Node or bundler pipeline. Materialize, jQuery, TinyMCE, application JavaScript, and CSS are committed under `public/assets/` and served directly.
 

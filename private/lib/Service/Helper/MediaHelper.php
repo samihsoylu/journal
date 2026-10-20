@@ -8,6 +8,8 @@ use App\Service\MediaService;
 
 final class MediaHelper
 {
+    public function __construct(private readonly string $uploadPath = MediaService::UPLOAD_DIR) {}
+
     public function removeUserUploadDir(int $userId) : void
     {
         $uploadDirectory = $this->getUserUploadDir($userId);
@@ -34,6 +36,6 @@ final class MediaHelper
 
     public function getUserUploadDir(int $userId) : string
     {
-        return MediaService::UPLOAD_DIR . ('/' . $userId);
+        return $this->uploadPath . ('/' . $userId);
     }
 }

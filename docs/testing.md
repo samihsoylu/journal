@@ -64,6 +64,47 @@ APP_ENV=test ./vendor/bin/doctrine-migrations migrate
 
 ## Running Tests
 
+For an isolated database without starting or resetting your development stack:
+
+```bash
+docker compose -f ci/compose.tests.yaml up -d --wait
+APP_ENV=test vendor/bin/doctrine-migrations migrate --no-interaction
+vendor/bin/phpunit
+docker compose -f ci/compose.tests.yaml down -v
+```
+
+This dedicated Compose project exposes its test database on loopback port 3306.
+Stop if that port is already in use; do not stop an unrelated database to run it.
+To exercise MariaDB, use
+`TEST_DATABASE_IMAGE=mariadb:10.11 docker compose -f ci/compose.tests.yaml up -d --wait`
+after removing only this disposable test project. Never use the teardown command
+against development or production Compose files.
+
+CI runs the suite on PHP 8.5 with both MySQL 8.0 and MariaDB 10.11. It also runs
+`php ci/verify-install-upgrade.php` to build the image, verify fresh startup,
+and rehearse a v1.5.1 upgrade using original-code-generated synthetic data.
+The checks workflow does not publish images or deploy applications. The separate
+Docker release workflow publishes a version tag and `latest` only for new `v*`
+tags, after the same checks pass. Merges to `master` and pull requests run checks
+without publishing images. The rehearsal also starts the resolved example
+Compose configuration using the local candidate image and an available loopback
+port, then checks demo login and container recreation.
+
+Service regression tests cover encryption/password continuity, session lifecycle,
+CSRF rotation, ownership checks, content operations, category deletion, media,
+account defaults, widgets, and privilege restrictions. Category-search tests
+check ownership, result counts, and pagination. Export tests verify all
+entries survive matching/sanitized filenames, offline media links work, failures
+remove partial archives, and accounts can find/delete only their own archives.
+The container rehearsal runs on both database engines and adds HTTP login, existing encrypted data/media, the real
+export worker/download (including usernames with spaces and a missing log
+directory), failure exit/lock cleanup, persistence, and legacy readback checks.
+Its original-v1 data fixture lives in `ci/fixtures/legacy-data.php` and runs only
+inside the disposable legacy container. A Chrome test checks TinyMCE image paste,
+blob preview, upload, save, and reload, plus login-session rotation and cookie flags.
+Chrome and ChromeDriver are test tools, with no browser dependency in the app image.
+See [upgrading.md](upgrading.md) for the scope and limits.
+
 ### Run All Tests
 
 ```bash

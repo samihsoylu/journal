@@ -17,7 +17,7 @@ return static function (Container $container) : void {
         DATABASE_CACHE_PATH,
         DATABASE_CACHE_PATH,
         MODEL_PATH,
-        (bool) $_ENV['DEBUG_MODE'],
+        $_ENV['DEBUG_MODE'] === 'true',
     ));
 
     $container->set(DependencyFactory::class, static function (Container $container) {

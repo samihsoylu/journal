@@ -33,13 +33,18 @@ fi
 # wait for db to be up
 wait-for-it.sh $DB_HOST:3306 -t 30 -- echo "db is up or timeout reached, continuing"
 
+# CLI initialization and Apache must share ownership of writable cache files.
+# Resolving services even for user:list creates the session cache namespace.
+mkdir -p "$ROOT_FOLDER/private/cache/export/log"
+chown -R www-data:www-data "$ROOT_FOLDER/private/cache"
+
 # run database migrations
-$ROOT_FOLDER/vendor/bin/doctrine-migrations migrate --no-interaction
+runuser -u www-data -- "$ROOT_FOLDER/vendor/bin/doctrine-migrations" migrate --no-interaction
 
 # create an admin user if there wasn't any user
-COUNT=$($ROOT_FOLDER/bin/console user:list | wc -l)
+COUNT=$(runuser -u www-data -- "$ROOT_FOLDER/bin/console" user:list | wc -l)
 if [ "$COUNT" = "3" ]; then 
-    printf "${USERNAME}\n${PASSWORD}\n${CONFIRM_PASSWORD}\n${EMAIL_ADDRESS}\n\n" | $ROOT_FOLDER/bin/console user:create
+    printf '%s\n' "$USERNAME" "$PASSWORD" "$CONFIRM_PASSWORD" "$EMAIL_ADDRESS" '' | runuser -u www-data -- "$ROOT_FOLDER/bin/console" user:create
 fi
 
 if [ "${1#-}" != "$1" ]; then

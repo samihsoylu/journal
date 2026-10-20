@@ -73,6 +73,14 @@ final readonly class ExceptionHandler
         // Sentry provides stack traces, user context, request data, and notifications
         if (SENTRY_ENABLED) {
             captureException($this->exception);
+        } else {
+            // Keep default installs diagnosable without recording private content.
+            error_log(sprintf(
+                'Journal error: %s at %s:%d',
+                $this->exception::class,
+                $this->exception->getFile(),
+                $this->exception->getLine(),
+            ));
         }
 
         http_response_code(500);

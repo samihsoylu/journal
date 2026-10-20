@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Utility;
 
+use RuntimeException;
 use Symfony\Component\Cache\CacheItem;
 
 /**
@@ -184,6 +185,9 @@ final class UserSession
         string $encodedEncryptionKey,
         ?string $timezone,
     ) : void {
+        if (session_status() === PHP_SESSION_ACTIVE && ! session_regenerate_id(true)) {
+            throw new RuntimeException('Could not regenerate the login session');
+        }
         // Generate a cryptographically secure random session ID
         $sessionId = bin2hex(random_bytes(32));
 
@@ -196,6 +200,7 @@ final class UserSession
         $this->antiCSRFToken = self::generateNewAntiCSRFToken($sessionId);
         $this->setEncodedEncryptionKey($encodedEncryptionKey);
         $this->save();
+        $this->isLoaded = true;
     }
 
     /**
@@ -222,6 +227,7 @@ final class UserSession
      */
     public function destroy() : void
     {
+        $this->isLoaded = false;
         $sessionId = Session::get(self::SESSION_ID);
 
         if ($sessionId === null) {

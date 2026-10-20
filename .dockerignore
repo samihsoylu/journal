@@ -1,7 +1,6 @@
 .git
 .github
 .idea
-.jcode
 
 .env
 .env.*
@@ -20,3 +19,8 @@ phpstan.neon
 phpstan.neon.dist
 rector.php
 .php-cs-fixer.cache
+ci/compose.tests.yaml
+ci/docker/legacy.Dockerfile
+ci/fixtures
+ci/verify-install-upgrade.php
+ci/verify-browser.php

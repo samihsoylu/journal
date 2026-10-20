@@ -37,7 +37,7 @@ final class EntryValidator extends AbstractValidator
 
         $this->ensureValueIsNotTooLong($this->post, 'entry_title', 128);
 
-        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key'] ?? null);
     }
 
     public function update() : void

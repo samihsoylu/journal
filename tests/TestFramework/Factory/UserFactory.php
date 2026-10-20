@@ -98,6 +98,7 @@ final class UserFactory
             $encryptionKey = $encryptor->generateProtectedKey($this->password);
         }
 
+        $this->encryptionKey = $encryptionKey;
         $user->setEncryptionKey($encryptionKey);
 
         if ($this->timezone !== null) {
@@ -116,13 +117,8 @@ final class UserFactory
     {
         $encryptor = new Encryptor();
 
-        if ($this->encryptionKey !== null) {
-            return $encryptor->getKeyFromProtectedKey($this->encryptionKey, $this->password);
-        }
+        $this->encryptionKey ??= $encryptor->generateProtectedKey($this->password);
 
-        // Generate a new protected key and unlock it
-        $protectedKey = $encryptor->generateProtectedKey($this->password);
-
-        return $encryptor->getKeyFromProtectedKey($protectedKey, $this->password);
+        return $encryptor->getKeyFromProtectedKey($this->encryptionKey, $this->password);
     }
 }

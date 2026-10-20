@@ -45,18 +45,11 @@ if ( ! DEBUG_MODE) {
     error_reporting(0);
 }
 
-if (SSL_IS_ENABLED) {
-    // **PREVENTING SESSION HIJACKING**
-    // Prevents javascript XSS attacks aimed to steal the session ID
-    ini_set('session.cookie_httponly', '1');
-
-    // **PREVENTING SESSION FIXATION**
-    // Session ID cannot be passed through URLs
-    ini_set('session.use_only_cookies', '1');
-
-    // Uses a secure connection (HTTPS) if possible
-    ini_set('session.cookie_secure', '1');
-}
+// Cookie protections apply to HTTP installations too; Secure follows the URL.
+ini_set('session.cookie_httponly', '1');
+ini_set('session.use_only_cookies', '1');
+ini_set('session.cookie_samesite', 'Strict');
+ini_set('session.cookie_secure', SSL_IS_ENABLED ? '1' : '0');
 
 // Project constants
 const MODEL_PATH = BASE_PATH . '/private/lib/Database/Model/';
@@ -83,7 +76,7 @@ if (headers_sent()) {
     header('X-Frame-Options: DENY');  // Prevent clickjacking
     header('X-Content-Type-Options: nosniff');  // Prevent MIME-sniffing
     header('Referrer-Policy: strict-origin-when-cross-origin');  // Control referrer information
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'");
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: http:; media-src 'self' data: blob: https: http:; frame-src 'self' https: http:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'");
 
     // Additional security header when SSL is enabled
     if (SSL_IS_ENABLED) {

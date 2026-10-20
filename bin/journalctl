@@ -1,0 +1,5 @@
+#!/usr/bin/env php
+<?php
+
+// Preserve the v1 command path for existing administration scripts.
+require __DIR__ . '/console';

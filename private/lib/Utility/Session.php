@@ -50,6 +50,7 @@ final class Session
     public static function destroy() : void
     {
         // Destroy all associated sessions
+        $_SESSION = [];
         session_destroy();
 
         // Start it again. In some cases we want to display an alert message to the user, we pass between redirects
