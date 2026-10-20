@@ -265,6 +265,13 @@ function main(bool $skipBuild) : void
         waitFor(static fn () => $sql('SELECT 1') === '1', 'database');
         $sql("CREATE DATABASE journal_upgrade; GRANT ALL ON journal_upgrade.* TO 'journal'@'%';");
         [$fresh, $browser] = $web('fresh', 'journal', $volume('fresh-uploads'));
+        // A direct POST has no login form token in its new/expired session.
+        $direct = new Browser($browser->base);
+        [$status, $body] = $direct->request('/login/action', [
+            'username' => 'freshowner', 'password' => 'fresh-password', 'form_key' => 'stale-token',
+        ]);
+        ensure($status === 200 && str_contains($body, 'Invalid Form Key. Please try again.'), 'Login without a session token should render a validation error, not fail');
+        echo "Direct login POST without a session token: validation error rendered\n";
         $browser->login('freshowner', 'fresh-password');
         ensure(str_contains($browser->page('/entries'), 'Entries'), 'Fresh entries page failed');
         verifyEditorBrowser($browser->base, $temporary);

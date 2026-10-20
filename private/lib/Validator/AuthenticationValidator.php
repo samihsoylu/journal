@@ -31,8 +31,9 @@ final class AuthenticationValidator extends AbstractValidator
         $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
 
         $token = $this->post['form_key'];
+        $sessionToken = Session::get('login_form_key');
 
-        if (hash_equals(Session::get('login_form_key'), $token) === false) {
+        if ( ! is_string($sessionToken) || $sessionToken === '' || ! is_string($token) || ! hash_equals($sessionToken, $token)) {
             throw InvalidParameterException::invalidFormKey();
         }
 
