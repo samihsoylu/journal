@@ -53,6 +53,7 @@ if ($mode === 'seed') {
     $entries->createEntry($userId, $key, $category->getId(), 'Legacy Markdown entry', '**Legacy bold**');
     $entries->createEntry($userId, $key, $category->getId(), 'Same title!', '<p>First collision entry</p>');
     $entries->createEntry($userId, $key, $category->getId(), 'Same title?', '<p>Second collision entry</p>');
+    $entries->createEntry($userId, $key, $category->getId(), 'Legacy Unicode – café 日本語', '<p>Unicode metadata remains readable</p>');
     $templates->createTemplate($userId, $key, $category->getId(), 'Legacy template', '<p>Legacy template content</p>');
     $png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a6XkAAAAASUVORK5CYII=';
     $image = new App\Service\ValueObject\Image($png, 'legacy-pixel.png', 'png');
@@ -78,6 +79,11 @@ if ($mode === 'seed') {
         $contents[] = $entry->getContentDecrypted($key);
     }
 
+    $titles = array_map(static fn ($entry) => $entry->getTitle(), $entries);
+
+    if ( ! in_array('Legacy Unicode – café 日本語', $titles, true)) {
+        throw new RuntimeException('Original runtime cannot read legacy Unicode metadata');
+    }
     $expectedContents = in_array($mode, ['verify-candidate-writes', 'verify-rollback'], true)
         ? ['<p>Updated legacy entry</p>', '<p>New v1 content</p>']
         : ['<p>Legacy private content – café</p>'];

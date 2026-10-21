@@ -153,6 +153,12 @@ final class Browser
 
         foreach (curl_getinfo($this->client, CURLINFO_COOKIELIST) as $cookie) {
             $fields = explode("\t", $cookie);
+
+            // Some libcurl versions retain expired rows in this inspection list.
+            // They are not sent on requests and do not represent active cookies.
+            if ((int) $fields[4] !== 0 && (int) $fields[4] <= time()) {
+                continue;
+            }
             $values[$fields[5]] = $fields[6];
         }
 
@@ -396,6 +402,7 @@ function main(bool $skipBuild) : void
         ensure(str_replace('varchar(1024)', 'varchar(191)', $migrationBefore) === $sql('SHOW CREATE TABLE journal_upgrade.migrations'), 'Migration table schema changed beyond its documented version-column width');
         echo "Declared migrations: nullable template title pattern and empty authenticator tables added; all original values/DDL and six migration records preserved; tracking width 1024 -> 191 tested\n";
         $browser->login('legacy owner', 'legacy-password');
+        ensure(str_contains($browser->page('/entries'), 'Legacy Unicode – café 日本語'), 'Upgrade changed legacy Unicode metadata');
         $entryId = $sql("SELECT id FROM journal_upgrade.entries WHERE title='Legacy HTML entry'");
         $markdownId = $sql("SELECT id FROM journal_upgrade.entries WHERE title='Legacy Markdown entry'");
         $templateId = $sql("SELECT id FROM journal_upgrade.templates WHERE title='Legacy template'");

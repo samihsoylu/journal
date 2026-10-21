@@ -224,13 +224,19 @@ final class AuthenticationRegressionTest extends IntegrationTestCase
     #[Test]
     public function collation_aliases_share_one_account_limit_and_other_logins_do_not_reset_it() : void
     {
-        UserFactory::setup()->create();
+        $user = UserFactory::setup()->create();
         UserFactory::setup()->withUsername('other-user')->withEmailAddress('other@example.test')->create();
         $auth = $this->getService(AuthenticationService::class);
+        $repository = $this->getRepository(UserRepository::class);
+        // Connection charsets/collations differ in Unicode equivalence. Only names resolving to
+        // this account must consume its bucket; unknown names have their own.
+        $aliases = array_values(array_filter(['testuser', 'TESTUSER', 'téstuser', 'ｔｅｓｔｕｓｅｒ'], static fn ($name) => $repository->findByUsername($name)?->getId() === $user->getId()));
+        self::assertContains('testuser', $aliases);
+        self::assertContains('TESTUSER', $aliases);
 
         for ($attempt = 0; $attempt < 10; ++$attempt) {
             try {
-                $auth->login($attempt % 2 === 0 ? 'téstuser' : 'ｔｅｓｔｕｓｅｒ', 'wrong-password');
+                $auth->login($aliases[$attempt % count($aliases)], 'wrong-password');
                 self::fail('Invalid password was accepted');
             } catch (InvalidArgumentException) {
                 self::assertFalse($auth->isUserLoggedIn());
@@ -247,7 +253,7 @@ final class AuthenticationRegressionTest extends IntegrationTestCase
             self::assertFalse($auth->isUserLoggedIn());
         }
         $_SERVER['REMOTE_ADDR'] .= '-other-peer';
-        $auth->login('téstuser', 'testpassword');
+        $auth->login($aliases[1], 'testpassword');
         self::assertTrue($auth->isUserLoggedIn());
     }
 
