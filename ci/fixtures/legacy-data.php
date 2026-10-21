@@ -74,12 +74,12 @@ if ($mode === 'seed') {
     $key = $encryptor->getKeyFromProtectedKey($user->getEncryptionKey(), $password);
     $entries = $entryRepository->getAllEntriesForUser($user->getId());
     $contents = [];
+    $titles = [];
 
     foreach ($entries as $entry) {
         $contents[] = $entry->getContentDecrypted($key);
+        $titles[] = $entry->getTitle();
     }
-
-    $titles = array_map(static fn ($entry) => $entry->getTitle(), $entries);
 
     if ( ! in_array('Legacy Unicode – café 日本語', $titles, true)) {
         throw new RuntimeException('Original runtime cannot read legacy Unicode metadata');
