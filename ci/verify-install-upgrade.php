@@ -382,7 +382,9 @@ function main(bool $skipBuild) : void
         ensure($legacySnapshot('journal_upgrade') === $before, 'Upgrade changed existing v1 columns, schema or stored data');
         $allowedTables = [...explode("\n", $legacyTables), 'user_two_factor', 'user_two_factor_recovery'];
         sort($allowedTables);
-        ensure($sql("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA='journal_upgrade' ORDER BY TABLE_NAME") === implode("\n", $allowedTables), 'Upgrade added unexpected tables');
+        $actualTables = explode("\n", $sql("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA='journal_upgrade' ORDER BY TABLE_NAME"));
+        sort($actualTables); // Information-schema collations order underscores differently across engines.
+        ensure($actualTables === $allowedTables, 'Upgrade added unexpected tables');
         ensure($sql('SELECT COUNT(*) FROM journal_upgrade.user_two_factor') === '0' && $sql('SELECT COUNT(*) FROM journal_upgrade.user_two_factor_recovery') === '0', 'Upgrade unexpectedly enrolled existing users');
         ensure($sql("SELECT COLUMN_TYPE, IS_NULLABLE, COLUMN_DEFAULT FROM information_schema.COLUMNS WHERE TABLE_SCHEMA='journal_upgrade' AND TABLE_NAME='templates' AND COLUMN_NAME='defaultEntryTitlePattern'") === "varchar(255)\tYES\tNULL", 'Unexpected title-pattern column definition');
         ensure($sql('SELECT COUNT(*) FROM journal_upgrade.templates WHERE defaultEntryTitlePattern IS NOT NULL') === '0', 'Upgrade changed existing template defaults');
