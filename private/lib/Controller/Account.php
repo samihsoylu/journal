@@ -188,8 +188,7 @@ final class Account extends AbstractController
         }
 
         $fileName = urlencode(basename($filePath));
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Cache-Control: private', false);
+        header('Cache-Control: private, no-store, max-age=0');
         header('Content-Type: application/zip');
         header('Content-Disposition: attachment; filename=' . $fileName);
         header('Content-Transfer-Encoding: binary');

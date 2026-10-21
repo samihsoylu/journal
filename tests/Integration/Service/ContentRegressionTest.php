@@ -13,6 +13,7 @@ use App\Service\TemplateService;
 use App\Service\UserService;
 use App\Utility\Encryptor;
 use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestFramework\Factory\CategoryFactory;
 use Tests\TestFramework\Factory\EntryFactory;
@@ -146,5 +147,45 @@ final class ContentRegressionTest extends IntegrationTestCase
         $template = TemplateFactory::setup()->withUser($owner)->create();
         $this->expectException(NotFoundException::class);
         $this->getService(TemplateService::class)->deleteTemplate($template->getId(), $intruder->getId());
+    }
+
+    #[Test]
+    public function backdated_entries_use_the_account_timezone_and_keep_their_date_when_edited_without_a_date() : void
+    {
+        $factory = UserFactory::setup()->withTimezone('Asia/Tokyo');
+        $user = $factory->create();
+        $key = $factory->getDecryptionKey();
+        $category = CategoryFactory::setup()->withUser($user)->create();
+        $service = $this->getService(EntryService::class);
+        $id = $service->createEntry($user->getId(), $key, $category->getId(), 'Backdated entry', 'Private content', '2023-12-31T23:30');
+        self::assertSame(1704033000, (int) $this->testOrm->fetchOneAssoc('SELECT createdTimestamp FROM entries WHERE id = ?', [$id])['createdTimestamp']);
+        self::assertSame('2023-12-31T23:30', $service->getEntryForUser($id, $user->getId(), $key)->getDateTime());
+        $service->updateEntry($user->getId(), $key, $id, $category->getId(), 'Edited entry', 'Edited private content');
+        self::assertSame(1704033000, (int) $this->testOrm->fetchOneAssoc('SELECT createdTimestamp FROM entries WHERE id = ?', [$id])['createdTimestamp']);
+        $service->updateEntry($user->getId(), $key, $id, $category->getId(), 'Edited entry', 'Edited private content', '2024-01-01T12:00');
+        self::assertSame('2024-01-01T12:00', $service->getEntryForUser($id, $user->getId(), $key)->getDateTime());
+    }
+
+    #[Test]
+    #[DataProvider('provideSubmitting_an_unchanged_date_keeps_every_second_and_the_original_dst_occurrenceCases')]
+    public function submitting_an_unchanged_date_keeps_every_second_and_the_original_dst_occurrence(int $timestamp) : void
+    {
+        $factory = UserFactory::setup()->withTimezone('Europe/Amsterdam');
+        $user = $factory->create();
+        $key = $factory->getDecryptionKey();
+        $category = CategoryFactory::setup()->withUser($user)->create();
+        $entry = EntryFactory::setup()->withUser($user)->withCategory($category)->withContent('Private before', $key)->create();
+        $entry->setCreatedTimestamp($timestamp);
+        $this->getService(EntityManagerInterface::class)->flush();
+        $service = $this->getService(EntryService::class);
+        $displayedDate = $service->getEntryForUser($entry->getId(), $user->getId(), $key)->getDateTime();
+        $service->updateEntry($user->getId(), $key, $entry->getId(), $category->getId(), 'Changed title', '<p>Private after</p>', $displayedDate);
+        self::assertSame($timestamp, (int) $this->testOrm->fetchOneAssoc('SELECT createdTimestamp FROM entries WHERE id = ?', [$entry->getId()])['createdTimestamp']);
+        self::assertSame('<p>Private after</p>', $service->getEntryForUser($entry->getId(), $user->getId(), $key)->getContent());
+    }
+
+    public static function provideSubmitting_an_unchanged_date_keeps_every_second_and_the_original_dst_occurrenceCases() : iterable
+    {
+        return ['nonzero seconds' => [1600000037], 'earlier DST fold' => [1729989000]];
     }
 }

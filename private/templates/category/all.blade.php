@@ -13,7 +13,7 @@
         </div>
         <div class="row row-align">
             <div class="col s12">
-                <div id="sortable" class="ui-sortable">
+                <div id="sortable" class="ui-sortable" data-form-key="{{ $session->getAntiCSRFToken() }}">
                 @foreach ($categories as $category)
                     <div id="{{ $category->getId() }}" class="card sortable-card">
                         <div class="card-icon ui-sortable-handle">
@@ -33,6 +33,6 @@
     </div>
 @endsection
 
-@section('jquery-scripts')
+@section('scripts')
     <script src="{{ $assets_url }}/js/category.js"></script>
 @endsection

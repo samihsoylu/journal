@@ -6,11 +6,13 @@ namespace App\Service;
 
 use App\Database\Model\Entry;
 use App\Database\Repository\EntryRepository;
+use App\Service\Entry\EntryDateTime;
 use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\EntryHelper;
 use App\Service\Helper\UserHelper;
 use App\Service\Model\EntriesDecorator;
 use App\Service\Model\EntryDecorator;
+use App\Service\Security\RichContentSanitizer;
 use Defuse\Crypto\Key;
 
 final readonly class EntryService
@@ -20,6 +22,8 @@ final readonly class EntryService
         private EntryHelper $entryHelper,
         private CategoryHelper $categoryHelper,
         private UserHelper $userHelper,
+        private RichContentSanitizer $contentSanitizer = new RichContentSanitizer(),
+        private EntryDateTime $entryDateTime = new EntryDateTime(),
     ) {}
 
     /**
@@ -27,13 +31,18 @@ final readonly class EntryService
      *
      * @return int Entry id
      */
-    public function createEntry(int $userId, Key $encryptionKey, int $categoryId, string $title, string $content) : int
+    public function createEntry(int $userId, Key $encryptionKey, int $categoryId, string $title, string $content, ?string $dateTime = null) : int
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
         $user = $this->userHelper->getUserById($userId);
+        $timestamp = $this->entryDateTime->parse($dateTime, $user->getTimezone());
 
         $entry = new Entry();
+
+        if ($timestamp !== null) {
+            $entry->setCreatedTimestamp($timestamp);
+        }
         $entry->setReferencedCategory($category)
             ->setReferencedUser($user)
             ->setTitle($title)
@@ -49,11 +58,20 @@ final readonly class EntryService
     /**
      * Update an entry for a user.
      */
-    public function updateEntry(int $userId, Key $encryptionKey, int $entryId, int $categoryId, string $title, string $content) : void
+    public function updateEntry(int $userId, Key $encryptionKey, int $entryId, int $categoryId, string $title, string $content, ?string $dateTime = null) : void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
         $entry = $this->entryHelper->getEntryForUser($entryId, $userId);
+        $timezone = $entry->getReferencedUser()->getTimezone();
+        // The form displays minutes only. An unchanged value must retain the
+        // original seconds and the original occurrence of an autumn DST fold.
+        $unchanged = $dateTime !== null && $dateTime !== '' && $dateTime === $this->entryDateTime->format($entry->getCreatedTimestamp(), $timezone);
+        $timestamp = $unchanged ? null : $this->entryDateTime->parse($dateTime, $timezone);
+
+        if ($timestamp !== null) {
+            $entry->setCreatedTimestamp($timestamp);
+        }
         $entry->setReferencedCategory($category)
             ->setTitle($title)
             ->setContentAndEncrypt($content, $encryptionKey)
@@ -115,8 +133,9 @@ final readonly class EntryService
             $entry->getTitle(),
             $entry->getReferencedCategory()->getId(),
             $entry->getReferencedCategory()->getName(),
-            $entry->getContentDecrypted($key),
+            $this->contentSanitizer->sanitize($entry->getContentDecrypted($key)),
             $entry->getLastUpdatedTimestampFormatted($entry->getReferencedUser()->getTimezone()),
+            $this->entryDateTime->format($entry->getCreatedTimestamp(), $entry->getReferencedUser()->getTimezone()),
         );
     }
 

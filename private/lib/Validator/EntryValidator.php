@@ -37,6 +37,10 @@ final class EntryValidator extends AbstractValidator
 
         $this->ensureValueIsNotTooLong($this->post, 'entry_title', 128);
 
+        if (isset($this->post['entry_date_time'])) {
+            $this->ensureValueIsNotTooShort($this->post, 'entry_date_time', 0);
+        }
+
         $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key'] ?? null);
     }
 
@@ -47,7 +51,7 @@ final class EntryValidator extends AbstractValidator
 
     public function delete() : void
     {
-        $this->ensureUserHasProvidedValidAntiCSRFToken($_GET['form_key']);
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key'] ?? null);
     }
 
     private function ensureOptionalDateFormatIsValid(array $values, string $fieldName) : void

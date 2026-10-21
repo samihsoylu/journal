@@ -295,7 +295,7 @@ $repository = $this->getRepository(UserRepository::class);
 
 ## Best Practices
 
-1. **One assertion per test** - Each test should verify one specific behavior
+1. **One behavior per test** - Use the assertions needed to verify its result and side effects
 2. **Descriptive test names** - Use names like `it_should_find_user_by_username`
 3. **Use factories** - Don't create entities manually in tests
 4. **Verify via SQL** - Use `testOrm->fetchOneAssoc()` to verify database state
@@ -352,3 +352,42 @@ APP_ENV=test ./vendor/bin/doctrine-migrations migrate
 - Ensure you're using a local database (not remote)
 - Check for N+1 queries in your code
 - Consider using database indexes
+
+## Browser, upgrade and coverage checks
+
+Run the Docker rehearsal described in [Upgrading](upgrading.md#reproduce-the-compatibility-checks)
+to exercise fresh installs, original v1 data, rollback, the editor, PWA, entry
+dates, template titles, account security and optional authenticator login.
+It starts only disposable databases, containers and volumes with synthetic data.
+Browser tests use ChromeDriver's native WebDriver API from PHP; no Node or Python
+toolchain is needed. The example Compose file is also exercised with the local
+candidate image, without publishing it.
+
+CI measures application line coverage from PHPUnit plus actual HTTP/CLI execution
+on each tested database, and requires at least 85%. The source filter includes
+uncovered application services, controllers, validators, framework code, scripts,
+production service configuration and entry points. This is combined coverage,
+not a claim that unit tests alone cover 85%. Reaching 100% unit coverage remains
+a follow-up.
+
+To reproduce with PCOV installed in host PHP:
+
+```sh
+mkdir -p coverage
+vendor/bin/phpunit --coverage-php=coverage/phpunit.cov
+JOURNAL_COVERAGE_DIR="$PWD/coverage" php ci/verify-install-upgrade.php
+php ci/coverage/report.php coverage 85
+```
+
+The rehearsal builds a test-only PCOV image and captures line data from the web
+and CLI processes. The report writes `coverage/clover.xml`, `coverage/summary.txt`
+and `coverage/html/`. Container source hashes must match the checkout; rebuild
+and start with an empty capture directory after source changes. Release images
+do not contain PCOV or the capture hook. Keep coverage artifacts out of Git.
+
+Security regressions cover session revocation, CSRF and method checks, ownership,
+image validation, rich-content cleaning, private error reporting, asynchronous
+exports, failed storage, concurrent rate limits, authenticator/recovery replay
+and credential changes. The Docker check races separate database connections to
+prove exactly one winner for a shared counter or recovery code. Do not substitute
+these synthetic checks for a deployment-specific backup and HTTPS rehearsal.

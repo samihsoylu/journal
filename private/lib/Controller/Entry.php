@@ -16,6 +16,7 @@ use App\Utility\Sanitize;
 use App\Utility\Template;
 use App\Validator\EntryValidator;
 use DateTime;
+use DateTimeZone;
 
 final class Entry extends AbstractController
 {
@@ -24,7 +25,7 @@ final class Entry extends AbstractController
     public const string CREATE_ENTRY_URL = self::ENTRY_URL . '/create';
     public const string VIEW_ENTRY_URL = self::ENTRY_URL . '/{id:\d+}';
     public const string UPDATE_ENTRY_URL = self::VIEW_ENTRY_URL . '/update';
-    public const string DELETE_ENTRY_URL = self::VIEW_ENTRY_URL . '/delete/{antiCsrfToken}';
+    public const string DELETE_ENTRY_URL = self::VIEW_ENTRY_URL . '/delete';
     public const string CREATE_ENTRY_POST_URL = self::CREATE_ENTRY_URL . '/action';
     public const string UPDATE_ENTRY_POST_URL = self::UPDATE_ENTRY_URL . '/action';
 
@@ -65,13 +66,13 @@ final class Entry extends AbstractController
         $page = $this->sanitize->getVariable($_GET, 'page', Sanitize::TYPE_INT) ?? 1;
 
         if ($createdDateFrom !== null) {
-            $date = new DateTime($createdDateFrom);
+            $date = new DateTime($createdDateFrom, new DateTimeZone($this->getUserTimezone()));
             $date->setTime(0, 0, 0);
             $createdDateFrom = $date->getTimestamp();
         }
 
         if ($createdDateTo !== null) {
-            $date = new DateTime($createdDateTo);
+            $date = new DateTime($createdDateTo, new DateTimeZone($this->getUserTimezone()));
             $date->setTime(23, 59, 59);
             $createdDateTo = $date->getTimestamp();
         }
@@ -135,7 +136,7 @@ final class Entry extends AbstractController
         $entryTitle = $this->sanitize->string($_POST['entry_title']);
         $entryContent = $this->sanitize->string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
-        $entryId = $this->service->createEntry($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $entryTitle, $entryContent);
+        $entryId = $this->service->createEntry($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $entryTitle, $entryContent, $_POST['entry_date_time'] ?? null);
 
         $this->setNotification(Notification::TYPE_SUCCESS, sprintf('Entry %s has been created', $entryTitle));
 
@@ -182,6 +183,7 @@ final class Entry extends AbstractController
             $categoryId,
             $entryTitle,
             $entryContent,
+            $_POST['entry_date_time'] ?? null,
         );
 
         $this->setNotification(
@@ -225,9 +227,6 @@ final class Entry extends AbstractController
     public function delete() : never
     {
         $entryId = $this->sanitize->int($this->getRouteParameters()['id']);
-
-        // setting get variable for validator
-        $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
         /** @see EntryValidator::delete() */
         $this->validator->validate(__FUNCTION__);

@@ -9,6 +9,21 @@
         <div class="row row-align">
             <div class="col s12 m6">
 
+                <div class="card"><div class="card-content">
+                    <span class="card-title">Two-factor authentication</span>
+                    <p>Add an authenticator code to protect your login.</p>
+                    <a class="btn btn-default mt-10" href="{{ $security_url }}">Manage two-factor login</a>
+                </div></div>
+
+                <div class="card">
+                    <div class="card-content">
+                        <span class="card-title">Install Journal</span>
+                        <p>Use your browser's Install app or Add to Home Screen menu to keep Journal close by.</p>
+                        <p class="small-text">A connection to your Journal server is required. Entries and account details are never saved for offline use.</p>
+                        <button id="install-journal" class="btn btn-default mt-10" type="button" hidden>Install Journal</button>
+                    </div>
+                </div>
+
                 <!-- Change Password -->
                 <div class="card">
                     <div class="card-content">

@@ -15,8 +15,10 @@ final class CategoryValidator extends AbstractValidator
     {
         $requiredFields = ['category_name', 'category_description'];
         $this->ensureRequiredFieldsAreProvided($this->post, $requiredFields);
+        $this->ensureValueIsNotTooShort($this->post, 'category_name', 1);
+        $this->ensureValueIsNotTooShort($this->post, 'category_description', 0);
 
-        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key'] ?? null);
     }
 
     /**
@@ -32,11 +34,13 @@ final class CategoryValidator extends AbstractValidator
      */
     public function delete() : void
     {
-        $this->ensureUserHasProvidedValidAntiCSRFToken($_GET['form_key']);
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key'] ?? null);
     }
 
     public function setCategoryOrder() : void
     {
+        // Sorting may send several requests from the same open page.
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key'] ?? null, false);
         $fieldName = 'orderedCategoryIds';
 
         $requiredFields = [$fieldName];

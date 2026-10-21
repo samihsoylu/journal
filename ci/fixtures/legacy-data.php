@@ -24,7 +24,7 @@ file_put_contents('.env', implode("\n", array_map(
 
 $mode = $argv[1] ?? 'seed';
 
-if ($mode === 'seed') {
+if (in_array($mode, ['seed', 'verify-rollback'], true)) {
     exec('vendor/bin/doctrine-migrations migrate --no-interaction 2>&1', $migrationOutput, $code);
 
     if ($code !== 0) {
@@ -65,7 +65,7 @@ if ($mode === 'seed') {
     if ($user === null) {
         throw new RuntimeException('Legacy user missing after upgrade');
     }
-    $password = in_array($mode, ['verify-changed-password', 'verify-candidate-writes'], true) ? 'changed-legacy-password' : 'legacy-password';
+    $password = in_array($mode, ['verify-changed-password', 'verify-candidate-writes', 'verify-rollback'], true) ? 'changed-legacy-password' : 'legacy-password';
 
     if ( ! password_verify($password, $user->getPassword())) {
         throw new RuntimeException('Original runtime cannot verify the account password');
@@ -78,7 +78,7 @@ if ($mode === 'seed') {
         $contents[] = $entry->getContentDecrypted($key);
     }
 
-    $expectedContents = $mode === 'verify-candidate-writes'
+    $expectedContents = in_array($mode, ['verify-candidate-writes', 'verify-rollback'], true)
         ? ['<p>Updated legacy entry</p>', '<p>New v1 content</p>']
         : ['<p>Legacy private content – café</p>'];
 

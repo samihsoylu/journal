@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" theme="light">
     <head>
         <title>@yield('pageTitle') | {{ $site_title }}</title>
         <meta charset="UTF-8" />
@@ -18,13 +18,12 @@
         <link rel="icon" type="image/png" sizes="32x32" href="{{ $assets_url }}/images/favicon/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="96x96" href="{{ $assets_url }}/images/favicon/favicon-96x96.png">
         <link rel="icon" type="image/png" sizes="16x16" href="{{ $assets_url }}/images/favicon/favicon-16x16.png">
-        <link rel="manifest" href="{{ $assets_url }}/images/favicon/manifest.json">
+        <link rel="manifest" href="{{ $base_url }}/manifest.webmanifest">
         <meta name="msapplication-TileColor" content="#ffffff">
         <meta name="msapplication-TileImage" content="{{ $assets_url }}/images/favicon/ms-icon-144x144.png">
         <meta name="theme-color" content="#ffffff">
 
         <link href="{{ $assets_url }}/css/materialize/materialize.min.css" rel="stylesheet" />
-        <link href="{{ $assets_url }}/css/jquery-ui/jquery-ui.css" rel="stylesheet" />
         <link href="{{ $assets_url }}/css/style.css" rel="stylesheet" />
     </head>
     <body>
@@ -32,14 +31,13 @@
 @yield('content')
         </main>
 
-        <script src="{{ $assets_url }}/js/jquery.js"></script>
-        <script src="{{ $assets_url }}/js/jquery-ui.min.js"></script>
-        <script src="{{ $assets_url }}/js/jquery.ui.touch-punch.min.js"></script>
         <script src="{{ $assets_url }}/js/materialize.min.js"></script>
+        <script src="{{ $assets_url }}/js/sortable.min.js"></script>
         <script type="text/javascript">
-            const BASE_URL = '{{ $base_url }}';
+            const BASE_URL = @json($base_url);
         </script>
         <script src="{{ $assets_url }}/js/script.js"></script>
-@yield('jquery-scripts')
+        <script src="{{ $assets_url }}/js/pwa.js"></script>
+@yield('scripts')
     </body>
 </html>

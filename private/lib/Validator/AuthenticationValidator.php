@@ -9,6 +9,11 @@ use App\Utility\Session;
 
 final class AuthenticationValidator extends AbstractValidator
 {
+    public function logout() : void
+    {
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key'] ?? null);
+    }
+
     /**
      * @throws InvalidParameterException
      */
@@ -19,6 +24,8 @@ final class AuthenticationValidator extends AbstractValidator
 
         $this->ensureValueIsNotTooShort($this->post, 'username', 4);
         $this->ensureValueIsNotTooLong($this->post, 'username', 64);
+        $this->ensureValueIsNotTooShort($this->post, 'password', 1);
+        $this->ensureValueIsNotTooLong($this->post, 'password', 1024);
         $this->ensureEmailIsValid($this->post, 'email');
     }
 
@@ -39,5 +46,7 @@ final class AuthenticationValidator extends AbstractValidator
 
         $this->ensureValueIsNotTooShort($this->post, 'username', 4);
         $this->ensureValueIsNotTooLong($this->post, 'username', 64);
+        // Keep legacy passwords valid while rejecting malformed HTTP values.
+        $this->ensureValueIsNotTooShort($this->post, 'password', 0);
     }
 }

@@ -24,7 +24,7 @@ final class Category extends AbstractController
     public const string READ_CATEGORY_URL = self::CATEGORY_URL . '/{id:\d+}';
     public const string UPDATE_CATEGORY_URL = self::READ_CATEGORY_URL . '/update';
     public const string UPDATE_CATEGORY_POST_URL = self::UPDATE_CATEGORY_URL . '/action';
-    public const string DELETE_CATEGORY_URL = self::READ_CATEGORY_URL . '/delete/{antiCsrfToken}';
+    public const string DELETE_CATEGORY_URL = self::READ_CATEGORY_URL . '/delete';
     public const string SET_CATEGORY_ORDER_URL = self::CATEGORIES_URL . '/ajax/sort-order';
 
     private readonly CategoryValidator $validator;
@@ -40,7 +40,7 @@ final class Category extends AbstractController
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->validator = new CategoryValidator($_POST, [], $authenticationService->getUserSession());
+        $this->validator = new CategoryValidator($_POST, $_GET, $authenticationService->getUserSession());
     }
 
     /**
@@ -129,9 +129,6 @@ final class Category extends AbstractController
     public function delete() : never
     {
         $categoryId = $this->sanitize->int($this->getRouteParameters()['id']);
-
-        // setting get variable for validator
-        $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
         /** @see CategoryValidator::delete() */
         $this->validator->validate(__FUNCTION__);

@@ -17,6 +17,7 @@ use App\Service\Helper\UserHelper;
 use App\Service\Helper\UserSetupHelper;
 use App\Service\Helper\WidgetHelper;
 use App\Service\Model\UserDecorator;
+use App\Service\Security\PasswordPolicy;
 use App\Service\Security\UserKeys;
 
 final readonly class UserManagementService
@@ -58,6 +59,7 @@ final readonly class UserManagementService
      */
     public function createUser(string $username, string $password, string $email, int $privilegeLevel) : int
     {
+        PasswordPolicy::validate($password);
         $user = $this->repository->findByUsername($username);
 
         if ($user instanceof User) {

@@ -4,7 +4,7 @@ services:
     image: samihsoylu/journal
     restart: unless-stopped
     ports:
-      - 8080:80
+      - 127.0.0.1:8080:80
     depends_on:
       - mariadb
     volumes:
@@ -16,9 +16,9 @@ services:
       - DB_USERNAME=journal
       - DB_PASSWORD=journal
       - DB_SCHEMA=journal
-      - DEBUG_MODE=true
+      - DEBUG_MODE=false
       - USERNAME=demouser
-      - PASSWORD=demopass
+      - PASSWORD=journal-demo-password
       - EMAIL_ADDRESS=user@example.com
   mariadb:
     image: mariadb:10.11

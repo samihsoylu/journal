@@ -10,6 +10,11 @@ use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
 use App\Service\Helper\AuthenticationHelper;
 use App\Service\Model\SessionDecorator;
+use App\Service\Security\CredentialFingerprint;
+use App\Service\Security\PendingLogin;
+use App\Service\Security\TwoFactorChange;
+use App\Service\Security\TwoFactorService;
+use App\Service\Security\TwoFactorStore;
 use App\Service\Security\UserKeys;
 use App\Utility\UserSession;
 use Defuse\Crypto\Key;
@@ -21,26 +26,43 @@ final readonly class AuthenticationService
         private AuthenticationHelper $helper,
         private UserSession $userSession,
         private UserKeys $keys,
+        private TwoFactorStore $twoFactorStore,
+        private TwoFactorService $twoFactor,
+        private PendingLogin $pending,
     ) {}
 
     public function getUserSession() : ?UserSession
     {
-        return $this->userSession->exists() ? $this->userSession : null;
-    }
+        if ( ! $this->userSession->exists()) {
+            return null;
+        }
+        $user = $this->repository->getById($this->userSession->getUserId());
+        $fingerprint = $this->userSession->getCredentialFingerprint();
 
-    public function login(string $username, string $password) : void
-    {
-        $userFailedLoginCount = $this->helper->getFailedLoginCount();
+        if ( ! $user instanceof User || ! is_string($fingerprint) || ! hash_equals($this->credentialFingerprint($user), $fingerprint)) {
+            // Password/key changes, privilege changes, and deletion revoke cached sessions.
+            $this->userSession->destroy();
 
-        if ($userFailedLoginCount >= 10) {
-            throw InvalidOperationException::loginAttemptsExceeded($userFailedLoginCount);
+            return null;
         }
 
+        return $this->userSession;
+    }
+
+    private function credentialFingerprint(User $user) : string
+    {
+        return CredentialFingerprint::from($user, $this->twoFactorStore->find($user->getId())?->revision);
+    }
+
+    public function login(string $username, string $password) : bool
+    {
         $user = $this->repository->findByUsername($username);
+        // Legacy database collations accept accent/width aliases. All names that
+        // resolve to one account must share that account's throttle bucket.
+        $identity = $user instanceof User ? 'user:' . $user->getId() : 'missing:' . mb_strtolower($username, 'UTF-8');
+        $this->helper->reserveLoginAttempt($identity);
 
         if ( ! $user instanceof User || ! password_verify($password, $user->getPassword())) {
-            $this->helper->setFailedLoginCount(++$userFailedLoginCount);
-
             // Username or password is incorrect
             throw InvalidArgumentException::incorrectLogin();
         }
@@ -50,19 +72,69 @@ final readonly class AuthenticationService
             $password,
         );
 
+        $state = $this->twoFactorStore->find($user->getId());
+        $fingerprint = CredentialFingerprint::from($user, $state?->revision);
+
+        if ($state?->enabled()) {
+            $this->userSession->destroy();
+            $this->pending->begin($user->getId(), $fingerprint, $encodedEncryptionKey);
+
+            return false;
+        }
+        $this->pending->clear();
         $this->userSession->create(
             $user->getId(),
             $user->getUsername(),
             $user->getPrivilegeLevel(),
             $encodedEncryptionKey,
             $user->getTimezone(),
+            $fingerprint,
         );
 
-        $this->helper->setFailedLoginCount(0);
+        $this->helper->resetLoginAttempts($identity);
+
+        return true;
+    }
+
+    public function completeTwoFactor(string $code, mixed $csrf) : void
+    {
+        $pending = $this->pending->requireState($csrf);
+        $user = $this->repository->getById($pending['userId']);
+        $state = $this->twoFactorStore->find($pending['userId']);
+
+        if ( ! $user instanceof User || $state === null || ! $state->enabled()
+            || ! hash_equals(CredentialFingerprint::from($user, $state->revision), $pending['fingerprint'])) {
+            $this->pending->clear();
+
+            throw TwoFactorService::invalidCode();
+        }
+        $encodedKey = $_COOKIE[PendingLogin::COOKIE];
+        $key = $this->keys->getKeyFromEncodedKey($encodedKey);
+
+        if ( ! $this->twoFactor->verifyProof($state, $key, $code)) {
+            throw TwoFactorService::invalidCode();
+        }
+        $this->pending->clear();
+        // Use the fingerprint actually verified, so later changes revoke this session.
+        $this->userSession->create($user->getId(), $user->getUsername(), $user->getPrivilegeLevel(), $encodedKey, $user->getTimezone(), $pending['fingerprint']);
+        $this->helper->resetLoginAttempts('user:' . $user->getId());
+        $this->twoFactor->resetAttempts($user->getId());
+    }
+
+    public function refreshSecuritySession(TwoFactorChange $change) : void
+    {
+        $user = $this->repository->getById($this->userSession->getUserId());
+
+        if ( ! $this->userSession->exists() || ! $user instanceof User || $change->state->userId !== $user->getId()) {
+            throw InvalidOperationException::userIsNotLoggedIn();
+        }
+        $this->userSession->create($user->getId(), $user->getUsername(), $user->getPrivilegeLevel(), $this->userSession->getEncodedEncryptionKey(), $user->getTimezone(), $change->fingerprint);
     }
 
     public function logout() : void
     {
+        $this->pending->clear();
+        $this->twoFactor->cancelSetup();
         $this->userSession->destroy();
     }
 

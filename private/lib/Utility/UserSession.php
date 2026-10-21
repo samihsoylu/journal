@@ -20,6 +20,7 @@ final class UserSession
     private ?string $username = null;
     private ?int $privilegeLevel = null;
     private ?string $timezone = null;
+    private ?string $credentialFingerprint = null;
 
     private const string SESSION_ID = 'SessionID';
     private const string USER_ID = 'UserID';
@@ -28,6 +29,7 @@ final class UserSession
     private const string ANTI_CSRF_TOKEN = 'AntiCSRFToken';
     private const string ENCODED_ENCRYPTION_KEY = 'EEK';
     private const string TIMEZONE = 'timezone';
+    private const string CREDENTIAL_FINGERPRINT = 'credentialFingerprint';
 
     private bool $isLoaded;
 
@@ -45,7 +47,7 @@ final class UserSession
         $sessionId = Session::get(self::SESSION_ID);
         $encodedEncryptionKey = $_COOKIE[self::ENCODED_ENCRYPTION_KEY] ?? null;
 
-        if ( ! $sessionId || ! $encodedEncryptionKey) {
+        if ( ! is_string($sessionId) || $sessionId === '' || ! is_string($encodedEncryptionKey) || $encodedEncryptionKey === '') {
             $this->isLoaded = false;
 
             return;
@@ -64,6 +66,12 @@ final class UserSession
         $this->fromStruct($item->get());
         $token = Session::get(self::ANTI_CSRF_TOKEN);
 
+        if ( ! is_string($token) || $token === '') {
+            $this->isLoaded = false;
+
+            return;
+        }
+
         $this->setAntiCSRFToken($token);
         $this->setEncodedEncryptionKey($encodedEncryptionKey);
 
@@ -78,6 +86,11 @@ final class UserSession
     public function getSessionId() : ?string
     {
         return $this->sessionId;
+    }
+
+    public function getCredentialFingerprint() : ?string
+    {
+        return $this->credentialFingerprint;
     }
 
     private function setSessionId(string $sessionId) : void
@@ -152,6 +165,7 @@ final class UserSession
         $this->setUsername($struct[self::USER_NAME]);
         $this->setPrivilegeLevel($struct[self::USER_PRIVILEGE_LEVEL]);
         $this->setTimezone($struct[self::TIMEZONE] ?? null);
+        $this->credentialFingerprint = $struct[self::CREDENTIAL_FINGERPRINT] ?? null;
     }
 
     private function toStruct() : array
@@ -162,6 +176,7 @@ final class UserSession
             self::USER_NAME => $this->username,
             self::USER_PRIVILEGE_LEVEL => $this->privilegeLevel,
             self::TIMEZONE => $this->timezone,
+            self::CREDENTIAL_FINGERPRINT => $this->credentialFingerprint,
         ];
     }
 
@@ -184,6 +199,7 @@ final class UserSession
         int $privilegeLevel,
         string $encodedEncryptionKey,
         ?string $timezone,
+        ?string $credentialFingerprint = null,
     ) : void {
         if (session_status() === PHP_SESSION_ACTIVE && ! session_regenerate_id(true)) {
             throw new RuntimeException('Could not regenerate the login session');
@@ -196,6 +212,7 @@ final class UserSession
         $this->setUsername($username);
         $this->setPrivilegeLevel($privilegeLevel);
         $this->setTimezone($timezone);
+        $this->credentialFingerprint = $credentialFingerprint;
 
         $this->antiCSRFToken = self::generateNewAntiCSRFToken($sessionId);
         $this->setEncodedEncryptionKey($encodedEncryptionKey);
@@ -230,7 +247,13 @@ final class UserSession
         $this->isLoaded = false;
         $sessionId = Session::get(self::SESSION_ID);
 
-        if ($sessionId === null) {
+        unset($_COOKIE[self::ENCODED_ENCRYPTION_KEY]);
+        $this->setCookie(self::ENCODED_ENCRYPTION_KEY, '', time() - 3600);
+
+        if ( ! is_string($sessionId) || $sessionId === '') {
+            Session::delete(self::SESSION_ID);
+            Session::delete(self::ANTI_CSRF_TOKEN);
+
             return;
         }
 
@@ -240,26 +263,11 @@ final class UserSession
             $this->cache->delete($sessionId);
         }
 
-        unset($_COOKIE[self::ENCODED_ENCRYPTION_KEY]);
-        $this->setCookie(self::ENCODED_ENCRYPTION_KEY, '', time() - 3600);
-
         Session::destroy();
     }
 
     private function setCookie(string $cookieName, string $cookieValue, int $cookieExpiryTime) : void
     {
-        $options = [
-            'expires' => $cookieExpiryTime,
-            'path' => '/',
-            'httponly' => true,  // Prevents JavaScript access (XSS protection)
-            'samesite' => 'Strict',  // Prevents CSRF attacks
-        ];
-
-        // Only set Secure flag when SSL is enabled (production environments)
-        if (SSL_IS_ENABLED) {
-            $options['secure'] = true;  // Only transmit over HTTPS
-        }
-
-        setcookie($cookieName, $cookieValue, $options);
+        PrivateCookie::write($cookieName, $cookieValue, $cookieExpiryTime);
     }
 }

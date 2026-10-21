@@ -1,9 +1,12 @@
 <header>
+    <form id="logout-form" method="post" action="{{ $logout_url }}" hidden>
+        <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
+    </form>
     <!-- Account menu dropdown (desktop) -->
     <ul id="account_menu" class="dropdown-content">
         <li><a href="{{ $account_url }}">Account settings</a></li>
         <li class="divider"></li>
-        <li><a href="{{ $logout_url }}">Logout</a></li>
+        <li><button class="nav-action" type="submit" form="logout-form">Logout</button></li>
     </ul>
 
     <!-- Navigation bar (mobile -->
@@ -16,7 +19,7 @@
             <li><a href="{{ $users_url }}">Users</a></li>
         @endif
         <li><a href="{{ $account_url }}">Account settings</a></li>
-        <li><a href="{{ $logout_url }}">Logout</a></li>
+        <li><button class="nav-action" type="submit" form="logout-form">Logout</button></li>
     </ul>
 
     <!-- Entries menu dropdown (desktop) -->
@@ -38,7 +41,7 @@
     </ul>
 
     <div class="navbar-fixed">
-        <nav>
+        <nav class="navbar">
             <div class="nav-wrapper">
                 <a href="{{ $dashboard_url }}" class="brand-logo">{{ $site_title }}</a>
                 <a href="#" data-target="mobile_menu" class="sidenav-trigger"><i class="material-icons">menu</i></a>

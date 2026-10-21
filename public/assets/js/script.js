@@ -1,46 +1,19 @@
-$( document ).ready(function() {
-    // Navigation
-    $('.sidenav').sidenav();
-    $(".dropdown-trigger").dropdown({
-        'constrainWidth': false
+document.addEventListener('DOMContentLoaded', () => {
+    M.Sidenav.init(document.querySelectorAll('.sidenav'));
+    M.Dropdown.init(document.querySelectorAll('.dropdown-trigger'), { constrainWidth: false });
+    M.FormSelect.init(document.querySelectorAll('form select'));
+    M.Datepicker.init(document.querySelectorAll('.datepicker'), { format: 'mmm dd, yyyy' });
+    M.Modal.init(document.querySelectorAll('.modal'));
+    M.Tooltip.init(document.querySelectorAll('.tooltipped'));
+
+    document.querySelectorAll('.corner-alert').forEach(alert => {
+        alert.addEventListener('click', () => { alert.hidden = true; });
     });
-
-    // Forms: select field
-    $('form select').formSelect();
-
-    // General site heading
-    $('.parallax').parallax();
-
-    // ----- View all entries page -----
-    /** $('form#filters select').on('change', function(){
-        $(this).closest('form').submit();
-    });**/
-    // View all entries page date picker
-    $('.datepicker').datepicker();
-
-    $('.modal').modal();
-
-    $(".corner-alert").click(function(){
-        $(".corner-alert").hide();
+    document.querySelectorAll('#desktopFilter, #filters').forEach(form => {
+        form.addEventListener('submit', () => {
+            form.querySelectorAll('input, select, textarea').forEach(input => {
+                if (!input.value) input.removeAttribute('name');
+            });
+        });
     });
-
-    // Ensures that filters with blank values are not included in the get request
-    $("#desktopFilter").submit(function() {
-        $(this).find(":input").filter(function () {
-            return !this.value;
-        }).attr("name", '');
-
-        return true;
-    });
-
-    $("#filters").submit(function() {
-        $(this).find(":input").filter(function () {
-            return !this.value;
-        }).attr("name", '');
-
-        return true;
-    });
-
-    // Tool tips
-    $('.tooltipped').tooltip();
 });

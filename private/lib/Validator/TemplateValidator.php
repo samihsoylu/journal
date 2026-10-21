@@ -22,7 +22,11 @@ final class TemplateValidator extends AbstractValidator
         $this->ensureValueIsNotTooLong($this->post, 'template_title', 128);
         $this->ensureValueIsNotTooShort($this->post, 'entry_content', 1);
 
-        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key']);
+        if (array_key_exists('default_title_pattern', $this->post)) {
+            $this->ensureValueIsNotTooShort($this->post, 'default_title_pattern', 0);
+        }
+
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key'] ?? null);
     }
 
     /**
@@ -38,6 +42,13 @@ final class TemplateValidator extends AbstractValidator
      */
     public function delete() : void
     {
-        $this->ensureUserHasProvidedValidAntiCSRFToken($_GET['form_key']);
+        $this->ensureUserHasProvidedValidAntiCSRFToken($this->post['form_key'] ?? null);
+    }
+
+    public function getTemplateAsJsonView() : void
+    {
+        if (array_key_exists('entry_date_time', $this->get)) {
+            $this->ensureValueIsNotTooLong($this->get, 'entry_date_time', 16);
+        }
     }
 }

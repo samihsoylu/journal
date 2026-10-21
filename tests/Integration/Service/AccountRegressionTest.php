@@ -101,4 +101,25 @@ final class AccountRegressionTest extends IntegrationTestCase
         $this->expectException(InvalidOperationException::class);
         $this->getService(UserManagementService::class)->deleteUserForAdmin($admin->getId(), $owner->getId());
     }
+
+    #[Test]
+    public function a_weak_new_password_cannot_change_existing_credentials() : void
+    {
+        $user = UserFactory::setup()->withPassword('old')->create();
+        $before = $this->testOrm->fetchOneAssoc('SELECT password, encryptionKey FROM users WHERE id = ?', [$user->getId()]);
+
+        try {
+            $this->getService(UserService::class)->changePassword($user->getId(), 'old', '');
+            self::fail('An empty new password was accepted');
+        } catch (InvalidArgumentException) {
+            self::assertSame($before, $this->testOrm->fetchOneAssoc('SELECT password, encryptionKey FROM users WHERE id = ?', [$user->getId()]));
+        }
+    }
+
+    #[Test]
+    public function a_weak_password_cannot_create_a_new_account() : void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->getService(UserManagementService::class)->createUser('new-user', '', 'new@example.test', User::PRIVILEGE_LEVEL_USER);
+    }
 }

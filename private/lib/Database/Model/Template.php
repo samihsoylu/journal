@@ -43,6 +43,9 @@ class Template extends AbstractModel
     #[ORM\Column(type: 'text', nullable: false)]
     protected string $content;
 
+    #[ORM\Column(type: 'string', nullable: true)]
+    protected ?string $defaultEntryTitlePattern = null;
+
     #[ORM\Column(type: 'integer', nullable: false)]
     #[Override]
     protected int $createdTimestamp;
@@ -90,6 +93,18 @@ class Template extends AbstractModel
     public function getContent() : string
     {
         return $this->content;
+    }
+
+    public function getDefaultEntryTitlePattern() : ?string
+    {
+        return $this->defaultEntryTitlePattern;
+    }
+
+    public function setDefaultEntryTitlePattern(?string $pattern) : self
+    {
+        $this->defaultEntryTitlePattern = $pattern;
+
+        return $this;
     }
 
     public function setContent(string $content) : self

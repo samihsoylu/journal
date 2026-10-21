@@ -11,10 +11,21 @@ DB_USERNAME=${DB_USERNAME:-testuser}
 DB_PASSWORD=${DB_PASSWORD:-testpass}
 SITE_TITLE=${SITE_TITLE:-Journal}
 USERNAME=${USERNAME:-demouser}
-PASSWORD=${PASSWORD:-demopass}
+PASSWORD=${PASSWORD:-journal-demo-password}
 CONFIRM_PASSWORD=$PASSWORD
 EMAIL_ADDRESS=${EMAIL_ADDRESS:-"mail@example.com"}
 ROOT_FOLDER=/var/www/html
+IMAGE_UPLOAD_SIZE_LIMIT=${IMAGE_UPLOAD_SIZE_LIMIT:-1}
+case "$IMAGE_UPLOAD_SIZE_LIMIT" in
+    ''|*[!0-9]*) echo 'IMAGE_UPLOAD_SIZE_LIMIT must be an integer from 1 to 100 MB.' >&2; exit 1 ;;
+esac
+if [ "$IMAGE_UPLOAD_SIZE_LIMIT" -lt 1 ] || [ "$IMAGE_UPLOAD_SIZE_LIMIT" -gt 100 ]; then
+    echo 'IMAGE_UPLOAD_SIZE_LIMIT must be an integer from 1 to 100 MB.' >&2
+    exit 1
+fi
+# PHP parses request bodies before application code runs. Set these at startup,
+# allowing room for the multipart boundary and CSRF field.
+printf 'upload_max_filesize = %sM\npost_max_size = %sM\n' "$IMAGE_UPLOAD_SIZE_LIMIT" "$((IMAGE_UPLOAD_SIZE_LIMIT + 1))" > "$PHP_INI_DIR/conf.d/uploads.ini"
 
 # Create a .env file if doesn't exist
 if [ ! -f $ROOT_FOLDER/.env ]; then
@@ -27,6 +38,7 @@ DB_USERNAME = \"$DB_USERNAME\"
 DB_PASSWORD = \"$DB_PASSWORD\"
 SITE_TITLE = \"$SITE_TITLE\"
 ADMIN_EMAIL_ADDRESS = \"$EMAIL_ADDRESS\"
+IMAGE_UPLOAD_SIZE_LIMIT = \"$IMAGE_UPLOAD_SIZE_LIMIT\"
 " >> $ROOT_FOLDER/.env
 fi
 

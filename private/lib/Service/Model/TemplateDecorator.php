@@ -15,6 +15,8 @@ final readonly class TemplateDecorator implements JsonSerializable
         private int $categoryId,
         private string $categoryName,
         private string $content,
+        private ?string $defaultEntryTitlePattern = null,
+        private ?string $defaultEntryTitle = null,
     ) {}
 
     public function getId() : int
@@ -40,6 +42,11 @@ final readonly class TemplateDecorator implements JsonSerializable
     public function getContent() : string
     {
         return $this->content;
+    }
+
+    public function getDefaultEntryTitlePattern() : ?string
+    {
+        return $this->defaultEntryTitlePattern;
     }
 
     #[ReturnTypeWillChange]

@@ -35,10 +35,10 @@ final readonly class BackgroundExportJobRunner implements ExportJobRunner
         }
 
         $command = new Command([escapeshellarg(PHP_BINDIR . '/php')], [
-            $this->scriptPath, $userId, $username, $key->saveToAsciiSafeString(),
+            $this->scriptPath, $userId, $username,
         ]);
 
-        return Process::start($command, $this->logDirectory . '/' . ExportFileName::prefix($username) . '.log')->getId();
+        return Process::start($command, $this->logDirectory . '/' . ExportFileName::prefix($username) . '.log', $key->saveToAsciiSafeString())->getId();
     }
 
     public function isRunning(int $userId, string $username) : bool

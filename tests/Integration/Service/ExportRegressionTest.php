@@ -20,6 +20,7 @@ use App\Utility\Sanitize;
 use App\Utility\TemplateRendererInterface;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
+use DOMDocument;
 use FilesystemIterator;
 use PHPUnit\Framework\Attributes\Test;
 use RecursiveDirectoryIterator;
@@ -128,8 +129,14 @@ final class ExportRegressionTest extends IntegrationTestCase
         $contents = $this->readArchive($path);
         self::assertSame('image bytes', $contents['testuser/media/pixel.png']);
         $html = array_values(array_filter($contents, static fn ($name) => str_ends_with($name, '.html'), ARRAY_FILTER_USE_KEY))[0];
-        self::assertStringContainsString('src="../media/pixel.png"', $html);
-        self::assertStringContainsString("src='../media/pixel.png'", $html);
+        $document = new DOMDocument();
+        $document->loadHTML($html);
+        $images = $document->getElementsByTagName('img');
+        self::assertCount(2, $images);
+
+        foreach ($images as $image) {
+            self::assertSame('../media/pixel.png', $image->getAttribute('src'));
+        }
     }
 
     #[Test]

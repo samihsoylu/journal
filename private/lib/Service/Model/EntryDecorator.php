@@ -13,6 +13,7 @@ final readonly class EntryDecorator
         private string $categoryName,
         private string $content,
         private string $getLastUpdatedTimestamp,
+        private string $dateTime = '',
     ) {}
 
     public function getId() : int
@@ -43,5 +44,10 @@ final readonly class EntryDecorator
     public function getLastUpdatedTimestamp() : string
     {
         return $this->getLastUpdatedTimestamp;
+    }
+
+    public function getDateTime() : string
+    {
+        return $this->dateTime;
     }
 }

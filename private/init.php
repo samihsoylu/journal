@@ -35,10 +35,7 @@ define('SSL_IS_ENABLED', $_ENV['USE_SSL'] === 'true');
 define('SITE_TITLE', $_ENV['SITE_TITLE']);
 define('ADMIN_EMAIL_ADDRESS', $_ENV['ADMIN_EMAIL_ADDRESS']);
 define('SENTRY_ENABLED', (isset($_ENV['SENTRY_DSN'])) && ($_ENV['SENTRY_DSN'] !== ''));
-define('IMAGE_UPLOAD_SIZE_LIMIT', $_ENV['IMAGE_UPLOAD_SIZE_LIMIT'] ?? 1);
-
-ini_set('upload_max_filesize', IMAGE_UPLOAD_SIZE_LIMIT . 'M');
-ini_set('post_max_size', IMAGE_UPLOAD_SIZE_LIMIT . 'M');
+define('IMAGE_UPLOAD_SIZE_LIMIT', filter_var($_ENV['IMAGE_UPLOAD_SIZE_LIMIT'] ?? 1, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 100]]) ?: 1);
 
 if ( ! DEBUG_MODE) {
     ini_set('display_errors', '0');
@@ -76,7 +73,8 @@ if (headers_sent()) {
     header('X-Frame-Options: DENY');  // Prevent clickjacking
     header('X-Content-Type-Options: nosniff');  // Prevent MIME-sniffing
     header('Referrer-Policy: strict-origin-when-cross-origin');  // Control referrer information
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: http:; media-src 'self' data: blob: https: http:; frame-src 'self' https: http:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'");
+    header('Cache-Control: private, no-store, max-age=0');
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: http:; media-src 'self' data: blob: https: http:; frame-src 'self' https: http:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'");
 
     // Additional security header when SSL is enabled
     if (SSL_IS_ENABLED) {
@@ -90,7 +88,7 @@ if (SENTRY_ENABLED) {
         exit(1);
     }
 
-    \Sentry\init(['dsn' => $_ENV['SENTRY_DSN']]);
+    \Sentry\init(App\Utility\SentryConfiguration::options($_ENV['SENTRY_DSN']));
 }
 
 // Initialize Kernel for dependency injection

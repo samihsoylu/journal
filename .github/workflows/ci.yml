@@ -18,7 +18,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        database: ['mysql:8.0', 'mariadb:10.11']
+        include:
+          - database: mysql:8.0
+            artifact: mysql
+          - database: mysql:5.7
+            artifact: mysql57
+          - database: mariadb:10.11
+            artifact: mariadb
+          - database: mariadb:10.4
+            artifact: mariadb104
     services:
       database:
         image: ${{ matrix.database }}
@@ -43,15 +51,20 @@ jobs:
         with:
           php-version: '8.5'
           extensions: pdo_mysql, mbstring, curl, dom, zip
-          coverage: none
+          coverage: pcov
       - run: composer validate --strict
       - run: composer install --prefer-dist --no-progress --no-interaction
       - run: composer audit --locked
+      - run: php ci/verify-frontend.php
       - run: vendor/bin/parallel-lint --exclude vendor --exclude private/cache .
       - run: vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no
       - run: vendor/bin/phpstan analyse --no-progress
       - run: vendor/bin/doctrine-migrations migrate --no-interaction
-      - run: vendor/bin/phpunit
+      - run: vendor/bin/phpunit --coverage-php=coverage/phpunit.cov
+      - uses: actions/upload-artifact@v7
+        with:
+          name: coverage-unit-${{ matrix.artifact }}
+          path: coverage/phpunit.cov
 
   installation:
     name: Container install and v1 upgrade / ${{ matrix.database }}
@@ -59,7 +72,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        database: ['mysql:8.0', 'mariadb:10.11']
+        include:
+          - database: mysql:8.0
+            artifact: mysql
+          - database: mysql:5.7
+            artifact: mysql57
+          - database: mariadb:10.11
+            artifact: mariadb
+          - database: mariadb:10.4
+            artifact: mariadb104
     env:
       TEST_DATABASE_IMAGE: ${{ matrix.database }}
     steps:
@@ -81,3 +102,42 @@ jobs:
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
           CHROMEDRIVER_PATH: ${{ steps.chrome.outputs.chromedriver-path }}
+          JOURNAL_COVERAGE_DIR: ${{ runner.temp }}/journal-coverage
+      - uses: actions/upload-artifact@v7
+        with:
+          name: coverage-http-cli-${{ matrix.artifact }}
+          path: ${{ runner.temp }}/journal-coverage/requests
+
+  coverage:
+    name: Application coverage / ${{ matrix.database }}
+    needs: [checks, installation]
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [mysql, mysql57, mariadb, mariadb104]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: dom, mbstring, zip
+          coverage: pcov
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - uses: actions/download-artifact@v8
+        with:
+          name: coverage-unit-${{ matrix.database }}
+          path: coverage
+      - uses: actions/download-artifact@v8
+        with:
+          name: coverage-http-cli-${{ matrix.database }}
+          path: coverage/requests
+      - run: php -d memory_limit=1G ci/coverage/report.php coverage 85
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-report-${{ matrix.database }}
+          path: |
+            coverage/clover.xml
+            coverage/summary.txt
+            coverage/html

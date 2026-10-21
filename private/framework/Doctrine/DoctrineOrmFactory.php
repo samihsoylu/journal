@@ -40,7 +40,7 @@ final readonly class DoctrineOrmFactory
         ];
 
         // Doctrine ORM 3.x uses PSR-6 cache directly
-        $cache = new PhpFilesAdapter(self::CACHE_NAMESPACE, self::DEFAULT_CACHE_LIFETIME, $this->databaseCacheDirPath . '/cache/');
+        $cache = new PhpFilesAdapter($this->cacheNamespace(), self::DEFAULT_CACHE_LIFETIME, $this->databaseCacheDirPath . '/cache/');
 
         // Doctrine ORM 3.x uses attributes instead of annotations
         $config = ORMSetup::createAttributeMetadataConfiguration(
@@ -66,5 +66,18 @@ final readonly class DoctrineOrmFactory
             new JsonFile($this->rootDirPath . '/migrations.json'),
             new ExistingEntityManager($entityManager),
         );
+    }
+
+    private function cacheNamespace() : string
+    {
+        // Reused cache mounts must not retain an old mapping after a code or
+        // dependency update, including an additive migration such as templates.
+        $versions = [hash_file('sha256', $this->rootDirPath . '/composer.lock')];
+
+        foreach (glob($this->modelPath . '/*.php') as $file) {
+            $versions[] = hash_file('sha256', $file);
+        }
+
+        return self::CACHE_NAMESPACE . '_' . substr(hash('sha256', implode('', $versions)), 0, 16);
     }
 }

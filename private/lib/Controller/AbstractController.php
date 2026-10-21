@@ -110,6 +110,11 @@ abstract class AbstractController
         return $this->authenticationService->getUserId();
     }
 
+    protected function getUserTimezone() : string
+    {
+        return $this->authenticationService->getSessionDecorator()?->getTimezone() ?? 'UTC';
+    }
+
     /**
      * Get the encryption key of the logged in user.
      */
@@ -127,7 +132,9 @@ abstract class AbstractController
 
     public function renderJsonResponse(array $response) : void
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: private, no-store, max-age=0');
+        header('X-Content-Type-Options: nosniff');
         echo json_encode($response, JSON_THROW_ON_ERROR);
     }
 }

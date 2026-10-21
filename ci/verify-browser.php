@@ -40,7 +40,7 @@ final class EditorBrowser
 
     public function start(string $profile) : void
     {
-        $options = ['args' => ['--headless=new', '--no-sandbox', '--disable-dev-shm-usage', '--disable-background-networking', '--user-data-dir=' . $profile]];
+        $options = ['args' => ['--headless=new', '--no-sandbox', '--disable-dev-shm-usage', '--disable-background-networking', '--window-size=1280,1000', '--user-data-dir=' . $profile]];
 
         if (getenv('CHROME_PATH')) {
             $options['binary'] = getenv('CHROME_PATH');
@@ -68,6 +68,26 @@ final class EditorBrowser
         return $cookies[0];
     }
 
+    public function cookies() : array
+    {
+        return $this->request('GET', $this->session . '/cookie');
+    }
+
+    public function actions(array $actions) : void
+    {
+        $this->request('POST', $this->session . '/actions', ['actions' => $actions]);
+    }
+
+    public function cdp(string $command, array $parameters = []) : mixed
+    {
+        return $this->request('POST', $this->session . '/goog/cdp/execute', ['cmd' => $command, 'params' => (object) $parameters]);
+    }
+
+    public function screenshot() : string
+    {
+        return $this->request('GET', $this->session . '/screenshot');
+    }
+
     public function close() : void
     {
         if ($this->session !== '') {
@@ -76,7 +96,7 @@ final class EditorBrowser
     }
 }
 
-function verifyEditorBrowser(string $base, string $temporary) : void
+function verifyEditorBrowser(string $base, string $temporary, callable $connection) : void
 {
     $socket = stream_socket_server('tcp://127.0.0.1:0', $errorCode, $error);
     ensure($socket !== false, 'Could not reserve a ChromeDriver port: ' . $error);
@@ -98,8 +118,44 @@ function verifyEditorBrowser(string $base, string $temporary) : void
         $browser->script("document.querySelector('#username').value = 'freshowner'; document.querySelector('#password').value = 'fresh-password'; document.querySelector('form').requestSubmit();");
         waitFor(static fn () => $browser->script("return location.pathname === '/dashboard';"), 'browser login', 15);
         ensure($anonymousCookie['value'] !== $browser->sessionCookie()['value'], 'Login did not rotate the PHP session cookie');
+        $browser->visit($base . '/template/create');
+        waitFor(static fn () => $browser->script('return !!(window.tinymce && tinymce.activeEditor && tinymce.activeEditor.initialized);'), 'template editor', 20);
+        $browser->script(<<<'JS'
+            document.querySelector('#template_title').value = 'Sleep default title';
+            document.querySelector('#default_title_pattern').value = 'Sleep {date} {time}';
+            tinymce.activeEditor.setContent('<p>Sleep template content</p>');
+            tinymce.triggerSave();
+            window.onbeforeunload = null;
+            document.querySelector('#entry_form').requestSubmit();
+            JS);
+        waitFor(static fn () => $browser->script("return location.pathname === '/templates';"), 'template saved', 15);
         $browser->visit($base . '/entry/create');
         waitFor(static fn () => $browser->script('return !!(window.tinymce && tinymce.activeEditor && tinymce.activeEditor.initialized);'), 'TinyMCE', 20);
+        $browser->script(<<<'JS'
+            const select = document.querySelector('#template_id_d');
+            M.FormSelect.getInstance(select)?.destroy();
+            select.value = [...select.options].find(option => option.text === 'Sleep default title').value;
+            M.FormSelect.init(select);
+            document.querySelector('#entry_date_time').value = '2020-06-15T08:30';
+            JS);
+        $template = $browser->script("return fetch('/template/' + document.querySelector('#template_id_d').value + '/ajax').then(response => response.json());");
+        $browser->script("tinymce.activeEditor.setContent('<p>Before template load</p>'); document.querySelector('#load-template').click();");
+        waitFor(static fn () => $browser->script("return document.querySelector('#category_id_d').value === String(arguments[0]) && !tinymce.activeEditor.getContent().includes('Before template load');", [$template['categoryId']]), 'template load and default category', 15);
+        ensure($browser->script("return document.querySelector('#entry_title').value;") === 'Sleep 2020-06-15 08:30', 'Template title did not use the selected entry date');
+        $browser->script("document.querySelector('#entry_date_time').value = '2020-06-16T09:45'; document.querySelector('#entry_date_time').dispatchEvent(new Event('change')); ");
+        waitFor(static fn () => $browser->script("return document.querySelector('#entry_title').value === 'Sleep 2020-06-16 09:45';"), 'default title date change', 15);
+        $browser->script("document.querySelector('#entry_title').value = 'My own title'; document.querySelector('#entry_date_time').value = '2020-06-15T08:30'; document.querySelector('#entry_date_time').dispatchEvent(new Event('change')); ");
+        ensure($browser->script("return new Promise(resolve => setTimeout(() => resolve(document.querySelector('#entry_title').value === 'My own title'), 100));"), 'Changing the date overwrote a manual title');
+        $override = $browser->script(<<<'JS'
+            const select = document.querySelector('#category_id_d');
+            const option = [...select.options].find(option => option.value !== select.value);
+            M.FormSelect.getInstance(select).destroy();
+            select.value = option.value;
+            select.dispatchEvent(new Event('change', {bubbles: true}));
+            M.FormSelect.init(select);
+            document.querySelector('#entry_date_time').value = '2020-06-15T08:30';
+            return option.text;
+            JS);
         // Delay only the upload request so the real local blob preview can load.
         // A clipboard File goes through TinyMCE's own paste and upload handlers.
         $browser->script(<<<'JS'
@@ -145,7 +201,43 @@ function verifyEditorBrowser(string $base, string $temporary) : void
             const image = [...document.images].find(image => image.src === arguments[0]);
             return !!(image && image.complete && image.naturalWidth > 0);
             JS, [$imageUrl]), 'saved image after reload', 15);
+        ensure($browser->script('return document.body.textContent.includes(arguments[0]);', ['Category: ' . $override]), 'Template category could not be overridden');
+        $savedUrl = $browser->script('return location.href;');
+        $browser->visit($base . '/entries?date_from=Jun%2015,%202020&date_to=Jun%2015,%202020');
+        ensure($browser->script("return document.body.textContent.includes('Browser image regression');"), 'Backdated entry missing from its date filter');
+        $browser->visit($base . '/entries?date_from=Jun%2016,%202020&date_to=Jun%2016,%202020');
+        ensure( ! $browser->script("return document.body.textContent.includes('Browser image regression');"), 'Backdated entry appeared on another date');
+        $browser->visit($savedUrl . '/update');
+        ensure($browser->script("return document.querySelector('#entry_date_time').value;") === '2020-06-15T08:30', 'Editing lost the entry date');
+        $browser->script('window.onbeforeunload = null;');
+        $browser->visit($base . '/categories');
+        $browser->script("document.querySelector('#sortable').scrollIntoView({block: 'start'}); window.scrollBy(0, -80);");
+        $before = $browser->script("return [...document.querySelector('#sortable').children].map(item => item.id);");
+        $points = $browser->script(<<<'JS'
+            const cards = document.querySelector('#sortable').children;
+            const start = cards[0].querySelector('.card-icon').getBoundingClientRect();
+            const end = cards[1].getBoundingClientRect();
+            return {x: Math.round(start.x + start.width / 2), y: Math.round(start.y + start.height / 2), endY: Math.round(end.bottom - 10)};
+            JS);
+        $browser->actions([['type' => 'pointer', 'id' => 'mouse', 'parameters' => ['pointerType' => 'mouse'], 'actions' => [
+            ['type' => 'pointerMove', 'duration' => 0, 'x' => $points['x'], 'y' => $points['y']],
+            ['type' => 'pointerDown', 'button' => 0],
+            ['type' => 'pause', 'duration' => 150],
+            ['type' => 'pointerMove', 'duration' => 500, 'x' => $points['x'], 'y' => $points['endY']],
+            ['type' => 'pause', 'duration' => 200],
+            ['type' => 'pointerUp', 'button' => 0],
+        ]]]);
+        waitFor(static fn () => $browser->script("return [...document.querySelector('#sortable').children].map(item => item.id);") !== $before, 'category drag order', 15);
+        $after = $browser->script("return [...document.querySelector('#sortable').children].map(item => item.id);");
+        waitFor(static function () use ($browser, $base, $after) : bool {
+            $browser->visit($base . '/categories');
+
+            return $browser->script("return [...document.querySelector('#sortable').children].map(item => item.id);") === $after;
+        }, 'saved category drag order', 15);
         echo "TinyMCE browser: pasted blob preview, real upload, save, and reload passed\n";
+        echo "Browser features: template title patterns/date/manual override, category/override, backdating/date filters, retained edit date, and real category drag/reload passed\n";
+        verifyPwaBrowser($browser, $base, $savedUrl, $connection);
+        verifyTwoFactorBrowser($browser, $base);
     } finally {
         try {
             $browser->close();

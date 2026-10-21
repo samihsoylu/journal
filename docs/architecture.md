@@ -135,20 +135,45 @@ Journal uses `defuse/php-encryption` for entry, template, and uploaded-media con
 
 1. Account creation generates a random encryption key protected by the user's password.
 2. The protected key is stored in `users.encryptionKey`; the password is stored separately as an Argon2id hash.
-3. Login unlocks the key and places its encoded form in the hardened `EEK` browser cookie.
+3. Login unlocks the key. Accounts without an authenticator receive the hardened
+   `EEK` cookie immediately. Enrolled accounts first get a five-minute HttpOnly
+   pending-key cookie, bound to a digest and verified credential snapshot in the
+   PHP session. No authenticated session or `EEK` is issued until factor proof succeeds.
 4. The server-side session cache stores identity/session data, not the unlocked encryption key.
 5. Requests reconstruct the key transiently to encrypt or decrypt content.
 6. A password change re-protects the same underlying key, so existing ciphertext remains valid.
 
 This protects database, backup, and upload data at rest. It does not protect against a fully compromised live server that can inspect an active request. Do not persist the unlocked key on the server without explicitly redesigning and documenting the threat model.
 
+Optional authenticator policy lives in `TwoFactorService`, with OTPHP behind
+`Totp`, independent recovery-code generation, and `TwoFactorStore` as the storage
+contract. `DoctrineTwoFactorStore` uses DBAL transactions and conditional updates
+for the two security tables. Settings changes check both account credentials and
+factor revision under a user-row lock; proof consumption checks the verified
+revision. Disabled rows retain a fresh revision, so old password-only sessions
+cannot become valid again after enable/disable. Session creation uses the proved
+credential fingerprint, and subsequent requests check current account state.
+
+`AttemptLimiter` uses Symfony's fixed-window policy with explicit filesystem
+locks and strict storage that rejects failed reads/writes. It reserves attempts
+before verification, with an account-wide budget for factor guesses. Runtime
+cache directories require a private filesystem with working locks; independent
+hosts need a shared atomic backend before being supported.
+
 ## Templates and frontend
 
 The project uses Illuminate Blade directly through `App\Utility\BladeRenderer` and `App\Utility\Template`, without Laravel. Templates live in `private/templates/`, and compiled templates are cached in `private/cache/templates/`.
 
-The frontend has no Node or bundler pipeline. Materialize, jQuery, TinyMCE, application JavaScript, and CSS are committed under `public/assets/` and served directly.
+The frontend has no Node or bundler pipeline. Materialize, SortableJS, TinyMCE,
+application JavaScript and CSS are committed under `public/assets/` and served
+directly. `ci/frontend-dependencies.json` records archive integrity and deployed
+file hashes. The service worker caches only the public offline notice.
 
-Mutating forms carry the current session's anti-CSRF token. Validators compare with `hash_equals()` and rotate the token after a valid check. This makes tokens single-use and means an older form open in another tab may become stale.
+Mutating forms carry the current session's anti-CSRF token. Validators compare
+typed strings with `hash_equals()` and normally rotate the token after a valid
+check. Upload and sort requests retain it so multiple uploads and the containing
+form remain usable. Older regular forms can become stale. Login and pending
+factor forms have separate tokens before an authenticated session exists.
 
 ## CLI and background work
 

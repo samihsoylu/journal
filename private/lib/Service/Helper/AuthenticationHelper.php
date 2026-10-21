@@ -4,39 +4,26 @@ declare(strict_types=1);
 
 namespace App\Service\Helper;
 
-use App\Utility\Cache;
-use Symfony\Component\Cache\CacheItem;
+use App\Service\Security\AttemptLimiter;
 
 final readonly class AuthenticationHelper
 {
-    public function __construct(private Cache $cache) {}
+    public function __construct(private AttemptLimiter $attempts) {}
 
-    public function getFailedLoginCount() : int
+    public function reserveLoginAttempt(string $identity) : void
     {
-        $item = $this->cache->getItem($this->getIpAddressHashed());
-
-        /** @var CacheItem $item */
-        if ($item->isHit()) {
-            return (int) $item->get();
-        }
-
-        return 0;
+        $this->attempts->reserve('login', $this->peerIdentity($identity));
     }
 
-    public function setFailedLoginCount(int $count) : void
+    public function resetLoginAttempts(string $identity) : void
     {
-        // Since the `:` symbol is a reserved character, hashing the IP prevents an exception when using IPv6
-        $item = $this->cache->getItem($this->getIpAddressHashed());
-
-        /** @var CacheItem $item */
-        $item->expiresAfter(3600);
-        $item->set($count);
-
-        $this->cache->save($item);
+        $this->attempts->reset('login', $this->peerIdentity($identity));
     }
 
-    private function getIpAddressHashed() : string
+    private function peerIdentity(string $identity) : string
     {
-        return md5((string) $_SERVER['REMOTE_ADDR']);
+        // Resolve account identity before calling this helper. Never trust a
+        // caller-supplied forwarding header or reset another account's budget.
+        return $identity . "\0" . ($_SERVER['REMOTE_ADDR'] ?? '');
     }
 }

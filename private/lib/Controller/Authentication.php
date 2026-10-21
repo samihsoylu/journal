@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Exception\UserException\InvalidParameterException;
 use App\Service\AuthenticationService;
+use App\Service\Security\PendingLogin;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
@@ -19,6 +21,8 @@ final class Authentication extends AbstractController
     public const string LOGIN_URL = BASE_URL . '/login';
     public const string LOGIN_POST_URL = self::LOGIN_URL . '/action';
     public const string LOGOUT_URL = BASE_URL . '/logout';
+    public const string TWO_FACTOR_URL = BASE_URL . '/login/two-factor';
+    public const string TWO_FACTOR_CANCEL_URL = self::TWO_FACTOR_URL . '/cancel';
 
     private readonly AuthenticationValidator $validator;
 
@@ -26,10 +30,11 @@ final class Authentication extends AbstractController
         private readonly AuthenticationService $authenticationService,
         Template $template,
         private readonly Sanitize $sanitize,
+        private readonly PendingLogin $pending,
     ) {
         parent::__construct($authenticationService, $template);
 
-        $this->validator = new AuthenticationValidator($_POST);
+        $this->validator = new AuthenticationValidator($_POST, [], $authenticationService->getUserSession());
     }
 
     /**
@@ -46,7 +51,15 @@ final class Authentication extends AbstractController
         $password = $_POST['password'];
 
         // Log the user in
-        $this->authenticationService->login($username, $password);
+        if ( ! $this->authenticationService->login($username, $password)) {
+            Redirect::to(self::TWO_FACTOR_URL);
+        }
+
+        $this->redirectAfterLogin();
+    }
+
+    private function redirectAfterLogin() : never
+    {
 
         /** @see AbstractController::redirectLoggedOutUsersToLoginPage() */
         $referredFrom = Session::get('referred_from');
@@ -67,6 +80,10 @@ final class Authentication extends AbstractController
     {
         $this->redirectLoggedInUsersToDashboard();
 
+        if ($this->pending->state() !== null) {
+            Redirect::to(self::TWO_FACTOR_URL);
+        }
+
         $token = UserSession::generateNewAntiCSRFToken(uniqid());
         Session::put('login_form_key', $token);
 
@@ -80,10 +97,52 @@ final class Authentication extends AbstractController
      */
     public function logout() : never
     {
+        $this->validator->validate(__FUNCTION__);
         $this->authenticationService->logout();
 
         $this->setNotification(Notification::TYPE_INFO, 'You have been logged out');
 
         Redirect::to(self::LOGIN_URL);
+    }
+
+    public function twoFactorView() : void
+    {
+        $this->redirectLoggedInUsersToDashboard();
+        $state = $this->pending->state();
+
+        if ($state === null) {
+            Redirect::to(self::LOGIN_URL);
+        }
+        $this->template->setVariable('token', $state['csrf']);
+        $this->renderTemplate('authenticate/two-factor');
+    }
+
+    public function twoFactor() : never
+    {
+        $this->redirectLoggedInUsersToDashboard();
+        $code = $_POST['code'] ?? null;
+
+        if ( ! is_string($code) || strlen($code) > 128 || $code === '') {
+            throw InvalidParameterException::invalidFieldValue('code');
+        }
+        $this->authenticationService->completeTwoFactor($code, $_POST['form_key'] ?? null);
+        $this->redirectAfterLogin();
+    }
+
+    public function cancelTwoFactor() : never
+    {
+        $this->pending->requireState($_POST['form_key'] ?? null);
+        $this->pending->clear();
+        Redirect::to(self::LOGIN_URL);
+    }
+
+    public function cancelTwoFactorView() : void
+    {
+        $this->twoFactorView();
+    }
+
+    public function logoutView() : never
+    {
+        Redirect::to(Welcome::DASHBOARD_URL);
     }
 }

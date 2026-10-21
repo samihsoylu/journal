@@ -1,5 +1,6 @@
 # Generic project files
 /vendor/
+/coverage/
 .idea/*
 .env
 .php_cs.cache

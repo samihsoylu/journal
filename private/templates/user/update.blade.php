@@ -41,15 +41,16 @@
 
                         <!-- javascript in the back button ensures that the filters are not lost when you go back to the users page -->
                         <button class="btn btn-default" type="button" onclick="window.location.href='{{ $users_url }}'"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
-                        <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('DANGER: This action will delete this user', '{{ $user_url }}/{{ $user->getId() }}/delete/{{ $session->getAntiCSRFToken() }}')" @if($user->isReadOnly()) disabled @endif><i class="material-icons">delete_forever</i> Delete</button>
+                        <button class="btn btn-danger" id="delete" type="submit" form="delete-record" @if($user->isReadOnly()) disabled @endif><i class="material-icons">delete_forever</i> Delete</button>
                         <button class="btn btn-primary" type="submit" @if($user->isReadOnly()) disabled @endif><i class="material-icons">save</i> Save</button>
                     </form>
+                    @include('components/delete-form', ['deleteAction' => $user_url . '/' . $user->getId() . '/delete'])
                 @endisset
             </div>
         </div>
     </div>
 @endsection
 
-@section('jquery-scripts')
+@section('scripts')
     @include('components/delete-button-warning')
 @endsection

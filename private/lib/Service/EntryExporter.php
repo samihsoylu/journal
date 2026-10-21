@@ -6,6 +6,7 @@ namespace App\Service;
 
 use App\Database\Repository\EntryRepository;
 use App\Service\Helper\MediaHelper;
+use App\Service\Security\RichContentSanitizer;
 use App\Utility\Export\ExportFileName;
 use App\Utility\Sanitize;
 use App\Utility\TemplateRendererInterface;
@@ -22,6 +23,7 @@ final readonly class EntryExporter
         private Sanitize $sanitize,
         private TemplateRendererInterface $renderer,
         private string $exportPath = EXPORT_CACHE_PATH,
+        private RichContentSanitizer $contentSanitizer = new RichContentSanitizer(),
     ) {}
 
     public function export(int $userId, string $username, Key $key) : ?string
@@ -68,7 +70,7 @@ final readonly class EntryExporter
                 $category = $entry->getReferencedCategory();
                 $categoryName = ($this->sanitize->stringForShell($category->getName()) ?: 'category') . '__' . $category->getId();
                 $title = ($this->sanitize->stringForShell($entry->getTitle()) ?: 'entry') . '__' . $entry->getId();
-                $content = $entry->getContentDecrypted($key);
+                $content = $this->contentSanitizer->sanitize($entry->getContentDecrypted($key));
                 $prefixes = ['/media/'];
 
                 if (defined('BASE_URL') && BASE_URL !== '') {

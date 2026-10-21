@@ -9,6 +9,7 @@ use App\Database\Repository\UserRepository;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
 use App\Service\Helper\UserHelper;
+use App\Service\Security\PasswordPolicy;
 use App\Service\Security\UserKeys;
 use App\Utility\UserSession;
 
@@ -47,6 +48,7 @@ final readonly class UserService
             throw InvalidArgumentException::incorrectPassword();
         }
 
+        PasswordPolicy::validate($newPassword);
         $newEncryptedPassword = password_hash($newPassword, self::DEFAULT_PASSWORD_HASH_ALGORITHM);
         $user->setPassword($newEncryptedPassword);
 

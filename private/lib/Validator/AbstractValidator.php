@@ -7,6 +7,7 @@ namespace App\Validator;
 use App\Exception\UserException\InvalidOperationException;
 use App\Exception\UserException\InvalidParameterException;
 use App\Utility\UserSession;
+use LogicException;
 
 abstract class AbstractValidator
 {
@@ -21,9 +22,10 @@ abstract class AbstractValidator
      */
     public function validate(string $method) : void
     {
-        if (method_exists($this, $method)) {
-            $this->{$method}();
+        if ( ! method_exists($this, $method)) {
+            throw new LogicException('Validation method is not implemented: ' . $method);
         }
+        $this->{$method}();
     }
 
     protected function ensureRequiredFieldsAreProvided(array $userProvidedData, array $requiredFields) : void
@@ -72,14 +74,22 @@ abstract class AbstractValidator
 
     protected function ensureValueIsNotTooShort(array $values, string $fieldName, int $minLength) : void
     {
-        if (strlen((string) $values[$fieldName]) < $minLength) {
+        if ( ! is_string($values[$fieldName])) {
+            throw InvalidParameterException::invalidFieldValue($fieldName);
+        }
+
+        if (strlen($values[$fieldName]) < $minLength) {
             throw InvalidParameterException::stringTooShort($fieldName, $minLength);
         }
     }
 
     protected function ensureValueIsNotTooLong(array $values, string $fieldName, int $maxLength) : void
     {
-        if (strlen((string) $values[$fieldName]) > $maxLength) {
+        if ( ! is_string($values[$fieldName])) {
+            throw InvalidParameterException::invalidFieldValue($fieldName);
+        }
+
+        if (strlen($values[$fieldName]) > $maxLength) {
             throw InvalidParameterException::stringTooLong($fieldName, $maxLength);
         }
     }
@@ -91,17 +101,19 @@ abstract class AbstractValidator
         }
     }
 
-    protected function ensureUserHasProvidedValidAntiCSRFToken(?string $token) : void
+    protected function ensureUserHasProvidedValidAntiCSRFToken(mixed $token, bool $rotate = true) : void
     {
         if ( ! $this->userSession instanceof UserSession || ! $this->userSession->exists()) {
             throw InvalidOperationException::userIsNotLoggedIn();
         }
 
-        if ($token === null || hash_equals($this->userSession->getAntiCSRFToken(), $token) === false) {
+        if ( ! is_string($token) || ! hash_equals($this->userSession->getAntiCSRFToken(), $token)) {
             throw InvalidParameterException::invalidFormKey();
         }
 
         // regenerate so that in the next request the user has a different token
-        $this->userSession->regenerateNewAntiCSRFToken();
+        if ($rotate) {
+            $this->userSession->regenerateNewAntiCSRFToken();
+        }
     }
 }

@@ -23,6 +23,13 @@ use Parsedown;
 #[Index(name: 'SearchBy_UserId_CategoryId_CreatedTimestamp_Title', columns: ['userId', 'categoryId', 'createdTimestamp', 'title'])]
 class Entry extends AbstractModel
 {
+    public function setCreatedTimestamp(int $timestamp) : self
+    {
+        $this->createdTimestamp = $timestamp;
+
+        return $this;
+    }
+
     #[ORM\Id]
     #[ORM\Column(type: 'integer')]
     #[ORM\GeneratedValue]

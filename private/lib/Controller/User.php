@@ -21,7 +21,7 @@ final class User extends AbstractController
     public const string CREATE_USER_URL = self::USER_URL . '/create';
     public const string CREATE_USER_POST_URL = self::CREATE_USER_URL . '/action';
     public const string VIEW_USER_URL = self::USER_URL . '/{id:\d+}';
-    public const string DELETE_USER_URL = self::VIEW_USER_URL . '/delete/{antiCsrfToken}';
+    public const string DELETE_USER_URL = self::VIEW_USER_URL . '/delete';
     public const string UPDATE_USER_URL = self::VIEW_USER_URL . '/update';
 
     private readonly UserValidator $validator;
@@ -120,9 +120,6 @@ final class User extends AbstractController
     public function delete() : never
     {
         $targetUserId = $this->sanitize->int($this->getRouteParameters()['id']);
-
-        // setting get variable for validator
-        $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
 
         /** @see UserValidator::delete() */
         $this->validator->validate(__FUNCTION__);

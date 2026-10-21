@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Exception\UserException\InvalidParameterException;
 use App\Service\AuthenticationService;
 use App\Service\MediaService;
+use App\Service\Security\ImageContentValidator;
 use App\Service\ValueObject\Image;
 use App\Utility\Template;
+use App\Validator\MediaValidator;
 use Exception;
 
 final class Media extends AbstractController
@@ -16,42 +19,66 @@ final class Media extends AbstractController
     public const string MEDIA_UPLOAD_POST_URL = self::MEDIA_URL . '/upload';
     public const string MEDIA_GET_URL = self::MEDIA_URL . '/{imageName}';
 
+    private readonly MediaValidator $validator;
+
     public function __construct(
         AuthenticationService $authenticationService,
         Template $template,
         public MediaService $service,
+        private readonly ImageContentValidator $imageValidator = new ImageContentValidator(),
     ) {
         parent::__construct($authenticationService, $template);
-
         $this->redirectLoggedOutUsersToLoginPage();
+        $this->validator = new MediaValidator($_POST, [], $authenticationService->getUserSession());
     }
 
     public function upload() : void
     {
+        try {
+            $this->validator->upload();
+        } catch (InvalidParameterException) {
+            http_response_code(403);
+            $this->renderJsonResponse(['error' => 'Invalid Form Key. Please reload the editor.']);
+
+            return;
+        }
         $file = $_FILES['file'] ?? null;
-        $name = $file['name'];
-        $tmpName = $file['tmp_name'];
 
-        $imageType = strtolower(pathinfo((string) $file['name'], PATHINFO_EXTENSION));
-        $file['type'] = $imageType;
+        if ( ! is_array($file) || ! is_string($file['name'] ?? null) || ! is_string($file['tmp_name'] ?? null) || ! is_int($file['size'] ?? null) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || ! is_uploaded_file($file['tmp_name'])) {
+            http_response_code(400);
+            $this->renderJsonResponse(['error' => 'No valid image was uploaded.']);
 
-        $binary = $this->getUploadedImageBinaryAsBase64Encoded($file);
+            return;
+        }
+        $limit = 1024 * 1024 * IMAGE_UPLOAD_SIZE_LIMIT;
 
-        $hashedImageName = sha1($name . uniqid());
-        $image = new Image($binary, $hashedImageName, $imageType);
+        if ($file['size'] < 1 || $file['size'] > $limit) {
+            http_response_code(413);
+            $this->renderJsonResponse(['error' => 'The image exceeds the upload size limit.']);
 
-        $uploaded = $this->service->encryptImage(
-            $this->getUserId(),
-            $image,
-            $this->getUserEncryptionKey(),
-            $tmpName,
-        );
+            return;
+        }
+        $binary = file_get_contents($file['tmp_name']);
+
+        try {
+            $type = $this->imageValidator->validate($binary === false ? '' : $binary, $limit);
+        } catch (InvalidParameterException $exception) {
+            http_response_code(400);
+            $this->renderJsonResponse(['error' => $exception->getMessage()]);
+
+            return;
+        }
+        // Determine the type from the actual image, never the filename or MIME sent by the browser.
+        $image = new Image(base64_encode($binary), bin2hex(random_bytes(20)), $type);
+        $uploaded = $this->service->encryptImage($this->getUserId(), $image, $this->getUserEncryptionKey(), $file['tmp_name']);
 
         if ( ! $uploaded) {
-            $this->renderCouldNotUploadFile();
-        }
+            http_response_code(500);
+            $this->renderJsonResponse(['error' => 'Could not upload the image.']);
 
-        $this->renderJsonResponse(['location' => self::MEDIA_URL . ('/' . $hashedImageName)]);
+            return;
+        }
+        $this->renderJsonResponse(['location' => self::MEDIA_URL . '/' . $image->getName()]);
     }
 
     public function showImage() : void
@@ -59,89 +86,18 @@ final class Media extends AbstractController
         $imageName = $this->getRouteParameters()['imageName'] ?? '';
 
         try {
-            $image = $this->service->getDecryptedImage(
-                $this->getUserId(),
-                $imageName,
-                $this->getUserEncryptionKey(),
-            );
+            $image = $this->service->getDecryptedImage($this->getUserId(), $imageName, $this->getUserEncryptionKey());
         } catch (Exception) {
-            $this->renderNotFound();
-        }
+            http_response_code(404);
+            $this->renderTemplate('errors/404');
 
-        header('Cache-Control: max-age=86400');
-        header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + 86400));
-        header('Content-Type: image/' . $image->getType());
+            return;
+        }
+        header('Cache-Control: private, no-store, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+        header('X-Content-Type-Options: nosniff');
+        header('Content-Type: image/' . ($image->getType() === 'jpg' ? 'jpeg' : $image->getType()));
         echo $image->getBinary();
-    }
-
-    private function renderNotFound() : never
-    {
-        header('HTTP/1.1 404 Not Found');
-        $this->renderTemplate('errors/404');
-        exit;
-    }
-
-    private function getUploadedImageBinaryAsBase64Encoded(?array $file) : string
-    {
-        $this->ensureIsUploadRequest($file);
-        $this->ensureFileWasUploaded($file['tmp_name']);
-        $this->ensureFileTypeIsValid($file['type']);
-        $this->ensureFileSizeIsWithinLimits($file['size']);
-
-        $image = file_get_contents($file['tmp_name']);
-
-        if ( ! $image) {
-            header('HTTP/1.1 500 Server Error');
-            $this->renderJsonResponse(['Could not read uploaded file.']);
-            exit;
-        }
-
-        return base64_encode($image);
-    }
-
-    private function ensureFileSizeIsWithinLimits(int $size) : void
-    {
-        // Convert MB to Bytes
-        $sizeLimit = 1024 * 1024 * IMAGE_UPLOAD_SIZE_LIMIT;
-
-        if ($size > $sizeLimit) {
-            header('HTTP/1.1 400 File size too large.');
-            $this->renderJsonResponse(['File size is too large.']);
-            exit;
-        }
-    }
-
-    private function ensureFileWasUploaded(string $filePath) : void
-    {
-        if ( ! is_uploaded_file($filePath)) {
-            header('HTTP/1.1 500 Server Error');
-            $this->renderJsonResponse(['File was not uploaded.']);
-            exit;
-        }
-    }
-
-    private function ensureFileTypeIsValid(string $fileType) : void
-    {
-        if ( ! in_array($fileType, Image::ALLOWED_TYPES, true)) {
-            header('HTTP/1.1 400 Invalid file type.');
-            $this->renderJsonResponse(['File type not allowed.']);
-            exit;
-        }
-    }
-
-    private function ensureIsUploadRequest(?array $file) : void
-    {
-        if ($file === null) {
-            header('HTTP/1.1 400 Bad Request');
-            $this->renderJsonResponse(['No file uploaded']);
-            exit;
-        }
-    }
-
-    private function renderCouldNotUploadFile() : never
-    {
-        header('HTTP/1.1 500 Server Error');
-        $this->renderJsonResponse(['Could not upload file.']);
-        exit;
     }
 }

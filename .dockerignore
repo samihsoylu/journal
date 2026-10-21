@@ -7,6 +7,7 @@
 !.env.example
 
 vendor
+coverage
 private/cache
 uploads
 
@@ -21,6 +22,13 @@ rector.php
 .php-cs-fixer.cache
 ci/compose.tests.yaml
 ci/docker/legacy.Dockerfile
+ci/docker/coverage.Dockerfile
 ci/fixtures
 ci/verify-install-upgrade.php
 ci/verify-browser.php
+ci/verify-security.php
+ci/verify-pwa.php
+ci/verify-two-factor.php
+ci/verify-two-factor-store.php
+ci/verify-frontend.php
+ci/coverage

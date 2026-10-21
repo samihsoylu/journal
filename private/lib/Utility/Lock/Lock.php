@@ -7,46 +7,73 @@ namespace App\Utility\Lock;
 use LogicException;
 use RuntimeException;
 
-final readonly class Lock
+final class Lock
 {
-    private string $lockFile;
+    private readonly string $lockFile;
+    private mixed $handle = null;
 
-    private function __construct(private string $lockName)
-    {
-        $this->lockFile = CACHE_PATH . sprintf('/%s.lock', $this->lockName);
+    private function __construct(
+        string $lockName,
+        string $directory = CACHE_PATH,
+    ) {
+        $this->lockFile = $directory . sprintf('/%s.lock', $lockName);
     }
 
-    public static function acquire(string $lockName) : self
+    public static function acquire(string $lockName, string $directory = CACHE_PATH) : self
     {
-        $lock = new self($lockName);
+        $lock = new self($lockName, $directory);
+        $handle = $lock->open();
 
-        return $lock->create();
+        if ( ! flock($handle, LOCK_EX | LOCK_NB)) {
+            fclose($handle);
+
+            throw new LogicException(sprintf("Lock with name '%s' is already held", $lockName));
+        }
+        $lock->handle = $handle;
+        ftruncate($handle, 0);
+        fwrite($handle, (string) getmypid());
+
+        return $lock;
     }
 
-    private function create() : self
+    private function open() : mixed
     {
-        if (file_exists($this->lockFile)) {
-            throw new LogicException(sprintf("Lock with name '%s' already exists", $this->lockName));
+        $handle = @fopen($this->lockFile, 'c+');
+
+        if ($handle === false) {
+            throw new RuntimeException('Could not open the worker lock');
         }
+        chmod($this->lockFile, 0o600);
 
-        $response = file_put_contents($this->lockFile, time());
-
-        if ($response === false) {
-            throw new RuntimeException(sprintf("Could not acquire lock '%s'", $this->lockName));
-        }
-
-        return $this;
+        return $handle;
     }
 
     public function unlock() : void
     {
-        unlink($this->lockFile);
+        if (isset($this->handle) && is_resource($this->handle)) {
+            flock($this->handle, LOCK_UN);
+            fclose($this->handle);
+        }
+        // Keep the inode: unlinking can let a third worker lock a different file
+        // while another worker still holds the original open file.
     }
 
-    public static function exists(string $lockName) : bool
+    public function __destruct()
     {
-        $self = new self($lockName);
+        $this->unlock();
+    }
 
-        return file_exists($self->lockFile);
+    public static function exists(string $lockName, string $directory = CACHE_PATH) : bool
+    {
+        $lock = new self($lockName, $directory);
+        $handle = $lock->open();
+        $available = flock($handle, LOCK_EX | LOCK_NB);
+
+        if ($available) {
+            flock($handle, LOCK_UN);
+        }
+        fclose($handle);
+
+        return ! $available;
     }
 }

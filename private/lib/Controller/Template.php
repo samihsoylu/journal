@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Exception\UserException;
+use App\Exception\UserException\InvalidParameterException;
 use App\Service\AuthenticationService;
 use App\Service\CategoryService;
 use App\Service\TemplateService;
@@ -23,7 +24,7 @@ final class Template extends AbstractController
     public const string VIEW_TEMPLATE_URL = self::TEMPLATE_URL . '/{id:\d+}';
     public const string UPDATE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/update';
     public const string UPDATE_TEMPLATE_POST_URL = self::UPDATE_TEMPLATE_URL . '/action';
-    public const string DELETE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/delete/{antiCsrfToken}';
+    public const string DELETE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/delete';
     public const string GET_TEMPLATE_DATA_AS_JSON_URL = self::VIEW_TEMPLATE_URL . '/ajax';
 
     private readonly TemplateValidator $validator;
@@ -60,7 +61,7 @@ final class Template extends AbstractController
         $templateTitle = $this->sanitize->string($_POST['template_title']);
         $templateContent = $this->sanitize->string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
-        $this->service->createTemplate($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $templateTitle, $templateContent);
+        $this->service->createTemplate($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $templateTitle, $templateContent, $_POST['default_title_pattern'] ?? null);
 
         $this->setNotification(Notification::TYPE_SUCCESS, sprintf('Template %s has been created', $templateTitle));
 
@@ -94,6 +95,7 @@ final class Template extends AbstractController
             $templateId,
             $templateTitle,
             $templateContent,
+            $_POST['default_title_pattern'] ?? null,
         );
 
         $this->setNotification(
@@ -130,9 +132,6 @@ final class Template extends AbstractController
     {
         $templateId = $this->sanitize->int($this->getRouteParameters()['id']);
 
-        // setting get variable for validator
-        $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
-
         /** @see TemplateValidator::delete() */
         $this->validator->validate(__FUNCTION__);
 
@@ -157,12 +156,16 @@ final class Template extends AbstractController
         $templateId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         try {
-            $template = $this->service->getTemplateForUser($templateId, $this->getUserId(), $this->getUserEncryptionKey());
+            $this->validator->validate(__FUNCTION__);
+            $template = $this->service->getTemplateForUser($templateId, $this->getUserId(), $this->getUserEncryptionKey(), $_GET['entry_date_time'] ?? null);
 
-            echo json_encode($template, JSON_PRETTY_PRINT);
+            $this->renderJsonResponse($template->jsonSerialize());
+        } catch (InvalidParameterException $exception) {
+            http_response_code(400);
+            $this->renderJsonResponse(['error' => $exception->getMessage()]);
         } catch (UserException $userException) {
             http_response_code(404);
-            echo $userException->getMessage();
+            $this->renderJsonResponse(['error' => $userException->getMessage()]);
         }
     }
 }

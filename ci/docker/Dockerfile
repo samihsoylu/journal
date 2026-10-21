@@ -9,7 +9,7 @@ RUN curl -sSLf \
     https://github.com/mlocati/docker-php-extension-installer/releases/download/2.12.3/install-php-extensions && \
     echo '9c26dd516b8147235c4e924c52e2f076fb2b3f278f5457e88918518ebfee9e01  /usr/local/bin/install-php-extensions' | sha256sum -c - && \
     chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions @composer json pdo openssl tokenizer mbstring ctype pcre session pdo_mysql zip && \
+    install-php-extensions @composer json pdo openssl tokenizer mbstring ctype pcre session pdo_mysql zip dom && \
     a2enmod rewrite
 
 # install zip package

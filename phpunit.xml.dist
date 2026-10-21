@@ -25,6 +25,13 @@
     <source>
         <include>
             <directory>private/lib</directory>
+            <directory>private/framework</directory>
+            <directory>private/scripts</directory>
+            <directory>config/services/prod</directory>
+            <file>private/init.php</file>
+            <file>public/index.php</file>
+            <file>bin/console</file>
+            <file>bin/journalctl</file>
         </include>
     </source>
 </phpunit>

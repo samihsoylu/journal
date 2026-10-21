@@ -13,8 +13,8 @@ require dirname(__DIR__) . '/init.php';
 /** @var App\Framework\Kernel $kernel */
 $arguments = $_SERVER['argv'] ?? [];
 
-if (count($arguments) !== 4) {
-    printf("Usage: %s <userId> <username> <encodedEncryptionKey>\n", $_SERVER['PHP_SELF']);
+if (count($arguments) !== 3) {
+    printf("Usage: %s <userId> <username> (encryption key on stdin)\n", $_SERVER['PHP_SELF']);
     exit(1);
 }
 
@@ -26,7 +26,8 @@ $exitCode = 0;
 try {
     $lockName = LockName::create($userId, ExportFileName::prefix($username), LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
     $lock = Lock::acquire($lockName);
-    $key = $kernel->get(Encryptor::class)->getKeyFromEncodedKey($arguments[3]);
+    $encodedKey = stream_get_contents(STDIN, 1024);
+    $key = $kernel->get(Encryptor::class)->getKeyFromEncodedKey($encodedKey);
     $kernel->get(EntryExporter::class)->export($userId, $username, $key);
 } catch (Throwable $exception) {
     fwrite(STDERR, 'Export failed: ' . $exception->getMessage() . PHP_EOL);
