@@ -17,7 +17,7 @@
                                     <div class="wrapper">
                                         <h1 class="site-title">Journal</h1>
                                     </div>
-                                    <img src="{{ $assets_url }}/images/landscape.jpg" alt="landscape" />
+                                    <img src="{{ $assets_url }}/images/header/parallax-photo.jpg" alt="" />
                                 </div>
                                 <div class="card-content">
                                     <span class="card-title">Log In</span>

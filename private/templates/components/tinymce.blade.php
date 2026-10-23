@@ -1,6 +1,7 @@
 <script type="text/javascript" src="{{ $assets_url }}/js/tinymce/tinymce.min.js" referrerpolicy="origin"></script>
 <script type="text/javascript">
     tinymce.init({
+        license_key: 'gpl',
         selector: 'textarea#entry_content',
         plugins: 'importcss autolink code fullscreen image link media nonbreaking anchor lists wordcount emoticons quickbars table',
         menubar: false,
@@ -50,6 +51,7 @@
 
             const formData = new FormData();
             formData.append('file', blobInfo.blob(), blobInfo.filename());
+            formData.append('form_key', '{{ $session->getAntiCSRFToken() }}');
 
             xhr.send(formData);
         })

@@ -1,105 +1,175 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
-use App\Service\Model\SessionDecorator;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
 use App\Service\Helper\AuthenticationHelper;
-use App\Utility\Encryptor;
-use App\Utility\Registry;
+use App\Service\Model\SessionDecorator;
+use App\Service\Security\CredentialFingerprint;
+use App\Service\Security\PendingLogin;
+use App\Service\Security\TwoFactorChange;
+use App\Service\Security\TwoFactorService;
+use App\Service\Security\TwoFactorStore;
+use App\Service\Security\UserKeys;
 use App\Utility\UserSession;
 use Defuse\Crypto\Key;
 
-class AuthenticationService
+final readonly class AuthenticationService
 {
-    private UserRepository $repository;
-    private AuthenticationHelper $helper;
+    public function __construct(
+        private UserRepository $repository,
+        private AuthenticationHelper $helper,
+        private UserSession $userSession,
+        private UserKeys $keys,
+        private TwoFactorStore $twoFactorStore,
+        private TwoFactorService $twoFactor,
+        private PendingLogin $pending,
+    ) {}
 
-    public function __construct()
+    public function getUserSession() : ?UserSession
     {
-        /** @var UserRepository $repository */
-        $repository = Registry::get(UserRepository::class);
-        $this->repository = $repository;
+        if ( ! $this->userSession->exists()) {
+            return null;
+        }
+        $user = $this->repository->getById($this->userSession->getUserId());
+        $fingerprint = $this->userSession->getCredentialFingerprint();
 
-        $this->helper = new AuthenticationHelper();
-    }
+        if ( ! $user instanceof User || ! is_string($fingerprint) || ! hash_equals($this->credentialFingerprint($user), $fingerprint)) {
+            // Password/key changes, privilege changes, and deletion revoke cached sessions.
+            $this->userSession->destroy();
 
-    public function getUserSession(): ?UserSession
-    {
-        return UserSession::load();
-    }
-
-    public function login(string $username, string $password): void
-    {
-        $userFailedLoginCount = $this->helper->getFailedLoginCount();
-        if ($userFailedLoginCount >= 10) {
-            throw InvalidOperationException::loginAttemptsExceeded($userFailedLoginCount);
+            return null;
         }
 
-        $user = $this->repository->findByUsername($username);
-        if ($user === null || !password_verify($password, $user->getPassword())) {
-            $this->helper->setFailedLoginCount(++$userFailedLoginCount);
+        return $this->userSession;
+    }
 
+    private function credentialFingerprint(User $user) : string
+    {
+        return CredentialFingerprint::from($user, $this->twoFactorStore->find($user->getId())?->revision);
+    }
+
+    public function login(string $username, string $password) : bool
+    {
+        $user = $this->repository->findByUsername($username);
+        // Legacy database collations accept accent/width aliases. All names that
+        // resolve to one account must share that account's throttle bucket.
+        // Missing names share one per-peer budget: rotating arbitrary names
+        // must not create unlimited guesses and persistent state files.
+        $identity = $user instanceof User ? 'user:' . $user->getId() : 'missing';
+        $this->helper->reserveLoginAttempt($identity);
+
+        if ( ! $user instanceof User || ! password_verify($password, $user->getPassword())) {
             // Username or password is incorrect
             throw InvalidArgumentException::incorrectLogin();
         }
 
-        $encryptor = new Encryptor();
-        $encodedEncryptionKey = $encryptor->getEncodedKeyFromProtectedKey(
+        $encodedEncryptionKey = $this->keys->getEncodedKeyFromProtectedKey(
             $user->getEncryptionKey(),
-            $password
+            $password,
         );
 
-        UserSession::create(
+        $state = $this->twoFactorStore->find($user->getId());
+        $fingerprint = CredentialFingerprint::from($user, $state?->revision);
+
+        if ($state?->enabled()) {
+            $this->userSession->destroy();
+            $this->pending->begin($user->getId(), $fingerprint, $encodedEncryptionKey);
+
+            return false;
+        }
+        $this->pending->clear();
+        $this->userSession->create(
             $user->getId(),
             $user->getUsername(),
             $user->getPrivilegeLevel(),
             $encodedEncryptionKey,
-            $user->getTimezone()
+            $user->getTimezone(),
+            $fingerprint,
         );
 
-        $this->helper->setFailedLoginCount(0);
+        $this->helper->resetLoginAttempts($identity);
+
+        return true;
     }
 
-    public function logout(): void
+    public function completeTwoFactor(string $code, mixed $csrf) : void
     {
-        UserSession::destroy();
+        $pending = $this->pending->requireState($csrf);
+        $user = $this->repository->getById($pending['userId']);
+        $state = $this->twoFactorStore->find($pending['userId']);
+
+        if ( ! $user instanceof User || $state === null || ! $state->enabled()
+            || ! hash_equals(CredentialFingerprint::from($user, $state->revision), $pending['fingerprint'])) {
+            $this->pending->clear();
+
+            throw TwoFactorService::invalidCode();
+        }
+        $encodedKey = $_COOKIE[PendingLogin::COOKIE];
+        $key = $this->keys->getKeyFromEncodedKey($encodedKey);
+
+        if ( ! $this->twoFactor->verifyProof($state, $key, $code)) {
+            throw TwoFactorService::invalidCode();
+        }
+        $this->pending->clear();
+        // Use the fingerprint actually verified, so later changes revoke this session.
+        $this->userSession->create($user->getId(), $user->getUsername(), $user->getPrivilegeLevel(), $encodedKey, $user->getTimezone(), $pending['fingerprint']);
+        $this->helper->resetLoginAttempts('user:' . $user->getId());
+        $this->twoFactor->resetAttempts($user->getId());
     }
 
-    public function isUserLoggedIn(): bool
+    public function refreshSecuritySession(TwoFactorChange $change) : void
+    {
+        $user = $this->repository->getById($this->userSession->getUserId());
+
+        if ( ! $this->userSession->exists() || ! $user instanceof User || $change->state->userId !== $user->getId()) {
+            throw InvalidOperationException::userIsNotLoggedIn();
+        }
+        $this->userSession->create($user->getId(), $user->getUsername(), $user->getPrivilegeLevel(), $this->userSession->getEncodedEncryptionKey(), $user->getTimezone(), $change->fingerprint);
+    }
+
+    public function logout() : void
+    {
+        $this->pending->clear();
+        $this->twoFactor->cancelSetup();
+        $this->userSession->destroy();
+    }
+
+    public function isUserLoggedIn() : bool
     {
         $session = $this->getUserSession();
 
-        return ($session !== null);
+        return $session instanceof UserSession;
     }
 
-    public function userHasAdminPrivileges(): bool
+    public function userHasAdminPrivileges() : bool
     {
         $session = $this->getUserSession();
-        if ($session === null) {
+
+        if ( ! $session instanceof UserSession) {
             return false;
         }
 
         // 1|2 <= 2 - is true for admin and owner
-        return ($session->getPrivilegeLevel() <= User::PRIVILEGE_LEVEL_ADMIN);
+        return $session->getPrivilegeLevel() <= User::PRIVILEGE_LEVEL_ADMIN;
     }
 
-    public function getUserDecodedEncryptionKey(): Key
+    public function getUserDecodedEncryptionKey() : Key
     {
         $session = $this->getUserSession();
         $this->ensureSessionIsNotNull($session);
 
         $encodedEncryptionKey = $session->getEncodedEncryptionKey();
 
-        $encryptor = new Encryptor();
-
-        return $encryptor->getKeyFromEncodedKey($encodedEncryptionKey);
+        return $this->keys->getKeyFromEncodedKey($encodedEncryptionKey);
     }
 
-    public function getUserId(): int
+    public function getUserId() : int
     {
         $session = $this->getUserSession();
         $this->ensureSessionIsNotNull($session);
@@ -107,10 +177,11 @@ class AuthenticationService
         return $session->getUserId();
     }
 
-    public function getSessionDecorator(): ?SessionDecorator
+    public function getSessionDecorator() : ?SessionDecorator
     {
         $session = $this->getUserSession();
-        if ($session === null) {
+
+        if ( ! $session instanceof UserSession) {
             return null;
         }
 
@@ -122,18 +193,18 @@ class AuthenticationService
         );
     }
 
-    public function updateUserSessionTimezone(string $timezone): void
+    public function updateUserSessionTimezone(string $timezone) : void
     {
         $session = $this->getUserSession();
         $this->ensureSessionIsNotNull($session);
 
-        $session->setTimezone($timezone);
-        $session->save();
+        $this->userSession->setTimezone($timezone);
+        $this->userSession->save();
     }
 
-    private function ensureSessionIsNotNull(?UserSession $session): void
+    private function ensureSessionIsNotNull(?UserSession $session) : void
     {
-        if ($session === null) {
+        if ( ! $session instanceof UserSession) {
             throw InvalidOperationException::userIsNotLoggedIn();
         }
     }

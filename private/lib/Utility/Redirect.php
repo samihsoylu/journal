@@ -1,17 +1,27 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Utility;
 
-class Redirect
+final class Redirect
 {
-    /**
-     * Redirects the user to a different url
-     *
-     * @param string $location
-     */
-    public static function to(string $location): void
+    public static function localDestination(mixed $path, string $fallback) : string
     {
-        header("Location: {$location}");
-        exit();
+        if ( ! is_string($path) || ! str_starts_with($path, '/') || str_starts_with($path, '//')
+            || str_contains($path, '\\') || preg_match('/[\x00-\x20\x7f]/', $path)) {
+            return $fallback;
+        }
+
+        return $path;
+    }
+
+    /**
+     * Redirects the user to a different url.
+     */
+    public static function to(string $location) : never
+    {
+        header('Location: ' . $location);
+        exit;
     }
 }

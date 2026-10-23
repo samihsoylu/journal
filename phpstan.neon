@@ -5,10 +5,10 @@ parameters:
     paths:
         - private/lib
         - private/scripts
+        - tests
     excludePaths:
         - private/cache
         - private/templates
-        - tests
         - vendor
     dynamicConstantNames:
         - BASE_URL

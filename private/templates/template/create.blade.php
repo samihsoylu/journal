@@ -20,6 +20,7 @@
                         <input id="template_title" name="template_title" type="text" class="validate" @isset($post['template_title']) value="{{ $post['template_title'] }}" @endisset  required />
                         <label for="template_title">Template title</label>
                     </div>
+                    @include('components/template-title-pattern')
                     <div class="input-field">
                         <textarea id="entry_content" name="entry_content">@isset($post['entry_content']) {{ $post['entry_content'] }} @endisset</textarea>
                     </div>
@@ -33,7 +34,7 @@
     </div>
 @endsection
 
-@section('jquery-scripts')
+@section('scripts')
     @include('components/confirm-reload')
     @include('components/tinymce')
 @endsection

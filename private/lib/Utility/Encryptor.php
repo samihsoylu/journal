@@ -1,18 +1,21 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Utility;
 
+use App\Service\Security\UserKeys;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
 use Defuse\Crypto\KeyProtectedByPassword;
 
-class Encryptor
+final class Encryptor implements UserKeys
 {
     /**
      * @return string protected encryption key that should be stored in the database
      */
-    public function generateProtectedKey(string $password): string
+    public function generateProtectedKey(string $password) : string
     {
         $protectedKeyObject = KeyProtectedByPassword::createRandomPasswordProtectedKey($password);
 
@@ -22,7 +25,7 @@ class Encryptor
     /**
      * @return string encoded key that should be stored in the user session
      */
-    public function getEncodedKeyFromProtectedKey(string $protectedKey, string $password): string
+    public function getEncodedKeyFromProtectedKey(string $protectedKey, string $password) : string
     {
         $protectedKeyObject = KeyProtectedByPassword::loadFromAsciiSafeString($protectedKey);
         $key = $protectedKeyObject->unlockKey($password);
@@ -30,7 +33,7 @@ class Encryptor
         return $key->saveToAsciiSafeString();
     }
 
-    public function getKeyFromProtectedKey(string $protectedKey, string $password): Key
+    public function getKeyFromProtectedKey(string $protectedKey, string $password) : Key
     {
         $protectedKeyObject = KeyProtectedByPassword::loadFromAsciiSafeString($protectedKey);
 
@@ -40,12 +43,12 @@ class Encryptor
     /**
      * @return Key object that you must provide for $this->encrypt() and $this->decrypt()
      */
-    public function getKeyFromEncodedKey(string $encodedKey): Key
+    public function getKeyFromEncodedKey(string $encodedKey) : Key
     {
         return Key::loadFromAsciiSafeString($encodedKey);
     }
 
-    public function encrypt(string $unencryptedString, Key $key): string
+    public function encrypt(string $unencryptedString, Key $key) : string
     {
         return Crypto::encrypt($unencryptedString, $key);
     }
@@ -53,15 +56,17 @@ class Encryptor
     /**
      * @throws WrongKeyOrModifiedCiphertextException
      */
-    public function decrypt(string $encryptedString, Key $key): string
+    public function decrypt(string $encryptedString, Key $key) : string
     {
         return Crypto::decrypt($encryptedString, $key);
     }
 
     /**
+     * @param mixed $currentPassword
+     * @param mixed $newPassword
      * @return string protected encryption key that should be stored in the database
      */
-    public function changePassword(string $protectedKey, $currentPassword, $newPassword): string
+    public function changePassword(string $protectedKey, $currentPassword, $newPassword) : string
     {
         $protectedKeyObject = KeyProtectedByPassword::loadFromAsciiSafeString($protectedKey);
         $protectedKeyObject->changePassword($currentPassword, $newPassword);

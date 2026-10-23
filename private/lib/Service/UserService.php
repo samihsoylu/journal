@@ -1,174 +1,86 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
 use App\Database\Model\User;
 use App\Database\Repository\UserRepository;
-use App\Exception\UserException\ActionNotPermittedException;
-use App\Exception\UserException\NotFoundException;
-use App\Service\Helper\MediaHelper;
-use App\Service\Helper\TemplateHelper;
-use App\Service\Helper\UserSetupHelper;
-use App\Service\Helper\WidgetHelper;
-use App\Service\Model\UserDecorator;
 use App\Exception\UserException\InvalidArgumentException;
 use App\Exception\UserException\InvalidOperationException;
-use App\Service\Helper\CategoryHelper;
-use App\Service\Helper\EntryHelper;
 use App\Service\Helper\UserHelper;
-use App\Utility\Command\Command;
-use App\Utility\Command\Process;
-use App\Utility\Encryptor;
-use App\Utility\Lock\Lock;
-use App\Utility\Lock\LockName;
-use App\Utility\Registry;
+use App\Service\Security\PasswordPolicy;
+use App\Service\Security\UserKeys;
 use App\Utility\UserSession;
-use Defuse\Crypto\Key;
 
-class UserService
+final readonly class UserService
 {
-    private UserRepository $repository;
-    private UserHelper $userHelper;
-    private CategoryHelper $categoryHelper;
-    private EntryHelper $entryHelper;
-    private WidgetHelper $widgetHelper;
-    private TemplateHelper $templateHelper;
-    private MediaHelper $mediaHelper;
+    private const string DEFAULT_PASSWORD_HASH_ALGORITHM = PASSWORD_ARGON2ID;
 
-    private const DEFAULT_PASSWORD_HASH_ALGORITHM = PASSWORD_ARGON2ID;
-
-    public function __construct()
-    {
-        /** @var UserRepository $repository */
-        $repository = Registry::get(UserRepository::class);
-
-        $this->repository     = $repository;
-        $this->userHelper     = new UserHelper();
-        $this->categoryHelper = new CategoryHelper();
-        $this->entryHelper    = new EntryHelper();
-        $this->templateHelper = new TemplateHelper();
-        $this->widgetHelper   = new WidgetHelper();
-        $this->mediaHelper    = new MediaHelper();
-    }
+    public function __construct(
+        private UserRepository $repository,
+        private UserHelper $userHelper,
+        private UserSession $userSession,
+        private UserManagementService $userManagementService,
+        private UserKeys $keys,
+    ) {}
 
     /**
-     * Get all registered users
+     * Get all registered users.
      *
      * @return User[]
      */
-    public function getAllUsers(): array
+    public function getAllUsers() : array
     {
         return $this->userHelper->getAllUsers();
     }
 
-    /**
-     * Create a new user account for a logged in user
-     *
-     * @return int User id
-     */
-    public function createUserForAdmin(int $loggedInUserId, string $username, string $password, string $email, int $privilegeLevel): int
+    public function getUser(int $loggedInUserId) : User
     {
-        $loggedInUser = $this->userHelper->getUserById($loggedInUserId);
-
-        if ($loggedInUser->getPrivilegeLevel() >= $privilegeLevel) {
-            // 'admin' users are only allowed to create users with the 'user' privilege level
-            throw InvalidOperationException::insufficientPrivileges($loggedInUser->getPrivilegeLevelAsString());
-        }
-
-        return $this->createUser($username, $password, $email, $privilegeLevel);
+        return $this->userHelper->getUserById($loggedInUserId);
     }
 
-    /**
-     * Create a new user account
-     *
-     * @return int
-     */
-    public function createUser(string $username, string $password, string $email, int $privilegeLevel): int
+    public function changePassword(int $userId, string $currentPassword, string $newPassword) : void
     {
-        $user = $this->repository->findByUsername($username);
-        if ($user !== null) {
-            throw InvalidArgumentException::alreadyRegistered('username', $username);
+        $user = $this->userHelper->getUserById($userId);
+
+        if ( ! password_verify($currentPassword, $user->getPassword())) {
+            throw InvalidArgumentException::incorrectPassword();
         }
 
-        $user = $this->repository->findByEmailAddress($email);
-        if ($user !== null) {
-            throw InvalidArgumentException::alreadyRegistered('email', $email);
-        }
+        PasswordPolicy::validate($newPassword);
+        $newEncryptedPassword = password_hash($newPassword, self::DEFAULT_PASSWORD_HASH_ALGORITHM);
+        $user->setPassword($newEncryptedPassword);
 
-        $encryptedPassword = password_hash($password, self::DEFAULT_PASSWORD_HASH_ALGORITHM);
+        $newEncryptedKey = $this->keys->changePassword($user->getEncryptionKey(), $currentPassword, $newPassword);
+        $user->setEncryptionKey($newEncryptedKey);
 
-        $encryptor = new Encryptor();
-        $protectedEncryptionKey = $encryptor->generateProtectedKey($password);
-
-        $user = new User();
-        $user->setUsername($username)
-            ->setPassword($encryptedPassword)
-            ->setEmailAddress($email)
-            ->setPrivilegeLevel($privilegeLevel)
-            ->setEncryptionKey($protectedEncryptionKey)
-            ->save();
-
-        $key = $encryptor->getKeyFromProtectedKey($protectedEncryptionKey, $password);
-        $setup = new UserSetupHelper($user, $key);
-        $setup->setDefaults();
-
-        return $user->getId();
-    }
-
-    public function getUserForAdmin(int $loggedInUserId, int $targetUserId): UserDecorator
-    {
-        $user       = $this->userHelper->getUserById($loggedInUserId);
-        $targetUser = $this->userHelper->getUserById($targetUserId);
-
-        $targetUserIsReadOnly = !$this->userHasEditPrivilegesForTargetUser($user, $targetUser);
-
-        $targetUserTotalEntries = $this->entryHelper->getEntryCountForUser($targetUser);
-        $targetUserTotalCategories = $this->categoryHelper->getCategoryCountForUser($targetUser);
-        $targetUserTotalTemplates = $this->templateHelper->getTemplateCountForUser($targetUser);
-
-        return new UserDecorator(
-            $targetUser,
-            $targetUserIsReadOnly,
-            $targetUserTotalCategories,
-            $targetUserTotalEntries,
-            $targetUserTotalTemplates
-        );
-    }
-
-    public function updateUserPrivilegesForAdmin(int $loggedInUserId, int $targetUserId, int $newPrivilegeLevel): void
-    {
-        $loggedInUser = $this->userHelper->getUserById($loggedInUserId);
-        $targetUser = $this->userHelper->getUserById($targetUserId);
-
-        $this->ensureUserHasUpdatePrivileges($loggedInUser, $targetUser);
-
-        if ($newPrivilegeLevel <= $loggedInUser->getPrivilegeLevel()) {
-            // logged in user may not give the same privileges or higher to the target user
-            throw InvalidOperationException::insufficientPrivileges($loggedInUser->getPrivilegeLevelAsString());
-        }
-
-        $targetUser->setPrivilegeLevel($newPrivilegeLevel);
-
-        $this->repository->queue($targetUser);
+        $this->repository->queue($user);
         $this->repository->save();
     }
 
-    public function deleteUserForAdmin(int $loggedInUserId, int $targetUserId): void
+    public function changeUserEmail(int $userId, string $newEmailAddress) : void
     {
-        $loggedInUser = $this->userHelper->getUserById($loggedInUserId);
-        $targetUser = $this->userHelper->getUserById($targetUserId);
+        $user = $this->userHelper->getUserById($userId);
+        $user->setEmailAddress($newEmailAddress);
 
-        $this->ensureUserHasUpdatePrivileges($loggedInUser, $targetUser);
+        $this->repository->queue($user);
+        $this->repository->save();
+    }
 
-        $this->deleteUser($targetUser);
+    public function setDateTimeZoneForUser(int $getUserId, string $timezone) : void
+    {
+        $user = $this->userHelper->getUserById($getUserId);
+        $user->setTimezone($timezone);
+
+        $this->repository->queue($user);
+        $this->repository->save();
     }
 
     /**
-     * Deletes user for logged in user (account page)
-     *
-     * @return void
+     * Deletes user for logged in user (account page).
      */
-    public function deleteUserForUser(string $currentPassword, int $userId): void
+    public function deleteUserForUser(string $currentPassword, int $userId) : void
     {
         $user = $this->userHelper->getUserById($userId);
 
@@ -176,193 +88,12 @@ class UserService
             throw InvalidOperationException::insufficientPrivileges($user->getPrivilegeLevelAsString());
         }
 
-        if (!password_verify($currentPassword, $user->getPassword())) {
+        if ( ! password_verify($currentPassword, $user->getPassword())) {
             throw InvalidArgumentException::incorrectPassword();
         }
 
-        $this->deleteUser($user);
+        $this->userManagementService->deleteUser($user);
 
-        UserSession::destroy();
-    }
-
-    public function deleteUser(User $targetUser): void
-    {
-        $entries = $this->entryHelper->getAllEntriesForUser($targetUser);
-        foreach ($entries as $entry) {
-            $this->repository->remove($entry);
-        }
-
-        $templates = $this->templateHelper->getAllTemplatesForUser($targetUser);
-        foreach ($templates as $template) {
-            $this->repository->remove($template);
-        }
-
-        $categories = $this->categoryHelper->getAllCategoriesForUser($targetUser);
-        foreach ($categories as $category) {
-            $this->repository->remove($category);
-        }
-
-        $widgets = $this->widgetHelper->getAllWidgetsForUser($targetUser);
-        foreach ($widgets as $widget) {
-            $this->repository->remove($widget);
-        }
-
-        $files = $this->getZipFileNamesForExportedEntriesByUser($targetUser->getId());
-        foreach ($files as $file) {
-            try {
-                $this->deleteExportedEntriesZipFile($targetUser->getId(), $file);
-            } catch (NotFoundException $e) {
-                continue;
-            }
-        }
-
-        $this->mediaHelper->removeUserUploadDir($targetUser->getId());
-
-        $this->repository->remove($targetUser);
-
-        // Execute queued changes
-        $this->repository->save();
-    }
-
-    private function ensureUserHasUpdatePrivileges(User $user, User $targetUser): void
-    {
-        if (!$this->userHasEditPrivilegesForTargetUser($user, $targetUser)) {
-            throw InvalidOperationException::insufficientPrivileges($user->getPrivilegeLevelAsString());
-        }
-    }
-
-    private function userHasEditPrivilegesForTargetUser(User $user, User $targetUser): bool
-    {
-        // Owners can edit admins and lower, and admins can edit users.
-        return ($user->getPrivilegeLevel() < $targetUser->getPrivilegeLevel());
-    }
-
-    public function changePassword(int $userId, string $currentPassword, string $newPassword): void
-    {
-        $user = $this->userHelper->getUserById($userId);
-        if (!password_verify($currentPassword, $user->getPassword())) {
-            throw InvalidArgumentException::incorrectPassword();
-        }
-
-        $newEncryptedPassword = password_hash($newPassword, self::DEFAULT_PASSWORD_HASH_ALGORITHM);
-        $user->setPassword($newEncryptedPassword);
-
-        $encryptor = new Encryptor();
-        $newEncryptedKey = $encryptor->changePassword($user->getEncryptionKey(), $currentPassword, $newPassword);
-        $user->setEncryptionKey($newEncryptedKey);
-        $user->save();
-    }
-
-    public function getUser(int $loggedInUserId): User
-    {
-        return $this->userHelper->getUserById($loggedInUserId);
-    }
-
-    public function changeUserEmail(int $userId, string $newEmailAddress): void
-    {
-        $user = $this->userHelper->getUserById($userId);
-        $user->setEmailAddress($newEmailAddress);
-        $user->save();
-    }
-
-    /**
-     * @param int $userId
-     * @param Key $encryptionKey used for decrypting entry contents
-     */
-    public function exportUserEntries(int $userId, Key $encryptionKey): int
-    {
-        $exports = $this->getZipFileNamesForExportedEntriesByUser($userId);
-        if ($exports !== []) {
-            throw new ActionNotPermittedException('Allowed count of exports reached');
-        }
-
-        $user = $this->userHelper->getUserById($userId);
-        $exportScriptFilePath = SCRIPTS_PATH . '/ExportAllEntriesForUser.php';
-
-        $this->ensureExportIsNotAlreadyRunning($user->getId(), $user->getUsername());
-        $this->ensureScriptExists($exportScriptFilePath);
-
-        $command = new Command([
-            PHP_BINDIR . '/php', $exportScriptFilePath, $userId, $user->getUsername(), $encryptionKey->saveToAsciiSafeString()
-        ]);
-
-        $process = Process::start(
-            $command,
-            BASE_PATH . "/private/cache/export/log/{$user->getUsername()}.log"
-        );
-
-        return $process->getId();
-    }
-
-    private function ensureExportIsNotAlreadyRunning(int $userId, string $username): void
-    {
-        if ($this->getHasExportEntriesActionRunning($userId, $username)) {
-            throw InvalidOperationException::actionIsAlreadyRunning('exporting entries');
-        }
-    }
-
-    private function ensureScriptExists(string $scriptPath): void
-    {
-        if (!file_exists($scriptPath)) {
-            throw new \LogicException("Script in path: {$scriptPath} does not exist");
-        }
-    }
-
-    public function getZipFileNamesForExportedEntriesByUser(int $userId): array
-    {
-        $user = $this->userHelper->getUserById($userId);
-
-        /** @see EntryExporter::zipAllEntries() */
-        $exportedFiles = glob(EXPORT_CACHE_PATH . "/{$user->getUsername()}__*.zip");
-
-        return array_map(static fn (string $file) => basename($file), $exportedFiles);
-    }
-
-    public function getZipFilePathForExportedEntriesByUser(int $userId, string $fileName): ?string
-    {
-        $user = $this->userHelper->getUserById($userId);
-
-        // must be similar to samih__14-03-2022_00-19-32.zip
-        $this->ensureValidExportEntriesZipFileName($fileName);
-
-        // Results in: 14-03-2022_00-19-32.zip
-        $fileNameSuffix = explode('__', $fileName)[1];
-
-        // Here we reconstruct the file name in-case it was tampered
-        $filePath = EXPORT_CACHE_PATH . "/{$user->getUsername()}__{$fileNameSuffix}";
-
-        return (file_exists($filePath)) ? $filePath : null;
-    }
-
-    public function deleteExportedEntriesZipFile(int $userId, string $fileName): void
-    {
-        $filePath = $this->getZipFilePathForExportedEntriesByUser($userId, $fileName);
-        if ($filePath === null) {
-            throw NotFoundException::entityNameNotFound('Zip', $fileName);
-        }
-
-        @unlink($filePath);
-    }
-
-    private function ensureValidExportEntriesZipFileName(string $fileName)
-    {
-        // expected file must adhere to samih__14-03-2022_00-19-32.zip
-        if (!preg_match('/\S+_{2}\d{2}-\d{2}-\d{4}_\d{2}-\d{2}-\d{2}\S+/', $fileName)) {
-            throw InvalidArgumentException::invalidFileNameProvided();
-        }
-    }
-
-    public function getHasExportEntriesActionRunning(int $userId, string $username): bool
-    {
-        $lockName = LockName::create($userId, $username, LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER);
-
-        return Lock::exists($lockName);
-    }
-
-    public function setDateTimeZoneForUser(int $getUserId, string $timezone)
-    {
-        $user = $this->userHelper->getUserById($getUserId);
-        $user->setTimezone($timezone);
-        $user->save();
+        $this->userSession->destroy();
     }
 }

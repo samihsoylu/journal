@@ -1,21 +1,18 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
-class Error extends AbstractController
+final class Error extends AbstractController
 {
-    public function __construct(array $routeParameters = [])
-    {
-        parent::__construct($routeParameters);
-    }
-
-    public function renderNotFoundPage(): void
+    public function renderNotFoundPage() : never
     {
         $this->renderTemplate('errors/404');
-        exit();
+        exit;
     }
 
-    public function methodNotAllowed(): void
+    public function methodNotAllowed() : void
     {
         $this->renderTemplate('errors/405');
     }

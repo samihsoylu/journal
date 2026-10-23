@@ -1,8 +1,11 @@
 # Generic project files
 /vendor/
+/coverage/
 .idea/*
 .env
 .php_cs.cache
+.phpunit.cache
+exceptions.txt
 
 # Cache Directory
 /private/cache/*

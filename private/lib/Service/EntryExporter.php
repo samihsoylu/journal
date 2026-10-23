@@ -1,0 +1,110 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Service;
+
+use App\Database\Repository\EntryRepository;
+use App\Service\Helper\MediaHelper;
+use App\Service\Security\RichContentSanitizer;
+use App\Utility\Export\ExportFileName;
+use App\Utility\Sanitize;
+use App\Utility\TemplateRendererInterface;
+use Defuse\Crypto\Key;
+use RuntimeException;
+use ZipArchive;
+
+final readonly class EntryExporter
+{
+    public function __construct(
+        private EntryRepository $entries,
+        private MediaService $media,
+        private MediaHelper $mediaHelper,
+        private Sanitize $sanitize,
+        private TemplateRendererInterface $renderer,
+        private string $exportPath = EXPORT_CACHE_PATH,
+        private RichContentSanitizer $contentSanitizer = new RichContentSanitizer(),
+    ) {}
+
+    public function export(int $userId, string $username, Key $key) : ?string
+    {
+        if ($this->entries->getTotalCountByUserId($userId) === 0) {
+            return null;
+        }
+
+        $directory = $this->exportPath . '/' . $userId;
+
+        if ( ! is_dir($directory) && ! mkdir($directory, 0o700, true) && ! is_dir($directory)) {
+            throw new RuntimeException('Could not create the export directory');
+        }
+
+        $archivePath = $directory . '/' . ExportFileName::prefix($username) . '__' . date('d-m-Y_H-i-s') . '.zip';
+
+        if (file_exists($archivePath)) {
+            throw new RuntimeException('An export already exists for this account and time');
+        }
+
+        $temporary = tempnam($directory, '.export-');
+
+        if ($temporary === false) {
+            throw new RuntimeException('Could not create a temporary export');
+        }
+
+        $archive = new ZipArchive();
+        $opened = false;
+
+        try {
+            if ($archive->open($temporary, ZipArchive::OVERWRITE) !== true) {
+                throw new RuntimeException('Could not open the export archive');
+            }
+            $opened = true;
+            $root = $this->sanitize->stringForShell($username) ?: 'user_' . $userId;
+
+            foreach ($this->mediaHelper->getAllImageNamesForUser($userId) as $imageName) {
+                $image = $this->media->getDecryptedImage($userId, $imageName, $key);
+
+                if ( ! $archive->addFromString($root . '/media/' . $imageName, $image->getBinary())) {
+                    throw new RuntimeException('Could not add media to the export');
+                }
+            }
+
+            foreach ($this->entries->getAllEntriesForUser($userId) as $entry) {
+                $category = $entry->getReferencedCategory();
+                $categoryName = ($this->sanitize->stringForShell($category->getName()) ?: 'category') . '__' . $category->getId();
+                $title = ($this->sanitize->stringForShell($entry->getTitle()) ?: 'entry') . '__' . $entry->getId();
+                $content = $this->contentSanitizer->sanitize($entry->getContentDecrypted($key));
+                $prefixes = ['/media/'];
+
+                if (defined('BASE_URL') && BASE_URL !== '') {
+                    $prefixes[] = BASE_URL . '/media/';
+                }
+
+                foreach ($prefixes as $prefix) {
+                    $content = str_replace(['"' . $prefix, "'" . $prefix], ['"../media/', "'../media/"], $content);
+                }
+                $document = $this->renderer->render('export', ['content' => $content]);
+
+                if ( ! $archive->addFromString($root . '/' . $categoryName . '/' . $title . '.html', $document)) {
+                    throw new RuntimeException('Could not add an entry to the export');
+                }
+            }
+
+            $closed = $archive->close();
+            $opened = false;
+
+            if ( ! $closed || ! rename($temporary, $archivePath)) {
+                throw new RuntimeException('Could not finish the export archive');
+            }
+
+            return $archivePath;
+        } finally {
+            if ($opened) {
+                $archive->close();
+            }
+
+            if (is_file($temporary)) {
+                unlink($temporary);
+            }
+        }
+    }
+}

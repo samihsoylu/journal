@@ -1,51 +1,54 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
 use App\Database\Model\Template;
 use App\Database\Repository\TemplateRepository;
 use App\Exception\UserException\InvalidArgumentException;
+use App\Service\Entry\EntryDateTime;
 use App\Service\Helper\CategoryHelper;
 use App\Service\Helper\TemplateHelper;
 use App\Service\Helper\UserHelper;
 use App\Service\Model\TemplateDecorator;
-use App\Utility\Registry;
+use App\Service\Security\RichContentSanitizer;
+use App\Service\Template\EntryTitlePattern;
+use DateTimeImmutable;
+use DateTimeZone;
 use Defuse\Crypto\Key;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
-class TemplateService
+final readonly class TemplateService
 {
-    private TemplateRepository $repository;
-    private TemplateHelper $templateHelper;
-    private UserHelper $userHelper;
-    private CategoryHelper $categoryHelper;
-
-    public function __construct()
-    {
-        /** @var TemplateRepository $repository */
-        $repository = Registry::get(TemplateRepository::class);
-        $this->repository     = $repository;
-
-        $this->templateHelper = new TemplateHelper();
-        $this->userHelper     = new UserHelper();
-        $this->categoryHelper = new CategoryHelper();
-    }
+    public function __construct(
+        private TemplateRepository $repository,
+        private TemplateHelper $templateHelper,
+        private UserHelper $userHelper,
+        private CategoryHelper $categoryHelper,
+        private RichContentSanitizer $contentSanitizer = new RichContentSanitizer(),
+        private EntryTitlePattern $titlePattern = new EntryTitlePattern(),
+        private EntryDateTime $entryDateTime = new EntryDateTime(),
+    ) {}
 
     /**
      * @return Template[]
      */
-    public function getAllTemplatesForUser(int $userId): array
+    public function getAllTemplatesForUser(int $userId) : array
     {
         $user = $this->userHelper->getUserById($userId);
 
         return $this->templateHelper->getAllTemplatesForUser($user);
     }
 
-    public function getTemplateForUser(int $templateId, int $userId, Key $key, bool $getTemplateContentAsMarkup = false): TemplateDecorator
+    public function getTemplateForUser(int $templateId, int $userId, Key $key, ?string $dateTime = null) : TemplateDecorator
     {
         $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 
-        $templateContent = $template->getContentDecrypted($key);
+        $templateContent = $this->contentSanitizer->sanitize($template->getContentDecrypted($key));
+        $timezone = $template->getReferencedUser()->getTimezone();
+        $timestamp = $this->entryDateTime->parse($dateTime, $timezone) ?? time();
+        $date = new DateTimeImmutable('@' . $timestamp)->setTimezone(new DateTimeZone($timezone ?? 'UTC'));
 
         return new TemplateDecorator(
             $template->getId(),
@@ -53,10 +56,12 @@ class TemplateService
             $template->getReferencedCategory()->getId(),
             $template->getReferencedCategory()->getName(),
             $templateContent,
+            $template->getDefaultEntryTitlePattern(),
+            $this->titlePattern->render($template->getDefaultEntryTitlePattern(), $template->getTitle(), $date),
         );
     }
 
-    public function createTemplate(int $userId, Key $encryptionKey, int $categoryId, string $templateTitle, string $templateContent)
+    public function createTemplate(int $userId, Key $encryptionKey, int $categoryId, string $templateTitle, string $templateContent, ?string $defaultTitlePattern = null) : void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
 
@@ -64,38 +69,41 @@ class TemplateService
 
         $template = new Template();
         $template->setReferencedUser($user)
-                 ->setReferencedCategory($category)
-                 ->setTitle($templateTitle)
-                 ->setContentAndEncrypt($templateContent, $encryptionKey);
+            ->setReferencedCategory($category)
+            ->setTitle($templateTitle)
+            ->setContentAndEncrypt($templateContent, $encryptionKey)
+            ->setDefaultEntryTitlePattern($this->titlePattern->normalize($defaultTitlePattern, $templateTitle))
+        ;
 
         $this->repository->queue($template);
 
         try {
             $this->repository->save();
-        } catch (UniqueConstraintViolationException $e) {
+        } catch (UniqueConstraintViolationException) {
             throw InvalidArgumentException::templateAlreadyExists($templateTitle);
         }
     }
 
-    public function updateTemplate(int $userId, Key $encryptionKey, int $categoryId, int $templateId, string $templateTitle, string $templateContent): void
+    public function updateTemplate(int $userId, Key $encryptionKey, int $categoryId, int $templateId, string $templateTitle, string $templateContent, ?string $defaultTitlePattern = null) : void
     {
         $category = $this->categoryHelper->getCategoryForUser($categoryId, $userId);
         $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 
+        $pattern = $this->titlePattern->normalize($defaultTitlePattern ?? $template->getDefaultEntryTitlePattern(), $templateTitle);
         $template->setTitle($templateTitle)
-                 ->setContentAndEncrypt($templateContent, $encryptionKey)
-                 ->setReferencedCategory($category);
+            ->setDefaultEntryTitlePattern($pattern)
+            ->setContentAndEncrypt($templateContent, $encryptionKey)
+            ->setReferencedCategory($category)
+        ;
 
         $this->repository->queue($template);
         $this->repository->save();
     }
 
     /**
-     * Removes an existing template for user
-     *
-     * @return void
+     * Removes an existing template for user.
      */
-    public function deleteTemplate(int $templateId, int $userId): void
+    public function deleteTemplate(int $templateId, int $userId) : void
     {
         $template = $this->templateHelper->getTemplateForUser($templateId, $userId);
 
