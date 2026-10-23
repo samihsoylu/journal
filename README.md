@@ -42,7 +42,7 @@ installations, follow the [upgrade instructions](docs/upgrading.md) first.
 
 ## Requirements
 - A Linux-based server with shell access
-- PHP 8.5
+- PHP 8.5.12 or newer within PHP 8
 - MySQL or MariaDB (checks cover MySQL 5.7/8.0 and MariaDB 10.4/10.11; use maintained versions for new installs)
 
 ### PHP Extensions

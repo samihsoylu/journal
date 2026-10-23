@@ -86,8 +86,13 @@ The recent user-service split is an example of the intended direction:
 - `UserManagementService` handles administrator CRUD and destructive user lifecycle operations.
 - `UserExportService` checks export eligibility and coordinates archive and job contracts.
 - `FilesystemExportArchiveStore` lists, finds, and deletes archives for the supplied
-  account. It reconstructs paths from that account, never from a submitted path.
+  account ID and username. New archives live in account-ID directories; flat v1
+  archives remain readable. Paths come from the account, never a submitted path.
+  Deletion removes all matching scoped and flat copies and reports failed removal.
 - `BackgroundExportJobRunner` handles worker commands, logs, and running-job checks.
+  Its exclusive account guard holds the same OS lock as the worker throughout
+  account deletion. A running export blocks deletion before files or rows change,
+  preventing late plaintext archives even on databases that reuse deleted IDs.
 - `EntryExporter` builds a private ZIP directly from decrypted entries/media, uses
   IDs to preserve colliding names, and publishes the file only after completion.
   It receives its renderer and shares safe filename rules with storage and jobs.

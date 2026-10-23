@@ -47,24 +47,30 @@ final readonly class UserExportService
     {
         $user = $this->userHelper->getUserById($userId);
 
-        return $this->archives->listForUser($user->getUsername());
+        return $this->archives->listForUser($user->getId(), $user->getUsername());
     }
 
     public function getZipFilePathForExportedEntriesByUser(int $userId, string $fileName) : ?string
     {
         $user = $this->userHelper->getUserById($userId);
 
-        return $this->archives->findForUser($user->getUsername(), $fileName);
+        return $this->archives->findForUser($user->getId(), $user->getUsername(), $fileName);
     }
 
     public function deleteExportedEntriesZipFile(int $userId, string $fileName) : void
     {
         $user = $this->userHelper->getUserById($userId);
-        $this->archives->deleteForUser($user->getUsername(), $fileName);
+        $this->archives->deleteForUser($user->getId(), $user->getUsername(), $fileName);
     }
 
     public function getHasExportEntriesActionRunning(int $userId, string $username) : bool
     {
         return $this->jobs->isRunning($userId, $username);
+    }
+
+    public function withIdleAccount(int $userId, callable $operation) : void
+    {
+        $user = $this->userHelper->getUserById($userId);
+        $this->jobs->withIdleAccount($userId, $user->getUsername(), $operation);
     }
 }

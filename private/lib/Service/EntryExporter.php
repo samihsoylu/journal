@@ -32,17 +32,19 @@ final readonly class EntryExporter
             return null;
         }
 
-        if ( ! is_dir($this->exportPath) && ! mkdir($this->exportPath, 0o750, true) && ! is_dir($this->exportPath)) {
+        $directory = $this->exportPath . '/' . $userId;
+
+        if ( ! is_dir($directory) && ! mkdir($directory, 0o700, true) && ! is_dir($directory)) {
             throw new RuntimeException('Could not create the export directory');
         }
 
-        $archivePath = $this->exportPath . '/' . ExportFileName::prefix($username) . '__' . date('d-m-Y_H-i-s') . '.zip';
+        $archivePath = $directory . '/' . ExportFileName::prefix($username) . '__' . date('d-m-Y_H-i-s') . '.zip';
 
         if (file_exists($archivePath)) {
             throw new RuntimeException('An export already exists for this account and time');
         }
 
-        $temporary = tempnam($this->exportPath, '.export-');
+        $temporary = tempnam($directory, '.export-');
 
         if ($temporary === false) {
             throw new RuntimeException('Could not create a temporary export');

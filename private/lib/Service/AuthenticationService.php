@@ -59,7 +59,9 @@ final readonly class AuthenticationService
         $user = $this->repository->findByUsername($username);
         // Legacy database collations accept accent/width aliases. All names that
         // resolve to one account must share that account's throttle bucket.
-        $identity = $user instanceof User ? 'user:' . $user->getId() : 'missing:' . mb_strtolower($username, 'UTF-8');
+        // Missing names share one per-peer budget: rotating arbitrary names
+        // must not create unlimited guesses and persistent state files.
+        $identity = $user instanceof User ? 'user:' . $user->getId() : 'missing';
         $this->helper->reserveLoginAttempt($identity);
 
         if ( ! $user instanceof User || ! password_verify($password, $user->getPassword())) {

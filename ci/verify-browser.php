@@ -118,6 +118,11 @@ function verifyEditorBrowser(string $base, string $temporary, callable $connecti
         $browser->script("document.querySelector('#username').value = 'freshowner'; document.querySelector('#password').value = 'fresh-password'; document.querySelector('form').requestSubmit();");
         waitFor(static fn () => $browser->script("return location.pathname === '/dashboard';"), 'browser login', 15);
         ensure($anonymousCookie['value'] !== $browser->sessionCookie()['value'], 'Login did not rotate the PHP session cookie');
+        $encryptionCookies = array_values(array_filter($browser->cookies(), static fn ($cookie) => $cookie['name'] === 'EEK'));
+        ensure(count($encryptionCookies) === 1, 'Missing encryption-key cookie after browser login');
+        ensure($encryptionCookies[0]['httpOnly'] === true, 'Encryption-key cookie is missing HttpOnly');
+        ensure( ! $browser->script("return document.cookie.split(';').some(cookie => cookie.trim().startsWith('EEK='));"), 'Page JavaScript can read the encryption-key cookie');
+        echo "Encryption-key cookie browser: HttpOnly stored and document.cookie access blocked\n";
         $browser->visit($base . '/template/create');
         waitFor(static fn () => $browser->script('return !!(window.tinymce && tinymce.activeEditor && tinymce.activeEditor.initialized);'), 'template editor', 20);
         $browser->script(<<<'JS'

@@ -18,6 +18,7 @@ final readonly class BackgroundExportJobRunner implements ExportJobRunner
     public function __construct(
         private string $scriptPath = SCRIPTS_PATH . '/ExportAllEntriesForUser.php',
         private string $logDirectory = EXPORT_CACHE_PATH . '/log',
+        private string $lockDirectory = CACHE_PATH,
     ) {}
 
     public function start(int $userId, string $username, Key $key) : int
@@ -43,6 +44,21 @@ final readonly class BackgroundExportJobRunner implements ExportJobRunner
 
     public function isRunning(int $userId, string $username) : bool
     {
-        return Lock::exists(LockName::create($userId, ExportFileName::prefix($username), LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER));
+        return Lock::exists(LockName::create($userId, ExportFileName::prefix($username), LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER), $this->lockDirectory);
+    }
+
+    public function withIdleAccount(int $userId, string $username, callable $operation) : void
+    {
+        try {
+            $lock = Lock::acquire(LockName::create($userId, ExportFileName::prefix($username), LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER), $this->lockDirectory);
+        } catch (LogicException) {
+            throw InvalidOperationException::actionIsAlreadyRunning('exporting entries; wait for it to finish before deleting this account');
+        }
+
+        try {
+            $operation();
+        } finally {
+            $lock->unlock();
+        }
     }
 }
