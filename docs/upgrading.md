@@ -2,7 +2,7 @@
 
 This platform update keeps the v1 database and encryption format. It does not
 require a new database, new accounts, password resets, or re-encryption. Upgrade
-the runtime to PHP 8.5 with the ZIP extension and install the committed Composer lockfile. Existing PHP
+the runtime to PHP 8.5.12 or newer with the ZIP extension and install the committed Composer lockfile. PHP 8.5.12 includes the critical October 2026 security fixes. Existing PHP
 7/8.0–8.4 runtimes cannot execute this version.
 
 The automated database checks cover MySQL 5.7/8.0 and MariaDB 10.4/10.11. Rehearse separately
@@ -40,7 +40,7 @@ caches also require a fresh login after the update.
 ## Apply the update
 
 - Briefly stop application writes and exports.
-- Deploy the new code with its locked dependencies and PHP 8.5; retain the existing
+- Deploy the new code with its locked dependencies and PHP 8.5.12 or newer; retain the existing
   database connection, database volume, upload mount, URL prefix, and HTTPS settings.
 - Run `vendor/bin/doctrine-migrations migrate --no-interaction`. The existing six
   v1 migration versions are retained. Two new migrations add the nullable
@@ -63,6 +63,13 @@ caches also require a fresh login after the update.
 
 Both `bin/console` and the v1-compatible `bin/journalctl` support administration
 commands. The former development-only interactive `bin/shell` is not included.
+
+New export ZIPs are stored under the account ID. Account deletion takes the
+worker's exclusive lock and asks you to wait if an export is still running.
+It removes both old and new archive copies before deleting the account, including
+when a database can later reuse that account's ID. Existing flat export archives
+remain readable and downloadable.
+Preserve the entire private export directory if you keep exports during an upgrade.
 
 Exports retain ZIP downloads and offline HTML/media. Entry and category IDs now
 distinguish archive paths so matching/sanitized titles cannot overwrite content.

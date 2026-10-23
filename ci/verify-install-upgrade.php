@@ -123,9 +123,10 @@ final class Browser
         ]);
     }
 
-    public function request(string $path, ?array $fields = null) : array
+    public function request(string $path, ?array $fields = null, bool $followRedirects = true) : array
     {
         curl_setopt($this->client, CURLOPT_URL, $this->base . $path);
+        curl_setopt($this->client, CURLOPT_FOLLOWLOCATION, $followRedirects);
 
         if ($fields === null) {
             curl_setopt($this->client, CURLOPT_HTTPGET, true);
@@ -262,6 +263,9 @@ function main(bool $skipBuild) : void
                 run(['docker', 'build', '-f', 'ci/docker/coverage.Dockerfile', '-t', 'journal-platform-coverage:local', '.']);
             }
         }
+        $version = trim(run(['docker', 'run', '--rm', '--entrypoint', 'php', $candidate, '-r', 'echo PHP_VERSION;']));
+        ensure(version_compare($version, '8.5.12', '>='), 'The candidate needs PHP 8.5.12 or newer to include the critical PHP security fixes');
+        echo 'Candidate PHP ' . $version . " includes the required security fixes\n";
         run(['docker', 'network', 'create', $network]);
         $networkCreated = true;
         $sql = static fn (string $statement) => trim(run([
@@ -351,6 +355,11 @@ function main(bool $skipBuild) : void
         ]);
         ensure($status === 200 && str_contains($body, 'Invalid Form Key. Please try again.'), 'Login without a session token should render a validation error, not fail');
         echo "Direct login POST without a session token: validation error rendered\n";
+        $redirectProbe = new Browser($browser->base);
+        $login = $redirectProbe->page('/entries?url=//outside.invalid');
+        $redirectProbe->request('/login/action', ['username' => 'freshowner', 'password' => 'fresh-password', 'form_key' => Browser::token($login)], false);
+        ensure(($redirectProbe->headers['location'] ?? '') === '/entries', 'A query parameter redirected login outside the requested application page');
+        echo "Login redirect: untrusted url parameter cannot change the destination\n";
         $browser->login('freshowner', 'fresh-password');
         ensure(str_contains($browser->page('/entries'), 'Entries'), 'Fresh entries page failed');
         verifyEditorBrowser($browser->base, $temporary, static function (bool $online) use ($fresh, $browserFor) : void {
@@ -416,7 +425,7 @@ function main(bool $skipBuild) : void
         [$status] = $browser->request('/account/export-entries', ['form_key' => Browser::token($browser->page('/account'))]);
         ensure($status === 200, 'Export request failed');
         $exported = waitFor(static fn () => trim(run([
-            'docker', 'exec', $upgraded, 'find', '/var/www/html/private/cache/export', '-maxdepth', '1', '-name', '*.zip',
+            'docker', 'exec', $upgraded, 'find', '/var/www/html/private/cache/export', '-maxdepth', '2', '-name', '*.zip',
         ])), 'legacy content export', 45);
         $zipPath = $temporary . '/export.zip';
         run(['docker', 'cp', $upgraded . ':' . $exported, $zipPath]);

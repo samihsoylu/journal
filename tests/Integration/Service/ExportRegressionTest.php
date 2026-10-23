@@ -6,6 +6,7 @@ namespace Tests\Integration\Service;
 
 use App\Database\Repository\EntryRepository;
 use App\Exception\UserException\ActionNotPermittedException;
+use App\Exception\UserException\InvalidOperationException;
 use App\Service\EntryExporter;
 use App\Service\Export\ExportArchiveStore;
 use App\Service\Export\ExportJobRunner;
@@ -13,13 +14,19 @@ use App\Service\Helper\MediaHelper;
 use App\Service\Helper\UserHelper;
 use App\Service\MediaService;
 use App\Service\UserExportService;
+use App\Service\UserManagementService;
 use App\Service\ValueObject\Image;
 use App\Utility\BladeRenderer;
 use App\Utility\Encryptor;
+use App\Utility\Export\ExportFileName;
+use App\Utility\Export\FilesystemExportArchiveStore;
+use App\Utility\Lock\Lock;
+use App\Utility\Lock\LockName;
 use App\Utility\Sanitize;
 use App\Utility\TemplateRendererInterface;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
+use Doctrine\ORM\EntityManagerInterface;
 use DOMDocument;
 use FilesystemIterator;
 use PHPUnit\Framework\Attributes\Test;
@@ -77,6 +84,88 @@ final class ExportRegressionTest extends IntegrationTestCase
         $archive->close();
 
         return $contents;
+    }
+
+    #[Test]
+    public function deletion_waits_for_the_worker_and_removes_exports_before_an_account_id_can_be_reused() : void
+    {
+        $factory = UserFactory::setup();
+        $original = $factory->create();
+        $originalId = $original->getId();
+        $username = $original->getUsername();
+        $key = $factory->getDecryptionKey();
+        EntryFactory::setup()->withUser($original)->withContent('<p>Original private content</p>', $key)->create();
+        $management = $this->getService(UserManagementService::class);
+        $renderer = $this->createMock(TemplateRendererInterface::class);
+        $renderer->expects(self::once())->method('render')->willReturnCallback(function (string $template, array $variables) use ($management, $original, $originalId) : string {
+            try {
+                $management->deleteUser($original);
+                self::fail('Account deletion ran while its export worker was active');
+            } catch (InvalidOperationException) {
+                self::assertNotNull($this->testOrm->fetchOneAssoc('SELECT id FROM users WHERE id = ?', [$originalId]));
+                self::assertNotEmpty($this->testOrm->fetchAllAssoc('SELECT id FROM entries WHERE userId = ?', [$originalId]));
+            }
+
+            return $variables['content'];
+        });
+        // Match ExportAllEntriesForUser.php, including its real shared OS lock.
+        $worker = Lock::acquire(LockName::create($originalId, ExportFileName::prefix($username), LockName::ACTION_EXPORT_ALL_ENTRIES_FOR_USER));
+        $archive = null;
+
+        try {
+            $exporter = new EntryExporter($this->getRepository(EntryRepository::class), $this->media, $this->mediaHelper, new Sanitize(), $renderer);
+            $archive = $exporter->export($originalId, $username, $key);
+            self::assertNotNull($archive);
+            self::assertFileExists($archive);
+            $worker->unlock();
+            $management->deleteUser($original);
+            self::assertFileDoesNotExist($archive);
+            self::assertNull($this->testOrm->fetchOneAssoc('SELECT id FROM users WHERE id = ?', [$originalId]));
+            $replacement = UserFactory::setup()->create();
+            $manager = $this->getService(EntityManagerInterface::class);
+            // MySQL 5.7 can reuse the highest deleted ID after a restart.
+            $manager->getConnection()->update('users', ['id' => $originalId], ['id' => $replacement->getId()]);
+            $manager->clear();
+            $exports = $this->getService(UserExportService::class);
+            self::assertSame([], $exports->getZipFileNamesForExportedEntriesByUser($originalId));
+            self::assertNull($exports->getZipFilePathForExportedEntriesByUser($originalId, basename($archive)));
+        } finally {
+            $worker->unlock();
+
+            if ($archive !== null && is_file($archive)) {
+                unlink($archive);
+            }
+            @rmdir(EXPORT_CACHE_PATH . '/' . $originalId);
+        }
+    }
+
+    #[Test]
+    public function a_late_export_from_a_deleted_account_is_not_inherited_when_its_username_is_reused() : void
+    {
+        $factory = UserFactory::setup();
+        $original = $factory->create();
+        $originalId = $original->getId();
+        $key = $factory->getDecryptionKey();
+        EntryFactory::setup()->withUser($original)->withContent('<p>Deleted account private text</p>', $key)->create();
+        $replacement = null;
+        $renderer = $this->createMock(TemplateRendererInterface::class);
+        $renderer->expects(self::once())->method('render')->willReturnCallback(function (string $template, array $variables) use ($original, &$replacement) : string {
+            // The worker has decrypted a row, but has not published its ZIP yet.
+            $this->getService(UserManagementService::class)->deleteUser($original);
+            $replacement = UserFactory::setup()->create();
+
+            return $variables['content'];
+        });
+        $exportPath = $this->directory . '/exports';
+        $exporter = new EntryExporter($this->getRepository(EntryRepository::class), $this->media, $this->mediaHelper, new Sanitize(), $renderer, $exportPath);
+        $archive = $exporter->export($originalId, $original->getUsername(), $key);
+        self::assertNotNull($archive);
+        self::assertNotNull($replacement);
+        self::assertNotSame($originalId, $replacement->getId());
+        self::assertStringContainsString('Deleted account private text', implode('', $this->readArchive($archive)));
+        $service = new UserExportService($this->getService(UserHelper::class), $this->getRepository(EntryRepository::class), new FilesystemExportArchiveStore($exportPath), self::createStub(ExportJobRunner::class));
+        self::assertSame([], $service->getZipFileNamesForExportedEntriesByUser($replacement->getId()));
+        self::assertNull($service->getZipFilePathForExportedEntriesByUser($replacement->getId(), basename($archive)));
     }
 
     #[Test]
@@ -153,7 +242,7 @@ final class ExportRegressionTest extends IntegrationTestCase
             $this->exporter->export($user->getId(), $user->getUsername(), $key);
             self::fail('An export was created with an incorrect key');
         } catch (WrongKeyOrModifiedCiphertextException) {
-            self::assertSame([], array_values(array_diff(scandir($this->directory . '/exports'), ['.', '..'])));
+            self::assertSame([], array_values(array_diff(scandir($this->directory . '/exports/' . $user->getId()), ['.', '..'])));
             self::assertSame('private image bytes', $this->media->getDecryptedImage($user->getId(), 'pixel.png', $key)->getBinary());
         }
     }
@@ -208,7 +297,7 @@ final class ExportRegressionTest extends IntegrationTestCase
         $key = $factory->getDecryptionKey();
         EntryFactory::setup()->withUser($user)->withContent('<p>Private</p>', $key)->create();
         $archives = $this->createMock(ExportArchiveStore::class);
-        $archives->expects(self::once())->method('listForUser')->with($user->getUsername())->willReturn([]);
+        $archives->expects(self::once())->method('listForUser')->with($user->getId(), $user->getUsername())->willReturn([]);
         $jobs = $this->createMock(ExportJobRunner::class);
         $jobs->expects(self::once())->method('start')->with($user->getId(), $user->getUsername(), $key)->willReturn(42);
         $service = new UserExportService($this->getService(UserHelper::class), $this->getRepository(EntryRepository::class), $archives, $jobs);
@@ -223,7 +312,7 @@ final class ExportRegressionTest extends IntegrationTestCase
         $key = $factory->getDecryptionKey();
         EntryFactory::setup()->withUser($user)->withContent('<p>Private</p>', $key)->create();
         $archives = $this->createMock(ExportArchiveStore::class);
-        $archives->expects(self::once())->method('listForUser')->with($user->getUsername())->willReturn(['existing.zip']);
+        $archives->expects(self::once())->method('listForUser')->with($user->getId(), $user->getUsername())->willReturn(['existing.zip']);
         $jobs = $this->createMock(ExportJobRunner::class);
         $jobs->expects(self::never())->method('start');
         $service = new UserExportService($this->getService(UserHelper::class), $this->getRepository(EntryRepository::class), $archives, $jobs);
@@ -248,7 +337,7 @@ final class ExportRegressionTest extends IntegrationTestCase
             self::fail('Export succeeded despite a rendering failure');
         } catch (RuntimeException $exception) {
             self::assertSame('Renderer unavailable', $exception->getMessage());
-            self::assertSame([], array_values(array_diff(scandir($this->directory . '/exports'), ['.', '..'])));
+            self::assertSame([], array_values(array_diff(scandir($this->directory . '/exports/' . $user->getId()), ['.', '..'])));
         }
     }
 

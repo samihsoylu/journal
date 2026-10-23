@@ -143,6 +143,13 @@ final readonly class UserManagementService
 
     public function deleteUser(User $targetUser) : void
     {
+        $this->userExportService->withIdleAccount($targetUser->getId(), function () use ($targetUser) : void {
+            $this->deleteUserData($targetUser);
+        });
+    }
+
+    private function deleteUserData(User $targetUser) : void
+    {
         $entries = $this->entryHelper->getAllEntriesForUser($targetUser);
 
         foreach ($entries as $entry) {

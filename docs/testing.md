@@ -5,7 +5,7 @@ This document describes how to write and run tests for the Journal application.
 ## Overview
 
 The test suite uses:
-- **PHPUnit 12** for the testing framework
+- **PHPUnit 13** for the testing framework
 - **Unit tests** for archive storage and filename ownership without a database
 - **Transaction-based isolation** - each test runs in a transaction that is rolled back
 - **Factory pattern** for creating test entities
@@ -76,12 +76,17 @@ docker compose -f ci/compose.tests.yaml down -v
 
 This dedicated Compose project exposes its test database on loopback port 3306.
 Stop if that port is already in use; do not stop an unrelated database to run it.
+The cache filesystem must enforce OS file locks. When running PHPUnit in Docker
+on macOS, put `private/cache` on a native Docker volume or tmpfs rather than the
+Mac source bind mount. The account-deletion/export lock regression checks this
+behavior; a failing lock check must not be skipped.
 To exercise MariaDB, use
 `TEST_DATABASE_IMAGE=mariadb:10.11 docker compose -f ci/compose.tests.yaml up -d --wait`
 after removing only this disposable test project. Never use the teardown command
 against development or production Compose files.
 
-CI runs the suite on PHP 8.5 with both MySQL 8.0 and MariaDB 10.11. It also runs
+CI runs the suite on patched PHP 8.5 (at least 8.5.12) with MySQL 5.7/8.0 and
+MariaDB 10.4/10.11. It also runs
 `php ci/verify-install-upgrade.php` to build the image, verify fresh startup,
 and rehearse a v1.5.1 upgrade using original-code-generated synthetic data.
 The checks workflow does not publish images or deploy applications. The separate
@@ -93,7 +98,9 @@ port, then checks demo login and container recreation.
 
 Service regression tests cover encryption/password continuity, session lifecycle,
 CSRF rotation, ownership checks, content operations, category deletion, media,
-account defaults, widgets, and privilege restrictions. Category-search tests
+account defaults, widgets, and privilege restrictions. Export regressions include
+account deletion during a running export and reuse of the deleted username.
+Category-search tests
 check ownership, result counts, and pagination. Export tests verify all
 entries survive matching/sanitized filenames, offline media links work, failures
 remove partial archives, and accounts can find/delete only their own archives.

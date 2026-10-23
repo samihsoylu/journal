@@ -182,9 +182,7 @@ final class UserSession
 
     public static function generateNewAntiCSRFToken(string $sessionId) : string
     {
-        $prefix = sha1(random_bytes(5));
-
-        return sha1($prefix . $sessionId);
+        return bin2hex(random_bytes(32));
     }
 
     public function regenerateNewAntiCSRFToken() : void

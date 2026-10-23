@@ -66,7 +66,7 @@ abstract class AbstractController
             );
 
             // keep track on which page the user attempted to load
-            Session::put('referred_from', $_GET['url'] ?? Welcome::DASHBOARD_URL);
+            Session::put('referred_from', parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH));
 
             Redirect::to(Authentication::LOGIN_URL);
         }

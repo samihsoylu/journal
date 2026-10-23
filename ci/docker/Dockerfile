@@ -1,4 +1,4 @@
-FROM php:8.5-apache
+FROM php:8.5.12-apache@sha256:e25ab14ef2cfec3bab9dd66c6cf871691146f428fbd72241b1a2c38fcacf92f5
 
 # Keep dependency installation cached when application source changes.
 COPY --chown=www-data:www-data composer.json composer.lock /var/www/html/

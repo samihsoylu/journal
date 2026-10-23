@@ -53,6 +53,28 @@ final class AuthenticationRegressionTest extends IntegrationTestCase
     }
 
     #[Test]
+    public function changing_unknown_usernames_does_not_create_unlimited_login_budgets() : void
+    {
+        UserFactory::setup()->create();
+        $auth = $this->getService(AuthenticationService::class);
+
+        for ($attempt = 0; $attempt < 10; ++$attempt) {
+            try {
+                $auth->login('missing-user-' . $attempt, 'wrong-password');
+                self::fail('A missing account authenticated');
+            } catch (InvalidArgumentException) {
+                self::assertFalse($auth->isUserLoggedIn());
+            }
+        }
+        // A real account behind the same proxy can still log in, but cannot
+        // clear the separate budget for guesses at nonexistent accounts.
+        $auth->login('testuser', 'testpassword');
+        self::assertTrue($auth->isUserLoggedIn());
+        $this->expectException(InvalidOperationException::class);
+        $auth->login('another-missing-user', 'wrong-password');
+    }
+
+    #[Test]
     public function login_unlocks_the_existing_key_and_logout_revokes_the_session() : void
     {
         $factory = UserFactory::setup();

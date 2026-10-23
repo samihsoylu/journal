@@ -67,7 +67,7 @@ final class Authentication extends AbstractController
         if ($referredFrom !== null) {
             Session::delete('referred_from');
 
-            Redirect::to(BASE_URL . ('/' . $referredFrom));
+            Redirect::to(Redirect::localDestination($referredFrom, Welcome::DASHBOARD_URL));
         }
 
         Redirect::to(Welcome::DASHBOARD_URL);

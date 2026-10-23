@@ -27,7 +27,7 @@
         }
     },
     "require": {
-        "php": "^8.5",
+        "php": "^8.5.12",
         "ext-json": "*",
         "ext-zip": "*",
         "doctrine/orm": "^3.0",
