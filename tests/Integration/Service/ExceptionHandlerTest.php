@@ -24,6 +24,25 @@ final class ExceptionHandlerTest extends TestCase
     #[Test]
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
+    public function debug_mode_rethrows_the_original_exception() : void
+    {
+        define('BASE_URL', '');
+        define('DEBUG_MODE', true);
+        define('SITE_TITLE', 'Journal test');
+        define('ASSETS_URL', '/assets');
+        $_SERVER['REQUEST_URI'] = '/error-test';
+        $_POST = $_SESSION = [];
+        $renderer = new BladeRenderer();
+        $exception = new RuntimeException('Synthetic diagnostic');
+        $handler = new ExceptionHandler($exception, new Template($renderer, new Notification(), $renderer));
+        self::assertSame($exception, $handler->getException());
+        $this->expectExceptionObject($exception);
+        $handler->genericException();
+    }
+
+    #[Test]
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
     public function production_errors_without_sentry_leave_diagnostics_without_private_content() : void
     {
         define('BASE_URL', '');

@@ -27,6 +27,7 @@ ci/fixtures
 ci/verify-install-upgrade.php
 ci/verify-browser.php
 ci/verify-security.php
+ci/verify-account.php
 ci/verify-pwa.php
 ci/verify-two-factor.php
 ci/verify-two-factor-store.php

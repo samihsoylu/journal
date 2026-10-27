@@ -80,4 +80,18 @@ final class RichContentSanitizerTest extends TestCase
         self::assertStringContainsString('blob:https://example.test/id', $output);
         self::assertStringContainsString('data:image/png;base64,aGVsbG8=', html_entity_decode($output));
     }
+
+    #[Test]
+    public function supported_editor_styles_survive_while_unknown_classes_and_broken_declarations_do_not() : void
+    {
+        $styles = 'vertical-align: middle; font-weight: 700; font-style: italic; text-decoration: underline line-through; border-style: dashed; list-style-type: lower-roman; padding-left: 12px';
+        $output = new RichContentSanitizer()->sanitize('<p class="untrusted" style="broken; ' . $styles . '; position: fixed">Styled text</p>');
+
+        foreach (explode('; ', $styles) as $style) {
+            self::assertStringContainsString($style, $output);
+        }
+        self::assertStringNotContainsString('untrusted', $output);
+        self::assertStringNotContainsString('broken', $output);
+        self::assertStringNotContainsString('position', $output);
+    }
 }

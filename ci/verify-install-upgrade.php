@@ -21,6 +21,7 @@ const PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwM
 
 require_once __DIR__ . '/verify-browser.php';
 require_once __DIR__ . '/verify-security.php';
+require_once __DIR__ . '/verify-account.php';
 require_once __DIR__ . '/verify-pwa.php';
 require_once __DIR__ . '/verify-two-factor.php';
 
@@ -372,6 +373,7 @@ function main(bool $skipBuild) : void
         $browser = $browserFor($fresh);
         $browser->login('freshowner', 'fresh-password');
         verifySecurityRequests($browser, $sql, $temporary);
+        verifyAccountRequests($browser, $sql, $temporary);
         verifyTwoFactorRequests($browser, $sql, $temporary, $fresh);
         $freshBefore = $snapshot('journal');
         run(['docker', 'restart', $fresh]);

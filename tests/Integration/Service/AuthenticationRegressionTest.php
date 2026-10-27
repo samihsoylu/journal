@@ -125,6 +125,27 @@ final class AuthenticationRegressionTest extends IntegrationTestCase
     }
 
     #[Test]
+    public function an_expired_cache_entry_cannot_restore_an_authenticated_session() : void
+    {
+        $_SESSION['SessionID'] = 'missing-' . bin2hex(random_bytes(12));
+        $_COOKIE['EEK'] = 'present-but-untrusted';
+        self::assertFalse(new UserSession($this->getService(Cache::class))->exists());
+    }
+
+    #[Test]
+    public function a_cached_session_without_its_csrf_binding_cannot_be_restored() : void
+    {
+        UserFactory::setup()->create();
+        $auth = $this->getService(AuthenticationService::class);
+        $auth->login('testuser', 'testpassword');
+        $session = $this->getService(UserSession::class);
+        $_COOKIE['EEK'] = $session->getEncodedEncryptionKey();
+        self::assertSame(User::PRIVILEGE_LEVEL_USER, $session->getPrivilegeLevel());
+        unset($_SESSION['AntiCSRFToken']);
+        self::assertFalse(new UserSession($this->getService(Cache::class))->exists());
+    }
+
+    #[Test]
     public function a_form_without_a_csrf_token_is_rejected() : void
     {
         UserFactory::setup()->create();

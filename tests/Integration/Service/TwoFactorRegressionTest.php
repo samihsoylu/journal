@@ -94,6 +94,22 @@ final class TwoFactorRegressionTest extends IntegrationTestCase
         return $pending;
     }
 
+    public function test_enrolled_accounts_cannot_start_another_setup() : void
+    {
+        $this->enroll();
+        $this->expectException(InvalidParameterException::class);
+        $this->service->beginSetup($this->user->getId(), $this->key, 'testpassword');
+    }
+
+    public function test_overlong_proofs_and_a_wrong_content_key_cannot_consume_a_factor() : void
+    {
+        [$secret] = $this->enroll();
+        $state = $this->store->find($this->user->getId());
+        self::assertFalse($this->service->verifyProof($state, $this->key, str_repeat('x', 129)));
+        self::assertFalse($this->service->verifyProof($state, Key::createNewRandomKey(), $this->code($secret)));
+        self::assertTrue($this->service->verifyProof($state, $this->key, $this->code($secret)));
+    }
+
     public function test_existing_users_remain_password_only_and_enrollment_keeps_ciphertext_private() : void
     {
         self::assertNull($this->store->find($this->user->getId()));

@@ -132,7 +132,7 @@ jobs:
         with:
           name: coverage-http-cli-${{ matrix.database }}
           path: coverage/requests
-      - run: php -d memory_limit=1G ci/coverage/report.php coverage 85
+      - run: php -d memory_limit=1G ci/coverage/report.php coverage 95
       - uses: actions/upload-artifact@v7
         if: always()
         with:

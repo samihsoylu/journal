@@ -13,10 +13,10 @@ use SebastianBergmann\CodeCoverage\Serialization\Unserializer;
 $root = dirname(__DIR__, 2);
 require $root . '/vendor/autoload.php';
 $directory = $argv[1] ?? '';
-$threshold = (float) ($argv[2] ?? 85);
+$threshold = (float) ($argv[2] ?? 95);
 
 if ( ! is_dir($directory) || $threshold < 0 || $threshold > 100) {
-    fwrite(STDERR, "Usage: php ci/coverage/report.php <coverage-directory> [minimum-percentage=85]\n");
+    fwrite(STDERR, "Usage: php ci/coverage/report.php <coverage-directory> [minimum-percentage=95]\n");
     exit(1);
 }
 $filter = new Filter();

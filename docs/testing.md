@@ -111,6 +111,11 @@ Its original-v1 data fixture lives in `ci/fixtures/legacy-data.php` and runs onl
 inside the disposable legacy container. A Chrome test checks TinyMCE image paste,
 blob preview, upload, save, and reload, plus login-session rotation and cookie flags.
 Chrome and ChromeDriver are test tools, with no browser dependency in the app image.
+Account HTTP checks exercise email and timezone updates, widget settings,
+malformed forms, export download ownership and removal, password/key continuity,
+and self-service deletion. Focused PHP tests also cover expired session bindings,
+invalid two-factor proofs, failed attempt-state writes, console account commands,
+and shell argument handling. Tests use synthetic accounts and disposable files.
 See [upgrading.md](upgrading.md) for the scope and limits.
 Export boundary tests also substitute renderers and job runners, reject jobs when
 policy disallows them, and check cleanup if rendering fails. Account setup tests
@@ -371,10 +376,10 @@ toolchain is needed. The example Compose file is also exercised with the local
 candidate image, without publishing it.
 
 CI measures application line coverage from PHPUnit plus actual HTTP/CLI execution
-on each tested database, and requires at least 85%. The source filter includes
+on each tested database, and requires at least 95%. The source filter includes
 uncovered application services, controllers, validators, framework code, scripts,
 production service configuration and entry points. This is combined coverage,
-not a claim that unit tests alone cover 85%. Reaching 100% unit coverage remains
+not a claim that unit tests alone cover 95%. Reaching 100% unit coverage remains
 a follow-up.
 
 To reproduce with PCOV installed in host PHP:
@@ -383,7 +388,7 @@ To reproduce with PCOV installed in host PHP:
 mkdir -p coverage
 vendor/bin/phpunit --coverage-php=coverage/phpunit.cov
 JOURNAL_COVERAGE_DIR="$PWD/coverage" php ci/verify-install-upgrade.php
-php ci/coverage/report.php coverage 85
+php ci/coverage/report.php coverage 95
 ```
 
 The rehearsal builds a test-only PCOV image and captures line data from the web
