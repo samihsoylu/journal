@@ -1,0 +1,36 @@
+#!/usr/bin/env php
+<?php
+
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Attribute\AsCommand;
+
+require_once(dirname(__DIR__) . '/private/init.php');
+
+/** @var \App\Framework\Kernel $kernel */
+
+$version = PROJECT_VERSION;
+$app = new Application("Journal <comment>v{$version}</comment>");
+
+$finder = new \Symfony\Component\Finder\Finder();
+$finder->files()->in(dirname(__DIR__) . '/private/lib/Console/Command');
+
+$namespace = '\App\Console\Command\\';
+foreach ($finder as $file) {
+    $className = str_replace('.php', '', $file->getRelativePathname());
+    $className = str_replace('/', '\\', $className);
+
+    $fullClassName = "{$namespace}{$className}";
+
+    $reflectionClass = new ReflectionClass($fullClassName);
+    if (!$reflectionClass->isInstantiable()) {
+        continue;
+    }
+
+    // Only support invokable commands with #[AsCommand] attribute
+    if (!empty($reflectionClass->getAttributes(AsCommand::class))) {
+        $command = $kernel->getContainer()->get($fullClassName);
+        $app->addCommand($command);
+    }
+}
+
+$app->run();

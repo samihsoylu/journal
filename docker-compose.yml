@@ -4,20 +4,24 @@ services:
     image: samihsoylu/journal
     restart: unless-stopped
     ports:
-      - 8080:80
+      - 127.0.0.1:8080:80
     depends_on:
       - mariadb
+    volumes:
+      # Existing installations must copy their current uploads before recreating.
+      # See docs/upgrading.md.
+      - uploads:/var/www/html/uploads
     environment:
       - DB_HOST=mariadb
       - DB_USERNAME=journal
       - DB_PASSWORD=journal
       - DB_SCHEMA=journal
-      - DEBUG_MODE=true
+      - DEBUG_MODE=false
       - USERNAME=demouser
-      - PASSWORD=demopass
+      - PASSWORD=journal-demo-password
       - EMAIL_ADDRESS=user@example.com
   mariadb:
-    image: mariadb
+    image: mariadb:10.11
     environment:
       - MARIADB_RANDOM_ROOT_PASSWORD=yes
       - MARIADB_USER=journal
@@ -27,3 +31,4 @@ services:
       - db_data:/var/lib/mysql
 volumes:
   db_data:
+  uploads:

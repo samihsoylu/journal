@@ -1,13 +1,14 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
 use App\Service\AuthenticationService;
-use App\Utility\Registry;
-use App\Utility\Session;
-use App\Utility\Template;
 use App\Utility\Notification;
 use App\Utility\Redirect;
+use App\Utility\Session;
+use App\Utility\Template;
 use Defuse\Crypto\Key;
 use Sentry\UserDataBag;
 
@@ -16,68 +17,62 @@ abstract class AbstractController
     /**
      * @var array route specific parameters (entryId, page, etc..)
      */
-    private array $routeParameters;
-
-    /**
-     * @var AuthenticationService used to determine user is logged in or not in inheriting controller classes
-     */
-    private AuthenticationService $authenticationService;
+    private array $routeParameters = [];
 
     /**
      * @var Notification gives the ability to set notifications for inheriting controller classes
      */
-    private Notification $notification;
+    private readonly Notification $notification;
 
-    /**
-     * @var Template allows inheriting controller classes to render templates
-     */
-    protected Template $template;
-
-    public function __construct(array $routeParameters)
-    {
-        /** @var AuthenticationService $authenticationService */
-        $authenticationService = Registry::get(AuthenticationService::class);
-        $this->authenticationService = $authenticationService;
-
-        // Router variables (/user/{userId}/entry/{entryId}/)
-        $this->routeParameters = $routeParameters;
-        $this->template        = Template::getInstance();
-        $this->notification    = new Notification();
+    public function __construct(
+        private readonly AuthenticationService $authenticationService,
+        /**
+         * @var Template allows inheriting controller classes to render templates
+         */
+        protected Template $template,
+    ) {
+        $this->notification = new Notification();
 
         if (SENTRY_ENABLED) {
-            \Sentry\configureScope(function (\Sentry\State\Scope $scope) use ($authenticationService): void {
+            \Sentry\configureScope(static function (\Sentry\State\Scope $scope) use ($authenticationService) : void {
                 $data = UserDataBag::createFromUserIpAddress($_SERVER['REMOTE_ADDR']);
                 $session = $authenticationService->getUserSession();
-                if ($session !== null) {
+
+                if ($session instanceof \App\Utility\UserSession) {
                     $data->setId($session->getUserId());
                     $data->setUsername($session->getUsername());
-                    ;
+
                 }
             });
         }
     }
 
-    protected function getRouteParameters(): array
+    public function setRouteParameters(array $routeParameters) : void
+    {
+        $this->routeParameters = $routeParameters;
+    }
+
+    protected function getRouteParameters() : array
     {
         return $this->routeParameters;
     }
 
-    protected function redirectLoggedOutUsersToLoginPage(): void
+    protected function redirectLoggedOutUsersToLoginPage() : void
     {
-        if (!$this->authenticationService->isUserLoggedIn()) {
+        if ( ! $this->authenticationService->isUserLoggedIn()) {
             $this->setNotification(
                 Notification::TYPE_ERROR,
-                'You must login before you can access this page'
+                'You must login before you can access this page',
             );
 
             // keep track on which page the user attempted to load
-            Session::put('referred_from', $_GET['url'] ?? Welcome::DASHBOARD_URL);
+            Session::put('referred_from', parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH));
 
             Redirect::to(Authentication::LOGIN_URL);
         }
     }
 
-    protected function redirectLoggedInUsersToDashboard(): void
+    protected function redirectLoggedInUsersToDashboard() : void
     {
         if ($this->authenticationService->isUserLoggedIn()) {
             Redirect::to(Welcome::DASHBOARD_URL);
@@ -86,15 +81,13 @@ abstract class AbstractController
 
     /**
      * Give a 403 response if the logged in user does not have admin privileges.
-     *
-     * @return void
      */
-    protected function ensureUserHasAdminPrivileges(): void
+    protected function ensureUserHasAdminPrivileges() : void
     {
         if ($this->authenticationService->userHasAdminPrivileges() === false) {
             http_response_code(403);
             $this->template->render('errors/403');
-            exit();
+            exit;
         }
     }
 
@@ -103,43 +96,45 @@ abstract class AbstractController
      * message to the user.
      *
      * @param string $notificationType error|info|success|warning
-     * @param string $notificationMessage
      */
-    protected function setNotification(string $notificationType, string $notificationMessage): void
+    protected function setNotification(string $notificationType, string $notificationMessage) : void
     {
         $this->notification->set($notificationType, $notificationMessage);
     }
 
     /**
-     * Get the user id of the logged in user
-     *
-     * @return int
+     * Get the user id of the logged in user.
      */
-    protected function getUserId(): int
+    protected function getUserId() : int
     {
         return $this->authenticationService->getUserId();
     }
 
+    protected function getUserTimezone() : string
+    {
+        return $this->authenticationService->getSessionDecorator()?->getTimezone() ?? 'UTC';
+    }
+
     /**
-     * Get the encryption key of the logged in user
-     *
-     * @return Key
+     * Get the encryption key of the logged in user.
      */
-    protected function getUserEncryptionKey(): Key
+    protected function getUserEncryptionKey() : Key
     {
         return $this->authenticationService->getUserDecodedEncryptionKey();
     }
 
-    public function renderTemplate(string $templateName): void
+    public function renderTemplate(string $templateName) : void
     {
         $this->template->setVariable('session', $this->authenticationService->getSessionDecorator());
 
         $this->template->render($templateName);
     }
 
-    public function renderJsonResponse(array $response): void
+    public function renderJsonResponse(array $response) : void
     {
-        header('Content-Type: application/json');
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: private, no-store, max-age=0');
+        header('X-Content-Type-Options: nosniff');
         echo json_encode($response, JSON_THROW_ON_ERROR);
     }
 }

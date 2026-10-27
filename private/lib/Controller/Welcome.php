@@ -1,32 +1,44 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Service\AuthenticationService;
 use App\Service\EntryService;
+use App\Utility\Template;
 
-class Welcome extends AbstractController
+final class Welcome extends AbstractController
 {
-    public const DASHBOARD_URL = BASE_URL . '/dashboard';
+    public const string DASHBOARD_URL = BASE_URL . '/dashboard';
 
-    public function index(): void
-    {
-        // direct new visitors to login
-        (new Authentication([]))->loginView();
+    public function __construct(
+        AuthenticationService $authenticationService,
+        Template $template,
+        private readonly EntryService $entryService,
+        private readonly Authentication $authenticationController,
+    ) {
+        parent::__construct($authenticationService, $template);
     }
 
-    public function dashboard(): void
+    public function index() : void
+    {
+        // direct new visitors to login
+        $this->authenticationController->loginView();
+    }
+
+    public function dashboard() : void
     {
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $service = new EntryService();
-        $entries = $service->getAllEntriesForUserFromFilter(
+        $entries = $this->entryService->getAllEntriesForUserFromFilter(
             $this->getUserId(),
             null,
             null,
             null,
             null,
             1,
-            5
+            5,
         );
 
         $this->template->setVariable('entries', $entries);

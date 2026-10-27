@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Database\Repository;
 
@@ -7,33 +9,33 @@ use App\Database\Model\User;
 
 /**
  * @method Template[] getAll()
- * @method Template|null getById(int $id)
+ * @method null|Template getById(int $id)
  */
-class TemplateRepository extends AbstractRepository
+final class TemplateRepository extends AbstractRepository
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public const RESOURCE_NAME = Template::class;
 
     /**
-     * Queries the database for a list of templates that were created by the provided user
+     * Queries the database for a list of templates that were created by the provided user.
      *
-     * @param User $user
      * @return Template[]
      */
-    public function findByUser(User $user): array
+    public function findByUser(User $user) : array
     {
         return $this->db->getRepository(self::RESOURCE_NAME)
-            ->findBy(['referencedUser' => $user]);
+            ->findBy(['referencedUser' => $user])
+        ;
     }
 
     /**
-     * Queries the database for all templates that are linked to the specified category
+     * Queries the database for all templates that are linked to the specified category.
      *
      * @return Template[]
      */
-    public function findByUserIdAndCategoryId(int $userId, int $categoryId): array
+    public function findByUserIdAndCategoryId(int $userId, int $categoryId) : array
     {
         $qb = $this->db->createQueryBuilder();
 
@@ -41,7 +43,8 @@ class TemplateRepository extends AbstractRepository
             ->from(self::RESOURCE_NAME, 'e')
             ->where('e.referencedCategory = :categoryId AND e.referencedUser = :userId')
             ->setParameter('categoryId', $categoryId)
-            ->setParameter('userId', $userId);
+            ->setParameter('userId', $userId)
+        ;
 
         return $qb->getQuery()->getResult();
     }

@@ -1,83 +1,143 @@
-name: ci
+name: Platform checks
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [master]
+  push:
+    branches: [master, maintenance/platform]
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
-    name: Code quality check
-    runs-on: ubuntu-latest
+  checks:
+    name: PHP 8.5 / ${{ matrix.database }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - database: mysql:8.0
+            artifact: mysql
+          - database: mysql:5.7
+            artifact: mysql57
+          - database: mariadb:10.11
+            artifact: mariadb
+          - database: mariadb:10.4
+            artifact: mariadb104
+    services:
+      database:
+        image: ${{ matrix.database }}
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: journal_test
+          MYSQL_USER: journal
+          MYSQL_PASSWORD: journal
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    env:
+      APP_ENV: test
+      SENTRY_DSN: ''
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_mysql, mbstring, curl, dom, zip
+          coverage: pcov
+      - run: composer validate --strict
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - run: composer audit --locked
+      - run: php ci/verify-frontend.php
+      - run: vendor/bin/parallel-lint --exclude vendor --exclude private/cache .
+      - run: vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no
+      - run: vendor/bin/phpstan analyse --no-progress
+      - run: vendor/bin/doctrine-migrations migrate --no-interaction
+      - run: vendor/bin/phpunit --coverage-php=coverage/phpunit.cov
+      - uses: actions/upload-artifact@v7
+        with:
+          name: coverage-unit-${{ matrix.artifact }}
+          path: coverage/phpunit.cov
 
-      - name: Validate composer.json and composer.lock
-        uses: MilesChou/composer-action/7.4@master
-        with:
-          args: validate --no-interaction --strict
-
-      - name: Install dependencies
-        uses: MilesChou/composer-action/7.4@master
-        with:
-          args: install --prefer-dist --no-progress
-
-      - name: Check for syntax errors
-        uses: MilesChou/composer-action/7.4@master
-        with:
-          entrypoint: ./vendor/bin/parallel-lint
-          args: --exclude vendor/ .
-
-      - name: Validate code style
-        uses: MilesChou/composer-action/7.4@master
-        with:
-          entrypoint: ./vendor/bin/php-cs-fixer
-          args: fix -v --dry-run --config=.php-cs-fixer.dist.php --using-cache=no
-
-      - name: Static code analysis
-        uses: MilesChou/composer-action/7.4@master
-        with:
-          entrypoint: php
-          args: -d memory_limit=1G ./vendor/bin/phpstan -vvv analyse -c phpstan.neon
-
-      - name: Set config for PHP version compatibility analysis
-        uses: MilesChou/composer-action/7.4@master
-        with:
-          entrypoint: ./vendor/bin/phpcs
-          args: --config-set installed_paths vendor/phpcompatibility/php-compatibility
-      - name: Analyse PHP version compatibility
-        uses: MilesChou/composer-action/7.4@master
-        with:
-          entrypoint: ./vendor/bin/phpcs
-          args: -p private/lib --standard=PHPCompatibility --runtime-set testVersion 7.4-
-  test74:
-    name: PHP 7.4 Unit Tests
-    runs-on: ubuntu-latest
+  installation:
+    name: Container install and v1 upgrade / ${{ matrix.database }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - database: mysql:8.0
+            artifact: mysql
+          - database: mysql:5.7
+            artifact: mysql57
+          - database: mariadb:10.11
+            artifact: mariadb
+          - database: mariadb:10.4
+            artifact: mariadb104
+    env:
+      TEST_DATABASE_IMAGE: ${{ matrix.database }}
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Install dependencies
-        uses: MilesChou/composer-action/7.4@master
+      - uses: actions/checkout@v7
         with:
-          args: install --prefer-dist --no-progress
-
-      - name: Unit tests
-        uses: MilesChou/composer-action/7.4@master
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
         with:
-          entrypoint: ./vendor/bin/phpunit
-          args: tests
-  test80:
-    name: PHP 8.0 Unit Tests
-    runs-on: ubuntu-latest
+          php-version: '8.5'
+          extensions: curl, zip
+          coverage: none
+      - uses: browser-actions/setup-chrome@v2
+        id: chrome
+        with:
+          chrome-version: '155.0.8059.84'
+          install-dependencies: true
+          install-chromedriver: true
+      - run: php ci/verify-install-upgrade.php
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          CHROMEDRIVER_PATH: ${{ steps.chrome.outputs.chromedriver-path }}
+          JOURNAL_COVERAGE_DIR: ${{ runner.temp }}/journal-coverage
+      - uses: actions/upload-artifact@v7
+        with:
+          name: coverage-http-cli-${{ matrix.artifact }}
+          path: ${{ runner.temp }}/journal-coverage/requests
+
+  coverage:
+    name: Application coverage / ${{ matrix.database }}
+    needs: [checks, installation]
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [mysql, mysql57, mariadb, mariadb104]
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Install dependencies
-        uses: MilesChou/composer-action/8.0@master
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
         with:
-          args: install --prefer-dist --no-progress
-
-      - name: Unit tests
-        uses: MilesChou/composer-action/8.0@master
+          php-version: '8.5'
+          extensions: dom, mbstring, zip
+          coverage: pcov
+      - run: composer install --prefer-dist --no-progress --no-interaction
+      - uses: actions/download-artifact@v8
         with:
-          entrypoint: ./vendor/bin/phpunit
-          args: tests
+          name: coverage-unit-${{ matrix.database }}
+          path: coverage
+      - uses: actions/download-artifact@v8
+        with:
+          name: coverage-http-cli-${{ matrix.database }}
+          path: coverage/requests
+      - run: php -d memory_limit=1G ci/coverage/report.php coverage 95
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-report-${{ matrix.database }}
+          path: |
+            coverage/clover.xml
+            coverage/summary.txt
+            coverage/html

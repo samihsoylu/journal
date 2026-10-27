@@ -21,23 +21,25 @@
                         <input id="entry_title" name="entry_title" type="text" class="validate" @if(isset($post['entry_title'])) value="{{ $post['entry_title'] }}" @else value="{{ $entry->getTitle() }}" @endif  required />
                         <label for="entry_title">Entry title</label>
                     </div>
+                    @include('components/entry-date-time')
                     <div class="input-field">
                         <textarea id="entry_content" name="entry_content">@if(isset($post['entry_content'])){{ $post['entry_content'] }}@else{{ $entry->getContent() }}@endif</textarea>
                     </div>
                     <input type="hidden" name="form_key" value="{{ $session->getAntiCSRFToken() }}" />
                     <div>
                         <button class="btn btn-default" type="button" onclick="window.history.go(-1);"><i class="material-icons">keyboard_arrow_left</i> Go back</button>
-                        <button class="btn btn-danger" id="delete" type="button" onclick="deleteButton('DANGER: This action will delete this entry', '{{ $entry_url }}/{{ $entry->getId() }}/delete/{{ $session->getAntiCSRFToken() }}')"><i class="material-icons">delete_forever</i> Delete</button>
+                        <button class="btn btn-danger" id="delete" type="submit" form="delete-record"><i class="material-icons">delete_forever</i> Delete</button>
                         <button class="btn btn-primary" type="submit"><i class="material-icons">save</i> Save</button>
                     </div>
                 </form>
+                @include('components/delete-form', ['deleteAction' => $entry_url . '/' . $entry->getId() . '/delete'])
                 @endisset
             </div>
         </div>
     </div>
 @endsection
 
-@section('jquery-scripts')
+@section('scripts')
     @include('components/confirm-reload')
     @include('components/delete-button-warning')
     @include('components/tinymce')

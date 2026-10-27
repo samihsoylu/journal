@@ -1,41 +1,37 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Utility;
 
+use Exception;
 use Throwable;
 
-class ExceptionHandler
+use function Sentry\captureException;
+
+final readonly class ExceptionHandler
 {
-    private Throwable $exception;
-    private Template $templatingEngine;
     private Notification $notifier;
 
-    public function __construct(Throwable $exception)
-    {
-        $this->exception = $exception;
-        $this->templatingEngine = Template::getInstance();
+    public function __construct(
+        private Throwable $exception,
+        private Template $templatingEngine,
+    ) {
         $this->notifier = new Notification();
     }
 
-    public function getException(): Throwable
+    public function getException() : Throwable
     {
         return $this->exception;
-    }
-
-    private function getTemplatingEngine(): Template
-    {
-        return $this->templatingEngine;
     }
 
     /**
      * Sets a notification that is stored in a cookie in between redirects. It is rendered on the first page the user
      * visits.
      *
-     * @see \App\Utility\Template::render()
-     * @param string $message
-     * @return void
+     * @see Template::render()
      */
-    private function setNotification(string $message): void
+    private function setNotification(string $message) : void
     {
         $this->notifier->set(Notification::TYPE_ERROR, $message);
     }
@@ -48,17 +44,13 @@ class ExceptionHandler
      * To explain the rule, as an example, if a function login() exists in the Authentication controller, it is also
      * expected to have a loginView() method implemented. The loginView is then rendered below with a notification set.
      *
-     * @param object $controller
-     * @param string $methodName
-     * @return void
-     *
      * @throws Throwable
      */
-    public function userException(object $controller, string $methodName): void
+    public function userException(object $controller, string $methodName) : void
     {
-        $this->setNotification($this->getException()->getMessage());
+        $this->setNotification($this->exception->getMessage());
 
-        if (!str_contains($methodName, 'View')) {
+        if ( ! str_contains($methodName, 'View')) {
             // Ensures action template is renamed to view, example: login() changes to loginView()
             $methodName .= 'View';
         }
@@ -66,35 +58,32 @@ class ExceptionHandler
         try {
             // Render a template
             $controller->{$methodName}();
-        } catch (\Exception $e) {
+        } catch (Exception) {
             $this->genericException();
         }
     }
 
-    public function genericException(): void
+    public function genericException() : void
     {
         if (DEBUG_MODE) {
-            throw $this->getException();
+            throw $this->exception;
         }
 
-        $exceptionsFile = BASE_PATH . '/exceptions.txt';
-        if (!file_exists($exceptionsFile)) {
-            file_put_contents($exceptionsFile, '');
+        // Send exception to Sentry for tracking and monitoring
+        // Sentry provides stack traces, user context, request data, and notifications
+        if (SENTRY_ENABLED) {
+            captureException($this->exception);
+        } else {
+            // Keep default installs diagnosable without recording private content.
+            error_log(sprintf(
+                'Journal error: %s at %s:%d',
+                $this->exception::class,
+                $this->exception->getFile(),
+                $this->exception->getLine(),
+            ));
         }
-
-        $timestamp = date('d-m-Y H:i:s');
-
-        $contents = file_get_contents($exceptionsFile);
-        $contents .= "\n[{$timestamp}] {$this->getException()} \n";
-
-        file_put_contents($exceptionsFile, $contents);
-
-        $to      = ADMIN_EMAIL_ADDRESS;
-        $subject = 'An internal exception occurred in ' . SITE_TITLE;
-        $message = $this->getException()->getMessage();
-        mail($to, $subject, $message);
 
         http_response_code(500);
-        $this->getTemplatingEngine()->render('errors/500');
+        $this->templatingEngine->render('errors/500');
     }
 }

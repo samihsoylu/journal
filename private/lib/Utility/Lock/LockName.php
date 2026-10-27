@@ -1,13 +1,15 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Utility\Lock;
 
-class LockName
+final class LockName
 {
-    public const ACTION_EXPORT_ALL_ENTRIES_FOR_USER = 'export_all_entries_for_user';
+    public const string ACTION_EXPORT_ALL_ENTRIES_FOR_USER = 'export_all_entries_for_user';
 
-    public static function create(int $userId, string $username, string $action): string
+    public static function create(int $userId, string $username, string $action) : string
     {
-        return "{$userId}_{$username}_{$action}";
+        return sprintf('%d_%s_%s', $userId, $username, $action);
     }
 }

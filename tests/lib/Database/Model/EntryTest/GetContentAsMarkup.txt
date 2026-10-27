@@ -1,3 +1,0 @@
-<h1>Meeting Jenny</h1>
-<p>Is a comedic drama that...
-<a href="http://domain.com">Link</a></p>

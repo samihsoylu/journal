@@ -1,0 +1,16 @@
+name: journal-platform-tests
+services:
+  database:
+    image: ${TEST_DATABASE_IMAGE:-mysql:8.0}
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: journal_test
+      MYSQL_USER: journal
+      MYSQL_PASSWORD: journal
+    ports:
+      - "127.0.0.1:3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-proot"]
+      interval: 3s
+      timeout: 5s
+      retries: 40

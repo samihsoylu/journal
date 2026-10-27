@@ -1,21 +1,21 @@
-$( function() {
-        $( "#sortable" ).sortable({
-            placeholder: 'ui-state-highlight',
-            axis: 'y',
-            revert: true,
-            handle: '.card-icon',
-            stop: function (event, ui){
-                var sortedIds = $(this).sortable("toArray");
-                var $ajax_url = BASE_URL + '/categories/ajax/sort-order';
-                $.ajax({
-                    url: $ajax_url,
-                    type: 'post',
-                    data: { orderedCategoryIds : sortedIds },
-                    error: function(xhr){
-                        alert(xhr.responseText + ', please refresh the page and try again.');
-                    }
+document.addEventListener('DOMContentLoaded', () => {
+    const list = document.getElementById('sortable');
+    if (!list) return;
+    Sortable.create(list, {
+        handle: '.card-icon', animation: 150,
+        onEnd: async () => {
+            const data = new URLSearchParams({ form_key: list.dataset.formKey });
+            Array.from(list.children).forEach((item, index) => {
+                data.append('orderedCategoryIds[' + index + ']', item.id);
+            });
+            try {
+                const response = await fetch(BASE_URL + '/categories/ajax/sort-order', {
+                    method: 'POST', credentials: 'same-origin', body: data
                 });
+                if (!response.ok) throw new Error('Category order could not be saved');
+            } catch (error) {
+                alert('Unable to save this order. Please refresh the page and try again.');
             }
-    }).disableSelection();
-} );
-	
+        }
+    });
+});

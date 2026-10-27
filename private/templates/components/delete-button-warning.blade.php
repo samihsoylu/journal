@@ -1,14 +1,9 @@
 <script>
-    var deleteButton = function deleteButton(warningMessage, redirectUrl) {
-        $(window).off('beforeunload');
-
-        if (!confirm(warningMessage)) {
-            $(window).on('beforeunload', function(){
-                return "Unsaved data will be lost.";
-            });
-            return false;
-        } else {
-            window.location.href=redirectUrl;
+    document.getElementById('delete-record')?.addEventListener('submit', event => {
+        if (!confirm('Delete this item? This cannot be undone. Entries and templates in a deleted category will become uncategorized.')) {
+            event.preventDefault();
+            return;
         }
-    }
+        window.onbeforeunload = null;
+    });
 </script>

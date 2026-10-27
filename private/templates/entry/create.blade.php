@@ -33,6 +33,7 @@
                         <input id="entry_title" name="entry_title" type="text" class="validate" @isset($post['entry_title']) value="{{ $post['entry_title'] }}" @endisset  required />
                         <label for="entry_title">Entry title</label>
                     </div>
+                    @include('components/entry-date-time')
                     <div class="input-field">
                         <textarea id="entry_content" name="entry_content">@isset($post['entry_content']) {{ $post['entry_content'] }} @endisset</textarea>
                     </div>
@@ -46,7 +47,7 @@
     </div>
 @endsection
 
-@section('jquery-scripts')
+@section('scripts')
     @include('components/confirm-reload')
 
     <script src="{{ $assets_url }}/js/entry.js"></script>

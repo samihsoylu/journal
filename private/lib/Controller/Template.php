@@ -1,48 +1,50 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Controller;
 
 use App\Exception\UserException;
+use App\Exception\UserException\InvalidParameterException;
+use App\Service\AuthenticationService;
 use App\Service\CategoryService;
 use App\Service\TemplateService;
 use App\Utility\Notification;
 use App\Utility\Redirect;
 use App\Utility\Sanitize;
+use App\Utility\Template as TemplateUtility;
 use App\Validator\TemplateValidator;
 
-class Template extends AbstractController
+final class Template extends AbstractController
 {
-    public const TEMPLATES_URL = BASE_URL . '/templates';
-    public const TEMPLATE_URL = BASE_URL . '/template';
+    public const string TEMPLATES_URL = BASE_URL . '/templates';
+    public const string TEMPLATE_URL = BASE_URL . '/template';
+    public const string CREATE_TEMPLATE_URL = self::TEMPLATE_URL . '/create';
+    public const string CREATE_TEMPLATE_POST_URL = self::CREATE_TEMPLATE_URL . '/action';
+    public const string VIEW_TEMPLATE_URL = self::TEMPLATE_URL . '/{id:\d+}';
+    public const string UPDATE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/update';
+    public const string UPDATE_TEMPLATE_POST_URL = self::UPDATE_TEMPLATE_URL . '/action';
+    public const string DELETE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/delete';
+    public const string GET_TEMPLATE_DATA_AS_JSON_URL = self::VIEW_TEMPLATE_URL . '/ajax';
 
-    public const CREATE_TEMPLATE_URL       = self::TEMPLATE_URL . '/create';
-    public const CREATE_TEMPLATE_POST_URL  = self::CREATE_TEMPLATE_URL . '/action';
+    private readonly TemplateValidator $validator;
 
-    public const VIEW_TEMPLATE_URL   = self::TEMPLATE_URL . '/{id:\d+}';
-    public const UPDATE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/update';
-    public const UPDATE_TEMPLATE_POST_URL  = self::UPDATE_TEMPLATE_URL . '/action';
-
-    public const DELETE_TEMPLATE_URL = self::VIEW_TEMPLATE_URL . '/delete/{antiCsrfToken}';
-
-    public const GET_TEMPLATE_DATA_AS_JSON_URL = self::VIEW_TEMPLATE_URL . '/ajax';
-    private TemplateService $service;
-    private TemplateValidator $validator;
-    private CategoryService $categoryService;
-
-    public function __construct(array $routeParameters)
-    {
-        parent::__construct($routeParameters);
+    public function __construct(
+        AuthenticationService $authenticationService,
+        TemplateUtility $template,
+        private readonly TemplateService $service,
+        private readonly CategoryService $categoryService,
+        private readonly Sanitize $sanitize,
+    ) {
+        parent::__construct($authenticationService, $template);
 
         // for every action in this controller, the user must be logged in
         $this->redirectLoggedOutUsersToLoginPage();
 
-        $this->service   = new TemplateService();
-        $this->validator = new TemplateValidator($_POST, $_GET);
-
-        $this->categoryService = new CategoryService();
+        $this->validator = new TemplateValidator($_POST, $_GET, $authenticationService->getUserSession());
     }
 
-    public function indexView(): void
+    public function indexView() : void
     {
         $templates = $this->service->getAllTemplatesForUser($this->getUserId());
 
@@ -50,23 +52,23 @@ class Template extends AbstractController
         $this->renderTemplate('template/all');
     }
 
-    public function create(): void
+    public function create() : never
     {
         /** @see TemplateValidator::create() */
         $this->validator->validate(__FUNCTION__);
 
-        $categoryId      = Sanitize::int($_POST['category_id']);
-        $templateTitle   = Sanitize::string($_POST['template_title']);
-        $templateContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
+        $categoryId = $this->sanitize->int($_POST['category_id']);
+        $templateTitle = $this->sanitize->string($_POST['template_title']);
+        $templateContent = $this->sanitize->string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
-        $this->service->createTemplate($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $templateTitle, $templateContent);
+        $this->service->createTemplate($this->getUserId(), $this->getUserEncryptionKey(), $categoryId, $templateTitle, $templateContent, $_POST['default_title_pattern'] ?? null);
 
-        $this->setNotification(Notification::TYPE_SUCCESS, "Template {$templateTitle} has been created");
+        $this->setNotification(Notification::TYPE_SUCCESS, sprintf('Template %s has been created', $templateTitle));
 
         Redirect::to(self::TEMPLATES_URL);
     }
 
-    public function createView(): void
+    public function createView() : void
     {
         $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
 
@@ -74,17 +76,17 @@ class Template extends AbstractController
         $this->renderTemplate('template/create');
     }
 
-    public function update(): void
+    public function update() : never
     {
         $this->template->setVariable('post', $_POST);
 
         /** @see TemplateValidator::update() */
         $this->validator->validate(__FUNCTION__);
 
-        $categoryId      = Sanitize::int($_POST['category_id']);
-        $templateId      = Sanitize::int($this->getRouteParameters()['id']);
-        $templateTitle   = Sanitize::string($_POST['template_title']);
-        $templateContent = Sanitize::string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
+        $categoryId = $this->sanitize->int($_POST['category_id']);
+        $templateId = $this->sanitize->int($this->getRouteParameters()['id']);
+        $templateTitle = $this->sanitize->string($_POST['template_title']);
+        $templateContent = $this->sanitize->string($_POST['entry_content'], [Sanitize::OPTION_TRIM]);
 
         $this->service->updateTemplate(
             $this->getUserId(),
@@ -92,20 +94,21 @@ class Template extends AbstractController
             $categoryId,
             $templateId,
             $templateTitle,
-            $templateContent
+            $templateContent,
+            $_POST['default_title_pattern'] ?? null,
         );
 
         $this->setNotification(
             Notification::TYPE_SUCCESS,
-            "Template {$templateTitle} has been updated"
+            sprintf('Template %s has been updated', $templateTitle),
         );
 
         Redirect::to(self::TEMPLATES_URL);
     }
 
-    public function updateView(): void
+    public function updateView() : void
     {
-        $templateId = Sanitize::int($this->getRouteParameters()['id']);
+        $templateId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         try {
             $categories = $this->categoryService->getAllCategoriesForUser($this->getUserId());
@@ -115,22 +118,19 @@ class Template extends AbstractController
                 'template' => $template,
                 'categories' => $categories,
             ]);
-        } catch (UserException $e) {
+        } catch (UserException $userException) {
             $this->template->setVariable(
                 Notification::TYPE_ERROR,
-                $e->getMessage()
+                $userException->getMessage(),
             );
         }
 
         $this->renderTemplate('template/update');
     }
 
-    public function delete(): void
+    public function delete() : never
     {
-        $templateId = Sanitize::int($this->getRouteParameters()['id']);
-
-        // setting get variable for validator
-        $_GET['form_key'] = $this->getRouteParameters()['antiCsrfToken'];
+        $templateId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         /** @see TemplateValidator::delete() */
         $this->validator->validate(__FUNCTION__);
@@ -142,28 +142,30 @@ class Template extends AbstractController
         $this->deleteView();
     }
 
-    public function deleteView(): void
+    public function deleteView() : never
     {
         // This is in its own method for the convenience of the error handler.
         Redirect::to(self::TEMPLATES_URL);
     }
 
     /**
-     * Displays a JSON output of the queried template id. Used in AJAX call in create entry page
-     *
-     * @return void
+     * Displays a JSON output of the queried template id. Used in AJAX call in create entry page.
      */
-    public function getTemplateAsJsonView(): void
+    public function getTemplateAsJsonView() : void
     {
-        $templateId = Sanitize::int($this->getRouteParameters()['id']);
+        $templateId = $this->sanitize->int($this->getRouteParameters()['id']);
 
         try {
-            $template = $this->service->getTemplateForUser($templateId, $this->getUserId(), $this->getUserEncryptionKey());
+            $this->validator->validate(__FUNCTION__);
+            $template = $this->service->getTemplateForUser($templateId, $this->getUserId(), $this->getUserEncryptionKey(), $_GET['entry_date_time'] ?? null);
 
-            echo json_encode($template, JSON_PRETTY_PRINT);
-        } catch (UserException $e) {
+            $this->renderJsonResponse($template->jsonSerialize());
+        } catch (InvalidParameterException $exception) {
+            http_response_code(400);
+            $this->renderJsonResponse(['error' => $exception->getMessage()]);
+        } catch (UserException $userException) {
             http_response_code(404);
-            echo $e->getMessage();
+            $this->renderJsonResponse(['error' => $userException->getMessage()]);
         }
     }
 }

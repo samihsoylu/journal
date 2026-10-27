@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Service;
 
@@ -6,31 +8,30 @@ use App\Service\Helper\MediaHelper;
 use App\Service\ValueObject\Image;
 use App\Utility\Encryptor;
 use Defuse\Crypto\Key;
+use RuntimeException;
 
-class MediaService
+final readonly class MediaService
 {
-    public const UPLOAD_DIR = BASE_PATH . '/uploads';
-    private Encryptor $encryptor;
-    private MediaHelper $helper;
+    public const string UPLOAD_DIR = BASE_PATH . '/uploads';
 
-    public function __construct(Encryptor $encryptor, MediaHelper $helper)
-    {
-        $this->helper = $helper;
-        $this->encryptor = $encryptor;
-    }
+    public function __construct(
+        private Encryptor $encryptor,
+        private MediaHelper $helper,
+    ) {}
 
-    private function ensureUserUploadDir(int $userId)
+    private function ensureUserUploadDir(int $userId) : void
     {
         $uploadDir = $this->helper->getUserUploadDir($userId);
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
+
+        if ( ! is_dir($uploadDir)) {
+            mkdir($uploadDir, 0o777, true);
         }
     }
 
-    public function encryptImage(int $userId, Image $image, Key $key, string $tmpPath): bool
+    public function encryptImage(int $userId, Image $image, Key $key, string $tmpPath) : bool
     {
         $this->ensureUserUploadDir($userId);
-        $targetPath = "{$this->helper->getUserUploadDir($userId)}/{$image->getName()}";
+        $targetPath = sprintf('%s/%s', $this->helper->getUserUploadDir($userId), $image->getName());
 
         $encryptedImage = $this->encryptor->encrypt((string) $image, $key);
 
@@ -39,13 +40,15 @@ class MediaService
         return (bool) file_put_contents($targetPath, $encryptedImage);
     }
 
-    public function getDecryptedImage(int $userId, string $imageName, Key $key): Image
+    public function getDecryptedImage(int $userId, string $imageName, Key $key) : Image
     {
-        $targetPath = "{$this->helper->getUserUploadDir($userId)}/{$imageName}";
+        $targetPath = sprintf('%s/%s', $this->helper->getUserUploadDir($userId), $imageName);
         $image = @file_get_contents($targetPath);
-        if (!$image) {
-            throw new \RuntimeException('Could not find image.');
+
+        if ( ! $image) {
+            throw new RuntimeException('Could not find image.');
         }
+
         $decryptedImage = $this->encryptor->decrypt($image, $key);
 
         return Image::fromString($decryptedImage);
